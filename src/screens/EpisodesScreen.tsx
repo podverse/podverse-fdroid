@@ -19,7 +19,6 @@ import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from '../lib/
 import { isOdd, setCategoryQueryProperty, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { removeDownloadedPodcastEpisode } from '../state/actions/downloads'
 import { core } from '../styles'
 
@@ -93,7 +92,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
         this.setState(newState)
       }
     )
-    gaTrackPageView('/episodes', 'Episodes Screen')
   }
 
   selectLeftItem = async (selectedKey: string) => {

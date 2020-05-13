@@ -13,7 +13,7 @@ import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
 import Router from './src/Router'
 import { downloadCategoriesList } from './src/services/category'
-import { gaInitialize } from './src/services/googleAnalytics'
+
 import { addOrUpdateHistoryItem } from './src/services/history'
 import { getNowPlayingItem, updateUserPlaybackPosition } from './src/services/player'
 import initialState from './src/state/initialState'
@@ -51,7 +51,6 @@ class App extends Component<Props, State> {
     StatusBar.setBarStyle('light-content')
     await this.setupGlobalState(darkModeEnabled === 'TRUE' || darkModeEnabled === null ? darkTheme : lightTheme)
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
-    await gaInitialize()
   }
 
   componentWillUnmount() {

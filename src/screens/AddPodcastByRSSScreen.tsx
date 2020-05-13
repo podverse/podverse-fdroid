@@ -13,7 +13,6 @@ import {
 } from '../components'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { getAddByRSSPodcast } from '../services/parser'
 import { addAddByRSSPodcast } from '../state/actions/parser'
 import { core } from '../styles'
@@ -55,8 +54,6 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     if (feedUrl) {
       this.setState({ url: feedUrl })
     }
-
-    gaTrackPageView('/add-podcast-by-rss', 'Add Podcast By RSS Screen')
   }
 
   _navToRequestPodcastForm = async () => {

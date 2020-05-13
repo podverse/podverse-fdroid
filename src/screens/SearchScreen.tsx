@@ -15,7 +15,6 @@ import {
 import { alertIfNoNetworkConnection } from '../lib/network'
 import { generateAuthorsText, isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { getPodcasts } from '../services/podcast'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { core } from '../styles'
@@ -64,10 +63,6 @@ export class SearchScreen extends React.Component<Props, State> {
     }
 
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
-  }
-
-  componentDidMount() {
-    gaTrackPageView('/search', 'Search Screen')
   }
 
   _handleSearchBarClear = (text: string) => {

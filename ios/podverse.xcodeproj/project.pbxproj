@@ -16,7 +16,6 @@
 		30F93B91236648E6006D889B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30F93B90236648E6006D889B /* StoreKit.framework */; };
 		31F1F4B1ED5187A2ECE8FC16 /* libPods-podverse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 22FFE1D24D61988CEEE5EA85 /* libPods-podverse.a */; };
 		DD6EFB43667B49708823C8E8 /* RNPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CDF56DAEB5F43889C2C479C /* RNPlaceholder.swift */; };
-		E58770308C43465B815B53A7 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 817D31662D5647DEACDF2C26 /* AppCenter-Config.plist */; };
 		E7C58368244B5A69001928A9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E7C58367244B5A69001928A9 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +54,6 @@
 		56365D5F83A14051852A5418 /* libRNCSlider.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCSlider.a; sourceTree = "<group>"; };
 		5C83CC1DDEC74F7EBD62CB6A /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		65514BCC3DF1494F9D1E16A1 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
-		817D31662D5647DEACDF2C26 /* AppCenter-Config.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "AppCenter-Config.plist"; path = "podverse/AppCenter-Config.plist"; sourceTree = "<group>"; };
 		826EC5F6F54B4C19BBCA18A2 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		8CDF56DAEB5F43889C2C479C /* RNPlaceholder.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; path = RNPlaceholder.swift; sourceTree = "<group>"; };
 		A4607D8F289E4EE6A4DAE6E1 /* Fontisto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Fontisto.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf"; sourceTree = "<group>"; };
@@ -160,7 +158,6 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				E7F324CB223C8EAE003E6611 /* Recovered References */,
 				F69706A207B6412DB43A073D /* Resources */,
-				817D31662D5647DEACDF2C26 /* AppCenter-Config.plist */,
 				DF5816EEC7F453E6F4935801 /* Pods */,
 			);
 			indentWidth = 2;
@@ -305,7 +302,6 @@
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				E7C58368244B5A69001928A9 /* LaunchScreen.storyboard in Resources */,
-				E58770308C43465B815B53A7 /* AppCenter-Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -425,8 +421,6 @@
 				DEVELOPMENT_TEAM = DF9KG8H54B;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/AppCenter/AppCenter-SDK-Apple/iOS\"",
-					"\"${PODS_ROOT}/AppCenterReactNativeShared/AppCenterReactNativeShared\"",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = podverse/Info.plist;
@@ -459,8 +453,6 @@
 				DEVELOPMENT_TEAM = DF9KG8H54B;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/AppCenter/AppCenter-SDK-Apple/iOS\"",
-					"\"${PODS_ROOT}/AppCenterReactNativeShared/AppCenterReactNativeShared\"",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = podverse/Info.plist;

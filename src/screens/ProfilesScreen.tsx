@@ -12,7 +12,6 @@ import {
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { isOdd, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { getAuthUserInfo } from '../state/actions/auth'
 import { getPublicUsersByQuery, toggleSubscribeToUser } from '../state/actions/user'
 
@@ -59,8 +58,6 @@ export class ProfilesScreen extends React.Component<Props, State> {
     if (userId) {
       navigation.navigate(PV.RouteNames.ProfileScreen, { userId })
     }
-
-    gaTrackPageView('/profiles', 'Profiles Screen')
   }
 
   _onEndReached = ({ distanceFromEnd }) => {

@@ -4,7 +4,6 @@ import { ActionSheet, Divider, DownloadTableCell, FlatList, MessageWithAction, S
 import { cancelDownloadTask, DownloadStatus } from '../lib/downloader'
 import { isOdd, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { pauseDownloadingEpisode, removeDownloadingEpisode, resumeDownloadingEpisode } from '../state/actions/downloads'
 
 type Props = {
@@ -29,10 +28,6 @@ export class DownloadsScreen extends React.Component<Props, State> {
       selectedItem: null,
       showActionSheet: false
     }
-  }
-
-  componentDidMount() {
-    gaTrackPageView('/downloads', 'Downloads Screen')
   }
 
   _ItemSeparatorComponent = () => {

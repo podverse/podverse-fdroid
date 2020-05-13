@@ -4,7 +4,6 @@ import packageJson from '../../package.json'
 import { Divider, ScrollView, Text, View } from '../components'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 
 type Props = {}
 
@@ -13,10 +12,6 @@ type State = {}
 export class TermsOfServiceScreen extends React.Component<Props, State> {
   static navigationOptions = {
     title: 'Terms of Service'
-  }
-
-  componentDidMount() {
-    gaTrackPageView('/terms', 'Terms of Service Screen')
   }
 
   showLeavingAppAlert = (url: string) => {

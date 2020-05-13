@@ -41,7 +41,6 @@ import {
 } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { getMediaRef, getMediaRefs } from '../services/mediaRef'
 import { getAddByRSSPodcast } from '../services/parser'
 import { getNowPlayingItem, PVTrackPlayer } from '../services/player'
@@ -127,8 +126,6 @@ export class PlayerScreen extends React.Component<Props, State> {
         this._setShouldQueryAgain
       )
     }
-
-    gaTrackPageView('/player', 'Player Screen')
   }
 
   _setShouldQueryAgain = () => {

@@ -2,7 +2,6 @@ import { StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 import { Button, NavDismissIcon, SafeAreaView, TimePicker, View } from '../components'
 import { testProps } from '../lib/utility'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { sleepTimerIsRunning } from '../services/sleepTimer'
 import {
   pauseSleepTimerStateUpdates,
@@ -38,8 +37,6 @@ export class SleepTimerScreen extends React.Component<Props, State> {
     if (isActive) {
       resumeSleepTimerStateUpdates()
     }
-
-    gaTrackPageView('/sleep-timer', 'Sleep Timer Screen')
   }
 
   async componentWillUnmount() {

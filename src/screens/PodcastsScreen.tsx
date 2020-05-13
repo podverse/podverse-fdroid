@@ -20,7 +20,6 @@ import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/ne
 import { isOdd, setCategoryQueryProperty, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisode } from '../services/episode'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import {
   checkIdlePlayerState,
   getNowPlayingItemFromQueueOrHistoryByTrackId,
@@ -119,8 +118,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
       Alert.alert(PV.Alerts.SOMETHING_WENT_WRONG.title, PV.Alerts.SOMETHING_WENT_WRONG.message, PV.Alerts.BUTTONS.OK)
     }
-
-    gaTrackPageView('/podcasts', 'Podcasts Screen')
   }
 
   componentWillUnmount() {

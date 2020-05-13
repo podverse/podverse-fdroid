@@ -29,7 +29,6 @@ import {
   testProps
 } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { deleteMediaRef } from '../services/mediaRef'
 import { loadItemAndPlayTrack } from '../services/player'
 import { getPodcasts } from '../services/podcast'
@@ -131,8 +130,6 @@ export class ProfileScreen extends React.Component<Props, State> {
   async componentDidMount() {
     const { userId } = this.state
     this._initializeScreenData()
-    const idPath = userId ? userId : 'user-not-logged-in'
-    gaTrackPageView('/profile/' + idPath, 'Profile Screen')
   }
 
   async _initializeScreenData() {

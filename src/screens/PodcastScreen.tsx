@@ -38,7 +38,6 @@ import {
 } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { getMediaRefs } from '../services/mediaRef'
 import { getPodcast } from '../services/podcast'
 import { removeDownloadedPodcastEpisode, updateAutoDownloadSettings } from '../state/actions/downloads'
@@ -159,8 +158,6 @@ export class PodcastScreen extends React.Component<Props, State> {
         }
       }
     )
-    const pageTitle = podcast ? 'Podcasts Screen - ' + podcast.title : 'PodcastsScreen - ' + 'no info available'
-    gaTrackPageView('/podcast/' + podcastId, pageTitle)
   }
 
   async _initializePageData() {

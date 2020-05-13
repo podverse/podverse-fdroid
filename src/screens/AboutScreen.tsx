@@ -5,7 +5,6 @@ import React from 'reactn'
 import { Divider, Icon, ScrollView, Text, View } from '../components'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { button } from '../styles'
 
 type Props = {}
@@ -15,10 +14,6 @@ type State = {}
 export class AboutScreen extends React.Component<Props, State> {
   static navigationOptions = {
     title: 'About'
-  }
-
-  componentDidMount() {
-    gaTrackPageView('/about', 'About Screen')
   }
 
   handleFollowLink = (url: string) => {

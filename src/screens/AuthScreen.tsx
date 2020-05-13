@@ -5,7 +5,6 @@ import { alertIfNoNetworkConnection } from '../lib/network'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { sendResetPassword } from '../services/auth'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { Credentials, loginUser, signUpUser } from '../state/actions/auth'
 
 type Props = {
@@ -49,10 +48,6 @@ export class AuthScreen extends React.Component<Props, State> {
       isLoadingSignUp: false,
       screenType: (showSignUp && _signup) || props.screenType || _login
     }
-  }
-
-  componentDidMount() {
-    gaTrackPageView('/auth', 'Auth Screen')
   }
 
   attemptLogin = async (credentials: Credentials) => {

@@ -14,7 +14,6 @@ import {
 import { refreshDownloads } from '../lib/downloader'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 import { clearHistoryItems } from '../state/actions/history'
 import { core, darkTheme, hidePickerIconOnAndroidTransparent, lightTheme } from '../styles'
 
@@ -68,8 +67,6 @@ export class SettingsScreen extends React.Component<Props, State> {
       },
       () => this.setState({ hasLoaded: true })
     )
-
-    gaTrackPageView('/settings', 'Settings Screen')
   }
 
   _toggleTheme = (value: boolean) => {
