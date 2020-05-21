@@ -17,6 +17,10 @@ steps:
 
 - task: CmdLine@2
   inputs:
+    script: 'python3 -m pip install ruamel_yaml'
+
+- task: CmdLine@2
+  inputs:
     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
     workingDirectory: $(Agent.BuildDirectory)
 
