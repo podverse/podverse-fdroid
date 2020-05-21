@@ -33,11 +33,6 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'ls metadata'
-    workingDirectory: $(Agent.BuildDirectory)
-
-- task: CmdLine@2
-  inputs:
     script: 'fdroid readmeta'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
