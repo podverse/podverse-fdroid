@@ -13,6 +13,10 @@ steps:
 
 - task: CmdLine@2
   inputs:
+    script: 'yarn install'
+
+- task: CmdLine@2
+  inputs:
     script: 'python3 -m pip install GitPython'
 
 - task: CmdLine@2
