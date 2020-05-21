@@ -11,25 +11,27 @@ pool:
 
 steps:
 
-# - task: CmdLine@2
-#   inputs:
-#     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
-#     workingDirectory: $(Agent.BuildDirectory)
-
-# - task: CmdLine@2
-#   inputs:
-#     script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
-#     workingDirectory: $(Agent.BuildDirectory)
-
-# - task: CmdLine@2
-#   inputs:
-#     script: 'sudo apt-get install fdroidserver'
-
-# - task: CmdLine@2
-#   inputs:
-#     script: 'mkdir metadata && cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml metadata'
-#     workingDirectory: $(Agent.BuildDirectory)
+- task: CmdLine@2
+  inputs:
+    script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
+    workingDirectory: $(Agent.BuildDirectory)
 
 - task: CmdLine@2
   inputs:
-    script: 'ls'
+    script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
+    workingDirectory: $(Agent.BuildDirectory)
+
+- task: CmdLine@2
+  inputs:
+    script: 'sudo apt-get install fdroidserver'
+
+- task: CmdLine@2
+  inputs:
+    script: 'mkdir metadata && cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml metadata'
+    workingDirectory: $(Agent.BuildDirectory)
+
+
+- task: CmdLine@2
+  inputs:
+    script: 'ls metadata'
+    workingDirectory: $(Agent.BuildDirectory)
