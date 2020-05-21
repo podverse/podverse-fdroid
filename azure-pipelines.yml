@@ -7,9 +7,13 @@ trigger:
 - azure-pipelines
 
 pool:
-  vmImage: 'macos-latest'
+  vmImage: 'ubuntu-latest'
 
 steps:
+
+- task: CmdLine@2
+  inputs:
+    script: 'python3 -m pip install GitPython'
 
 - task: CmdLine@2
   inputs:
@@ -20,10 +24,6 @@ steps:
   inputs:
     script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
     workingDirectory: $(Agent.BuildDirectory)
-
-- task: CmdLine@2
-  inputs:
-    script: 'brew install fdroidserver'
 
 - task: CmdLine@2
   inputs:
