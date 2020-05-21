@@ -1,0 +1,35 @@
+# Android
+# Build your Android project with Gradle.
+# Add steps that test, sign, and distribute the APK, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/android
+
+trigger:
+- azure-pipelines
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+# - task: CmdLine@2
+#   inputs:
+#     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
+#     workingDirectory: $(Agent.BuildDirectory)
+
+# - task: CmdLine@2
+#   inputs:
+#     script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
+#     workingDirectory: $(Agent.BuildDirectory)
+
+# - task: CmdLine@2
+#   inputs:
+#     script: 'sudo apt-get install fdroidserver'
+
+# - task: CmdLine@2
+#   inputs:
+#     script: 'mkdir metadata && cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml metadata'
+#     workingDirectory: $(Agent.BuildDirectory)
+
+- task: CmdLine@2
+  inputs:
+    script: 'ls'
