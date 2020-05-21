@@ -27,7 +27,7 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'mkdir metadata && cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml metadata'
+    script: 'cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml fdroiddata/metadata'
     workingDirectory: $(Agent.BuildDirectory)
 
 
@@ -35,3 +35,24 @@ steps:
   inputs:
     script: 'ls metadata'
     workingDirectory: $(Agent.BuildDirectory)
+
+- task: CmdLine@2
+  inputs:
+    script: 'fdroid readmeta'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+
+- task: CmdLine@2
+  inputs:
+    script: 'fdroid rewritemeta com.podverse.fdroid'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+
+
+- task: CmdLine@2
+  inputs:
+    script: 'fdroid lint com.podverse.fdroid'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+
+- task: CmdLine@2
+  inputs:
+    script: 'fdroid fdroid build -v -l com.podverse.fdroid'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
