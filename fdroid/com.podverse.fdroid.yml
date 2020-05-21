@@ -56,7 +56,7 @@ Repo: https://github.com/podverse/podverse-fdroid
 Builds:
   - versionName: 2.6.8
     versionCode: 1
-    commit: '?'
+    commit: '9c88b5cc2a76dee690abffd804a0679c28ec8db2'
     subdir: android/app
     gradle:
       - yes
