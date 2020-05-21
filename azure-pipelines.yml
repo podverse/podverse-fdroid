@@ -7,7 +7,7 @@ trigger:
 - azure-pipelines
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'macos-latest'
 
 steps:
 
@@ -21,9 +21,9 @@ steps:
     script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
     workingDirectory: $(Agent.BuildDirectory)
 
-# - task: CmdLine@2
-#   inputs:
-#     script: 'sudo apt-get install fdroidserver'
+- task: CmdLine@2
+  inputs:
+    script: 'brew install fdroidserver'
 
 - task: CmdLine@2
   inputs:
