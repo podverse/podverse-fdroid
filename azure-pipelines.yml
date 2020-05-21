@@ -30,6 +30,14 @@ steps:
     script: 'cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml fdroiddata/metadata'
     workingDirectory: $(Agent.BuildDirectory)
 
+- task: CmdLine@2
+  inputs:
+    script: 'cat fdroid/com.podverse.fdroid.yml'
+
+- task: CmdLine@2
+  inputs:
+    script: 'cat fdroiddata/metadata/com.podverse.fdroid.yml'
+    workingDirectory: $(Agent.BuildDirectory)
 
 - task: CmdLine@2
   inputs:
