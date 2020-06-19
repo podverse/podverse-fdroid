@@ -11,59 +11,70 @@ pool:
 
 steps:
 
-- task: Install Dependencies
+- task: CmdLine@2
+  diplayName: Install Dependencies
   inputs:
     script: 'yarn install'
 
-- task: Install GitPython Dependency
+- task: CmdLine@2
+  diplayName: Install GitPython Dependency
   inputs:
     script: 'python3 -m pip install GitPython'
 
-- task: Install GitPython Dependency
+- task: CmdLine@2
+  diplayName: Install GitPython Dependency
   inputs:
     script: 'python3 -m pip install ruamel_yaml'
 
-- task: Clone frdoiddata
+- task: CmdLine@2
+  diplayName: Clone frdoiddata
   inputs:
     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
     workingDirectory: $(Agent.BuildDirectory)
 
-- task: Clone fdroidserver
+- task: CmdLine@2
+  diplayName: Clone fdroidserver
   inputs:
     script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
     workingDirectory: $(Agent.BuildDirectory)
 
-- task: Copy podverse yml to metadata
+- task: CmdLine@2
+  diplayName: Copy podverse yml to metadata
   inputs:
     script: 'cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml fdroiddata/metadata'
     workingDirectory: $(Agent.BuildDirectory)
 
-- task: Log podverse frdoid yml 
+- task: CmdLine@2
+  diplayName: Log podverse frdoid yml 
   inputs:
     script: 'cat fdroid/com.podverse.fdroid.yml'
 
-- task: Log fdroiddata metadata podverse yml
+- task: CmdLine@2
+  diplayName: Log fdroiddata metadata podverse yml
   inputs:
     script: 'cat fdroiddata/metadata/com.podverse.fdroid.yml'
     workingDirectory: $(Agent.BuildDirectory)
 
-- task: Read Metadata
+- task: CmdLine@2
+  diplayName: Read Metadata
   inputs:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-- task: Rewrite Metadata
+- task: CmdLine@2
+  diplayName: Rewrite Metadata
   inputs:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid rewritemeta com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-
-- task: Lint podverse fdroid config file
+- task: CmdLine@2
+  diplayName: Lint podverse fdroid config file
   inputs:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid lint com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-- task: Build fdroid podverse
+- task: CmdLine@2
+  diplayName: Build fdroid podverse
   inputs:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
