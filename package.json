@@ -35,7 +35,6 @@
   "dependencies": {
     "@babel/helper-validator-identifier": "7.10.4",
     "@react-native-community/async-storage": "1.6.2",
-    "@react-native-community/cli": "^4.13.0",
     "@react-native-community/masked-view": "0.1.9",
     "@react-native-community/netinfo": "4.4.0",
     "@types/lodash.memoize": "4.1.6",
