@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import RNPickerSelect from 'react-native-picker-select'
 import { useGlobal } from 'reactn'
+import { convertFilterOptionsToI18N } from '../lib/i18n'
 import { PV } from '../resources'
 import { darkTheme, hidePickerIconOnAndroidSectionSelector } from '../styles'
 import { Icon, Text } from './'
@@ -13,8 +14,11 @@ type Props = {
   hidePickers?: boolean
   hideRightItemWhileLoading?: boolean
   includeChronological?: boolean
+  isAddByRSSPodcastFeedUrl?: boolean
   isBottomBar?: boolean
   isCategories?: boolean
+  isLoggedIn?: boolean
+  isTransparent?: boolean
   selectedLeftItemKey: string | null
   selectedRightItemKey?: string | null
   screenName: string
@@ -33,23 +37,34 @@ export const TableSectionSelectors = (props: Props) => {
     hidePickers,
     hideRightItemWhileLoading,
     includeChronological = false,
+    isAddByRSSPodcastFeedUrl = false,
     isBottomBar = false,
     isCategories = false,
+    isLoggedIn,
+    isTransparent,
     selectedLeftItemKey,
     selectedRightItemKey,
     screenName
   } = props
 
-  useEffect(() => {
-    let leftItems = []
-    let rightItems = []
+  const handleInitialRender = () => {
+    let leftItems = [] as any
+    let rightItems = [] as any
 
     if (!isBottomBar) {
-      leftItems = PV.FilterOptions.typeItems.filter((type: string) => {
-        return PV.FilterOptions.screenFilters[screenName].type.includes(type.value)
+      leftItems = PV.FilterOptions.typeItems.filter((type: any) => {
+        return isAddByRSSPodcastFeedUrl
+          ? PV.FilterOptions.screenFilters[screenName].addByPodcastRSSFeedURLType.includes(type.value)
+          : PV.FilterOptions.screenFilters[screenName].type.includes(type.value)
       })
 
-      rightItems = PV.FilterOptions.sortItems.filter((sortKey: string) => {
+      if (PV.FilterOptions.screenFilters[screenName].hideIfNotLoggedIn && !isLoggedIn) {
+        leftItems = leftItems.filter((type: any) => {
+          return !PV.FilterOptions.screenFilters[screenName].hideIfNotLoggedIn.includes(type.value)
+        })
+      }
+
+      rightItems = PV.FilterOptions.sortItems.filter((sortKey: any) => {
         return PV.FilterOptions.screenFilters[screenName].sort.includes(sortKey.value)
       })
     } else {
@@ -77,18 +92,30 @@ export const TableSectionSelectors = (props: Props) => {
       }
     }
 
+    leftItems = convertFilterOptionsToI18N(leftItems)
+    rightItems = convertFilterOptionsToI18N(rightItems)
+
     setLeftItems(leftItems)
     setRightItems(rightItems)
+  }
+
+  useEffect(() => {
+    handleInitialRender()
   }, [])
+
+  useEffect(() => {
+    if (selectedLeftItemKey === PV.Filters._myClipsKey && !isLoggedIn) {
+      handleSelectLeftItem(PV.Filters._subscribedKey)
+    }
+    handleInitialRender()
+  }, [isLoggedIn])
 
   useEffect(() => {
     let rightItems = []
     const screen = PV.FilterOptions.screenFilters[screenName]
-    if (screen.hideSort.includes(selectedLeftItemKey)) {
-      setRightItems(rightItems)
-    } else {
+    if (!screen.hideSort.includes(selectedLeftItemKey)) {
       if (!isBottomBar) {
-        rightItems = PV.FilterOptions.sortItems.filter((sortKey: string) => {
+        rightItems = PV.FilterOptions.sortItems.filter((sortKey: any) => {
           return PV.FilterOptions.screenFilters[screenName].sort.includes(sortKey.value)
         })
 
@@ -99,6 +126,8 @@ export const TableSectionSelectors = (props: Props) => {
         if (includeChronological) {
           rightItems.unshift(PV.FilterOptions.items.sortChronologicalItem)
         }
+
+        rightItems = convertFilterOptionsToI18N(rightItems)
       } else {
         if (leftItems.length > 0) {
           const selectedCategory = leftItems.find((category) => category.value === selectedLeftItemKey)
@@ -110,13 +139,20 @@ export const TableSectionSelectors = (props: Props) => {
                 ...subCat
               }
             })
+            rightItems.sort((a: any, b: any) => {
+              const textA = a.label.toUpperCase()
+              const textB = b.label.toUpperCase()
+              return textA < textB ? -1 : textA > textB ? 1 : 0
+            })
+
+            // Add the all-categories filter to the beginning
             rightItems.unshift(...PV.FilterOptions.screenFilters[screenName].sublist)
           }
         }
       }
-
-      setRightItems(rightItems)
     }
+
+    setRightItems(rightItems)
   }, [selectedLeftItemKey])
 
   const selectedLeftItem = leftItems.find((x) => x.value === selectedLeftItemKey) || {}
@@ -125,10 +161,14 @@ export const TableSectionSelectors = (props: Props) => {
     PV.Fonts.fontScale.largest === fontScaleMode
       ? [styles.tableSectionHeaderInner, { flexDirection: 'column' }]
       : [styles.tableSectionHeaderInner]
+  const headerStyle = [styles.tableSectionHeader, globalTheme.tableSectionHeader]
+  if (isTransparent) {
+    headerStyle.push(globalTheme.tableSectionHeaderTransparent)
+  }
 
   return (
     <View>
-      <View style={[styles.tableSectionHeader, globalTheme.tableSectionHeader]}>
+      <View style={headerStyle}>
         {!hidePickers && leftItems && leftItems.length > 0 && (
           <View style={wrapperStyle}>
             <RNPickerSelect

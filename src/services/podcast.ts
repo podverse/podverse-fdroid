@@ -6,7 +6,7 @@ import { hasValidNetworkConnection } from '../lib/network'
 import { PV } from '../resources'
 import { checkIfLoggedIn, getBearerToken } from './auth'
 import { getAutoDownloadEpisodes, removeAutoDownloadSetting } from './autoDownloads'
-import { getAddByRSSPodcasts, removeAddByRSSPodcast } from './parser'
+import { getAddByRSSPodcastsLocally, parseAllAddByRSSPodcasts, removeAddByRSSPodcast } from './parser'
 import { request } from './request'
 
 export const getPodcast = async (id: string) => {
@@ -23,12 +23,15 @@ export const getPodcast = async (id: string) => {
 }
 
 export const getPodcasts = async (query: any = {}, nsfwMode?: boolean) => {
+  const searchAuthor = query.searchAuthor ? encodeURIComponent(query.searchAuthor) : ''
+  const searchTitle = query.searchTitle ? encodeURIComponent(query.searchTitle) : ''
+
   const filteredQuery = {
     ...(query.maxResults ? { maxResults: true } : {}),
     ...(query.page ? { page: query.page } : { page: 1 }),
     ...(query.sort ? { sort: query.sort } : { sort: 'top-past-week' }),
-    ...(query.searchAuthor ? { searchAuthor: query.searchAuthor } : {}),
-    ...(query.searchTitle ? { searchTitle: query.searchTitle } : {})
+    ...(searchAuthor ? { searchAuthor } : {}),
+    ...(searchTitle ? { searchTitle } : {})
   } as any
 
   if (query.categories && query.categories !== PV.Filters._allCategoriesKey) {
@@ -49,7 +52,15 @@ export const getPodcasts = async (query: any = {}, nsfwMode?: boolean) => {
 }
 
 export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
-  if (subscribedPodcastIds.length < 1) return []
+  const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
+
+  if (subscribedPodcastIds.length < 1 && addByRSSPodcasts.length < 1) return [[], 0]
+
+  if (subscribedPodcastIds.length < 1 && addByRSSPodcasts.length > 0) {
+    const combinedPodcasts = await combineWithAddByRSSPodcasts()
+    return [combinedPodcasts, combinedPodcasts.length]
+  }
+
   const query = {
     podcastIds: subscribedPodcastIds,
     sort: 'alphabetical',
@@ -65,8 +76,7 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
       const autoDownloadSettingsString = await AsyncStorage.getItem(PV.Keys.AUTO_DOWNLOAD_SETTINGS)
       const autoDownloadSettings = autoDownloadSettingsString ? JSON.parse(autoDownloadSettingsString) : {}
       const data = await getPodcasts(query, true)
-      const subscribedPodcasts = data[0]
-      const subscribedPodcastsTotalCount = data[1]
+      const subscribedPodcasts = data[0] || []
       const podcastIds = Object.keys(autoDownloadSettings).filter((key: string) => autoDownloadSettings[key] === true)
 
       const autoDownloadEpisodes = await getAutoDownloadEpisodes(dateObj, podcastIds)
@@ -89,6 +99,8 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
         await AsyncStorage.setItem(PV.Keys.SUBSCRIBED_PODCASTS, JSON.stringify(subscribedPodcasts))
       }
 
+      await parseAllAddByRSSPodcasts()
+
       const combinedPodcasts = await combineWithAddByRSSPodcasts()
       return [combinedPodcasts, combinedPodcasts.length]
     } catch (error) {
@@ -104,9 +116,10 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
 export const combineWithAddByRSSPodcasts = async () => {
   // Combine the AddByRSSPodcast in with the subscribed podcast data, then alphabetize array
   const subscribedPodcasts = await getSubscribedPodcastsLocally()
-  const addByRSSPodcasts = await getAddByRSSPodcasts()
+  const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
   // @ts-ignore
   const combinedPodcasts = [...subscribedPodcasts[0], ...addByRSSPodcasts]
+
   return sortPodcastArrayAlphabetically(combinedPodcasts)
 }
 
@@ -235,10 +248,16 @@ const toggleSubscribeToPodcastOnServer = async (id: string) => {
 
 export const sortPodcastArrayAlphabetically = (podcasts: any[]) => {
   podcasts.sort((a, b) => {
-    let titleA = a.sortableTitle ? a.sortableTitle.toLowerCase().trim() : a.title.toLowerCase().trim()
-    let titleB = b.sortableTitle ? b.sortableTitle.toLowerCase().trim() : b.title.toLowerCase().trim()
-    titleA = titleA.replace(/#/g, '')
-    titleB = titleB.replace(/#/g, '')
+    let titleA = a.sortableTitle || a.title || ''
+    let titleB = b.sortableTitle || b.title || ''
+    titleA = titleA
+      .toLowerCase()
+      .trim()
+      .replace(/#/g, '')
+    titleB = titleB
+      .toLowerCase()
+      .trim()
+      .replace(/#/g, '')
     return titleA < titleB ? -1 : titleA > titleB ? 1 : 0
   })
 

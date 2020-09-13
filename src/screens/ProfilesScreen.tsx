@@ -1,14 +1,7 @@
 import { StyleSheet } from 'react-native'
 import React from 'reactn'
-import {
-  ActivityIndicator,
-  Divider,
-  FlatList,
-  MessageWithAction,
-  ProfileTableCell,
-  SwipeRowBack,
-  View
-} from '../components'
+import { ActivityIndicator, Divider, FlatList, ProfileTableCell, SwipeRowBack, View } from '../components'
+import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { isOdd, testProps } from '../lib/utility'
 import { PV } from '../resources'
@@ -29,8 +22,10 @@ type State = {
 }
 
 export class ProfilesScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Profiles'
+  static navigationOptions = () => {
+    return {
+      title: translate('Profiles')
+    }
   }
 
   constructor(props: Props) {
@@ -93,7 +88,7 @@ export class ProfilesScreen extends React.Component<Props, State> {
         onPress={() =>
           this.props.navigation.navigate(PV.RouteNames.ProfileScreen, {
             user: item,
-            navigationTitle: 'Profile'
+            navigationTitle: translate('Profile')
           })
         }
       />
@@ -104,36 +99,42 @@ export class ProfilesScreen extends React.Component<Props, State> {
     <SwipeRowBack
       isLoading={this.state.isUnsubscribing}
       onPress={() => this._handleHiddenItemPress(item.id, rowMap)}
-      text='Remove'
+      text={translate('Remove')}
     />
   )
 
   _handleHiddenItemPress = async (selectedId, rowMap) => {
-    const wasAlerted = await alertIfNoNetworkConnection('unsubscribe from this profile')
+    const wasAlerted = await alertIfNoNetworkConnection(translate('unsubscribe from this profile'))
     if (wasAlerted) return
 
     this.setState({ isUnsubscribing: true }, async () => {
       try {
         await toggleSubscribeToUser(selectedId)
         rowMap[selectedId].closeRow()
-        this.setState({ isUnsubscribing: true })
+        this.setState({ isUnsubscribing: false })
       } catch (error) {
-        this.setState({ isUnsubscribing: true })
+        this.setState({ isUnsubscribing: false })
       }
     })
   }
 
-  _onPressLogin = () => this.props.navigation.navigate(PV.RouteNames.AuthScreen)
+  _onPressLogin = () => {
+    this.props.navigation.goBack(null)
+    this.props.navigation.navigate(PV.RouteNames.AuthScreen)
+  }
 
   render() {
     const { isLoading, isLoadingMore, showNoInternetConnectionMessage } = this.state
+    const { offlineModeEnabled } = this.global
     const { flatListData, flatListDataTotalCount } = this.global.profiles
+
+    const showOfflineMessage = offlineModeEnabled
 
     return (
       <View style={styles.view} {...testProps('profiles_screen_view')}>
         <View style={styles.view}>
           {isLoading && <ActivityIndicator />}
-          {!isLoading && flatListData && flatListData.length > 0 && (
+          {!isLoading && (
             <FlatList
               data={flatListData}
               dataTotalCount={flatListDataTotalCount}
@@ -142,14 +143,12 @@ export class ProfilesScreen extends React.Component<Props, State> {
               isLoadingMore={isLoadingMore}
               ItemSeparatorComponent={this._ItemSeparatorComponent}
               keyExtractor={(item: any) => item.id}
+              noResultsMessage={translate('No profiles found')}
               onEndReached={this._onEndReached}
               renderHiddenItem={this._renderHiddenItem}
               renderItem={this._renderProfileItem}
-              showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+              showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
             />
-          )}
-          {!isLoading && flatListData && flatListData.length === 0 && (
-            <MessageWithAction message='You have no subscribed profiles' />
           )}
         </View>
       </View>
@@ -164,7 +163,11 @@ export class ProfilesScreen extends React.Component<Props, State> {
     } as State
 
     const hasInternetConnection = await hasValidNetworkConnection()
-    newState.showNoInternetConnectionMessage = !hasInternetConnection
+
+    if (!hasInternetConnection) {
+      newState.showNoInternetConnectionMessage = true
+      return newState
+    }
 
     try {
       const subscribedUserIds = this.global.session.userInfo.subscribedUserIds

@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActionSheet, Divider, DownloadTableCell, FlatList, MessageWithAction, SwipeRowBack, View } from '../components'
 import { cancelDownloadTask, DownloadStatus } from '../lib/downloader'
+import { translate } from '../lib/i18n'
 import { isOdd, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { pauseDownloadingEpisode, removeDownloadingEpisode, resumeDownloadingEpisode } from '../state/actions/downloads'
@@ -16,9 +17,9 @@ type State = {
 }
 
 export class DownloadsScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
+  static navigationOptions = () => {
     return {
-      title: 'Downloads'
+      title: translate('Downloads')
     }
   }
 
@@ -94,19 +95,17 @@ export class DownloadsScreen extends React.Component<Props, State> {
 
     return (
       <View style={styles.view} {...testProps('downloads_screen_view')}>
-        {!downloadsArray || (downloadsArray.length === 0 && <MessageWithAction message='No downloads in progress' />)}
-        {downloadsArray.length > 0 && (
-          <FlatList
-            data={downloadsArray}
-            dataTotalCount={downloadsArray.length}
-            disableLeftSwipe={false}
-            extraData={downloadsArray}
-            keyExtractor={(item: any) => item.episodeId}
-            ItemSeparatorComponent={this._ItemSeparatorComponent}
-            renderHiddenItem={this._renderHiddenItem}
-            renderItem={this._renderItem}
-          />
-        )}
+        <FlatList
+          data={downloadsArray}
+          dataTotalCount={downloadsArray.length}
+          disableLeftSwipe={false}
+          extraData={downloadsArray}
+          keyExtractor={(item: any) => item.episodeId}
+          ItemSeparatorComponent={this._ItemSeparatorComponent}
+          noResultsMessage={translate('No downloads in progress')}
+          renderHiddenItem={this._renderHiddenItem}
+          renderItem={this._renderItem}
+        />
         {selectedItem && (
           <ActionSheet
             handleCancelPress={this._handleCancelPress}
