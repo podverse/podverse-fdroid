@@ -54,7 +54,7 @@ RepoType: git
 Repo: https://github.com/podverse/podverse-fdroid
 
 Builds:
-  - versionName: 2.6.8
+  - versionName: 2.9.2
     versionCode: 1
     commit: '9c88b5cc2a76dee690abffd804a0679c28ec8db2'
     subdir: android/app
@@ -63,5 +63,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 2.6.8
+CurrentVersion: 2.9.2
 CurrentVersionCode: 1
