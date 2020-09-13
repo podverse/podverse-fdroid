@@ -37,15 +37,11 @@ Builds:
       - apt-get update || apt-get update
       - apt-get install -y -t stretch-backports npm
     init:
-      - echo "asdf init 1"
       - npm install
-      - echo "asdf init 2"
     gradle:
       - yes
     prebuild:
-      - echo "asdf prebuild 1"
       - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
-      - echo "asdf prebuild 2"
     rm:
       - node_modules/react-native-fast-image/ios/
     scanignore:
