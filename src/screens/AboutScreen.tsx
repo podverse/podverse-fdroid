@@ -3,6 +3,7 @@ import Config from 'react-native-config'
 import { getBuildNumber, getVersion } from 'react-native-device-info'
 import React from 'reactn'
 import { Divider, Icon, ScrollView, Text, View } from '../components'
+import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { button } from '../styles'
@@ -12,8 +13,10 @@ type Props = {}
 type State = {}
 
 export class AboutScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'About'
+  static navigationOptions = () => {
+    return {
+      title: translate('About')
+    }
   }
 
   handleFollowLink = (url: string) => {
@@ -28,20 +31,16 @@ export class AboutScreen extends React.Component<Props, State> {
       <View style={styles.content} {...testProps('about_screen_view')}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
-            {'Create and share highlights of your favorite podcasts with Podverse! ' +
-              'Available on iOS, Android, and web. Sign up today and get 1 year of Podverse premium for free.'}
+            {'Podverse is an open source podcast manager for iOS, Android, and web.'}
           </Text>
-          <Divider style={styles.divider} />
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
-            {'All Podverse software is provided under an open source, copyleft license. ' +
-              'That means anyone can download, modify, and use Podverse software for any purpose for free, ' +
-              'as long as they also share their changes to the code. ' +
-              'We believe open source transparency is necessary to create technology that respects its users, ' +
-              'and copyleft sharing ensures that technology can never be monopolized.'}
+            {'All Podverse software is provided under a free and open source (FOSS) licence.' +
+              ' Features that require updating our servers are available only with a Premium membership.' +
+              ' Sign up today and get 1 year of Premium for free!'}
           </Text>
           <Divider style={styles.divider} />
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
-            Team
+            {translate('Team')}
           </Text>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
             {'Mitch Downey – Programmer\n\nCreon Creonopoulos - Programmer\n\nGary Johnson – Designer'}
@@ -72,6 +71,12 @@ export class AboutScreen extends React.Component<Props, State> {
               style={[button.iconOnlySmall, styles.icon]}
             />
             <Icon
+              name='linkedin'
+              onPress={() => this.handleFollowLink(PV.URLs.social.linkedin)}
+              size={28}
+              style={[button.iconOnlySmall, styles.icon]}
+            />
+            <Icon
               name='github'
               onPress={() => this.handleFollowLink(PV.URLs.social.github)}
               size={28}
@@ -89,7 +94,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   divider: {
-    marginVertical: 24
+    marginBottom: 24
   },
   icon: {
     alignItems: 'center',
@@ -115,6 +120,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8
   },
   text: {
-    fontSize: PV.Fonts.sizes.md
+    fontSize: PV.Fonts.sizes.md,
+    marginBottom: 24
   }
 })

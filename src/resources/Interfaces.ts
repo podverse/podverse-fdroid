@@ -39,6 +39,7 @@ export interface GlobalTheme {
   tableCellTextPrimary?: any
   tableCellTextSecondary?: any
   tableSectionHeader?: any
+  tableSectionHeaderTransparent?: any
   tableSectionHeaderIcon?: any
   tableSectionHeaderText?: any
   text?: any
@@ -49,6 +50,7 @@ export interface GlobalTheme {
 }
 
 export interface UserInfo {
+  addByRSSPodcastFeedUrls?: []
   email?: string
   freeTrialExpiration?: string
   historyItems?: []
@@ -73,6 +75,10 @@ export interface InitialState {
   downloadedPodcastEpisodeCounts: any
   downloadedEpisodeLimitCount: number
   downloadedEpisodeLimitDefault: number | null
+  downloadedPodcasts: any[]
+  addByRSSPodcasts: any[]
+  censorNSFWText?: boolean
+  offlineModeEnabled?: any
   overlayAlert: {
     shouldShowAlert: boolean
   }
@@ -114,6 +120,7 @@ export interface InitialState {
     endOfResultsReached: boolean
     flatListData: any[]
     flatListDataTotalCount: number | null
+    hideRightItemWhileLoading: boolean
     isLoading: boolean
     isLoadingMore: boolean
     isQuerying: boolean
@@ -124,6 +131,7 @@ export interface InitialState {
     showFullClipInfo: boolean
     showHeaderActionSheet: boolean
     showMoreActionSheet: boolean
+    showNoInternetConnectionMessage: boolean
     showShareActionSheet: boolean
     viewType: string | null
   }
@@ -141,6 +149,7 @@ export interface InitialState {
   }
   subscribedPodcasts: []
   subscribedPodcastsTotalCount: number
+  userAgent?: string
 }
 
 export interface IActionSheet {
@@ -169,7 +178,7 @@ export interface IFilters {
   _episodesKey: string
   _clipsKey: string
   _playlistsKey: string
-  _aboutKey: string
+  _aboutPodcastKey: string
   _showNotesKey: string
   _titleKey: string
   _myPlaylistsKey: string

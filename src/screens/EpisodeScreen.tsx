@@ -1,4 +1,5 @@
 import debounce from 'lodash/debounce'
+import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
 import { NavigationStackOptions } from 'react-navigation-stack'
 import React from 'reactn'
@@ -17,9 +18,9 @@ import {
   View
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
+import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
-import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from '../lib/NowPlayingItem'
-import { formatTitleViewHtml, isOdd, testProps } from '../lib/utility'
+import { formatTitleViewHtml, isOdd, replaceLinebreaksWithBrTags, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisode } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
@@ -35,7 +36,7 @@ type State = {
   episodeId?: any
   flatListData: any[]
   flatListDataTotalCount: number | null
-  includeGoToPodcast?: boolean
+  includeGoToPodcast: boolean
   isLoading: boolean
   isLoadingMore: boolean
   queryPage: number
@@ -55,12 +56,12 @@ export class EpisodeScreen extends React.Component<Props, State> {
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
 
     return {
-      title: 'Episode',
+      title: translate('Episode'),
       headerRight: (
         <RNView style={core.row}>
           {!addByRSSPodcastFeedUrl && (
             <NavShareIcon
-              endingText=' – shared using Podverse'
+              endingText={translate('shared using brandName')}
               episodeTitle={episodeTitle}
               podcastTitle={podcastTitle}
               url={PV.URLs.episode + episodeId}
@@ -90,7 +91,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
       this.props.navigation.setParams({
         episodeId: episode.id,
         episodeTitle: episode.title,
-        podcastTitle: (episode.podcast && episode.podcast.title) || ''
+        podcastTitle: episode.podcast?.title || ''
       })
     }
 
@@ -101,7 +102,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
       flatListData: [],
       flatListDataTotalCount: null,
       includeGoToPodcast,
-      isLoading: viewType === PV.Filters._clipsKey,
+      isLoading: !episode || viewType === PV.Filters._clipsKey,
       isLoadingMore: false,
       queryPage: 1,
       querySort: PV.Filters._chronologicalKey,
@@ -114,12 +115,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    const { episode, episodeId } = this.state
     this._initializePageData()
-    const pageTitle =
-      episode && episode.podcast
-        ? 'Episode Screen - ' + episode.podcast.title + ' - ' + episode.title
-        : 'Episode Screen - ' + 'no info available'
   }
 
   async _initializePageData() {
@@ -336,7 +332,11 @@ export class EpisodeScreen extends React.Component<Props, State> {
       showNoInternetConnectionMessage,
       viewType
     } = this.state
-    const { downloadedEpisodeIds, downloadsActive } = this.global
+    const { downloadedEpisodeIds, downloadsActive, offlineModeEnabled } = this.global
+
+    if (episode) episode.description = replaceLinebreaksWithBrTags(episode.description)
+
+    const showOfflineMessage = offlineModeEnabled && viewType === PV.Filters._clipsKey
 
     return (
       <View style={styles.view} {...testProps('episode_screen_view')}>
@@ -348,7 +348,10 @@ export class EpisodeScreen extends React.Component<Props, State> {
           isLoading={isLoading && !episode}
           isNotFound={!isLoading && !episode}
           podcastImageUrl={
-            episode && ((episode.podcast && episode.podcast.shrunkImageUrl) || episode.podcast_shrunkImageUrl)
+            episode &&
+            ((episode.podcast && episode.podcast.shrunkImageUrl) ||
+              episode.podcast_shrunkImageUrl ||
+              (episode.podcast && episode.podcast.imageUrl))
           }
           pubDate={episode && episode.pubDate}
           title={episode && episode.title}
@@ -360,7 +363,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
           selectedLeftItemKey={viewType}
           selectedRightItemKey={querySort}
         />
-        {isLoading && viewType === PV.Filters._clipsKey && <ActivityIndicator />}
+        {isLoading && (!episode || viewType === PV.Filters._clipsKey) && <ActivityIndicator />}
         {!isLoading && viewType === PV.Filters._clipsKey && flatListData && (
           <FlatList
             data={flatListData}
@@ -371,9 +374,10 @@ export class EpisodeScreen extends React.Component<Props, State> {
             ItemSeparatorComponent={this._ItemSeparatorComponent}
             keyExtractor={(item: any) => item.id}
             {...(viewType === PV.Filters._clipsKey ? { ListHeaderComponent: this._ListHeaderComponent } : {})}
+            noResultsMessage={translate('No clips found')}
             onEndReached={this._onEndReached}
             renderItem={this._renderItem}
-            showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+            showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
           />
         )}
         {viewType === PV.Filters._showNotesKey && episode && (
@@ -390,8 +394,9 @@ export class EpisodeScreen extends React.Component<Props, State> {
               navigation,
               this._handleCancelPress,
               this._handleDownloadPressed,
-              null,
-              includeGoToPodcast
+              null, // handleDeleteClip
+              includeGoToPodcast,
+              false // includeGoToEpisode
             )
           }
           showModal={showActionSheet}
@@ -415,7 +420,11 @@ export class EpisodeScreen extends React.Component<Props, State> {
     } as State
 
     const hasInternetConnection = await hasValidNetworkConnection()
-    newState.showNoInternetConnectionMessage = !hasInternetConnection && filterKey === PV.Filters._clipsKey
+
+    if (!hasInternetConnection && filterKey === PV.Filters._clipsKey) {
+      newState.showNoInternetConnectionMessage = true
+      return newState
+    }
 
     try {
       if (PV.FilterOptions.screenFilters.EpisodeScreen.sort.some((option) => option.value === filterKey)) {

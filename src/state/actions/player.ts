@@ -1,10 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage'
+import { convertNowPlayingItemToEpisode, convertNowPlayingItemToMediaRef, NowPlayingItem } from 'podverse-shared'
 import { getGlobal, setGlobal } from 'reactn'
-import {
-  convertNowPlayingItemToEpisode,
-  convertNowPlayingItemToMediaRef,
-  NowPlayingItem
-} from '../../lib/NowPlayingItem'
 import { PV } from '../../resources'
 import {
   clearNowPlayingItem as clearNowPlayingItemService,
@@ -105,7 +101,7 @@ export const playNextFromQueue = async () => {
 export const loadItemAndPlayTrack = async (
   item: NowPlayingItem,
   shouldPlay: boolean,
-  skipAddOrUpdateHistory: boolean
+  skipAddOrUpdateHistory?: boolean
 ) => {
   if (item) {
     await updatePlayerState(item)

@@ -1,5 +1,6 @@
 import React from 'reactn'
 import { MessageWithAction } from '../components'
+import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { sendVerificationEmail } from '../services/auth'
 
@@ -13,8 +14,10 @@ type State = {
 }
 
 export class EmailVerificationScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Verify Your Email'
+  static navigationOptions = () => {
+    return {
+      title: translate('Verify Your Email')
+    }
   }
 
   constructor(props: Props) {
@@ -48,12 +51,12 @@ export class EmailVerificationScreen extends React.Component<Props, State> {
     return (
       <MessageWithAction
         bottomActionHandler={this._navToLogin}
-        bottomActionText='Login'
+        bottomActionText={translate('Login')}
         isLoading={isResendingEmail}
-        message={`Please verify your email address to login. 
-        You should receive an email shortly. The email may go to your Spam folder.`}
+        message={`${translate('Please verify your email address to login')} 
+        ${translate('You should receive an email shortly The email may go to your Spam folder')}`}
         topActionHandler={this._sendVerificationEmail}
-        topActionText='Resend Verification Email'
+        topActionText={translate('Resend Verification Email')}
       />
     )
   }

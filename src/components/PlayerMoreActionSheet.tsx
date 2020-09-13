@@ -3,11 +3,12 @@ import { Slider } from 'react-native-elements'
 import SystemSetting from 'react-native-system-setting'
 import { NavigationActions, StackActions } from 'react-navigation'
 import React from 'reactn'
+import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
 import { safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
-import { getAddByRSSPodcast } from '../services/parser'
-import { toggleAddByRSSPodcast } from '../state/actions/parser'
+import { getAddByRSSPodcastLocally } from '../services/parser'
+import { toggleAddByRSSPodcastFeedUrl } from '../state/actions/parser'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { actionSheetStyles, sliderStyles } from '../styles'
 import { ActionSheet, Icon, Text } from './'
@@ -54,13 +55,13 @@ export class PlayerMoreActionSheet extends React.Component<Props, State> {
   _handleToggleSubscribe = async () => {
     const { handleDismiss } = this.props
 
-    const wasAlerted = await alertIfNoNetworkConnection('subscribe to podcast')
+    const wasAlerted = await alertIfNoNetworkConnection(translate('subscribe to podcast'))
     if (wasAlerted) return
     const { nowPlayingItem } = this.global.player
     try {
       if (nowPlayingItem) {
         if (nowPlayingItem.addByRSSPodcastFeedUrl) {
-          await toggleAddByRSSPodcast(nowPlayingItem.addByRSSPodcastFeedUrl)
+          await toggleAddByRSSPodcastFeedUrl(nowPlayingItem.addByRSSPodcastFeedUrl)
         } else {
           await toggleSubscribeToPodcast(nowPlayingItem.podcastId)
         }
@@ -87,7 +88,7 @@ export class PlayerMoreActionSheet extends React.Component<Props, State> {
     })
     await navigation.dispatch(resetAction)
     if (nowPlayingItem && nowPlayingItem.addByRSSPodcastFeedUrl) {
-      const podcast = await getAddByRSSPodcast(nowPlayingItem.addByRSSPodcastFeedUrl)
+      const podcast = await getAddByRSSPodcastLocally(nowPlayingItem.addByRSSPodcastFeedUrl)
       navigation.navigate(PV.RouteNames.PodcastScreen, {
         podcast,
         addByRSSPodcastFeedUrl: nowPlayingItem.addByRSSPodcastFeedUrl
@@ -99,7 +100,7 @@ export class PlayerMoreActionSheet extends React.Component<Props, State> {
     }
   }
 
-  _handleOfficialHomePagePress = (podcast: any) => {
+  _handleOfficialPodcastPagePress = (podcast: any) => {
     const { handleDismiss } = this.props
     handleDismiss()
     Linking.openURL(podcast.linkUrl)
@@ -135,7 +136,7 @@ export class PlayerMoreActionSheet extends React.Component<Props, State> {
           ''
         )}>
         <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>
-          {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+          {isSubscribed ? translate('Unsubscribe') : translate('Subscribe')}
         </Text>
       </TouchableHighlight>,
       <TouchableHighlight
@@ -146,21 +147,25 @@ export class PlayerMoreActionSheet extends React.Component<Props, State> {
           () => globalTheme.actionSheetButtonCancelUnderlay.backgroundColor,
           ''
         )}>
-        <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>Podcast Page</Text>
+        <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>
+          {translate('Go to Podcast')}
+        </Text>
       </TouchableHighlight>
     ]
 
     if (podcast && podcast.linkUrl) {
       children.push(
         <TouchableHighlight
-          key='officialHomePage'
-          onPress={() => this._handleOfficialHomePagePress(podcast)}
+          key='officialPodcastPage'
+          onPress={() => this._handleOfficialPodcastPagePress(podcast)}
           style={[actionSheetStyles.button, globalTheme.actionSheetButton]}
           underlayColor={safelyUnwrapNestedVariable(
             () => globalTheme.actionSheetButtonCancelUnderlay.backgroundColor,
             ''
           )}>
-          <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>Official Podcast Page</Text>
+          <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>
+            {translate('Official Podcast Page')}
+          </Text>
         </TouchableHighlight>
       )
     }
@@ -175,7 +180,9 @@ export class PlayerMoreActionSheet extends React.Component<Props, State> {
             () => globalTheme.actionSheetButtonCancelUnderlay.backgroundColor,
             ''
           )}>
-          <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>Official Episode Page</Text>
+          <Text style={[actionSheetStyles.buttonText, globalTheme.actionSheetButtonText]}>
+            {translate('Official Episode Page')}
+          </Text>
         </TouchableHighlight>
       )
     }

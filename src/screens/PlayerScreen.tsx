@@ -1,3 +1,9 @@
+import {
+  convertNowPlayingItemToEpisode,
+  convertNowPlayingItemToMediaRef,
+  convertToNowPlayingItem,
+  NowPlayingItem
+} from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
 import Share from 'react-native-share'
 import React, { getGlobal, setGlobal } from 'reactn'
@@ -24,25 +30,21 @@ import {
   View
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
-import { alertIfNoNetworkConnection } from '../lib/network'
-import {
-  convertNowPlayingItemToEpisode,
-  convertNowPlayingItemToMediaRef,
-  convertToNowPlayingItem,
-  NowPlayingItem
-} from '../lib/NowPlayingItem'
+import { translate } from '../lib/i18n'
+import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import {
   decodeHTMLString,
   formatTitleViewHtml,
   isOdd,
   readableDate,
   removeHTMLFromString,
+  replaceLinebreaksWithBrTags,
   testProps
 } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
 import { getMediaRef, getMediaRefs } from '../services/mediaRef'
-import { getAddByRSSPodcast } from '../services/parser'
+import { getAddByRSSPodcastLocally } from '../services/parser'
 import { getNowPlayingItem, PVTrackPlayer } from '../services/player'
 import PlayerEventEmitter from '../services/playerEventEmitter'
 import { addQueueItemNext } from '../services/queue'
@@ -436,14 +438,16 @@ export class PlayerScreen extends React.Component<Props, State> {
     let title = ''
     if (podcastId) {
       url = PV.URLs.podcast + podcastId
-      title = `${nowPlayingItem.podcastTitle} – shared using Podverse`
+      title = `${nowPlayingItem.podcastTitle}${translate('shared using brandName')}`
     } else if (episodeId) {
       url = PV.URLs.episode + episodeId
-      title = `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} – shared using Podverse`
+      title = `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} ${translate('shared using brandName')}`
     } else {
       url = PV.URLs.clip + mediaRefId
-      title = `${nowPlayingItem.clipTitle ? nowPlayingItem.clipTitle + ' – ' : 'untitled clip – '}`
-      title += `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} – clip shared using Podverse`
+      title = `${nowPlayingItem.clipTitle ? nowPlayingItem.clipTitle + ' – ' : translate('untitled clip – ')}`
+      title += `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} ${translate(
+        'clip shared using brandName'
+      )}`
     }
 
     try {
@@ -489,7 +493,7 @@ export class PlayerScreen extends React.Component<Props, State> {
           hasZebraStripe={isOdd(index)}
           hideImage={true}
           pubDate={item.pubDate}
-          title={item.title || 'untitled episode'}
+          title={item.title || translate('untitled episode')}
           transparent={true}
         />
       )
@@ -509,13 +513,13 @@ export class PlayerScreen extends React.Component<Props, State> {
             ? { episodePubDate: readableDate(item.episode.pubDate) }
             : {})}
           {...(queryFrom === PV.Filters._fromThisPodcastKey
-            ? { episodeTitle: item.episode.title || 'untitled episode' }
+            ? { episodeTitle: item.episode.title || translate('untitled episode') }
             : {})}
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
           handleNavigationPress={() => this._handleNavigationPress(convertToNowPlayingItem(item, null, podcast))}
           hideImage={true}
           startTime={item.startTime}
-          title={item.title || 'untitled clip'}
+          title={item.title || translate('untitled clip')}
           transparent={true}
         />
       ) : (
@@ -526,7 +530,7 @@ export class PlayerScreen extends React.Component<Props, State> {
 
   render() {
     const { navigation } = this.props
-    const { fontScaleMode, player, screenPlayer } = this.global
+    const { fontScaleMode, offlineModeEnabled, player, screenPlayer } = this.global
     const { episode, nowPlayingItem } = player
     const {
       flatListData,
@@ -538,9 +542,10 @@ export class PlayerScreen extends React.Component<Props, State> {
       queryFrom,
       querySort,
       selectedItem,
-      showMoreActionSheet,
-      showShareActionSheet,
       showFullClipInfo,
+      showMoreActionSheet,
+      showNoInternetConnectionMessage,
+      showShareActionSheet,
       viewType
     } = screenPlayer
     let { mediaRef } = player
@@ -552,6 +557,14 @@ export class PlayerScreen extends React.Component<Props, State> {
     const podcastId = nowPlayingItem ? nowPlayingItem.podcastId : null
     const episodeId = episode ? episode.id : null
     const mediaRefId = mediaRef ? mediaRef.id : null
+
+    episode.description = replaceLinebreaksWithBrTags(episode.description)
+
+    const noResultsMessage =
+      viewType === PV.Filters._clipsKey ? translate('No clips found') : translate('No episodes found')
+
+    const showOfflineMessage =
+      offlineModeEnabled && queryFrom !== PV.Filters._showNotesKey && queryFrom !== PV.Filters._titleKey
 
     return (
       <OpaqueBackground nowPlayingItem={nowPlayingItem}>
@@ -580,6 +593,7 @@ export class PlayerScreen extends React.Component<Props, State> {
                 handleSelectRightItem={this._selectQuerySort}
                 hideRightItemWhileLoading={hideRightItemWhileLoading}
                 includeChronological={viewType === PV.Filters._clipsKey && queryFrom === PV.Filters._fromThisEpisodeKey}
+                isTransparent={true}
                 screenName='PlayerScreen'
                 selectedLeftItemKey={viewType}
                 selectedRightItemKey={querySort}
@@ -588,6 +602,7 @@ export class PlayerScreen extends React.Component<Props, State> {
                 <TableSectionSelectors
                   handleSelectLeftItem={this._selectQueryFrom}
                   isBottomBar={true}
+                  isTransparent={true}
                   screenName='PlayerScreen'
                   selectedLeftItemKey={queryFrom}
                 />
@@ -595,7 +610,8 @@ export class PlayerScreen extends React.Component<Props, State> {
               {viewType === PV.Filters._episodesKey && (
                 <TableSectionHeader
                   centerText={PV.Fonts.fontScale.largest === fontScaleMode}
-                  title='From this podcast'
+                  isTransparent={true}
+                  title={translate('From this podcast')}
                 />
               )}
               {isLoading || (isQuerying && <ActivityIndicator />)}
@@ -613,8 +629,10 @@ export class PlayerScreen extends React.Component<Props, State> {
                     isLoadingMore={isLoadingMore}
                     ItemSeparatorComponent={this._ItemSeparatorComponent}
                     keyExtractor={(item: any) => item.id}
+                    noResultsMessage={noResultsMessage}
                     onEndReached={this._onEndReached}
                     renderItem={this._renderItem}
+                    showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
                     transparent={true}
                   />
                 )}
@@ -645,9 +663,9 @@ export class PlayerScreen extends React.Component<Props, State> {
           <ActionSheet
             handleCancelPress={this._dismissShareActionSheet}
             items={shareActionSheetButtons(podcastId, episodeId, mediaRefId, this._handleShare)}
-            message='What link do you want to share?'
+            message={translate('What link do you want to share?')}
             showModal={showShareActionSheet}
-            title='Share'
+            title={translate('Share')}
           />
         </View>
       </OpaqueBackground>
@@ -689,7 +707,7 @@ export class PlayerScreen extends React.Component<Props, State> {
     const { queryPage, querySort } = screenPlayer
 
     if (nowPlayingItem && nowPlayingItem.addByRSSPodcastFeedUrl) {
-      const parsedPodcast = await getAddByRSSPodcast(nowPlayingItem.addByRSSPodcastFeedUrl)
+      const parsedPodcast = await getAddByRSSPodcastLocally(nowPlayingItem.addByRSSPodcastFeedUrl)
       if (parsedPodcast) {
         const { episodes = [] } = parsedPodcast
         return [episodes, episodes.length]
@@ -725,11 +743,16 @@ export class PlayerScreen extends React.Component<Props, State> {
       hideRightItemWhileLoading: false,
       isLoading: false,
       isLoadingMore: false,
-      isQuerying: false
+      isQuerying: false,
+      showNoInternetConnectionMessage: false
     } as any
 
-    const wasAlerted = await alertIfNoNetworkConnection('load data')
-    if (wasAlerted) return newState
+    const hasInternetConnection = await hasValidNetworkConnection()
+
+    if (!hasInternetConnection) {
+      newState.showNoInternetConnectionMessage = true
+      return newState
+    }
 
     try {
       if (viewType === PV.Filters._episodesKey) {
@@ -757,12 +780,12 @@ const shareActionSheetButtons = (podcastId: string, episodeId: string, mediaRefI
   const items = [
     {
       key: 'podcast',
-      text: 'Podcast',
+      text: translate('Podcast'),
       onPress: async () => handleShare(podcastId, null, null)
     },
     {
       key: 'episode',
-      text: 'Episode',
+      text: translate('Episode'),
       onPress: async () => handleShare(null, episodeId, null)
     }
   ]
@@ -770,7 +793,7 @@ const shareActionSheetButtons = (podcastId: string, episodeId: string, mediaRefI
   if (mediaRefId) {
     items.push({
       key: 'clip',
-      text: 'Clip',
+      text: translate('Clip'),
       onPress: async () => handleShare(null, null, mediaRefId)
     })
   }
