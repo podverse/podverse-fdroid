@@ -38,16 +38,15 @@ Builds:
       - apt-get install -y -t stretch-backports npm
     init:
       - npm install
+      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
     gradle:
       - yes
     rm:
       - node_modules/react-native-fast-image/ios/
-    prebuild:
-      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
     scanignore:
       - android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
-      - node_modules/react-native-secure-key-store
+      - node_modules/react-native-secure-key-store/android/build.gradle
     scandelete:
       - node_modules/
 
