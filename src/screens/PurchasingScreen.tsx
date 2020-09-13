@@ -1,6 +1,7 @@
 import { Linking, Platform, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, SafeAreaView, Text, View } from '../components'
+import { translate } from '../lib/i18n'
 import { createEmailLinkUrl, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { androidHandleStatusCheck } from '../state/actions/purchase.android'
@@ -13,9 +14,11 @@ type Props = {
 type State = {}
 
 export class PurchasingScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Processing',
-    headerRight: null
+  static navigationOptions = () => {
+    return {
+      title: translate('Processing'),
+      headerRight: null
+    }
   }
 
   constructor(props: Props) {
@@ -23,10 +26,7 @@ export class PurchasingScreen extends React.Component<Props, State> {
   }
 
   _handleContactSupportPress = async () => {
-    const subject = 'Podverse Checkout Issue'
-    const body = "Please explain your issue below and we'll get back to you as soon as we can:"
-    const emailLinkUrl = createEmailLinkUrl(PV.Emails.SUPPORT, subject, body)
-    Linking.openURL(emailLinkUrl)
+    Linking.openURL(createEmailLinkUrl(PV.Emails.CHECKOUT_ISSUE))
   }
 
   _handleRetryProcessing = async () => {
@@ -65,7 +65,7 @@ export class PurchasingScreen extends React.Component<Props, State> {
           )}
           {!isLoading && showDismissLink && (
             <TouchableOpacity onPress={this._handleDismiss}>
-              <Text style={[globalTheme.text, styles.button]}>Close</Text>
+              <Text style={[globalTheme.text, styles.button]}>{translate('Close')}</Text>
             </TouchableOpacity>
           )}
         </View>
