@@ -31,16 +31,21 @@ Repo: https://github.com/podverse/podverse-fdroid
 Builds:
   - versionName: 2.9.2
     versionCode: 1
-    commit: 'f719ccb1867f78ba03845443fd4f9aaaee7ab0fc'
+    commit: '43e01b51b61a92fc68178911ae86794299134a25'
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y -t stretch-backports npm
     init:
+      - echo "asdf init 1"
       - npm install
-      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - echo "asdf init 2"
     gradle:
       - yes
+    prebuild:
+      - echo "asdf prebuild 1"
+      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - echo "asdf prebuild 2"
     rm:
       - node_modules/react-native-fast-image/ios/
     scanignore:
