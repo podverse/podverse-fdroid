@@ -1,5 +1,4 @@
 import Config from 'react-native-config'
-console.log('huh', Config)
 const protocol = 'https://'
 const domain = Config.WEB_DOMAIN || 'stage.podverse.fm'
 const root = protocol + domain
