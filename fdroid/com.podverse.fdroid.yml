@@ -49,8 +49,8 @@ Builds:
       - echo TESTING456
       - ls ../../node_modules/@react-native-community/
       - echo TESTING789
-      - ls ../../node_modules/@react-native-community/cli/build/commands/server/external/
-      - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - ls ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external
+      - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
     scanignore:
       - android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
