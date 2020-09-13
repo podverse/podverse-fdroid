@@ -42,7 +42,7 @@ Builds:
     rm:
       - node_modules/react-native-fast-image/ios/
     prebuild:
-      - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
+      - truncate -s 0 ../node_modules/@react-native-community/cli/build/commands/server/external/xsel
     scanignore:
       - android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
