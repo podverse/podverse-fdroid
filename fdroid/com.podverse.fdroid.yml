@@ -45,9 +45,7 @@ Builds:
       - node_modules/react-native-fast-image/ios/
     prebuild:
       - echo TESTING123
-      - ls ../../
-      - echo TESTING456
-      - ls ../../../
+      - ls ../../node_modules
       - truncate -s 0 ../../node_modules/@react-native-community/cli/build/commands/server/external/xsel
     scanignore:
       - android/build.gradle
