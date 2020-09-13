@@ -1,3 +1,4 @@
+import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
 import { NavigationStackOptions } from 'react-navigation-stack'
 import React, { setGlobal } from 'reactn'
@@ -14,8 +15,8 @@ import {
   View
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
+import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from '../lib/NowPlayingItem'
 import { isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getPlaylist, toggleSubscribeToPlaylist } from '../state/actions/playlist'
@@ -43,11 +44,11 @@ export class PlaylistScreen extends React.Component<Props, State> {
     const playlistTitle = navigation.getParam('playlistTitle')
 
     return {
-      title: 'Playlist',
+      title: translate('Playlist'),
       headerRight: (
         <RNView style={core.row}>
           <NavShareIcon
-            endingText=' – playlist shared using Podverse'
+            endingText={translate('shared using brandName')}
             playlistTitle={playlistTitle}
             url={PV.URLs.playlist + playlistId}
           />
@@ -179,12 +180,8 @@ export class PlaylistScreen extends React.Component<Props, State> {
 
     this.setState({ isSubscribing: true }, async () => {
       try {
-        await toggleSubscribeToPlaylist(id, this.global)
-        const subscribedPlaylistIds = safelyUnwrapNestedVariable(
-          () => this.global.session.userInfo.subscribedPlaylistIds,
-          []
-        )
-        const isSubscribed = subscribedPlaylistIds.some((x: string) => id)
+        const subscribedPlaylistIds = await toggleSubscribeToPlaylist(id)
+        const isSubscribed = subscribedPlaylistIds.some((x: string) => x === id)
         this.setState({
           isSubscribed,
           isSubscribing: false
@@ -257,6 +254,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}
             keyExtractor={(item: any) => item.id}
+            noResultsMessage={translate('No playlist items found')}
             renderItem={this._renderItem}
           />
         )}
@@ -267,7 +265,10 @@ export class PlaylistScreen extends React.Component<Props, State> {
               selectedItem,
               navigation,
               this._handleCancelPress,
-              this._handleDownloadPressed
+              this._handleDownloadPressed,
+              null, // handleDeleteClip
+              true, // includeGoToPodcast
+              true // includeGoToEpisode
             )
           }
           showModal={showActionSheet}

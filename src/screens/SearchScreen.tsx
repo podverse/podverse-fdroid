@@ -1,5 +1,6 @@
 import debounce from 'lodash/debounce'
 import { Alert, Linking, StyleSheet } from 'react-native'
+import Config from 'react-native-config'
 import React from 'reactn'
 import {
   ActionSheet,
@@ -12,6 +13,8 @@ import {
   SearchBar,
   View
 } from '../components'
+import { translate } from '../lib/i18n'
+import { navigateToPodcastScreenWithPodcast } from '../lib/navigate'
 import { alertIfNoNetworkConnection } from '../lib/network'
 import { generateAuthorsText, isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
@@ -19,7 +22,7 @@ import { getPodcasts } from '../services/podcast'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { core } from '../styles'
 
-const { aboutKey, allEpisodesKey, clipsKey } = PV.Filters
+const { _aboutPodcastKey, _episodesKey, _clipsKey } = PV.Filters
 
 type Props = {
   navigation?: any
@@ -41,7 +44,7 @@ type State = {
 export class SearchScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
     return {
-      title: 'Search',
+      title: translate('Search'),
       headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
       headerRight: null
     }
@@ -145,15 +148,15 @@ export class SearchScreen extends React.Component<Props, State> {
 
   _handleNavigationPress = (podcast: any, viewType: string) => {
     this.setState({ showActionSheet: false })
-    this.props.navigation.navigate(PV.RouteNames.SearchPodcastScreen, {
-      podcast,
-      viewType,
-      isSearchScreen: true
-    })
+    navigateToPodcastScreenWithPodcast(this.props.navigation, podcast, viewType)
   }
 
   _handleAddPodcastByRSSURLNavigation = () => {
     this.props.navigation.navigate(PV.RouteNames.AddPodcastByRSSScreen)
+  }
+
+  _handleAddPodcastByRSSQRCodeNavigation = () => {
+    this.props.navigation.navigate(PV.RouteNames.ScanQRCodeScreen)
   }
 
   _renderPodcastItem = ({ item, index }) => (
@@ -176,29 +179,29 @@ export class SearchScreen extends React.Component<Props, State> {
     return [
       {
         key: 'toggleSubscribe',
-        text: isSubscribed ? 'Unsubscribe' : 'Subscribe',
+        text: isSubscribed ? translate('Unsubscribe') : translate('Subscribe'),
         onPress: () => selectedPodcast && this._toggleSubscribeToPodcast(selectedPodcast.id)
       },
       {
         key: 'episodes',
-        text: 'Episodes',
-        onPress: () => this._handleNavigationPress(selectedPodcast, allEpisodesKey)
+        text: translate('Episodes'),
+        onPress: () => this._handleNavigationPress(selectedPodcast, _episodesKey)
       },
       {
         key: 'clips',
-        text: 'Clips',
-        onPress: () => this._handleNavigationPress(selectedPodcast, clipsKey)
+        text: translate('Clips'),
+        onPress: () => this._handleNavigationPress(selectedPodcast, _clipsKey)
       },
       {
         key: 'about',
-        text: 'About',
-        onPress: () => this._handleNavigationPress(selectedPodcast, aboutKey)
+        text: translate('About'),
+        onPress: () => this._handleNavigationPress(selectedPodcast, _aboutPodcastKey)
       }
     ]
   }
 
   _toggleSubscribeToPodcast = async (id: string) => {
-    const wasAlerted = await alertIfNoNetworkConnection('subscribe to this podcast')
+    const wasAlerted = await alertIfNoNetworkConnection(translate('subscribe to this podcast'))
     if (wasAlerted) return
 
     try {
@@ -211,8 +214,8 @@ export class SearchScreen extends React.Component<Props, State> {
 
   _navToRequestPodcastForm = async () => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
-      { text: 'Cancel' },
-      { text: 'Yes', onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
+      { text: translate('Cancel') },
+      { text: translate('Yes'), onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
     ])
   }
 
@@ -235,7 +238,7 @@ export class SearchScreen extends React.Component<Props, State> {
           inputContainerStyle={core.searchBar}
           onChangeText={this._handleSearchBarTextChange}
           onClear={this._handleSearchBarClear}
-          placeholder='search'
+          placeholder={translate('search')}
           value={searchBarText}
         />
         <Divider />
@@ -245,16 +248,18 @@ export class SearchScreen extends React.Component<Props, State> {
             dataTotalCount={flatListDataTotalCount}
             disableLeftSwipe={true}
             extraData={flatListData}
-            handleAddPodcastByRSSURLNavigation={this._handleAddPodcastByRSSURLNavigation}
-            handleRequestPodcast={this._navToRequestPodcastForm}
+            handleNoResultsBottomAction={PV.URLs.requestPodcast ? this._navToRequestPodcastForm : null}
+            handleNoResultsMiddleAction={this._handleAddPodcastByRSSURLNavigation}
+            handleNoResultsTopAction={!Config.DISABLE_QR_SCANNER ? this._handleAddPodcastByRSSQRCodeNavigation : null}
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}
             keyExtractor={(item: any) => item.id}
+            noResultsBottomActionText={PV.URLs.requestPodcast ? translate('Request Podcast') : ''}
+            noResultsMessage={translate('No podcasts found')}
+            noResultsMiddleActionText={translate('Add by RSS')}
+            noResultsTopActionText={!Config.DISABLE_QR_SCANNER ? translate('Scan RSS Feed QR Code') : ''}
             onEndReached={this._onEndReached}
             renderItem={this._renderPodcastItem}
-            resultsText='podcasts'
-            showAddPodcastByRSS={flatListData && flatListData.length === 0}
-            showRequestPodcast={true}
           />
         )}
         {isLoading && <ActivityIndicator />}
@@ -276,7 +281,7 @@ export class SearchScreen extends React.Component<Props, State> {
       isLoadingMore: false
     }
 
-    const wasAlerted = await alertIfNoNetworkConnection('search podcasts')
+    const wasAlerted = await alertIfNoNetworkConnection(translate('search podcasts'))
     if (wasAlerted) return newState
 
     try {
@@ -307,7 +312,7 @@ export class SearchScreen extends React.Component<Props, State> {
 const _podcastByTitle = 0
 const _podcastByHost = 1
 
-const buttons = ['Podcast', 'Host']
+const buttons = [translate('Podcast'), translate('Host')]
 
 const styles = StyleSheet.create({
   searchBarContainer: {

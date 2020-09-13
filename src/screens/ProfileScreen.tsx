@@ -1,3 +1,4 @@
+import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podverse-shared'
 import { Alert, StyleSheet, View as RNView } from 'react-native'
 import Dialog from 'react-native-dialog'
 import { NavigationStackOptions } from 'react-navigation-stack'
@@ -18,8 +19,8 @@ import {
   View
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
+import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from '../lib/NowPlayingItem'
 import {
   generateAuthorsText,
   generateCategoriesText,
@@ -75,7 +76,7 @@ export class ProfileScreen extends React.Component<Props, State> {
     const isMyProfile = navigation.getParam('isMyProfile')
 
     return {
-      title: isMyProfile ? 'My Profile' : 'Profile',
+      title: isMyProfile ? translate('My Profile') : translate('Profile'),
       headerRight: (
         <RNView style={core.row}>
           {userIsPublic && userId && <NavShareIcon profileName={userName} url={PV.URLs.profile + userId} />}
@@ -324,7 +325,7 @@ export class ProfileScreen extends React.Component<Props, State> {
   }
 
   _handleToggleSubscribe = async (id: string) => {
-    const wasAlerted = await alertIfNoNetworkConnection('subscribe to profile')
+    const wasAlerted = await alertIfNoNetworkConnection(translate('subscribe to profile'))
     if (wasAlerted) return
 
     this.setState({ isSubscribing: true }, async () => {
@@ -466,25 +467,35 @@ export class ProfileScreen extends React.Component<Props, State> {
       userId
     } = this.state
 
-    const { profile, session } = this.global
+    const { offlineModeEnabled, profile, session } = this.global
     const { user } = profile
     const { isLoggedIn, userInfo } = session
     const { id } = userInfo
     const { navigation } = this.props
     const isLoggedInUserProfile = userId && id && userId === id
 
-    let resultsText = 'podcasts'
+    let noResultsMessage = translate('No podcasts found')
     if (queryFrom === PV.Filters._clipsKey) {
-      resultsText = 'clips'
+      noResultsMessage = translate('No clips found')
     } else if (queryFrom === PV.Filters._playlistsKey) {
-      resultsText = 'playlists'
+      noResultsMessage = translate('No playlists found')
     }
+
     const isMyProfile = navigation.getParam('isMyProfile')
-    const message = `Login to view your ${initializeClips ? 'clips' : 'profile'}`
+    const loginMessage = initializeClips
+      ? translate('Login to view your clips')
+      : translate('Login to view your profile')
+
+    const showOfflineMessage = offlineModeEnabled
+
     return (
       <View style={styles.view} {...testProps('profile_screen_view')}>
         {isMyProfile && !isLoggedIn && (
-          <MessageWithAction topActionHandler={this._onPressLogin} topActionText='Login' message={message} />
+          <MessageWithAction
+            topActionHandler={this._onPressLogin}
+            topActionText={translate('Login')}
+            message={loginMessage}
+          />
         )}
         {!(isMyProfile && !isLoggedIn) && (
           <View style={styles.view}>
@@ -496,7 +507,7 @@ export class ProfileScreen extends React.Component<Props, State> {
               isNotFound={!isLoading && !user}
               isSubscribed={isSubscribed}
               isSubscribing={isSubscribing}
-              name={(user && user.name) || 'anonymous'}
+              name={(user && user.name) || translate('anonymous')}
             />
             <TableSectionSelectors
               handleSelectLeftItem={this.selectLeftItem}
@@ -516,10 +527,10 @@ export class ProfileScreen extends React.Component<Props, State> {
                 isLoadingMore={isLoadingMore}
                 ItemSeparatorComponent={this._ItemSeparatorComponent}
                 keyExtractor={(item: any) => item.id}
+                noResultsMessage={noResultsMessage}
                 onEndReached={this._onEndReached}
                 renderItem={this._renderItem}
-                resultsText={resultsText}
-                showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+                showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
               />
             )}
             <ActionSheet
@@ -533,7 +544,9 @@ export class ProfileScreen extends React.Component<Props, State> {
                     navigation,
                     this._handleCancelPress,
                     this._handleDownloadPressed,
-                    this._showDeleteConfirmDialog
+                    this._showDeleteConfirmDialog,
+                    true, // includeGoToPodcast
+                    true // includeGoToEpisode
                   )
                 }
               }}
@@ -542,8 +555,8 @@ export class ProfileScreen extends React.Component<Props, State> {
             <Dialog.Container visible={showDeleteConfirmDialog}>
               <Dialog.Title>Delete Clip</Dialog.Title>
               <Dialog.Description>Are you sure?</Dialog.Description>
-              <Dialog.Button label='Cancel' onPress={this._cancelDeleteMediaRef} />
-              <Dialog.Button label='Delete' onPress={this._deleteMediaRef} />
+              <Dialog.Button label={translate('Cancel')} onPress={this._cancelDeleteMediaRef} />
+              <Dialog.Button label={translate('Delete')} onPress={this._deleteMediaRef} />
             </Dialog.Container>
           </View>
         )}
@@ -561,7 +574,7 @@ export class ProfileScreen extends React.Component<Props, State> {
       }
 
       let results = [[], 0]
-      if (this.global.profile.user.subscribedPodcastIds.length > 1) {
+      if (this.global.profile.user.subscribedPodcastIds.length > 0) {
         results = await getPodcasts(query, this.global.settings.nsfwMode)
       }
 
@@ -647,6 +660,7 @@ export class ProfileScreen extends React.Component<Props, State> {
     } as State
 
     const hasInternetConnection = await hasValidNetworkConnection()
+
     if (!hasInternetConnection) {
       newState.showNoInternetConnectionMessage = true
       return newState

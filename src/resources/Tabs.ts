@@ -1,27 +1,29 @@
+import { translate } from '../lib/i18n'
+
 export const Tabs = {
   Podcasts: {
-    title: 'Podcasts',
-    icon: require('./images/tab-podcasts.png'),
+    title: translate('Podcasts'),
+    icon: require('./images/tab-icons/tab-podcasts.png'),
     index: 0
   },
   Episodes: {
-    title: 'Episodes',
-    icon: require('./images/tab-episodes.png'),
+    title: translate('Episodes'),
+    icon: require('./images/tab-icons/tab-episodes.png'),
     index: 1
   },
   Clips: {
-    title: 'Clips',
-    icon: require('./images/tab-clips.png'),
+    title: translate('Clips'),
+    icon: require('./images/tab-icons/tab-clips.png'),
     index: 2
   },
   More: {
-    title: 'More',
-    icon: require('./images/tab-more.png'),
+    title: translate('More'),
+    icon: require('./images/tab-icons/tab-more.png'),
     index: 3
   },
   Queue: {
-    title: 'Queue',
-    icon: require('./images/tab-queue.png'),
+    title: translate('Queue'),
+    icon: require('./images/tab-icons/tab-queue.png'),
     index: 4
   }
 }

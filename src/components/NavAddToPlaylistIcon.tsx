@@ -1,8 +1,10 @@
-import React from 'react'
 import { View } from 'react-native'
-import { testProps } from '../../src/lib/utility'
+import Config from 'react-native-config'
+import React from 'reactn'
 import { GlobalTheme } from '../../src/resources/Interfaces'
 import { darkTheme } from '../../src/styles'
+import { translate } from '../lib/i18n'
+import { safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
 import { ActionSheet, NavItemIcon, NavItemWrapper } from './'
 
@@ -46,6 +48,9 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
   }
 
   render() {
+    const isLoggedIn = safelyUnwrapNestedVariable(() => this.global.session.isLoggedIn, false)
+    if (Config.DISABLE_ADD_TO_PLAYLIST || !isLoggedIn) return null
+
     const { getEpisodeId, getMediaRefId, navigation } = this.props
     const episodeId = getEpisodeId ? getEpisodeId() : null
     const mediaRefId = getMediaRefId ? getMediaRefId() : null
@@ -62,9 +67,9 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
         <ActionSheet
           handleCancelPress={this._dismissActionSheet}
           items={actionSheetButtons(episodeId, mediaRefId, navigation, this._dismissActionSheet)}
-          {...(mediaRefId ? { message: 'Do you want to add this episode or clip?' } : '')}
+          {...(mediaRefId ? { message: translate('Do you want to add this episode or clip') } : '')}
           showModal={showActionSheet}
-          title='Add to Playlist'
+          title={translate('Add to Playlist')}
         />
       </View>
     )
@@ -74,7 +79,7 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
 const actionSheetButtons = (episodeId: string, mediaRefId: string, navigation: any, handleDismiss: any) => [
   {
     key: 'episode',
-    text: 'Episode',
+    text: translate('Episode'),
     onPress: async () => {
       handleDismiss()
       navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { episodeId })
@@ -82,7 +87,7 @@ const actionSheetButtons = (episodeId: string, mediaRefId: string, navigation: a
   },
   {
     key: 'clip',
-    text: 'Clip',
+    text: translate('Clip'),
     onPress: async () => {
       handleDismiss()
       navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { mediaRefId })

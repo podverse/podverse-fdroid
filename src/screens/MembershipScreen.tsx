@@ -1,6 +1,7 @@
 import { Alert, Platform, StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, ComparisonTable, Text, TextLink, View } from '../components'
+import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
 import { getMembershipExpiration, getMembershipStatus, readableDate, testProps } from '../lib/utility'
 import { PV } from '../resources'
@@ -21,8 +22,10 @@ type State = {
 }
 
 export class MembershipScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Membership'
+  static navigationOptions = () => {
+    return {
+      title: translate('Membership')
+    }
   }
 
   constructor(props: Props) {
@@ -86,7 +89,7 @@ export class MembershipScreen extends React.Component<Props, State> {
     this.setState({ disableButton: true }, async () => {
       await this.props.navigation.navigate(PV.RouteNames.AuthScreen, {
         showSignUp: true,
-        title: 'Sign Up'
+        title: translate('Sign Up')
       })
       this.setState({ disableButton: false })
     })
@@ -106,7 +109,7 @@ export class MembershipScreen extends React.Component<Props, State> {
         {!isLoading && showNoInternetConnectionMessage && (
           <View style={styles.textRowCentered}>
             <Text style={[styles.subText, { textAlign: 'center' }]}>
-              Connect to the internet and reload this page to sign up for Premium.
+              {translate('Connect to the internet and reload this page to sign up for Premium')}
             </Text>
           </View>
         )}
@@ -114,7 +117,7 @@ export class MembershipScreen extends React.Component<Props, State> {
           <View>
             <View style={styles.textRow}>
               <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.label}>
-                Status:{' '}
+                {translate('Status')}{' '}
               </Text>
               <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[styles.text, membershipTextStyle]}>
                 {membershipStatus}
@@ -134,7 +137,7 @@ export class MembershipScreen extends React.Component<Props, State> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 onPress={this.handleRenewPress}
                 style={styles.subText}>
-                Renew Membership
+                {translate('Renew Membership')}
               </TextLink>
             </View>
           </View>
@@ -143,12 +146,12 @@ export class MembershipScreen extends React.Component<Props, State> {
           <View>
             <View style={styles.textRowCentered}>
               <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.subTextCentered}>
-                Get 1 year of Premium for free
+                {translate('Get 1 year of Premium for free')}
               </Text>
             </View>
             <View style={styles.textRowCentered}>
               <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.subTextCentered}>
-                $10/year after that
+                {translate('10 per year after that')}
               </Text>
             </View>
             <View style={styles.textRowCentered}>
@@ -157,14 +160,19 @@ export class MembershipScreen extends React.Component<Props, State> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 onPress={this.handleSignUpPress}
                 style={styles.subText}>
-                Sign Up
+                {translate('Sign Up')}
               </TextLink>
             </View>
           </View>
         )}
         {!isLoading && (
           <View style={styles.tableWrapper}>
-            <ComparisonTable column1Title='Free' column2Title='Premium' data={comparisonData} mainTitle='Features' />
+            <ComparisonTable
+              column1Title={translate('Free')}
+              column2Title={translate('Premium')}
+              data={comparisonData}
+              mainTitle='Features'
+            />
           </View>
         )}
       </View>
@@ -174,67 +182,57 @@ export class MembershipScreen extends React.Component<Props, State> {
 
 const comparisonData = [
   {
-    text: 'subscribe to podcasts',
+    text: translate('subscribe to podcasts'),
     column1: true,
     column2: true
   },
   {
-    text: 'play clips and episodes',
+    text: translate('download episodes'),
     column1: true,
     column2: true
   },
   {
-    text: 'download episodes',
+    text: translate('drag-and-drop queue'),
     column1: true,
     column2: true
   },
   {
-    text: 'drag-and-drop queue',
+    text: translate('sleep timer'),
     column1: true,
     column2: true
   },
   {
-    text: 'create sharable clips of any length',
+    text: translate('light - dark mode'),
     column1: true,
     column2: true
   },
   {
-    text: 'sleep timer',
-    column1: true,
-    column2: true
-  },
-  {
-    text: 'sync your subscriptions on all devices',
+    text: translate('create and share clips'),
     column1: false,
     column2: true
   },
   {
-    text: 'sync your queue on all devices',
+    text: translate('sync your subscriptions on all devices'),
     column1: false,
     column2: true
   },
   {
-    text: 'create playlists',
+    text: translate('sync your queue on all devices'),
     column1: false,
     column2: true
   },
   {
-    text: 'edit your clips',
+    text: translate('create playlists'),
     column1: false,
     column2: true
   },
   {
-    text: 'share your user profile',
+    text: translate('download a backup of your data'),
     column1: false,
     column2: true
   },
   {
-    text: 'download a backup of your data',
-    column1: false,
-    column2: true
-  },
-  {
-    text: 'support open source software',
+    text: translate('support open source software'),
     column1: true,
     column2: true,
     isSmile: true

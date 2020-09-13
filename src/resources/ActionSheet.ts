@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import NetInfo from '@react-native-community/netinfo'
 import { Alert } from 'react-native'
+import Config from 'react-native-config'
 import Share from 'react-native-share'
 import { getGlobal } from 'reactn'
+import { translate } from '../lib/i18n'
+import { navigateToEpisodeScreenWithItem, navigateToPodcastScreenWithItem } from '../lib/navigate'
 import { safelyUnwrapNestedVariable } from '../lib/utility'
 import { IActionSheet } from '../resources/Interfaces'
 import { PVTrackPlayer } from '../services/player'
@@ -17,13 +20,14 @@ const mediaMoreButtons = (
   handleDismiss: any,
   handleDownload: any,
   handleDeleteClip: any,
-  includeGoToPodcast?: boolean
+  includeGoToPodcast?: boolean,
+  includeGoToEpisode?: boolean | string
 ) => {
   if (!item || !item.episodeId) return
 
   const globalState = getGlobal()
   const isDownloading = globalState.downloadsActive && globalState.downloadsActive[item.episodeId]
-  const downloadingText = isDownloading ? 'Downloading' : 'Download'
+  const downloadingText = isDownloading ? translate('Downloading') : translate('Download')
   const isDownloaded = globalState.downloadedEpisodeIds[item.episodeId]
   const buttons = []
   const loggedInUserId = safelyUnwrapNestedVariable(() => globalState.session.userInfo.id, '')
@@ -34,7 +38,7 @@ const mediaMoreButtons = (
     buttons.push(
       {
         key: 'editClip',
-        text: 'Edit Clip',
+        text: translate('Edit Clip'),
         onPress: async () => {
           const { darkTheme } = require('../styles')
           const isDarkMode = globalState.globalTheme === darkTheme
@@ -56,7 +60,7 @@ const mediaMoreButtons = (
       },
       {
         key: 'deleteClip',
-        text: 'Delete Clip',
+        text: translate('Delete Clip'),
         onPress: async () => {
           await handleDismiss()
           await handleDeleteClip(item.clipId)
@@ -68,7 +72,7 @@ const mediaMoreButtons = (
   if (isDownloaded) {
     buttons.push({
       key: 'play',
-      text: 'Play',
+      text: translate('Play'),
       onPress: async () => {
         await handleDismiss()
         const shouldPlay = true
@@ -78,7 +82,7 @@ const mediaMoreButtons = (
   } else {
     buttons.push({
       key: 'stream',
-      text: 'Stream',
+      text: translate('Stream'),
       onPress: async () => {
         const showAlert = await hasTriedStreamingWithoutWifiAlert(handleDismiss, navigation, false)
         if (showAlert) return
@@ -113,7 +117,7 @@ const mediaMoreButtons = (
   buttons.push(
     {
       key: 'queueNext',
-      text: 'Queue: Next',
+      text: translate('Queue Next'),
       onPress: async () => {
         await addQueueItemNext(item)
         await handleDismiss()
@@ -121,7 +125,7 @@ const mediaMoreButtons = (
     },
     {
       key: 'queueLast',
-      text: 'Queue: Last',
+      text: translate('Queue Last'),
       onPress: async () => {
         await addQueueItemLast(item)
         await handleDismiss()
@@ -130,49 +134,53 @@ const mediaMoreButtons = (
   )
 
   if (!item.addByRSSPodcastFeedUrl) {
-    buttons.push({
-      key: 'addToPlaylist',
-      text: 'Add to Playlist',
-      onPress: async () => {
-        await handleDismiss()
-        navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, {
-          ...(item.clipId ? { mediaRefId: item.clipId } : { episodeId: item.episodeId })
-        })
-      }
-    })
-
-    buttons.push({
-      key: 'share',
-      text: 'Share',
-      onPress: async () => {
-        try {
-          let url = ''
-          let title = ''
-          if (item.clipId) {
-            url = PV.URLs.clip + item.clipId
-            title = item.clipTitle ? item.clipTitle : 'untitled clip –'
-            title += ` ${item.podcastTitle} – ${item.episodeTitle} – clip shared using Podverse`
-          } else if (item.episodeId) {
-            url = PV.URLs.episode + item.episodeId
-            title += `${item.podcastTitle} – ${item.episodeTitle} – shared using Podverse`
-          }
-          await Share.open({
-            title,
-            subject: title,
-            url
+    if (!Config.DISABLE_ADD_TO_PLAYLIST && isLoggedIn) {
+      buttons.push({
+        key: 'addToPlaylist',
+        text: translate('Add to Playlist'),
+        onPress: async () => {
+          await handleDismiss()
+          navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, {
+            ...(item.clipId ? { mediaRefId: item.clipId } : { episodeId: item.episodeId })
           })
-        } catch (error) {
-          console.log(error)
         }
-        await handleDismiss()
-      }
-    })
+      })
+    }
+
+    if (!Config.DISABLE_SHARE) {
+      buttons.push({
+        key: 'share',
+        text: translate('Share'),
+        onPress: async () => {
+          try {
+            let url = ''
+            let title = ''
+            if (item.clipId) {
+              url = PV.URLs.clip + item.clipId
+              title = item.clipTitle ? item.clipTitle : translate('untitled clip –')
+              title += ` ${item.podcastTitle} – ${item.episodeTitle} – ${translate('clip shared using brandName')}`
+            } else if (item.episodeId) {
+              url = PV.URLs.episode + item.episodeId
+              title += `${item.podcastTitle} – ${item.episodeTitle} – ${translate('shared using brandName')}`
+            }
+            await Share.open({
+              title,
+              subject: title,
+              url
+            })
+          } catch (error) {
+            console.log(error)
+          }
+          await handleDismiss()
+        }
+      })
+    }
   }
 
   if (isDownloaded) {
     buttons.push({
       key: 'deleteEpisode',
-      text: 'Delete Episode',
+      text: translate('Delete Episode'),
       onPress: async () => {
         removeDownloadedPodcastEpisode(item.episodeId)
         await handleDismiss()
@@ -183,12 +191,21 @@ const mediaMoreButtons = (
   if (includeGoToPodcast) {
     buttons.push({
       key: 'goToPodcast',
-      text: 'Go to Podcast',
+      text: translate('Go to Podcast'),
       onPress: async () => {
         await handleDismiss()
-        navigation.navigate(PV.RouteNames.EpisodePodcastScreen, {
-          podcastId: item.podcastId
-        })
+        navigateToPodcastScreenWithItem(navigation, item)
+      }
+    })
+  }
+
+  if (includeGoToEpisode) {
+    buttons.push({
+      key: 'goToEpisode',
+      text: translate('Go to Episode'),
+      onPress: async () => {
+        await handleDismiss()
+        navigateToEpisodeScreenWithItem(navigation, item)
       }
     })
   }
@@ -230,17 +247,17 @@ const hasTriedDownloadingWithoutWifiAlert = async (handleDismiss: any, navigatio
 
 const hasTriedWithoutWifiAlert = (handleDismiss: any, navigation: any, download: boolean) => {
   Alert.alert(
-    'No Wifi Connection',
+    translate('No Wifi Connection'),
     `You cannot ${download ? 'download' : 'stream'} without a Wifi connection.
     To allow ${download ? 'downloading' : 'streaming'} with your data plan, go to your Settings page.`,
     [
       {
-        text: 'Cancel',
+        text: translate('Cancel'),
         style: 'cancel',
         onPress: handleDismiss
       },
       {
-        text: 'Go to Settings',
+        text: translate('Go to Settings'),
         onPress: async () => {
           await handleDismiss()
           navigation.navigate(PV.RouteNames.SettingsScreen)

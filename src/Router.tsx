@@ -1,4 +1,5 @@
 import { Image, View } from 'react-native'
+import Config from 'react-native-config'
 import { createAppContainer, createSwitchNavigator } from 'react-navigation'
 import { createStackNavigator, NavigationStackOptions } from 'react-navigation-stack'
 import { createBottomTabNavigator } from 'react-navigation-tabs'
@@ -31,6 +32,7 @@ import {
   ProfilesScreen,
   PurchasingScreen,
   QueueScreen,
+  ScanQRCodeScreen,
   SearchScreen,
   SettingsScreen,
   SleepTimerScreen,
@@ -105,8 +107,7 @@ const PodcastsNavigator = createStackNavigator(
 const EpisodesNavigator = createStackNavigator(
   {
     [PV.RouteNames.EpisodesScreen]: EpisodesScreen,
-    [PV.RouteNames.EpisodeScreen]: EpisodeScreen,
-    [PV.RouteNames.EpisodePodcastScreen]: PodcastScreen
+    [PV.RouteNames.EpisodeScreen]: EpisodeScreen
   },
   {
     defaultNavigationOptions,
@@ -136,9 +137,7 @@ const ClipsNavigator = createStackNavigator(
 
 const SearchNavigator = createStackNavigator(
   {
-    [PV.RouteNames.SearchScreen]: { screen: SearchScreen, path: '' },
-    [PV.RouteNames.SearchPodcastScreen]: PodcastScreen,
-    [PV.RouteNames.SearchEpisodeScreen]: EpisodeScreen
+    [PV.RouteNames.SearchScreen]: { screen: SearchScreen, path: '' }
   },
   {
     defaultNavigationOptions
@@ -158,12 +157,16 @@ const MoreNavigator = createStackNavigator(
       screen: PlaylistsScreen,
       path: PV.DeepLinks.Playlists.path
     },
+    [PV.RouteNames.PlaylistsEpisodeScreen]: EpisodeScreen,
+    [PV.RouteNames.PlaylistsPodcastScreen]: PodcastScreen,
     [PV.RouteNames.EditPlaylistScreen]: EditPlaylistScreen,
     [PV.RouteNames.EditProfileScreen]: EditProfileScreen,
     [PV.RouteNames.ProfileScreen]: {
       screen: ProfileScreen,
       path: PV.DeepLinks.Profile.path
     },
+    [PV.RouteNames.ProfilesEpisodeScreen]: EpisodeScreen,
+    [PV.RouteNames.ProfilesPodcastScreen]: PodcastScreen,
     [PV.RouteNames.ProfilesScreen]: {
       screen: ProfilesScreen,
       path: PV.DeepLinks.Profiles.path
@@ -228,18 +231,24 @@ const QueueNavigator = createStackNavigator(
   }
 )
 
-const TabNavigator = createBottomTabNavigator(
-  {
-    Podcasts: { screen: PodcastsNavigator, path: '' },
-    Episodes: EpisodesNavigator,
-    Clips: ClipsNavigator,
-    Queue: { screen: QueueNavigator, path: '' },
-    More: { screen: MoreNavigator, path: PV.DeepLinks.Search.path }
-  },
-  {
-    tabBarComponent: (props: any) => <PVTabBar {...props} />
-  }
-)
+const allTabs = {
+  Podcasts: { screen: PodcastsNavigator, path: '' },
+  Episodes: EpisodesNavigator,
+  Queue: { screen: QueueNavigator, path: '' },
+  Clips: ClipsNavigator,
+  More: { screen: MoreNavigator, path: PV.DeepLinks.Search.path }
+}
+
+const tabsList = Config.NAV_STACK_TABS.split(',')
+
+const tabs = {}
+tabsList.forEach((tabName: string) => {
+  tabs[tabName] = allTabs[tabName]
+})
+
+const TabNavigator = createBottomTabNavigator(tabs, {
+  tabBarComponent: (props: any) => <PVTabBar {...props} />
+})
 
 const PlayerNavigator = createStackNavigator(
   {
@@ -247,7 +256,7 @@ const PlayerNavigator = createStackNavigator(
       screen: PlayerScreen,
       path: PV.DeepLinks.Clip.path
     },
-    [PV.RouteNames.MakeClipScreen]: MakeClipScreen,
+    [PV.RouteNames.MakeClipScreen]: { screen: MakeClipScreen, navigationOptions: { gesturesEnabled: false } },
     [PV.RouteNames.QueueScreen]: QueueScreen,
     [PV.RouteNames.PlayerFAQScreen]: FAQScreen,
     [PV.RouteNames.PlayerMyProfileScreen]: ProfileScreen,
@@ -315,6 +324,17 @@ const AddPodcastByRSSURLNavigator = createStackNavigator(
   }
 )
 
+const ScanQRCodeScreenNavigator = createStackNavigator(
+  {
+    [PV.RouteNames.ScanQRCodeScreen]: {
+      screen: ScanQRCodeScreen
+    }
+  },
+  {
+    defaultNavigationOptions
+  }
+)
+
 const MainApp = createStackNavigator(
   {
     [PV.RouteNames.TabNavigator]: { screen: TabNavigator, path: '' },
@@ -326,6 +346,7 @@ const MainApp = createStackNavigator(
     WebPageNavigator,
     EmailVerificationNavigator,
     PurchasingNavigator,
+    ScanQRCodeScreenNavigator,
     [PV.RouteNames.AddPodcastByRSSScreen]: {
       screen: AddPodcastByRSSURLNavigator,
       path: ''

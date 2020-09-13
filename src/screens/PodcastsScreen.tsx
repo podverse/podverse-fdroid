@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
-import { Alert, AppState, Linking, Platform, StyleSheet } from 'react-native'
+import { Alert, AppState, Linking, Platform, StyleSheet, View as RNView } from 'react-native'
+import Config from 'react-native-config'
 import Dialog from 'react-native-dialog'
 import React from 'reactn'
 import {
@@ -16,10 +17,12 @@ import {
   View
 } from '../components'
 import { getDownloadedPodcasts } from '../lib/downloadedPodcast'
+import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import { isOdd, setCategoryQueryProperty, testProps } from '../lib/utility'
+import { getAppUserAgent, isOdd, setAppUserAgent, setCategoryQueryProperty, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisode } from '../services/episode'
+import { getAddByRSSPodcastsLocally } from '../services/parser'
 import {
   checkIdlePlayerState,
   getNowPlayingItemFromQueueOrHistoryByTrackId,
@@ -37,6 +40,7 @@ import {
   updatePlayerState
 } from '../state/actions/player'
 import { getSubscribedPodcasts, removeAddByRSSPodcast, toggleSubscribeToPodcast } from '../state/actions/podcast'
+import { initializeSettings } from '../state/actions/settings'
 import { core, darkTheme } from '../styles'
 
 type Props = {
@@ -66,8 +70,10 @@ type State = {
 let isInitialLoad = true
 
 export class PodcastsScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Podcasts'
+  static navigationOptions = () => {
+    return {
+      title: translate('Podcasts')
+    }
   }
 
   constructor(props: Props) {
@@ -95,7 +101,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   async componentDidMount() {
     Linking.addEventListener('url', this._handleOpenURLEvent)
-
     AppState.addEventListener('change', this._handleAppStateChange)
 
     try {
@@ -104,6 +109,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         await AsyncStorage.setItem(PV.Keys.APP_HAS_LAUNCHED, 'true')
         await AsyncStorage.setItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END, 'TRUE')
         await AsyncStorage.setItem(PV.Keys.DOWNLOADED_EPISODE_LIMIT_GLOBAL_COUNT, '5')
+        await AsyncStorage.setItem(PV.Keys.CENSOR_NSFW_TEXT, 'TRUE')
         await AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, '2.5')
         this.setState({ showDataSettingsConfirmDialog: true })
       } else {
@@ -218,9 +224,12 @@ export class PodcastsScreen extends React.Component<Props, State> {
           const episode = await getEpisode(id)
           if (episode) {
             const podcast = await getPodcast(episode.podcast.id)
-            await navigate(PV.RouteNames.PodcastScreen, {
+            navigate(PV.RouteNames.PodcastScreen, {
               podcast,
               navToEpisodeWithId: id
+            })
+            navigate(PV.RouteNames.EpisodeScreen, {
+              episode
             })
           }
         } else if (path === PV.DeepLinks.Playlist.pathPrefix) {
@@ -232,7 +241,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
           await navigate(PV.RouteNames.MoreScreen)
           await navigate(PV.RouteNames.PlaylistsScreen)
         } else if (path === PV.DeepLinks.Podcast.pathPrefix) {
-          await navigate(PV.RouteNames.PodcastScreen, { podcastId: id })
+          await navigate(PV.RouteNames.PodcastScreen, {
+            podcastId: id
+          })
         } else if (path === PV.DeepLinks.Podcasts.path) {
           await navigate(PV.RouteNames.PodcastsScreen)
         } else if (path === PV.DeepLinks.Profile.pathPrefix) {
@@ -256,6 +267,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _initializeScreenData = async () => {
     await initPlayerState(this.global)
+    await initializeSettings()
+
+    // Set the appUserAgent one time on initialization, then retrieve from a constant
+    // using the getAppUserAgent method, or from the global state (for synchronous access).
+    await setAppUserAgent()
+    const userAgent = await getAppUserAgent()
+    this.setGlobal({ userAgent })
 
     try {
       await getAuthUserInfo()
@@ -264,11 +282,21 @@ export class PodcastsScreen extends React.Component<Props, State> {
       // If getAuthUserInfo fails, continue with the networkless version of the app
     }
 
-    const { subscribedPodcastIds } = this.global.session.userInfo
-    if (subscribedPodcastIds && subscribedPodcastIds.length > 0) {
+    const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
+    const { addByRSSPodcastFeedUrls, subscribedPodcastIds } = this.global.session.userInfo
+
+    /*
+     * If any podcasts are saved in local storage, or in the auth user object,
+     * then default to the Subscribed filter, else fallback to the All Podcasts filter.
+     */
+    if (
+      (subscribedPodcastIds && subscribedPodcastIds.length > 0) ||
+      (addByRSSPodcasts && addByRSSPodcasts.length > 0) ||
+      (addByRSSPodcastFeedUrls && addByRSSPodcastFeedUrls.length > 0)
+    ) {
       this.selectLeftItem(PV.Filters._subscribedKey, PV.Filters._alphabeticalKey)
     } else {
-      this.selectLeftItem(PV.Filters._allPodcastsKey, PV.Filters._topPastDay)
+      this.selectLeftItem(Config.DEFAULT_QUERY_PODCASTS_SCREEN, PV.Filters._topPastWeek)
     }
 
     await initDownloads()
@@ -287,7 +315,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const { querySort } = this.state
     let sort =
       !querySort || querySort === PV.Filters._alphabeticalKey || querySort === PV.Filters._mostRecentKey
-        ? PV.Filters._topPastDay
+        ? PV.Filters._topPastWeek
         : querySort
 
     if (querySortOverride) {
@@ -418,9 +446,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _renderPodcastItem = ({ item, index }) => {
-    const { downloadedPodcastEpisodeCounts } = this.global
-    const episodeCount = downloadedPodcastEpisodeCounts[item.id]
-
     return (
       <PodcastTableCell
         hasZebraStripe={isOdd(index)}
@@ -429,7 +454,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
         onPress={() =>
           this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
             podcast: item,
-            episodeCount,
             addByRSSPodcastFeedUrl: item.addByRSSPodcastFeedUrl
           })
         }
@@ -444,7 +468,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _renderHiddenItem = ({ item }, rowMap) => {
     const { queryFrom } = this.state
-    const buttonText = queryFrom === PV.Filters._downloadedKey ? 'Delete' : 'Unsubscribe'
+    const buttonText = queryFrom === PV.Filters._downloadedKey ? translate('Delete') : translate('Unsubscribe')
 
     return (
       <SwipeRowBack
@@ -460,7 +484,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     let wasAlerted = false
     if (queryFrom === PV.Filters._subscribedKey) {
-      wasAlerted = await alertIfNoNetworkConnection('unsubscribe from podcast')
+      wasAlerted = await alertIfNoNetworkConnection(translate('unsubscribe from podcast'))
     }
 
     if (wasAlerted) return
@@ -559,6 +583,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
       showDataSettingsConfirmDialog,
       showNoInternetConnectionMessage
     } = this.state
+    const { offlineModeEnabled } = this.global
+    const { subscribedPodcastIds } = this.global.session.userInfo
 
     let flatListData = []
     let flatListDataTotalCount = null
@@ -573,62 +599,72 @@ export class PodcastsScreen extends React.Component<Props, State> {
       flatListDataTotalCount = this.state.flatListDataTotalCount
     }
 
+    const noSubscribedPodcasts =
+      queryFrom === PV.Filters._subscribedKey && (!subscribedPodcastIds || subscribedPodcastIds.length === 0)
+
+    const showOfflineMessage =
+      offlineModeEnabled && queryFrom !== PV.Filters._downloadedKey && queryFrom !== PV.Filters._subscribedKey
+
     return (
       <View style={styles.view} {...testProps('podcasts_screen_view')}>
-        <PlayerEvents />
-        <TableSectionSelectors
-          handleSelectLeftItem={(selectedKey: string) => this.selectLeftItem(selectedKey)}
-          handleSelectRightItem={(selectedKey: string) => this.selectRightItem(selectedKey)}
-          hidePickers={isInitialLoad}
-          selectedLeftItemKey={queryFrom}
-          selectedRightItemKey={querySort}
-          screenName='PodcastsScreen'
-        />
-        {queryFrom === PV.Filters._categoryKey && (
+        <RNView style={{ flex: 1 }}>
+          <PlayerEvents />
           <TableSectionSelectors
-            handleSelectLeftItem={(x: string) => this._selectCategory(x)}
-            handleSelectRightItem={(x: string) => this._selectCategory(x, true)}
-            selectedLeftItemKey={selectedCategory}
-            selectedRightItemKey={selectedSubCategory}
-            isBottomBar={true}
-            isCategories={true}
+            handleSelectLeftItem={(selectedKey: string) => this.selectLeftItem(selectedKey)}
+            handleSelectRightItem={(selectedKey: string) => this.selectRightItem(selectedKey)}
+            hidePickers={isInitialLoad}
+            selectedLeftItemKey={queryFrom}
+            selectedRightItemKey={querySort}
             screenName='PodcastsScreen'
           />
-        )}
-        {isLoading && <ActivityIndicator />}
-        {!isLoading && queryFrom && (
-          <FlatList
-            data={flatListData}
-            dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe={queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey}
-            extraData={flatListData}
-            handleSearchNavigation={this._handleSearchNavigation}
-            keyExtractor={(item: any) => item.id}
-            isLoadingMore={isLoadingMore}
-            isRefreshing={isRefreshing}
-            ItemSeparatorComponent={this._ItemSeparatorComponent}
-            ListHeaderComponent={
-              queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey
-                ? this._ListHeaderComponent
-                : null
-            }
-            noSubscribedPodcasts={
-              queryFrom === PV.Filters._subscribedKey && (!flatListData || flatListData.length === 0)
-            }
-            onEndReached={this._onEndReached}
-            onRefresh={queryFrom === PV.Filters._subscribedKey ? this._onRefresh : null}
-            renderHiddenItem={this._renderHiddenItem}
-            renderItem={this._renderPodcastItem}
-            resultsText='podcasts'
-            showNoInternetConnectionMessage={showNoInternetConnectionMessage}
-          />
-        )}
+          {queryFrom === PV.Filters._categoryKey && (
+            <TableSectionSelectors
+              handleSelectLeftItem={(x: string) => this._selectCategory(x)}
+              handleSelectRightItem={(x: string) => this._selectCategory(x, true)}
+              selectedLeftItemKey={selectedCategory}
+              selectedRightItemKey={selectedSubCategory}
+              isBottomBar={true}
+              isCategories={true}
+              screenName='PodcastsScreen'
+            />
+          )}
+          {isLoading && <ActivityIndicator />}
+          {!isLoading && queryFrom && (
+            <FlatList
+              data={flatListData}
+              dataTotalCount={flatListDataTotalCount}
+              disableLeftSwipe={queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey}
+              extraData={flatListData}
+              handleNoResultsTopAction={this._handleSearchNavigation}
+              keyExtractor={(item: any) => item.id}
+              isLoadingMore={isLoadingMore}
+              isRefreshing={isRefreshing}
+              ItemSeparatorComponent={this._ItemSeparatorComponent}
+              ListHeaderComponent={
+                queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey
+                  ? this._ListHeaderComponent
+                  : null
+              }
+              noResultsTopActionText={noSubscribedPodcasts ? translate('Search') : ''}
+              noResultsMessage={
+                noSubscribedPodcasts
+                  ? translate('You are not subscribed to any podcasts')
+                  : translate('No podcasts found')
+              }
+              onEndReached={this._onEndReached}
+              onRefresh={queryFrom === PV.Filters._subscribedKey ? this._onRefresh : null}
+              renderHiddenItem={this._renderHiddenItem}
+              renderItem={this._renderPodcastItem}
+              showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
+            />
+          )}
+        </RNView>
         <Dialog.Container visible={showDataSettingsConfirmDialog}>
           <Dialog.Title>Data Settings</Dialog.Title>
           <Dialog.Description>Do you want to allow downloading episodes with your data plan?</Dialog.Description>
-          <Dialog.Button label='No, Wifi Only' onPress={this._handleDataSettingsWifiOnly} />
+          <Dialog.Button label={translate('No Wifi Only')} onPress={this._handleDataSettingsWifiOnly} />
           <Dialog.Button
-            label='Yes, Allow Data'
+            label={translate('Yes Allow Data')}
             onPress={this._handleDataSettingsAllowData}
             {...testProps('alert_yes_allow_data')}
           />
@@ -698,6 +734,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       const { nsfwMode } = settings
 
       const hasInternetConnection = await hasValidNetworkConnection()
+
       if (filterKey === PV.Filters._subscribedKey) {
         await getAuthUserInfo() // get the latest subscribedPodcastIds first
         await this._querySubscribedPodcasts()
