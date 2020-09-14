@@ -33,6 +33,7 @@ Builds:
     versionCode: 1
     commit: '43e01b51b61a92fc68178911ae86794299134a25'
     subdir: android/app
+    submodules: true
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y -t stretch-backports npm
