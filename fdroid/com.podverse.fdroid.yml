@@ -40,7 +40,7 @@ Builds:
     init:
       - npm install
       - npm install --save-dev jetifier
-      - ./node_modules/.bin/jetify
+      - ../../node_modules/.bin/jetify
     gradle:
       - yes
     prebuild:
