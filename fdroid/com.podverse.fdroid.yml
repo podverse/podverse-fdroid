@@ -51,8 +51,15 @@ Builds:
       - node_modules/node-notifier
       - node_modules/react-native/template/android/build.gradle
       - node_modules/react-native-camera/android/build.gradle
+      - node_modules/react-native-device-info/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/async-storage/packages/storage-legacy/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativecommunity/asyncstorage/*.class
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
 
     scandelete:
       - node_modules/react-native-background-fetch/ios/
