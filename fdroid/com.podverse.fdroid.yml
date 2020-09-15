@@ -39,7 +39,7 @@ Builds:
       - apt-get install -y -t stretch-backports npm
     init:
       - npm install
-      - npm install --save-dev jetifier
+      - npm install --save-dev jetifier note-pre-gyp
       - npm rebuild node-sass
       - ../../node_modules/.bin/jetify
     gradle:
