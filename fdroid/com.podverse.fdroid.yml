@@ -1,12 +1,13 @@
 Categories:
   - Multimedia
 License: AGPL-3.0-or-later
+WebSite: https://podverse.fm
 SourceCode: https://github.com/podverse/podverse-fdroid
 IssueTracker: https://github.com/podverse/podverse-fdroid/issues
 
-Summary: Podcast manager with cross-platform syncing
+Summary: Podcast manager with clips, playlists, and cross-platform syncing
 Description: |-
-  Podverse is the ultimate open source podcast manager for iOS and web.
+  Podverse is the ultimate open source podcast manager for Android, iOS and web!
 
   Free features:
   * Subscribe to podcasts
