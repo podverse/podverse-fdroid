@@ -40,6 +40,7 @@ Builds:
     init:
       - npm install
       - npm install --save-dev jetifier
+      - npm rebuild node-sass
       - ../../node_modules/.bin/jetify
     gradle:
       - yes
