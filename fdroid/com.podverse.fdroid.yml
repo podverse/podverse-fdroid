@@ -34,6 +34,8 @@ Builds:
     versionCode: 1
     commit: 'c1fdbb10059802b5c4ee96dd4b21dcfa6880c704'
     subdir: android/app
+    gradle:
+      - yes
     sudo:
       - apt-get update || apt-get update
       - apt-get install -y -t stretch-backports npm
@@ -41,8 +43,6 @@ Builds:
       - npm install
       - npm install --save-dev jetifier
       - npm run jetify
-    gradle:
-      - yes
     prebuild:
       - truncate -s 0 ../../node_modules/react-native/node_modules/@react-native-community/cli/build/commands/server/external/xsel
     scanignore:
