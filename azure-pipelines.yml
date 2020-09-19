@@ -81,6 +81,6 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'android/app/build/outputs/apk/release'
+    PathtoPublish: '$(Agent.BuildDirectory)/android/app/build/outputs/apk/release'
     ArtifactName: 'drop'
     publishLocation: 'Container'
