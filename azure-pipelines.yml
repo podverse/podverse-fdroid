@@ -14,7 +14,14 @@ steps:
 - task: CmdLine@2
   displayName: Install Dependencies
   inputs:
+    workingDirectory: $(Agent.BuildDirectory)
     script: 'pwd'
+
+- task: CmdLine@2
+  displayName: Install Dependencies
+  inputs:
+    script: 'pwd'
+
 
 # - task: CmdLine@2
 #   displayName: Install GitPython Dependency
