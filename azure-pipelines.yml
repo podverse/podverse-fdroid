@@ -80,12 +80,6 @@ steps:
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
-  displayName: Where is it - Agent.BuildDriectory
-  inputs:
-    script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)
-
-- task: CmdLine@2
   displayName: Where is it - Agent.BuildDirectory fdroiddata
   inputs:
     script: 'pwd'
@@ -95,40 +89,22 @@ steps:
   displayName: Where is it - Agent.BuildDirectory build
   inputs:
     script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)/build
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata/build
 
 - task: CmdLine@2
   displayName: Where is it - Agent.BuildDirectory build com podverse fdroid
   inputs:
     script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)/build/com.podverse.fdroid/
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/
 
 - task: CmdLine@2
   displayName: Where is it - Agent.BuildDirectory build com podverse fdroid android
   inputs:
     script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)/build/com.podverse.fdroid/android
-
-- task: CmdLine@2
-  displayName: Where is it - fdroidserver 1
-  inputs:
-    script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)/fdroidserver
-
-- task: CmdLine@2
-  displayName: Where is it - fdroidserver 2
-  inputs:
-    script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)/fdroidserver/fdroid
-
-- task: CmdLine@2
-  displayName: Where is it - fdroidserver 3
-  inputs:
-    script: 'pwd'
-    workingDirectory: $(Agent.BuildDirectory)/fdroidserver/fdroid/android
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'build/com.podverse.fdroid/android/app/build/outputs/apk/release'
+    PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release'
     ArtifactName: 'drop'
     publishLocation: 'Container'
