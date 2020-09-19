@@ -78,3 +78,9 @@ steps:
   inputs:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'android/app/build/output/apk/release'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
