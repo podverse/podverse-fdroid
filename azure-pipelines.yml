@@ -109,6 +109,24 @@ steps:
     script: 'pwd'
     workingDirectory: $(Agent.BuildDirectory)/build/com.podverse.fdroid/android
 
+- task: CmdLine@2
+  displayName: Where is it - fdroidserver 1
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)/fdroidserver
+
+- task: CmdLine@2
+  displayName: Where is it - fdroidserver 2
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)/fdroidserver/fdroid
+
+- task: CmdLine@2
+  displayName: Where is it - fdroidserver 3
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)/fdroidserver/fdroid/android
+
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: 'build/com.podverse.fdroid/android/app/build/outputs/apk/release'
