@@ -10,7 +10,7 @@ Repo: https://github.com/podverse/podverse-fdroid
 Builds:
   - versionName: 2.9.2
     versionCode: 1
-    commit: 'c1fdbb10059802b5c4ee96dd4b21dcfa6880c704'
+    commit: '4681d56d7b4f0546868d3dce5d66fcfda32b002d'
     subdir: android/app
     gradle:
       - yes
