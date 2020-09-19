@@ -81,6 +81,6 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid'
+    PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/'
     ArtifactName: 'drop'
     publishLocation: 'Container'
