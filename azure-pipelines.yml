@@ -11,20 +11,20 @@ pool:
 
 steps:
 
-# - task: CmdLine@2
-#   displayName: Install Dependencies
-#   inputs:
-#     script: 'yarn install'
+- task: CmdLine@2
+  displayName: Install Dependencies
+  inputs:
+    script: 'yarn install'
 
-# - task: CmdLine@2
-#   displayName: Install GitPython Dependency
-#   inputs:
-#     script: 'python3 -m pip install GitPython'
+- task: CmdLine@2
+  displayName: Install GitPython Dependency
+  inputs:
+    script: 'python3 -m pip install GitPython'
 
-# - task: CmdLine@2
-#   displayName: Install GitPython Dependency
-#   inputs:
-#     script: 'python3 -m pip install ruamel_yaml'
+- task: CmdLine@2
+  displayName: Install GitPython Dependency
+  inputs:
+    script: 'python3 -m pip install ruamel_yaml'
 
 - task: CmdLine@2
   displayName: Clone frdoiddata
@@ -73,20 +73,44 @@ steps:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid lint com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-# - task: CmdLine@2
-#   displayName: Build fdroid podverse
-#   inputs:
-#     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
-#     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+- task: CmdLine@2
+  displayName: Build fdroid podverse
+  inputs:
+    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
-  displayName: Where is it
+  displayName: Where is it - Agent.BuildDriectory
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)
+
+- task: CmdLine@2
+  displayName: Where is it - Agent.BuildDirectory fdroiddata
   inputs:
     script: 'pwd'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
+- task: CmdLine@2
+  displayName: Where is it - Agent.BuildDirectory build
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)/build
+
+- task: CmdLine@2
+  displayName: Where is it - Agent.BuildDirectory build com podverse fdroid
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)/build/com.podverse.fdroid/
+
+- task: CmdLine@2
+  displayName: Where is it - Agent.BuildDirectory build com podverse fdroid android
+  inputs:
+    script: 'pwd'
+    workingDirectory: $(Agent.BuildDirectory)/build/com.podverse.fdroid/android
+
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'android/app/build/outputs/apk/release'
+    PathtoPublish: 'build/com.podverse.fdroid/android/app/build/outputs/apk/release'
     ArtifactName: 'drop'
     publishLocation: 'Container'
