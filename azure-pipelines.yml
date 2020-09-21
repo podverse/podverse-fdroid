@@ -68,6 +68,8 @@ steps:
       '$(Agent.BuildDirectory)/fdroidserver/fdroid rewritemeta com.podverse.fdroid'
       echo hello0
       pwd
+      echo hello123
+      ls
       echo hello1
       ls $(Agent.BuildDirectory)
       echo hello2
