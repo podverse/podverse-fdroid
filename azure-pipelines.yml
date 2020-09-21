@@ -71,7 +71,7 @@ steps:
   displayName: Remove EXIF metadata from all images
   inputs:
     script: |
-      apt install libimage-exiftool-perl
+      sudo apt install libimage-exiftool-perl
       exiftool -all= -overwrite_original -r ./android
       exiftool -all= -overwrite_original -r ./fastlane
       exiftool -all= -overwrite_original -r ./src
