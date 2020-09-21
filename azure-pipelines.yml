@@ -64,18 +64,7 @@ steps:
 - task: CmdLine@2
   displayName: Rewrite Metadata
   inputs:
-    script: |
-      '$(Agent.BuildDirectory)/fdroidserver/fdroid rewritemeta com.podverse.fdroid'
-      echo hello0
-      pwd
-      echo hello123
-      ls
-      echo hello1
-      ls $(Agent.BuildDirectory)
-      echo hello2
-      ls $(Agent.BuildDirectory)/fdroidserver
-      echo hello3
-      ls $(Agent.BuildDirectory)/fdroiddata/fdroid
+    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid rewritemeta com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
