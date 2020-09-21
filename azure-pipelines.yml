@@ -73,33 +73,33 @@ steps:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid lint com.podverse.fdroid'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-# - task: CmdLine@2
-#   displayName: Build fdroid podverse
-#   inputs:
-#     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
-#     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+- task: CmdLine@2
+  displayName: Build fdroid podverse
+  inputs:
+    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-# - task: AndroidSigning@3
-#   env:
-#     APK_SIGNER_KEYSTORE_PASSWORD: $(APK_SIGNER_KEYSTORE_PASSWORD)
-#     APK_SIGNER_KEYSTORE_ALIAS: $(APK_SIGNER_KEYSTORE_ALIAS)
-#     APK_SIGNER_KEY_PASSWORD: $(APK_SIGNER_KEY_PASSWORD)
-#   inputs:
-#     apkFiles: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/app-release-unsigned.apk'
-#     apksign: true
-#     apksignerKeystoreFile: 'podverse-fdroid.keystore'
-#     apksignerKeystorePassword: $(APK_SIGNER_KEYSTORE_PASSWORD)
-#     apksignerKeystoreAlias: $(APK_SIGNER_KEYSTORE_ALIAS)
-#     apksignerKeyPassword: $(APK_SIGNER_KEY_PASSWORD)
-#     apksignerArguments: --out $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/podverse-fdroid.signed.release.apk
-#     zipalign: true
+- task: AndroidSigning@3
+  env:
+    APK_SIGNER_KEYSTORE_PASSWORD: $(APK_SIGNER_KEYSTORE_PASSWORD)
+    APK_SIGNER_KEYSTORE_ALIAS: $(APK_SIGNER_KEYSTORE_ALIAS)
+    APK_SIGNER_KEY_PASSWORD: $(APK_SIGNER_KEY_PASSWORD)
+  inputs:
+    apkFiles: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/app-release-unsigned.apk'
+    apksign: true
+    apksignerKeystoreFile: 'podverse-fdroid.keystore'
+    apksignerKeystorePassword: $(APK_SIGNER_KEYSTORE_PASSWORD)
+    apksignerKeystoreAlias: $(APK_SIGNER_KEYSTORE_ALIAS)
+    apksignerKeyPassword: $(APK_SIGNER_KEY_PASSWORD)
+    apksignerArguments: --out $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/podverse-fdroid.signed.release.apk
+    zipalign: true
 
-# - task: PublishBuildArtifacts@1
-#   displayName: Publish build artifact
-#   inputs:
-#     PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release'
-#     ArtifactName: 'app_build'
-#     publishLocation: 'Container'
+- task: PublishBuildArtifacts@1
+  displayName: Publish build artifact
+  inputs:
+    PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release'
+    ArtifactName: 'app_build'
+    publishLocation: 'Container'
 
 - task: PublishBuildArtifacts@1
   displayName: Publish metadata artifact
