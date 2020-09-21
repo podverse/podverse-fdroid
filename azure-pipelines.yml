@@ -11,91 +11,100 @@ pool:
 
 steps:
 
-- task: CmdLine@2
-  displayName: Install Dependencies
-  inputs:
-    script: 'yarn install'
+# - task: CmdLine@2
+#   displayName: Install Dependencies
+#   inputs:
+#     script: 'yarn install'
+
+# - task: CmdLine@2
+#   displayName: Install GitPython Dependency
+#   inputs:
+#     script: 'python3 -m pip install GitPython'
+
+# - task: CmdLine@2
+#   displayName: Install GitPython Dependency
+#   inputs:
+#     script: 'python3 -m pip install ruamel_yaml'
+
+# - task: CmdLine@2
+#   displayName: Clone frdoiddata
+#   inputs:
+#     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
+#     workingDirectory: $(Agent.BuildDirectory)
+
+# - task: CmdLine@2
+#   displayName: Clone fdroidserver
+#   inputs:
+#     script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
+#     workingDirectory: $(Agent.BuildDirectory)
+
+# - task: CmdLine@2
+#   displayName: Copy podverse yml to metadata
+#   inputs:
+#     script: 'cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml fdroiddata/metadata'
+#     workingDirectory: $(Agent.BuildDirectory)
+
+# - task: CmdLine@2
+#   displayName: Log podverse frdoid yml 
+#   inputs:
+#     script: 'cat fdroid/com.podverse.fdroid.yml'
+
+# - task: CmdLine@2
+#   displayName: Log fdroiddata metadata podverse yml
+#   inputs:
+#     script: 'cat fdroiddata/metadata/com.podverse.fdroid.yml'
+#     workingDirectory: $(Agent.BuildDirectory)
+
+# - task: CmdLine@2
+#   displayName: Read Metadata
+#   inputs:
+#     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
+#     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+
+# - task: CmdLine@2
+#   displayName: Rewrite Metadata
+#   inputs:
+#     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid rewritemeta com.podverse.fdroid'
+#     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
-  displayName: Install GitPython Dependency
+  displayName: Remove EXIF metadata from all images
   inputs:
-    script: 'python3 -m pip install GitPython'
+    script: |
+      apt install libimage-exiftool-perl
+      exiftool -all= -overwrite_original -r ./android
+      exiftool -all= -overwrite_original -r ./fastlane
+      exiftool -all= -overwrite_original -r ./src
 
-- task: CmdLine@2
-  displayName: Install GitPython Dependency
-  inputs:
-    script: 'python3 -m pip install ruamel_yaml'
+# - task: CmdLine@2
+#   displayName: Lint podverse fdroid config file
+#   inputs:
+#     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid lint com.podverse.fdroid'
+#     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-- task: CmdLine@2
-  displayName: Clone frdoiddata
-  inputs:
-    script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
-    workingDirectory: $(Agent.BuildDirectory)
+# - task: CmdLine@2
+#   displayName: Build fdroid podverse
+#   inputs:
+#     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
+#     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
-- task: CmdLine@2
-  displayName: Clone fdroidserver
-  inputs:
-    script: 'git clone https://gitlab.com/fdroid/fdroidserver.git'
-    workingDirectory: $(Agent.BuildDirectory)
+# - task: AndroidSigning@3
+#   env:
+#     APK_SIGNER_KEYSTORE_PASSWORD: $(APK_SIGNER_KEYSTORE_PASSWORD)
+#     APK_SIGNER_KEYSTORE_ALIAS: $(APK_SIGNER_KEYSTORE_ALIAS)
+#     APK_SIGNER_KEY_PASSWORD: $(APK_SIGNER_KEY_PASSWORD)
+#   inputs:
+#     apkFiles: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/*.apk'
+#     apksign: true
+#     apksignerKeystoreFile: 'podverse-fdroid.keystore'
+#     apksignerKeystorePassword: $(APK_SIGNER_KEYSTORE_PASSWORD)
+#     apksignerKeystoreAlias: $(APK_SIGNER_KEYSTORE_ALIAS)
+#     apksignerKeyPassword: $(APK_SIGNER_KEY_PASSWORD)
+#     apksignerArguments: --out $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/podverse-fdroid.signed.release.apk
+#     zipalign: true
 
-- task: CmdLine@2
-  displayName: Copy podverse yml to metadata
-  inputs:
-    script: 'cp $(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml fdroiddata/metadata'
-    workingDirectory: $(Agent.BuildDirectory)
-
-- task: CmdLine@2
-  displayName: Log podverse frdoid yml 
-  inputs:
-    script: 'cat fdroid/com.podverse.fdroid.yml'
-
-- task: CmdLine@2
-  displayName: Log fdroiddata metadata podverse yml
-  inputs:
-    script: 'cat fdroiddata/metadata/com.podverse.fdroid.yml'
-    workingDirectory: $(Agent.BuildDirectory)
-
-- task: CmdLine@2
-  displayName: Read Metadata
-  inputs:
-    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
-    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
-
-- task: CmdLine@2
-  displayName: Rewrite Metadata
-  inputs:
-    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid rewritemeta com.podverse.fdroid'
-    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
-
-- task: CmdLine@2
-  displayName: Lint podverse fdroid config file
-  inputs:
-    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid lint com.podverse.fdroid'
-    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
-
-- task: CmdLine@2
-  displayName: Build fdroid podverse
-  inputs:
-    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid build -v -l com.podverse.fdroid'
-    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
-
-- task: AndroidSigning@3
-  env:
-    APK_SIGNER_KEYSTORE_PASSWORD: $(APK_SIGNER_KEYSTORE_PASSWORD)
-    APK_SIGNER_KEYSTORE_ALIAS: $(APK_SIGNER_KEYSTORE_ALIAS)
-    APK_SIGNER_KEY_PASSWORD: $(APK_SIGNER_KEY_PASSWORD)
-  inputs:
-    apkFiles: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/app-release-unsigned.apk'
-    apksign: true
-    apksignerKeystoreFile: 'podverse-fdroid.keystore'
-    apksignerKeystorePassword: $(APK_SIGNER_KEYSTORE_PASSWORD)
-    apksignerKeystoreAlias: $(APK_SIGNER_KEYSTORE_ALIAS)
-    apksignerKeyPassword: $(APK_SIGNER_KEY_PASSWORD)
-    apksignerArguments: --out $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/podverse-fdroid.signed.release.apk
-    zipalign: true
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+# - task: PublishBuildArtifacts@1
+#   inputs:
+#     PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release'
+#     ArtifactName: 'drop'
+#     publishLocation: 'Container'
