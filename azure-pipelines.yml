@@ -85,7 +85,7 @@ steps:
     APK_SIGNER_KEYSTORE_ALIAS: $(APK_SIGNER_KEYSTORE_ALIAS)
     APK_SIGNER_KEY_PASSWORD: $(APK_SIGNER_KEY_PASSWORD)
   inputs:
-    apkFiles: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/*.apk'
+    apkFiles: '$(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release/app-release-unsigned.apk'
     apksign: true
     apksignerKeystoreFile: 'podverse-fdroid.keystore'
     apksignerKeystorePassword: $(APK_SIGNER_KEYSTORE_PASSWORD)
