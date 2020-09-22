@@ -1,0 +1,67 @@
+Categories:
+  - Multimedia
+License: AGPL-3.0-or-later
+SourceCode: https://github.com/podverse/podverse-fdroid
+IssueTracker: https://github.com/podverse/podverse-fdroid/issues
+
+Summary: Podcast manager with cross-platform syncing
+Description: |-
+  Podverse is an open source podcast manager for Android, iOS, and web
+  with cross-platform syncing, clip and playlist sharing, an intuitive interface,
+  and more!
+
+  All Podverse software is FOSS, but features that require updating our servers
+  are available only with a Premium membership ($10 annually).
+  Sign up today and get 1 year of Podverse premium for free.
+
+  Free features:
+  * Subscribe to podcasts
+  * Play clips and episodes
+  * Auto-download episodes
+  * Drag-and-drop queue
+  * Add podcasts by RSS
+  * Sleep timer
+  * Light / Dark mode
+
+  Premium features:
+  * Create and share podcast highlights
+  * Switch devices and play from where you left off
+  * Sync your subscriptions across devices
+  * Sync your "added by RSS" podcasts across devices
+  * Sync your queue across devices
+  * Create and share playlists
+  * Subscribe to playlists
+  * Share your user profile
+  * Subscribe to user profiles
+
+  Our mission is to support the original independent spirit of podcasting
+  by any means necessary. We would love to collaborate with all podcast apps
+  (especially open source ones) to make our technologies as cross-compatible,
+  convenient, and empowering for people as possible.
+
+  If you may be interested in collaborating or have any questions,
+  please email contact@podverse.fm(opens in new tab),
+  or reach us through one of our social media channels:
+  [https://github.com/podverse Github]
+  [https://reddit.com/u/podverse Reddit]
+  [https://twitter.com/podverse Twitter]
+  [https://facebook.com/podverse Facebook]
+  [https://linkedin.com/podverse LinkedIn]
+
+  Thank you!
+
+RepoType: git
+Repo: https://github.com/podverse/podverse-fdroid
+
+Builds:
+  - versionName: 2.6.8
+    versionCode: 1
+    commit: '9c88b5cc2a76dee690abffd804a0679c28ec8db2'
+    subdir: android/app
+    gradle:
+      - yes
+
+AutoUpdateMode: None
+UpdateCheckMode: Tags
+CurrentVersion: 2.6.8
+CurrentVersionCode: 1
