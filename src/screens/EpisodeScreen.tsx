@@ -49,11 +49,12 @@ type State = {
 }
 
 export class EpisodeScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
+  static navigationOptions = async ({ navigation }) => {
     const episodeId = navigation.getParam('episodeId')
     const episodeTitle = navigation.getParam('episodeTitle')
     const podcastTitle = navigation.getParam('podcastTitle')
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
+    const webUrls = await PV.URLs.web()
 
     return {
       title: translate('Episode'),
@@ -64,7 +65,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
               endingText={translate('shared using brandName')}
               episodeTitle={episodeTitle}
               podcastTitle={podcastTitle}
-              url={PV.URLs.episode + episodeId}
+              url={webUrls.episode + episodeId}
             />
           )}
           <NavSearchIcon navigation={navigation} />
