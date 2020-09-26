@@ -32,6 +32,11 @@ steps:
     script: 'python3 -m pip install Pillow'
 
 - task: CmdLine@2
+  displayName: Install paramiko Dependency
+  inputs:
+    script: 'python3 -m pip install paramiko'
+
+- task: CmdLine@2
   displayName: Clone frdoiddata
   inputs:
     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
@@ -63,7 +68,7 @@ steps:
 - task: CmdLine@2
   displayName: Read Metadata
   inputs:
-    script:  '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
+    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
