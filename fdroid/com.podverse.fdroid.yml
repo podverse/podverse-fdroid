@@ -11,7 +11,7 @@ Repo: https://github.com/podverse/podverse-fdroid
 Builds:
   - versionName: 2.9.3
     versionCode: 1
-    commit: 6990ac1df5fda2274918c5513ccb9d6bb349b7d9
+    commit: 76f9495fa93ba0ae49fc208997f942a3e42d4fc6
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
