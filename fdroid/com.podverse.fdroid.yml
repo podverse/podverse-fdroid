@@ -9,7 +9,7 @@ RepoType: git
 Repo: https://github.com/podverse/podverse-fdroid
 
 Builds:
-  - versionName: 2.9.2
+  - versionName: 2.9.3
     versionCode: 1
     commit: 6990ac1df5fda2274918c5513ccb9d6bb349b7d9
     subdir: android/app
@@ -28,9 +28,7 @@ Builds:
       - node_modules/jetifier/lib/*.jar
       - node_modules/jsc-android
       - node_modules/linkifyjs/dist/linkifyjs.zip
-      - node_modules/react-native/android/com/facebook/react/react-native/
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/react-native/template/android/build.gradle
+      - node_modules/react-native/
       - node_modules/react-native-background-fetch/android
       - node_modules/react-native-camera/android/build.gradle
       - node_modules/react-native-device-info/android/build.gradle
@@ -43,13 +41,11 @@ Builds:
       - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
-      - node_modules/@react-native-community/async-storage
-      - node_modules/@react-native-community/masked-view/android/build.gradle
-      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/@react-native-community/
     scandelete:
       - node_modules/react-native-background-fetch/ios/
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: 2.9.2
+CurrentVersion: 2.9.3
 CurrentVersionCode: 1
