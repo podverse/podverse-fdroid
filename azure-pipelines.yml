@@ -27,6 +27,11 @@ steps:
     script: 'python3 -m pip install ruamel_yaml'
 
 - task: CmdLine@2
+  displayName: Install Pillow Dependency
+  inputs:
+    script: 'python3 -m pip install Pillow'
+
+- task: CmdLine@2
   displayName: Clone frdoiddata
   inputs:
     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
@@ -58,9 +63,7 @@ steps:
 - task: CmdLine@2
   displayName: Read Metadata
   inputs:
-    script: |
-      pip install Pillow
-      '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
+    script:  '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
