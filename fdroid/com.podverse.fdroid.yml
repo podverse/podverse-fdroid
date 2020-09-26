@@ -46,7 +46,8 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
     scandelete:
-      - node_modules/react-native-background-fetch/ios/
+      - node_modules
+      
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
