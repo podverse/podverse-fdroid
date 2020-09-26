@@ -47,7 +47,6 @@ Builds:
       - node_modules/@react-native-community/netinfo/android/build.gradle
     scandelete:
       - node_modules
-      
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
