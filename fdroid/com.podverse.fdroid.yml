@@ -32,7 +32,6 @@ Builds:
       - node_modules/react-native/ReactAndroid/
       - node_modules/react-native/template/
       - node_modules/react-native-background-fetch/android
-      - node_modules/react-native-camera/android/build.gradle
       - node_modules/react-native-device-info/android/build.gradle
       - node_modules/react-native-gesture-handler/android/lib/build.gradle
       - node_modules/react-native-localize/android/build.gradle
