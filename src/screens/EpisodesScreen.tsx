@@ -57,8 +57,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
-
-    const { subscribedPodcastIds } = this.global.session.userInfo
+    const { subscribedPodcasts } = this.global
 
     this.state = {
       endOfResultsReached: false,
@@ -69,12 +68,12 @@ export class EpisodesScreen extends React.Component<Props, State> {
       isLoadingMore: false,
       isRefreshing: false,
       queryFrom:
-        subscribedPodcastIds && subscribedPodcastIds.length > 0
+        subscribedPodcasts && subscribedPodcasts.length > 0
           ? PV.Filters._subscribedKey
           : Config.DEFAULT_QUERY_EPISODES_SCREEN,
       queryPage: 1,
       querySort:
-        subscribedPodcastIds && subscribedPodcastIds.length > 0 ? PV.Filters._mostRecentKey : PV.Filters._topPastWeek,
+        subscribedPodcasts && subscribedPodcasts.length > 0 ? PV.Filters._mostRecentKey : PV.Filters._topPastWeek,
       searchBarText: '',
       selectedCategory: PV.Filters._allCategoriesKey,
       selectedSubCategory: PV.Filters._allCategoriesKey,
@@ -280,7 +279,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
         }
         podcastTitle={podcastTitle}
         pubDate={item.pubDate}
-        testId={'episodes_screen_episode_item_' + index}
+        testID={'episodes_screen_episode_item_' + index}
         title={title}
       />
     )
@@ -373,7 +372,8 @@ export class EpisodesScreen extends React.Component<Props, State> {
     const noSubscribedPodcasts =
       queryFrom === PV.Filters._subscribedKey &&
       (!subscribedPodcastIds || subscribedPodcastIds.length === 0) &&
-      !searchBarText
+      !searchBarText &&
+      (!flatListData || flatListData.length === 0)
 
     const showOfflineMessage = offlineModeEnabled && queryFrom !== PV.Filters._downloadedKey
 
@@ -492,9 +492,12 @@ export class EpisodesScreen extends React.Component<Props, State> {
           )
         }
 
-        const allEpisodes = await combineEpisodesWithAddByRSSEpisodesLocally(results)
+        const hasAddByRSSEpisodes = await hasAddByRSSEpisodesLocally()
+        if (querySort === PV.Filters._mostRecentKey && hasAddByRSSEpisodes) {
+          results = await combineEpisodesWithAddByRSSEpisodesLocally(results)
+        }
 
-        newState.flatListData = [...flatListData, ...allEpisodes]
+        newState.flatListData = [...flatListData, ...results[0]]
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
       } else if (filterKey === PV.Filters._downloadedKey) {
@@ -526,7 +529,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
           newState.flatListDataTotalCount = podcastResults[1]
         }
       } else if (PV.FilterOptions.screenFilters.EpisodesScreen.sort.some((option) => option === filterKey)) {
-        const results = await getEpisodes(
+        let results = await getEpisodes(
           {
             ...setCategoryQueryProperty(queryFrom, selectedCategory, selectedSubCategory),
             ...(queryFrom === PV.Filters._subscribedKey ? { podcastId } : {}),
@@ -537,6 +540,12 @@ export class EpisodesScreen extends React.Component<Props, State> {
           },
           nsfwMode
         )
+
+        const hasAddByRSSEpisodes = await hasAddByRSSEpisodesLocally()
+        if (queryFrom === PV.Filters._subscribedKey && filterKey === PV.Filters._mostRecentKey && hasAddByRSSEpisodes) {
+          results = await combineEpisodesWithAddByRSSEpisodesLocally(results)
+        }
+
         newState.flatListData = results[0]
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
