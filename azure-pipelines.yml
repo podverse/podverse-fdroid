@@ -58,7 +58,9 @@ steps:
 - task: CmdLine@2
   displayName: Read Metadata
   inputs:
-    script: '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
+    script: |
+      pip install Pillow
+      '$(Agent.BuildDirectory)/fdroidserver/fdroid readmeta'
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
