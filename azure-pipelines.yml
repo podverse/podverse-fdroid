@@ -115,5 +115,5 @@ steps:
   displayName: Publish metadata artifact
   inputs:
     PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/metadata/com.podverse.fdroid.yml'
-    ArtifactName: 'full_build'
+    ArtifactName: 'metadata'
     publishLocation: 'Container'
