@@ -27,7 +27,6 @@ Builds:
       - node_modules/hermes-engine
       - node_modules/jetifier/lib/*.jar
       - node_modules/jsc-android
-      - node_modules/node-sass/vendor
       - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
       - node_modules/react-native/template
     scanignore:
