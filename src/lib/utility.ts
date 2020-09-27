@@ -2,12 +2,13 @@ import AsyncStorage from '@react-native-community/async-storage'
 import he from 'he'
 import { NowPlayingItem } from 'podverse-shared'
 import Config from 'react-native-config'
-import { getUserAgent } from 'react-native-device-info'
+// import { getUserAgent } from 'react-native-device-info'
 import { PV } from '../resources'
 
 const cheerio = require('react-native-cheerio')
 
-let userAgent = ''
+// let userAgent = ''
+const userAgent = ''
 
 /*
  * getUserAgent sometimes crashes in the iOS simulator. This is apparently related
@@ -16,7 +17,7 @@ let userAgent = ''
  */
 export const setAppUserAgent = async () => {
   try {
-    userAgent = await getUserAgent()
+    // userAgent = await getUserAgent()
   } catch (e) {
     console.log('setAppUserAgent', e)
   }

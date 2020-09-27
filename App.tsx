@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-community/async-storage'
 import NetInfo, { NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo'
 import React, { Component } from 'react'
 import { Image, Platform, StatusBar, View, YellowBox } from 'react-native'
-import { getFontScale } from 'react-native-device-info'
 import 'react-native-gesture-handler'
 import TrackPlayer from 'react-native-track-player'
 import { setGlobal } from 'reactn'
@@ -88,7 +87,8 @@ class App extends Component<Props, State> {
   }
 
   async setupGlobalState(theme: GlobalTheme) {
-    const fontScale = await getFontScale()
+    const fontScale = 1
+    // const fontScale = await getFontScale()
     const fontScaleMode = determineFontScaleMode(fontScale)
 
     setGlobal(
