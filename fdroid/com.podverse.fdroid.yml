@@ -11,7 +11,7 @@ Repo: https://github.com/podverse/podverse-fdroid
 Builds:
   - versionName: 2.9.3
     versionCode: 1
-    commit: e6ab50e6dcc788697e8416917a28eb6201cc2e22
+    commit: 80de7b7f86c3ed87ccb6b507422174f1acbc84fc
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
@@ -22,15 +22,23 @@ Builds:
       - npm run jetify
     gradle:
       - yes
+    rm:
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/jsc-android
+      - node_modules/node-sass/vendor
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
       - node_modules/jetifier/lib/*.jar
       - node_modules/jsc-android
       - node_modules/linkifyjs/dist/linkifyjs.zip
-      - node_modules/react-native/android/
-      - node_modules/react-native/ReactAndroid/
-      - node_modules/react-native/template/
+      - node_modules/react-native/android
+      - node_modules/react-native/ReactAndroid
+      - node_modules/react-native/template
       - node_modules/react-native-background-fetch/android
       - node_modules/react-native-gesture-handler/android/lib/build.gradle
       - node_modules/react-native-localize/android/build.gradle
