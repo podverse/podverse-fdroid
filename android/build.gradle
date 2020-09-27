@@ -10,6 +10,7 @@ buildscript {
         kotlinVersion = '1.3.72'
     }
     repositories {
+        google()
         jcenter()
         maven {
             url 'https://maven.google.com/'
@@ -37,6 +38,7 @@ allprojects {
             url("$rootDir/../node_modules/jsc-android/dist")
         }
 
+        google()
         jcenter()
         maven { url "https://www.jitpack.io" }
     }
