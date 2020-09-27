@@ -96,9 +96,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
       showDataSettingsConfirmDialog: false
     }
 
-    const test = 'hello'
-    console.log('test', test)
-
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
   }
 
