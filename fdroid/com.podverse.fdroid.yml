@@ -22,8 +22,6 @@ Builds:
       - npm run jetify
     gradle:
       - yes
-    rm:
-      - functions
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
