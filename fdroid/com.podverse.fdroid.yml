@@ -33,10 +33,13 @@ Builds:
       - android/build.gradle
       - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
+      - node_modules/react-native-gesture-handler/android/lib/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
       - node_modules/@react-native-community/async-storage
