@@ -16,10 +16,6 @@ export class PrivacyPolicyScreen extends React.Component<Props, State> {
     }
   }
 
-  componentDidMount() {
-    gaTrackPageView('/privacy-policy', 'Privacy Policy Screen')
-  }
-
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
       { text: 'Cancel' },
