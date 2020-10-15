@@ -4,7 +4,6 @@ import { HTMLScrollView, View } from '../components'
 import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { gaTrackPageView } from '../services/googleAnalytics'
 
 type Props = {}
 
