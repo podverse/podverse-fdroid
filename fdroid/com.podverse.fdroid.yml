@@ -33,7 +33,6 @@ Builds:
       - node_modules/jsc-android
       - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
-      - node_modules/react-native-gesture-handler/android/lib/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
