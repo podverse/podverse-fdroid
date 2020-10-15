@@ -30,7 +30,7 @@ export class MoreScreen extends React.Component<Props, State> {
 
   _moreFeaturesOptions = (isLoggedIn: boolean) => {
     const moreFeaturesList = Config.NAV_STACK_MORE_FEATURES.split(',')
-    const loggedInFeatures = [_playlistsKey, _profilesKey, _myProfileKey, _logoutKey]
+    const loggedInFeatures = [_playlistsKey, _profilesKey, _myProfileKey, _myClipsKey, _logoutKey]
 
     return allMoreFeatures
       .filter((item: any) => {
@@ -48,16 +48,16 @@ export class MoreScreen extends React.Component<Props, State> {
   _moreOtherOptions = (membershipStatus?: string) => {
     const allMoreOtherOptions = [
       {
-        title: membershipStatus,
-        key: _membershipKey,
-        routeName: PV.RouteNames.MembershipScreen,
-        testID: 'more_screen_membership_cell'
-      },
-      {
         title: translate('Add Podcast by RSS'),
         key: _addPodcastByRSSKey,
         routeName: PV.RouteNames.AddPodcastByRSSScreen,
         testID: 'more_screen_add_podcast_by_rss_cell'
+      },
+      {
+        title: membershipStatus,
+        key: _membershipKey,
+        routeName: PV.RouteNames.MembershipScreen,
+        testID: 'more_screen_membership_cell'
       },
       {
         title: translate('Contact Us'),
@@ -65,13 +65,7 @@ export class MoreScreen extends React.Component<Props, State> {
         testID: 'more_screen_contact_us_cell'
       },
       {
-        title: 'FAQ',
-        key: _faqKey,
-        routeName: PV.RouteNames.FAQScreen,
-        testID: 'more_screen_faq_cell'
-      },
-      {
-        title: translate('About'),
+        title: translate('About brandName'),
         key: _aboutKey,
         routeName: PV.RouteNames.AboutScreen,
         testID: 'more_screen_about_cell'
@@ -81,6 +75,12 @@ export class MoreScreen extends React.Component<Props, State> {
         key: _termsOfServiceKey,
         routeName: PV.RouteNames.TermsOfServiceScreen,
         testID: 'more_screen_terms_of_service_cell'
+      },
+      {
+        title: translate('Privacy Policy'),
+        key: _privacyPolicyKey,
+        routeName: PV.RouteNames.PrivacyPolicyScreen,
+        testID: 'more_screen_privacy_policy_cell'
       }
     ]
 
@@ -114,10 +114,6 @@ export class MoreScreen extends React.Component<Props, State> {
         isMyProfile: true,
         initializeClips: true
       })
-    } else if (item.key === _aboutKey) {
-      Config.URL_SELF_HOSTED_ABOUT_PAGE
-        ? Linking.openURL(Config.URL_SELF_HOSTED_ABOUT_PAGE)
-        : navigation.navigate(item.routeName)
     } else {
       navigation.navigate(item.routeName)
     }
@@ -205,13 +201,13 @@ const _aboutKey = 'About'
 const _addPodcastByRSSKey = 'AddPodcastByRSS'
 const _contactKey = 'Contact'
 const _downloadsKey = 'Downloads'
-const _faqKey = 'FAQ'
 const _loginKey = 'Login'
 const _logoutKey = 'Logout'
 const _membershipKey = 'Membership'
 const _myClipsKey = 'MyClips'
 const _myProfileKey = 'MyProfile'
 const _playlistsKey = 'Playlists'
+const _privacyPolicyKey = 'PrivacyPolicy'
 const _profilesKey = 'Profiles'
 const _settingsKey = 'Settings'
 const _termsOfServiceKey = 'TermsOfService'
@@ -241,6 +237,17 @@ const allMoreFeatures = [
     testID: 'more_screen_my_profile_cell'
   },
   {
+    title: 'My Clips',
+    key: _myClipsKey,
+    testId: 'more_screen_my_clips_cell'
+  },
+  {
+    title: translate('Settings'),
+    key: _settingsKey,
+    routeName: PV.RouteNames.SettingsScreen,
+    testID: 'more_screen_settings_cell'
+  },
+  {
     title: translate('Log out'),
     key: _logoutKey,
     testID: 'more_screen_log_out_cell'
@@ -250,11 +257,5 @@ const allMoreFeatures = [
     key: _loginKey,
     routeName: PV.RouteNames.AuthNavigator,
     testID: 'more_screen_login_cell'
-  },
-  {
-    title: translate('Settings'),
-    key: _settingsKey,
-    routeName: PV.RouteNames.SettingsScreen,
-    testID: 'more_screen_settings_cell'
   }
 ]

@@ -58,3 +58,9 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+truffle.log
+
+stage_ssh_key
+
+main.js

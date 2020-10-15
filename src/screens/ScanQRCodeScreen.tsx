@@ -16,8 +16,7 @@ ScanQRCodeScreen.navigationOptions = () => ({
 
 const styles = StyleSheet.create({
   view: {
-    flex: 1,
-    backgroundColor: PV.Colors.black
+    flex: 1
   },
   preview: {
     ...StyleSheet.absoluteFillObject,
