@@ -49,8 +49,8 @@ Builds:
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
   - versionName: 2.10.1
-    versionCode: 1
-    commit: 1906b313032fc042ab3ebfd3467b29feec4bca1d
+    versionCode: 2
+    commit: 22ea46ad7e465a3b6b2b4a9e1783b1fc14c9ab85
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
