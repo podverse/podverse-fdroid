@@ -132,7 +132,7 @@ android {
         applicationId "com.podverse.fdroid"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 2
         versionName "2.10.1"
         multiDexEnabled true
         missingDimensionStrategy 'react-native-camera', 'general'
