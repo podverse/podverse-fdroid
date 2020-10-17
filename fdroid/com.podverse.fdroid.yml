@@ -46,7 +46,7 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-- versionName: 2.10.1
+  - versionName: 2.10.1
     versionCode: 1
     commit: 1906b313032fc042ab3ebfd3467b29feec4bca1d
     subdir: android/app
