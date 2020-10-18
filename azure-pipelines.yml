@@ -111,12 +111,12 @@ steps:
 #     ArtifactName: 'app_build'
 #     publishLocation: 'Container'
 
-# - task: PublishBuildArtifacts@1
-#   displayName: Publish metadata artifact
-#   inputs:
-#     PathtoPublish: '$(Agent.BuildDirectory)/fdroiddata/metadata/com.podverse.fdroid.yml'
-#     ArtifactName: 'metadata'
-#     publishLocation: 'Container'
+- task: PublishBuildArtifacts@1
+  displayName: Publish metadata artifact
+  inputs:
+    PathtoPublish: '$(Build.Repository.LocalPath)/fdroid/com.podverse.fdroid.yml'
+    ArtifactName: 'metadata'
+    publishLocation: 'Container'
 
 - task: Bash@3
   inputs:
