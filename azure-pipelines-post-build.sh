@@ -10,9 +10,10 @@ APP_URL="helloworld"
 jsonval() {
     temp=`echo $APP_URL | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"\:\"/\|/g' | sed 's/[\,]/ /g' | sed 's/\"//g' | grep -w "app_url"| cut -d":" -f1- | sed -e 's/^ *//g' -e 's/ *$//g'`
     echo ${temp##*|}
+    echo ehlloooooo
 }
 
-APP_ID=$(jsonval)
+APP_ID=`jsonval`
 
 echo $APP_ID
 echo Ok
