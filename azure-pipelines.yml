@@ -118,11 +118,30 @@ steps:
     ArtifactName: 'metadata'
     publishLocation: 'Container'
 
-- download: current
-  artifact: 'metadata'
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'drop'
+    downloadPath: '$(System.ArtifactsDirectory)'
+
+# - task: Bash@3
+#   inputs:
+#     targetType: 'filePath'
+#     filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
+#     # workingDirectory: $(Agent.ReleaseDirectory)
 
 - task: Bash@3
   inputs:
-    targetType: 'filePath'
-    filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
-    # workingDirectory: $(Agent.ReleaseDirectory)
+    targetType: 'inline'
+    script: |
+      echo 'Hello world!'
+      pwd
+      ls .
+      echo 12345
+      ls ..
+      echo 56789
+      ls ../..
+      echo 34567
+      ls ../../..
+
