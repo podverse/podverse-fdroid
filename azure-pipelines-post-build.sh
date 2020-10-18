@@ -5,6 +5,8 @@ pwd
 
 echo "======= Browserstack upload start ======="
 
+echo $(Agent.BuildDirectory)/fdroiddata/build/com.podverse.fdroid/android/app/build/outputs/apk/release
+
 cp "$APPCENTER_OUTPUT_DIRECTORY/app-release.apk" "$APPCENTER_OUTPUT_DIRECTORY/build-$APPCENTER_BUILD_ID.apk"
 OUTPUT_PATH="$APPCENTER_OUTPUT_DIRECTORY/build-$APPCENTER_BUILD_ID.apk"
 
