@@ -50,7 +50,7 @@ Builds:
 
   - versionName: 2.10.1
     versionCode: 2
-    commit: 22ea46ad7e465a3b6b2b4a9e1783b1fc14c9ab85
+    commit: ef3900abbaead15348d26cbe57d1d153817717fb
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
