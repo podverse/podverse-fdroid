@@ -14,5 +14,7 @@ jsonval() {
 
 APP_ID=`jsonval`
 
+echo $APP_ID
+
 echo "======= Browserstack TESTS REQUEST END ======="
 
