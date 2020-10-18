@@ -129,7 +129,8 @@ steps:
   inputs:
     targetType: 'filePath'
     filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
-    # workingDirectory: $(Agent.ReleaseDirectory)
+  env:
+    testing: '123'
 
 # - task: Bash@3
 #   inputs:
