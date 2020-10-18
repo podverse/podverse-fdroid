@@ -136,12 +136,6 @@ steps:
     targetType: 'inline'
     script: |
       echo 'Hello world!'
-      pwd
-      ls .
-      echo 12345
-      ls ..
-      echo 56789
-      ls ../..
-      echo 34567
-      ls ../../..
+      echo $(Agent.BuildDirectory)
+      echo $(Agent.ArtifactsDirectory)
 
