@@ -121,4 +121,4 @@ steps:
 - task: Bash@3
   inputs:
     targetType: 'filePath'
-    filePath: $(Build.Repository.LocalPath)/azure-post-build.sh
+    filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
