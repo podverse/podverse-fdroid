@@ -18,6 +18,8 @@ jsonval() {
 
 APP_ID=`jsonval`
 
+echo "APP_ID: $(APP_ID)"
+
 echo "======= Browserstack TESTS REQUEST START ======="
 
 RUN_TESTS=$(curl -X GET "https://us-central1-podverse-staging-tests.cloudfunctions.net/runTests?APP_URL=$APP_ID&DEVICE_TYPE=$PLATFORM" -H "x-api-key: $FB_API_KEY")
