@@ -122,4 +122,4 @@ steps:
   inputs:
     targetType: 'filePath'
     filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
-    workingDirectory: $(Agent.ReleaseDirectory)
+    # workingDirectory: $(Agent.ReleaseDirectory)
