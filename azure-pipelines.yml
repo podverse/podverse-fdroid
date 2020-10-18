@@ -118,6 +118,9 @@ steps:
     ArtifactName: 'metadata'
     publishLocation: 'Container'
 
+- download: current
+  artifact: 'metadata'
+
 - task: Bash@3
   inputs:
     targetType: 'filePath'
