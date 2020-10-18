@@ -134,4 +134,4 @@ steps:
     BS_USERNAME: $(BS_USERNAME)
     BS_KEY: $(BS_KEY)
     FB_API_KEY: $(FB_API_KEY)
-    PLATFORM: 'Android'
+    PLATFORM: 'F-Droid'
