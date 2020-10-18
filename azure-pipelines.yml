@@ -130,7 +130,8 @@ steps:
     targetType: 'filePath'
     filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
   env:
-    testing: '123'
+    APPCENTER_OUTPUT_DIRECTORY: $(System.ArtifactsDirectory)
+    APPCENTER_BUILD_ID: $(Build.BuildId)
 
 # - task: Bash@3
 #   inputs:
