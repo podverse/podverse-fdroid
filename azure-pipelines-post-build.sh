@@ -12,9 +12,10 @@ jsonval() {
     echo ${temp##*|}
 }
 
-APP_ID=`jsonval`
+APP_ID=jsonval
 
 echo $APP_ID
+echo Ok
 
 echo "======= Browserstack TESTS REQUEST END ======="
 
