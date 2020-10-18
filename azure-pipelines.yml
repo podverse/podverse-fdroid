@@ -136,6 +136,6 @@ steps:
     targetType: 'inline'
     script: |
       echo 'Hello world!'
-      echo $(Agent.BuildDirectory)
-      echo $(Agent.ArtifactsDirectory)
+      echo '$(Agent.BuildDirectory)'
+      echo '$(Agent.ArtifactsDirectory)'
 
