@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-pwd
-
 echo "======= Browserstack upload start ======="
 
 OUTPUT_PATH="$APPCENTER_OUTPUT_DIRECTORY/app_build/podverse-fdroid.signed.release.apk"
@@ -18,7 +16,11 @@ jsonval() {
 
 APP_ID=`jsonval`
 
-echo "APP_ID: $APP_ID"
+echo "
+
+APP_ID: $APP_ID
+
+"
 
 echo "======= Browserstack TESTS REQUEST START ======="
 
