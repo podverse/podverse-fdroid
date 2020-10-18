@@ -135,7 +135,8 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      echo 'Hello world!'
-      echo '$(Agent.BuildDirectory)'
-      echo '$(Agent.ArtifactsDirectory)'
+      echo 'Hello'
+      echo $(Agent.BuildDirectory)
+      echo $(System.ArtifactsDirectory)
+      echo 'Goodbye!'
 
