@@ -398,7 +398,7 @@ export class ClipsScreen extends React.Component<Props, State> {
     const showOfflineMessage = offlineModeEnabled
 
     return (
-      <View style={styles.view} {...testProps('clips_screen_view')}>
+      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
         <TableSectionSelectors
           handleSelectLeftItem={this.selectLeftItem}
           handleSelectRightItem={this.selectRightItem}
@@ -406,6 +406,7 @@ export class ClipsScreen extends React.Component<Props, State> {
           screenName='ClipsScreen'
           selectedLeftItemKey={queryFrom}
           selectedRightItemKey={querySort}
+          testID={testIDPrefix}
         />
         {queryFrom === PV.Filters._categoryKey && (
           <TableSectionSelectors
@@ -416,6 +417,7 @@ export class ClipsScreen extends React.Component<Props, State> {
             screenName='ClipsScreen'
             selectedLeftItemKey={selectedCategory}
             selectedRightItemKey={selectedSubCategory}
+            testID={`${testIDPrefix}_sub`}
           />
         )}
         {isLoading && <ActivityIndicator />}
@@ -463,6 +465,7 @@ export class ClipsScreen extends React.Component<Props, State> {
             )
           }}
           showModal={showActionSheet}
+          testID={testIDPrefix}
         />
         <Dialog.Container visible={showDeleteConfirmDialog}>
           <Dialog.Title>{translate('Delete Clip')}</Dialog.Title>

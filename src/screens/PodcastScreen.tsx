@@ -76,6 +76,8 @@ type State = {
   viewType: string | null
 }
 
+const testIDPrefix = 'podcast_screen'
+
 export class PodcastScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
     const podcastId = navigation.getParam('podcastId')
@@ -364,7 +366,7 @@ export class PodcastScreen extends React.Component<Props, State> {
           hideImage={true}
           id={item.id}
           pubDate={item.pubDate}
-          testID={'podcast_screen_episode_downloaded_item_' + index}
+          testID={`${testIDPrefix}_episode_downloaded_item_${index}`}
           title={item.title}
         />
       )
@@ -385,7 +387,7 @@ export class PodcastScreen extends React.Component<Props, State> {
           hideImage={true}
           id={item.id}
           pubDate={item.pubDate}
-          testID={'podcast_screen_episode_item_' + index}
+          testID={`${testIDPrefix}_episode_item_${index}`}
           title={item.title}
         />
       )
@@ -400,7 +402,7 @@ export class PodcastScreen extends React.Component<Props, State> {
           hasZebraStripe={isOdd(index)}
           hideImage={true}
           startTime={item.startTime}
-          testID={'podcast_screen_clip_item_' + index}
+          testID={`${testIDPrefix}_clip_item_${index}`}
           title={item.title}
         />
       ) : (
@@ -598,7 +600,7 @@ export class PodcastScreen extends React.Component<Props, State> {
       (viewType === PV.Filters._clipsKey && translate('No clips found'))
 
     return (
-      <View style={styles.view} {...testProps('podcast_screen_view')}>
+      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
         <PodcastTableHeader
           autoDownloadOn={autoDownloadOn}
           handleToggleAutoDownload={this._handleToggleAutoDownload}
@@ -620,6 +622,7 @@ export class PodcastScreen extends React.Component<Props, State> {
             screenName='PodcastScreen'
             selectedLeftItemKey={viewType}
             selectedRightItemKey={querySort}
+            testID={testIDPrefix}
           />
         )}
         {showSettings && <TableSectionHeader title={translate('Settings')} />}

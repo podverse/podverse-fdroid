@@ -58,6 +58,8 @@ type Props = {
 
 type State = {}
 
+const testIDPrefix = 'player_screen'
+
 let eventListenerPlayerNewEpisodeLoaded: any
 
 /* 
@@ -622,6 +624,7 @@ export class PlayerScreen extends React.Component<Props, State> {
                 screenName='PlayerScreen'
                 selectedLeftItemKey={viewType}
                 selectedRightItemKey={querySort}
+                testID={testIDPrefix}
               />
               {viewType === PV.Filters._clipsKey && (
                 <TableSectionSelectors
@@ -630,6 +633,7 @@ export class PlayerScreen extends React.Component<Props, State> {
                   isTransparent={true}
                   screenName='PlayerScreen'
                   selectedLeftItemKey={queryFrom}
+                  testID={`${testIDPrefix}_sub`}
                 />
               )}
               {viewType === PV.Filters._episodesKey && (

@@ -2,7 +2,7 @@ import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podvers
 import { Alert, StyleSheet, View as RNView } from 'react-native'
 import Dialog from 'react-native-dialog'
 import { NavigationStackOptions } from 'react-navigation-stack'
-import React, { setGlobal, useGlobal } from 'reactn'
+import React, { setGlobal } from 'reactn'
 import {
   ActionSheet,
   ActivityIndicator,
@@ -67,6 +67,8 @@ type State = {
   showNoInternetConnectionMessage?: boolean
   userId?: string
 }
+
+const testIDPrefix = 'profile_screen'
 
 export class ProfileScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
@@ -518,6 +520,7 @@ export class ProfileScreen extends React.Component<Props, State> {
               screenName='ProfileScreen'
               selectedLeftItemKey={queryFrom}
               selectedRightItemKey={querySort}
+              testID={testIDPrefix}
             />
             {isLoading && <ActivityIndicator />}
             {!isLoading && queryFrom && flatListData && (
