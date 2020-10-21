@@ -49,6 +49,8 @@ type State = {
   showNoInternetConnectionMessage?: boolean
 }
 
+const testIDPrefix = 'clips_screen'
+
 export class ClipsScreen extends React.Component<Props, State> {
   static navigationOptions = () => {
     return {
@@ -249,7 +251,7 @@ export class ClipsScreen extends React.Component<Props, State> {
         podcastImageUrl={item.episode.podcast.shrunkImageUrl || item.episode.podcast.imageUrl}
         podcastTitle={podcastTitle}
         startTime={item.startTime}
-        testID={'clips_screen_clip_item_' + index}
+        testID={`${testIDPrefix}_clip_item_${index}`}
         title={title || translate('untitled clip')}
       />
     ) : (
