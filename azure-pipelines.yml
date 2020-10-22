@@ -126,6 +126,7 @@ steps:
     downloadPath: '$(System.ArtifactsDirectory)'
 
 - task: Bash@3
+  displayName: Upload to BrowserStack
   inputs:
     targetType: 'filePath'
     filePath: $(Build.Repository.LocalPath)/azure-pipelines-post-build.sh
