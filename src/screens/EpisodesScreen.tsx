@@ -279,10 +279,11 @@ export class EpisodesScreen extends React.Component<Props, State> {
           item.podcast_imageUrl ||
           (item.podcast && (item.podcast.shrunkImageUrl || item.podcast.imageUrl))
         }
-        podcastTitle={podcastTitle}
+        {...(podcastTitle ? { podcastTitle } : {})}
         pubDate={item.pubDate}
+        showPodcastTitle={true}
         testID={`${testIDPrefix}_episode_item_${index}`}
-        title={title}
+        {...(title ? { title } : {})}
       />
     )
   }
@@ -440,6 +441,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
             )
           }
           showModal={showActionSheet}
+          testID={testIDPrefix}
         />
       </View>
     )
@@ -472,7 +474,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
       let { flatListData } = this.state
       const { queryFrom, querySort, selectedCategory, selectedSubCategory } = this.state
       const podcastId = this.global.session.userInfo.subscribedPodcastIds
-      const nsfwMode = this.global.settings.nsfwMode
       const { queryPage, searchAllFieldsText } = queryOptions
 
       flatListData = queryOptions && queryOptions.queryPage === 1 ? [] : flatListData
@@ -481,17 +482,14 @@ export class EpisodesScreen extends React.Component<Props, State> {
         let results = []
 
         if (podcastId) {
-          results = await getEpisodes(
-            {
-              sort: querySort,
-              page: queryPage,
-              podcastId,
-              ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
-              subscribedOnly: true,
-              includePodcast: true
-            },
-            this.global.settings.nsfwMode
-          )
+          results = await getEpisodes({
+            sort: querySort,
+            page: queryPage,
+            podcastId,
+            ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
+            subscribedOnly: true,
+            includePodcast: true
+          })
         }
 
         const hasAddByRSSEpisodes = await hasAddByRSSEpisodesLocally()
@@ -531,17 +529,14 @@ export class EpisodesScreen extends React.Component<Props, State> {
           newState.flatListDataTotalCount = podcastResults[1]
         }
       } else if (PV.FilterOptions.screenFilters.EpisodesScreen.sort.some((option) => option === filterKey)) {
-        let results = await getEpisodes(
-          {
-            ...setCategoryQueryProperty(queryFrom, selectedCategory, selectedSubCategory),
-            ...(queryFrom === PV.Filters._subscribedKey ? { podcastId } : {}),
-            sort: filterKey,
-            ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
-            subscribedOnly: queryFrom === PV.Filters._subscribedKey,
-            includePodcast: true
-          },
-          nsfwMode
-        )
+        let results = await getEpisodes({
+          ...setCategoryQueryProperty(queryFrom, selectedCategory, selectedSubCategory),
+          ...(queryFrom === PV.Filters._subscribedKey ? { podcastId } : {}),
+          sort: filterKey,
+          ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
+          subscribedOnly: queryFrom === PV.Filters._subscribedKey,
+          includePodcast: true
+        })
 
         const hasAddByRSSEpisodes = await hasAddByRSSEpisodesLocally()
         if (queryFrom === PV.Filters._subscribedKey && filterKey === PV.Filters._mostRecentKey && hasAddByRSSEpisodes) {
@@ -582,31 +577,25 @@ export class EpisodesScreen extends React.Component<Props, State> {
   _queryAllEpisodes = async (sort: string | null, page: number = 1) => {
     const { searchBarText: searchAllFieldsText } = this.state
 
-    const results = await getEpisodes(
-      {
-        sort,
-        page,
-        ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
-        includePodcast: true
-      },
-      this.global.settings.nsfwMode
-    )
+    const results = await getEpisodes({
+      sort,
+      page,
+      ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
+      includePodcast: true
+    })
 
     return results
   }
 
   _queryEpisodesByCategory = async (categoryId?: string | null, sort?: string | null, page: number = 1) => {
     const { searchBarText: searchAllFieldsText } = this.state
-    const results = await getEpisodes(
-      {
-        categories: categoryId,
-        sort,
-        page,
-        ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
-        includePodcast: true
-      },
-      this.global.settings.nsfwMode
-    )
+    const results = await getEpisodes({
+      categories: categoryId,
+      sort,
+      page,
+      ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
+      includePodcast: true
+    })
     return results
   }
 }

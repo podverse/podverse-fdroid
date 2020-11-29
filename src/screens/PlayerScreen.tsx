@@ -13,7 +13,6 @@ import {
   ClipInfoView,
   ClipTableCell,
   Divider,
-  EpisodeTableCell,
   FlatList,
   HTMLScrollView,
   NavAddToPlaylistIcon,
@@ -25,7 +24,6 @@ import {
   PlayerClipInfoBar,
   PlayerControls,
   PlayerTableHeader,
-  TableSectionHeader,
   TableSectionSelectors,
   View
 } from '../components'
@@ -33,19 +31,15 @@ import { downloadEpisode } from '../lib/downloader'
 import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
 import {
-  decodeHTMLString,
   formatTitleViewHtml,
-  isOdd,
   readableDate,
-  removeHTMLFromString,
   replaceLinebreaksWithBrTags,
   safelyUnwrapNestedVariable,
   testProps
 } from '../lib/utility'
 import { PV } from '../resources'
-import { getEpisodes } from '../services/episode'
+import { getEpisode, retrieveLatestChaptersForEpisodeId } from '../services/episode'
 import { getMediaRef, getMediaRefs } from '../services/mediaRef'
-import { getAddByRSSPodcastLocally } from '../services/parser'
 import { getNowPlayingItem, PVTrackPlayer } from '../services/player'
 import PlayerEventEmitter from '../services/playerEventEmitter'
 import { addQueueItemNext } from '../services/queue'
@@ -249,8 +243,6 @@ export class PlayerScreen extends React.Component<Props, State> {
     if (selectedKey === PV.Filters._clipsKey) {
       sort = PV.Filters._chronologicalKey
       hideRightItemWhileLoading = true
-    } else if (selectedKey === PV.Filters._episodesKey) {
-      hideRightItemWhileLoading = true
     }
 
     setGlobal(
@@ -269,7 +261,7 @@ export class PlayerScreen extends React.Component<Props, State> {
         }
       },
       async () => {
-        if (selectedKey === PV.Filters._clipsKey || selectedKey === PV.Filters._episodesKey) {
+        if (selectedKey === PV.Filters._chaptersKey || selectedKey === PV.Filters._clipsKey) {
           const newState = await this._queryData()
           setGlobal({
             screenPlayer: {
@@ -304,8 +296,6 @@ export class PlayerScreen extends React.Component<Props, State> {
     let hideRightItemWhileLoading = false
     if (selectedKey === PV.Filters._fromThisEpisodeKey) {
       sort = PV.Filters._chronologicalKey
-      hideRightItemWhileLoading = true
-    } else if (selectedKey === PV.Filters._episodesKey) {
       hideRightItemWhileLoading = true
     }
 
@@ -504,58 +494,43 @@ export class PlayerScreen extends React.Component<Props, State> {
     const { player, screenPlayer } = this.global
     const { episode } = player
     const podcast = (episode && episode.podcast) || {}
-    const { queryFrom, viewType } = screenPlayer
+    const { queryFrom } = screenPlayer
 
-    if (viewType === PV.Filters._episodesKey) {
-      let description = removeHTMLFromString(item.description)
-      description = decodeHTMLString(description)
-      return (
-        <EpisodeTableCell
-          description={description}
-          id={item.id}
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
-          handleNavigationPress={() => this._handleNavigationPress(convertToNowPlayingItem(item, null, podcast))}
-          hasZebraStripe={isOdd(index)}
-          hideImage={true}
-          pubDate={item.pubDate}
-          title={item.title || translate('untitled episode')}
-          transparent={true}
-        />
-      )
-    } else {
-      if (queryFrom === PV.Filters._fromThisEpisodeKey) {
-        item = {
-          ...item,
-          episode
-        }
+    if (queryFrom === PV.Filters._fromThisEpisodeKey) {
+      item = {
+        ...item,
+        episode
       }
-
-      return item && item.episode && item.episode.id ? (
-        <ClipTableCell
-          endTime={item.endTime}
-          episodeId={item.episode.id}
-          {...(queryFrom === PV.Filters._fromThisPodcastKey
-            ? { episodePubDate: readableDate(item.episode.pubDate) }
-            : {})}
-          {...(queryFrom === PV.Filters._fromThisPodcastKey
-            ? { episodeTitle: item.episode.title || translate('untitled episode') }
-            : {})}
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
-          handleNavigationPress={() => this._handleNavigationPress(convertToNowPlayingItem(item, null, podcast))}
-          hideImage={true}
-          startTime={item.startTime}
-          title={item.title || translate('untitled clip')}
-          transparent={true}
-        />
-      ) : (
-        <></>
-      )
     }
+
+    return item && item.episode && item.episode.id ? (
+      <ClipTableCell
+        endTime={item.endTime}
+        episodeId={item.episode.id}
+        {...(queryFrom === PV.Filters._fromThisPodcastKey
+          ? { episodePubDate: readableDate(item.episode.pubDate) }
+          : {})}
+        {...(queryFrom === PV.Filters._fromThisPodcastKey
+          ? { episodeTitle: item.episode.title || translate('untitled episode') }
+          : {})}
+        handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
+        handleNavigationPress={() => this._handleNavigationPress(convertToNowPlayingItem(item, null, podcast))}
+        hideImage={true}
+        showEpisodeInfo={queryFrom !== PV.Filters._fromThisEpisodeKey}
+        showPodcastTitle={false}
+        startTime={item.startTime}
+        testID={`${testIDPrefix}_clip_item_${index}`}
+        {...(item.title ? { title: item.title } : {})}
+        transparent={true}
+      />
+    ) : (
+      <></>
+    )
   }
 
   render() {
     const { navigation } = this.props
-    const { fontScaleMode, offlineModeEnabled, player, screenPlayer } = this.global
+    const { offlineModeEnabled, player, screenPlayer } = this.global
     const { episode, nowPlayingItem } = player
     const {
       flatListData,
@@ -587,8 +562,14 @@ export class PlayerScreen extends React.Component<Props, State> {
       episode.description = replaceLinebreaksWithBrTags(episode.description)
     }
 
-    const noResultsMessage =
-      viewType === PV.Filters._clipsKey ? translate('No clips found') : translate('No episodes found')
+    let noResultsMessage = translate('No episodes found')
+    let noResultsSubMessage = ''
+    if (viewType === PV.Filters._chaptersKey) {
+      noResultsMessage = translate('No chapters found')
+      noResultsSubMessage = translate('Chapters are created by the podcaster')
+    } else if (viewType === PV.Filters._clipsKey) {
+      noResultsMessage = translate('No clips found')
+    }
 
     const showOfflineMessage =
       offlineModeEnabled && queryFrom !== PV.Filters._showNotesKey && queryFrom !== PV.Filters._titleKey
@@ -596,7 +577,7 @@ export class PlayerScreen extends React.Component<Props, State> {
     return (
       <OpaqueBackground nowPlayingItem={nowPlayingItem}>
         <View style={styles.view} transparent={true} {...testProps('player_screen_view')}>
-          <PlayerTableHeader nowPlayingItem={nowPlayingItem} />
+          <PlayerTableHeader nowPlayingItem={nowPlayingItem} testID={testIDPrefix} />
           {showFullClipInfo && (mediaRef || (nowPlayingItem && nowPlayingItem.clipId)) && (
             <ClipInfoView
               createdAt={mediaRef.createdAt}
@@ -604,13 +585,15 @@ export class PlayerScreen extends React.Component<Props, State> {
               handleClosePress={this._toggleShowFullClipInfo}
               hideDynamicAdsWarning={nowPlayingItem.podcastHideDynamicAdsWarning}
               isLoading={isLoading}
+              isOfficialChapter={mediaRef.isOfficialChapter}
+              isOfficialSoundBite={mediaRef.isOfficialSoundBite}
               isPublic={mediaRef.isPublic}
               navigation={navigation}
               {...(mediaRef.owner ? { ownerId: mediaRef.owner.id } : {})}
               {...(mediaRef.owner ? { ownerIsPublic: mediaRef.owner.isPublic } : {})}
               {...(mediaRef.owner ? { ownerName: mediaRef.owner.name } : {})}
               startTime={mediaRef.startTime}
-              title={mediaRef.title}
+              {...(mediaRef.title ? { title: mediaRef.title } : {})}
             />
           )}
           {!showFullClipInfo && (
@@ -636,13 +619,6 @@ export class PlayerScreen extends React.Component<Props, State> {
                   testID={`${testIDPrefix}_sub`}
                 />
               )}
-              {viewType === PV.Filters._episodesKey && (
-                <TableSectionHeader
-                  centerText={PV.Fonts.fontScale.largest === fontScaleMode}
-                  isTransparent={true}
-                  title={translate('From this podcast')}
-                />
-              )}
               {isLoading || (isQuerying && <ActivityIndicator />)}
               {!isLoading &&
                 !isQuerying &&
@@ -659,6 +635,7 @@ export class PlayerScreen extends React.Component<Props, State> {
                     ItemSeparatorComponent={this._ItemSeparatorComponent}
                     keyExtractor={(item: any) => item.id}
                     noResultsMessage={noResultsMessage}
+                    noResultsSubMessage={noResultsSubMessage}
                     onEndReached={this._onEndReached}
                     renderItem={this._renderItem}
                     showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
@@ -691,17 +668,30 @@ export class PlayerScreen extends React.Component<Props, State> {
               )
             }
             showModal={showMoreActionSheet}
+            testID={`${testIDPrefix}_more`}
           />
           <ActionSheet
             handleCancelPress={this._dismissShareActionSheet}
             items={shareActionSheetButtons(podcastId, episodeId, mediaRefId, this._handleShare)}
             message={translate('What link do you want to share?')}
             showModal={showShareActionSheet}
+            testID={`${testIDPrefix}_share`}
             title={translate('Share')}
           />
         </View>
       </OpaqueBackground>
     )
+  }
+
+  _queryChapters = async () => {
+    const { player } = this.global
+    const { nowPlayingItem } = player
+
+    if (nowPlayingItem && !nowPlayingItem.addByRSSPodcastFeedUrl) {
+      return retrieveLatestChaptersForEpisodeId(nowPlayingItem.episodeId)
+    } else {
+      return [[], 0]
+    }
   }
 
   _queryClips = async () => {
@@ -712,50 +702,22 @@ export class PlayerScreen extends React.Component<Props, State> {
     const sort = this._validSort()
 
     if (nowPlayingItem && !nowPlayingItem.addByRSSPodcastFeedUrl) {
-      const results = await getMediaRefs(
-        {
-          sort,
-          page: queryPage,
-          ...(queryFrom === PV.Filters._fromThisEpisodeKey && nowPlayingItem
-            ? { episodeId: nowPlayingItem.episodeId }
-            : {}),
-          ...(queryFrom === PV.Filters._fromThisPodcastKey && nowPlayingItem
-            ? { podcastId: nowPlayingItem.podcastId }
-            : {}),
-          includeEpisode: queryFrom === PV.Filters._fromThisPodcastKey
-        },
-        this.global.settings.nsfwMode
-      )
+      const results = await getMediaRefs({
+        sort,
+        page: queryPage,
+        ...(queryFrom === PV.Filters._fromThisEpisodeKey && nowPlayingItem
+          ? { episodeId: nowPlayingItem.episodeId }
+          : {}),
+        ...(queryFrom === PV.Filters._fromThisPodcastKey && nowPlayingItem
+          ? { podcastId: nowPlayingItem.podcastId }
+          : {}),
+        includeEpisode: queryFrom === PV.Filters._fromThisPodcastKey,
+        allowUntitled: true
+      })
 
       return results
     } else {
       return [[], 0]
-    }
-  }
-
-  _queryEpisodes = async (item?: NowPlayingItem, page?: number) => {
-    const { player, screenPlayer } = this.global
-    const { nowPlayingItem } = player
-    const { queryPage, querySort } = screenPlayer
-
-    if (nowPlayingItem && nowPlayingItem.addByRSSPodcastFeedUrl) {
-      const parsedPodcast = await getAddByRSSPodcastLocally(nowPlayingItem.addByRSSPodcastFeedUrl)
-      if (parsedPodcast) {
-        const { episodes = [] } = parsedPodcast
-        return [episodes, episodes.length]
-      } else {
-        return [[], 0]
-      }
-    } else {
-      const results = await getEpisodes(
-        {
-          sort: !querySort || querySort === PV.Filters._chronologicalKey ? PV.Filters._mostRecentKey : querySort,
-          page: page || queryPage,
-          podcastId: nowPlayingItem && nowPlayingItem.podcastId
-        },
-        this.global.settings.nsfwMode
-      )
-      return results
     }
   }
 
@@ -787,13 +749,13 @@ export class PlayerScreen extends React.Component<Props, State> {
     }
 
     try {
-      if (viewType === PV.Filters._episodesKey) {
-        const results = await this._queryEpisodes()
+      if (viewType === PV.Filters._clipsKey) {
+        const results = await this._queryClips()
         newState.flatListData = [...flatListData, ...results[0]]
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
-      } else if (viewType === PV.Filters._clipsKey) {
-        const results = await this._queryClips()
+      } else if (viewType === PV.Filters._chaptersKey) {
+        const results = await this._queryChapters()
         newState.flatListData = [...flatListData, ...results[0]]
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]

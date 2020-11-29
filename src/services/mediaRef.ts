@@ -39,7 +39,7 @@ export const getMediaRef = async (id: string) => {
   return response && response.data
 }
 
-export const getMediaRefs = async (query: any = {}, nsfwMode: boolean) => {
+export const getMediaRefs = async (query: any = {}) => {
   const searchAllFieldsText = query.searchAllFieldsText ? encodeURIComponent(query.searchAllFieldsText) : ''
 
   const filteredQuery = {
@@ -49,7 +49,8 @@ export const getMediaRefs = async (query: any = {}, nsfwMode: boolean) => {
     ...(query.episodeId ? { episodeId: query.episodeId } : {}),
     ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
     ...(query.includeEpisode ? { includeEpisode: true } : {}),
-    ...(query.includePodcast ? { includePodcast: true } : {})
+    ...(query.includePodcast ? { includePodcast: true } : {}),
+    ...(query.allowUntitled ? { allowUntitled: true } : {})
   } as any
 
   if (query.categories && query.categories !== PV.Filters._allCategoriesKey) {
@@ -64,13 +65,10 @@ export const getMediaRefs = async (query: any = {}, nsfwMode: boolean) => {
     return [0, 0]
   }
 
-  const response = await request(
-    {
-      endpoint: '/mediaRef',
-      query: filteredQuery
-    },
-    nsfwMode
-  )
+  const response = await request({
+    endpoint: '/mediaRef',
+    query: filteredQuery
+  })
 
   return response && response.data
 }

@@ -460,7 +460,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           })
         }
         podcastImageUrl={item.shrunkImageUrl || item.imageUrl}
-        podcastTitle={item.title}
+        {...(item.title ? { podcastTitle: item.title } : {})}
         showAutoDownload={true}
         showDownloadCount={true}
         testID={`${testIDPrefix}_podcast_item_${index}`}
@@ -684,28 +684,22 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _queryAllPodcasts = async (sort: string | null, page: number = 1) => {
     const { searchBarText: searchTitle } = this.state
-    const results = await getPodcasts(
-      {
-        sort,
-        page,
-        ...(searchTitle ? { searchTitle } : {})
-      },
-      this.global.settings.nsfwMode
-    )
+    const results = await getPodcasts({
+      sort,
+      page,
+      ...(searchTitle ? { searchTitle } : {})
+    })
     return results
   }
 
   _queryPodcastsByCategory = async (categoryId?: string | null, sort?: string | null, page: number = 1) => {
     const { searchBarText: searchTitle } = this.state
-    const results = await getPodcasts(
-      {
-        categories: categoryId,
-        sort,
-        page,
-        ...(searchTitle ? { searchTitle } : {})
-      },
-      this.global.settings.nsfwMode
-    )
+    const results = await getPodcasts({
+      categories: categoryId,
+      sort,
+      page,
+      ...(searchTitle ? { searchTitle } : {})
+    })
     return results
   }
 
@@ -733,7 +727,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
         selectedSubCategory
       } = prevState
       const { settings } = this.global
-      const { nsfwMode } = settings
 
       const hasInternetConnection = await hasValidNetworkConnection()
 
@@ -775,14 +768,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
       } else if (PV.FilterOptions.screenFilters.PodcastsScreen.sort.some((option) => option === filterKey)) {
         newState.showNoInternetConnectionMessage = !hasInternetConnection
 
-        const results = await getPodcasts(
-          {
-            ...setCategoryQueryProperty(queryFrom, selectedCategory, selectedSubCategory),
-            sort: filterKey,
-            ...(searchTitle ? { searchTitle } : {})
-          },
-          nsfwMode
-        )
+        const results = await getPodcasts({
+          ...setCategoryQueryProperty(queryFrom, selectedCategory, selectedSubCategory),
+          sort: filterKey,
+          ...(searchTitle ? { searchTitle } : {})
+        })
         newState.flatListData = results[0]
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]

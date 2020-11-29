@@ -396,14 +396,16 @@ export class PodcastScreen extends React.Component<Props, State> {
         <ClipTableCell
           endTime={item.endTime}
           episodeId={item.episode.id}
-          episodePubDate={readableDate(item.episode.pubDate)}
-          episodeTitle={item.episode.title}
+          {...(item.episode.pubDate ? { episodePubDate: item.episode.pubDate } : {})}
+          {...(item.episode.title ? { episodeTitle: item.episode.title } : {})}
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
           hasZebraStripe={isOdd(index)}
           hideImage={true}
+          showEpisodeInfo={true}
+          showPodcastTitle={false}
           startTime={item.startTime}
           testID={`${testIDPrefix}_clip_item_${index}`}
-          title={item.title}
+          {...(item.title ? { title: item.title } : {})}
         />
       ) : (
         <></>
@@ -696,6 +698,7 @@ export class PodcastScreen extends React.Component<Props, State> {
                 )
               }
               showModal={showActionSheet}
+              testID={testIDPrefix}
             />
           </View>
         )}
@@ -713,31 +716,26 @@ export class PodcastScreen extends React.Component<Props, State> {
 
   _queryEpisodes = async (sort: string | null, page: number = 1) => {
     const { podcastId, searchBarText: searchAllFieldsText } = this.state
-    const results = await getEpisodes(
-      {
-        sort,
-        page,
-        podcastId,
-        ...(searchAllFieldsText ? { searchAllFieldsText } : {})
-      },
-      this.global.settings.nsfwMode
-    )
+    const results = await getEpisodes({
+      sort,
+      page,
+      podcastId,
+      ...(searchAllFieldsText ? { searchAllFieldsText } : {})
+    })
 
     return results
   }
 
   _queryClips = async (sort: string | null, page: number = 1) => {
     const { podcastId, searchBarText: searchAllFieldsText } = this.state
-    const results = await getMediaRefs(
-      {
-        sort,
-        page,
-        podcastId,
-        includeEpisode: true,
-        ...(searchAllFieldsText ? { searchAllFieldsText } : {})
-      },
-      this.global.settings.nsfwMode
-    )
+    const results = await getMediaRefs({
+      sort,
+      page,
+      podcastId,
+      includeEpisode: true,
+      ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
+      allowUntitled: true
+    })
     return results
   }
 

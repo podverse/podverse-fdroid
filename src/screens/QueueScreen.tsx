@@ -37,6 +37,8 @@ type State = {
   viewType?: string
 }
 
+const testIDPrefix = 'queue_screen'
+
 export class QueueScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
     const { globalTheme } = getGlobal()
@@ -67,6 +69,7 @@ export class QueueScreen extends React.Component<Props, State> {
                   <NavHeaderButtonText
                     handlePress={navigation.getParam('_startEditing')}
                     style={styles.navHeaderTextButton}
+                    testID={`${testIDPrefix}_header_edit`}
                     text={translate('Edit')}
                   />
                 </RNView>
@@ -75,6 +78,7 @@ export class QueueScreen extends React.Component<Props, State> {
                   <NavHeaderButtonText
                     handlePress={navigation.getParam('_stopEditing')}
                     style={styles.navHeaderTextButton}
+                    testID={`${testIDPrefix}_header_done`}
                     text={translate('Done')}
                   />
                 </RNView>
@@ -86,12 +90,14 @@ export class QueueScreen extends React.Component<Props, State> {
                 <NavHeaderButtonText
                   handlePress={navigation.getParam('_startEditing')}
                   style={styles.navHeaderTextButton}
+                  testID={`${testIDPrefix}_header_edit`}
                   text={translate('Edit')}
                 />
               ) : (
                 <NavHeaderButtonText
                   handlePress={navigation.getParam('_stopEditing')}
                   style={styles.navHeaderTextButton}
+                  testID={`${testIDPrefix}_header_done`}
                   text={translate('Done')}
                 />
               )}
@@ -208,13 +214,13 @@ export class QueueScreen extends React.Component<Props, State> {
           <QueueTableCell
             clipEndTime={item.clipEndTime}
             clipStartTime={item.clipStartTime}
-            clipTitle={item.clipTitle}
-            episodePubDate={item.episodePubDate}
-            episodeTitle={item.episodeTitle}
+            {...(item.clipTitle ? { clipTitle: item.clipTitle } : {})}
+            {...(item.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
+            {...(item.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
             handleRemovePress={() => this._handleRemoveHistoryItemPress(item)}
             hasZebraStripe={isOdd(index)}
             podcastImageUrl={item.podcastImageUrl}
-            podcastTitle={item.podcastTitle}
+            {...(item.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
             showRemoveButton={isEditing}
             transparent={isTransparent}
           />
@@ -231,13 +237,13 @@ export class QueueScreen extends React.Component<Props, State> {
         <QueueTableCell
           clipEndTime={data.clipEndTime}
           clipStartTime={data.clipStartTime}
-          clipTitle={data.clipTitle}
-          episodePubDate={data.episodePubDate}
-          episodeTitle={data.episodeTitle}
+          {...(data.clipTitle ? { clipTitle: data.clipTitle } : {})}
+          {...(data.episodePubDate ? { episodePubDate: data.episodePubDate } : {})}
+          {...(data.episodeTitle ? { episodeTitle: data.episodeTitle } : {})}
           handleRemovePress={() => this._handleRemoveQueueItemPress(data)}
           hasZebraStripe={isOdd(index)}
           podcastImageUrl={data.podcastImageUrl}
-          podcastTitle={data.podcastTitle}
+          {...(data.podcastTitle ? { podcastTitle: data.podcastTitle } : {})}
           showMoveButton={!isEditing}
           showRemoveButton={isEditing}
           transparent={isTransparent}
@@ -311,11 +317,11 @@ export class QueueScreen extends React.Component<Props, State> {
                 <QueueTableCell
                   clipEndTime={nowPlayingItem.clipEndTime}
                   clipStartTime={nowPlayingItem.clipStartTime}
-                  clipTitle={nowPlayingItem.clipTitle}
-                  episodePubDate={nowPlayingItem.episodePubDate}
-                  episodeTitle={nowPlayingItem.episodeTitle}
+                  {...(nowPlayingItem.clipTitle ? { clipTitle: nowPlayingItem.clipTitle } : {})}
+                  {...(nowPlayingItem.episodePubDate ? { episodePubDate: nowPlayingItem.episodePubDate } : {})}
+                  {...(nowPlayingItem.episodeTitle ? { episodeTitle: nowPlayingItem.episodeTitle } : {})}
                   podcastImageUrl={nowPlayingItem.podcastImageUrl}
-                  podcastTitle={nowPlayingItem.podcastTitle}
+                  {...(nowPlayingItem.podcastTitle ? { podcastTitle: nowPlayingItem.podcastTitle } : {})}
                   transparent={isTransparent}
                 />
               </View>

@@ -19,6 +19,7 @@ type Props = {
   podcastTitle?: string
   showMoveButton?: boolean
   showRemoveButton?: boolean
+  testID: string
   transparent?: boolean
 }
 
@@ -27,56 +28,80 @@ export class QueueTableCell extends React.PureComponent<Props> {
     const {
       clipEndTime,
       clipStartTime,
-      clipTitle,
-      episodePubDate,
-      episodeTitle,
+      clipTitle = translate('untitled clip'),
+      episodePubDate = '',
+      episodeTitle = translate('untitled episode'),
       handleRemovePress,
       hasZebraStripe,
       hideBottomRow,
       podcastImageUrl,
-      podcastTitle,
+      podcastTitle = translate('untitled podcast'),
       showMoveButton,
       showRemoveButton,
+      testID,
       transparent
     } = this.props
 
     return (
-      <View hasZebraStripe={hasZebraStripe} style={styles.wrapper} transparent={transparent}>
+      <View hasZebraStripe={hasZebraStripe} style={styles.wrapper} transparent={transparent} testID={testID}>
         <RNView style={styles.wrapperTop}>
           <FastImage isSmall={true} key={podcastImageUrl} source={podcastImageUrl} styles={styles.image} />
           <RNView style={styles.textWrapper}>
-            <Text
-              fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-              isSecondary={true}
-              numberOfLines={1}
-              style={styles.podcastTitle}>
-              {podcastTitle || translate('untitled podcast')}
-            </Text>
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} numberOfLines={1} style={styles.episodeTitle}>
-              {episodeTitle || translate('untitled episode')}
-            </Text>
-            {!!episodePubDate && (
+            {podcastTitle && (
               <Text
                 fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                 isSecondary={true}
                 numberOfLines={1}
-                style={styles.episodePubDate}>
+                style={styles.podcastTitle}
+                testID={`${testID}_podcast_title`}>
+                {podcastTitle.trim()}
+              </Text>
+            )}
+            {episodeTitle && (
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                numberOfLines={1}
+                style={styles.episodeTitle}
+                testID={`${testID}_episode_title`}>
+                {episodeTitle.trim()}
+              </Text>
+            )}
+            {episodePubDate && (
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                isSecondary={true}
+                numberOfLines={1}
+                style={styles.episodePubDate}
+                testID={`${testID}_episode_pub_date`}>
                 {readableDate(episodePubDate)}
               </Text>
             )}
           </RNView>
           {showMoveButton && <Icon isSecondary={true} name='arrows-alt-v' size={28} style={button.iconOnlyMedium} />}
           {showRemoveButton && handleRemovePress && (
-            <Icon name='times' onPress={handleRemovePress} size={28} style={button.iconOnlyMedium} />
+            <Icon
+              name='times'
+              onPress={handleRemovePress}
+              size={28}
+              style={button.iconOnlyMedium}
+              testID={`${testID}_remove_button`}
+            />
           )}
         </RNView>
         {!hideBottomRow && (
           <RNView style={styles.wrapperBottom}>
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} numberOfLines={1} style={styles.clipTitle}>
-              {clipStartTime ? clipTitle || translate('untitled clip') : translate('Full Episode')}
+            <Text
+              fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+              numberOfLines={1}
+              style={styles.clipTitle}
+              testID={`${testID}_bottom_text`}>
+              {clipStartTime && clipTitle ? clipTitle.trim() : translate('Full Episode')}
             </Text>
             {!!clipStartTime && (
-              <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} style={styles.clipTime}>
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                style={styles.clipTime}
+                testID={`${testID}_clip_time`}>
                 {readableClipTime(clipStartTime, clipEndTime)}
               </Text>
             )}

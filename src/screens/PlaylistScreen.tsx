@@ -38,6 +38,8 @@ type State = {
   showActionSheet: boolean
 }
 
+const testIDPrefix = 'playlist_screen'
+
 export class PlaylistScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
     const playlistId = navigation.getParam('playlistId')
@@ -137,14 +139,17 @@ export class PlaylistScreen extends React.Component<Props, State> {
         <ClipTableCell
           endTime={item.endTime}
           episodeId={item.episode.id}
-          episodePubDate={item.episode.pubDate}
-          episodeTitle={item.episode.title}
+          {...(item.episode.pubDate ? { episodePubDate: item.episode.pubDate } : {})}
+          {...(item.episode.title ? { episodeTitle: item.episode.title } : {})}
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
           hasZebraStripe={isOdd(index)}
           podcastImageUrl={item.episode.podcast.shrunkImageUrl || item.episode.podcast.imageUrl}
-          podcastTitle={item.episode.podcast.title}
+          {...(item.episode.podcast.title ? { podcastTitle: item.episode.podcast.title } : {})}
+          showEpisodeInfo={true}
+          showPodcastTitle={true}
           startTime={item.startTime}
-          title={item.title}
+          testID={`${testIDPrefix}_clip_item_${index}`}
+          {...(item.title ? { title: item.title } : {})}
         />
       ) : (
         <></>
@@ -161,9 +166,11 @@ export class PlaylistScreen extends React.Component<Props, State> {
           hasZebraStripe={isOdd(index)}
           id={item.id}
           podcastImageUrl={(item.podcast && (item.podcast.shrunkImageUrl || item.podcast.imageUrl)) || ''}
-          podcastTitle={(item.podcast && item.podcast.title) || ''}
+          {...(item.podcast && item.podcast.title ? { podcastTitle: item.podcast.title } : {})}
           pubDate={item.pubDate}
-          title={item.title}
+          showPodcastTitle={true}
+          testID={`${testIDPrefix}_episode_item_${index}`}
+          {...(item.title ? { title: item.title } : {})}
         />
       )
     }
@@ -273,6 +280,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
             )
           }
           showModal={showActionSheet}
+          testID={testIDPrefix}
         />
       </View>
     )

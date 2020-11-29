@@ -146,9 +146,6 @@ export interface InitialState {
     flatListDataTotalCount: number | null
     playlist?: any
   }
-  settings: {
-    nsfwMode: boolean
-  }
   session: {
     isLoggedIn: boolean
     userInfo: UserInfo
@@ -183,6 +180,7 @@ export interface IFilters {
   _podcastsKey: string
   _episodesKey: string
   _clipsKey: string
+  _chaptersKey: string
   _playlistsKey: string
   _aboutPodcastKey: string
   _showNotesKey: string
