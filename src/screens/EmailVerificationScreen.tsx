@@ -13,12 +13,9 @@ type State = {
   isResendingEmail?: boolean
 }
 
+const testIDPrefix = 'email_verification_screen'
+
 export class EmailVerificationScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
-      title: translate('Verify Your Email')
-    }
-  }
 
   constructor(props: Props) {
     super(props)
@@ -30,6 +27,10 @@ export class EmailVerificationScreen extends React.Component<Props, State> {
     }
   }
 
+  static navigationOptions = () => ({
+      title: translate('Verify Your Email')
+    })
+
   _navToLogin = async () => {
     const { navigation } = this.props
     await navigation.goBack(null)
@@ -38,7 +39,7 @@ export class EmailVerificationScreen extends React.Component<Props, State> {
     await navigation.navigate(PV.RouteNames.AuthNavigator)
   }
 
-  _sendVerificationEmail = async () => {
+  _sendVerificationEmail = () => {
     const { email } = this.state
     if (email) {
       sendVerificationEmail(email)
@@ -55,6 +56,7 @@ export class EmailVerificationScreen extends React.Component<Props, State> {
         isLoading={isResendingEmail}
         message={`${translate('Please verify your email address to login')} 
         ${translate('You should receive an email shortly The email may go to your Spam folder')}`}
+        testID={testIDPrefix}
         topActionHandler={this._sendVerificationEmail}
         topActionText={translate('Resend Verification Email')}
       />

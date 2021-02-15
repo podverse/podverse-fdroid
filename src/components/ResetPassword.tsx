@@ -1,15 +1,15 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React from 'reactn'
 import isEmail from 'validator/lib/isEmail'
-import { TextInput } from '.'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
+import { Button, TextInput } from '.'
 
 type Props = {
   isLoading: boolean
   onResetPasswordPressed?: any
   style?: any
+  bottomButtons: any
 }
 
 type State = {
@@ -44,16 +44,8 @@ export class ResetPassword extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading, style } = this.props
+    const { isLoading, style, bottomButtons } = this.props
     const { submitIsDisabled } = this.state
-    const disabledStyle = submitIsDisabled ? { backgroundColor: PV.Colors.gray } : null
-    const disabledTextStyle = submitIsDisabled ? { color: PV.Colors.white } : null
-    const { fontScaleMode } = this.global
-
-    const signInButtonTextStyle =
-      PV.Fonts.fontScale.largest === fontScaleMode
-        ? [styles.signInButtonText, disabledTextStyle, { fontSize: PV.Fonts.largeSizes.md }]
-        : [styles.signInButtonText, disabledTextStyle]
 
     return (
       <View style={[styles.view, style]}>
@@ -65,21 +57,19 @@ export class ResetPassword extends React.Component<Props, State> {
           onChangeText={this._emailChanged}
           placeholder={translate('Email')}
           returnKeyType='done'
-          style={styles.textField}
-          value={this.state.email}
           testID={`${testIDPrefix}_email`}
+          value={this.state.email}
         />
-        <TouchableOpacity
-          style={[styles.signInButton, disabledStyle]}
-          disabled={submitIsDisabled || isLoading}
+        <Button
+          disabled={submitIsDisabled}
+          isLoading={isLoading}
+          isPrimary={!submitIsDisabled}
           onPress={this._resetPassword}
-          {...testProps(`${testIDPrefix}_submit`)}>
-          {isLoading ? (
-            <ActivityIndicator animating={true} color={PV.Colors.gray} size='small' />
-          ) : (
-            <Text style={[signInButtonTextStyle, disabledTextStyle]}>{translate('Send Reset')}</Text>
-          )}
-        </TouchableOpacity>
+          testID={`${testIDPrefix}_submit`}
+          text={translate('Send Reset')}
+          wrapperStyles={styles.signInButton}
+        />
+        {bottomButtons}
       </View>
     )
   }
@@ -92,25 +82,8 @@ const styles = StyleSheet.create({
     fontWeight: PV.Fonts.weights.bold,
     marginBottom: 20
   },
-  signInButton: {
-    alignItems: 'center',
-    backgroundColor: PV.Colors.white,
-    marginBottom: 300,
-    padding: 16
-  },
-  signInButtonText: {
-    color: PV.Colors.brandColor,
-    fontSize: PV.Fonts.sizes.md,
-    fontWeight: 'bold'
-  },
-  textField: {
-    backgroundColor: PV.Colors.white,
-    color: PV.Colors.black,
-    fontSize: PV.Fonts.sizes.lg,
-    marginBottom: 40,
-    minHeight: 50,
-    paddingLeft: 20
-  },
+  signInButton: {},
+  signInButtonText: {},
   view: {
     paddingHorizontal: 20,
     justifyContent: 'center',

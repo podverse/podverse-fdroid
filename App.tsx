@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import NetInfo, { NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo'
 import React, { Component } from 'react'
-import { Image, Platform, StatusBar, View, YellowBox } from 'react-native'
+import { Image, LogBox, Platform, StatusBar, View } from 'react-native'
 import Config from 'react-native-config'
 import 'react-native-gesture-handler'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
@@ -14,17 +14,14 @@ import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
 import Router from './src/Router'
 import { downloadCategoriesList } from './src/services/category'
-
-import { addOrUpdateHistoryItem } from './src/services/history'
-import { getNowPlayingItem, updateUserPlaybackPosition } from './src/services/player'
+import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
 
-YellowBox.ignoreWarnings(['Warning: componentWillUpdate'])
+LogBox.ignoreLogs(['Warning: componentWillUpdate'])
+LogBox.ignoreAllLogs(true)
 
-console.disableYellowBox = true
-
-type Props = {}
+type Props = any
 
 type State = {
   appReady: boolean
@@ -49,6 +46,7 @@ class App extends Component<Props, State> {
   async componentDidMount() {
     TrackPlayer.registerPlaybackService(() => require('./src/services/playerEvents'))
     StatusBar.setBarStyle('light-content')
+    Platform.OS === 'android' && StatusBar.setBackgroundColor(PV.Colors.ink, true)
     const darkModeEnabled = await AsyncStorage.getItem(PV.Keys.DARK_MODE_ENABLED)
     let globalTheme = darkTheme
     if (darkModeEnabled === null) {
@@ -77,20 +75,14 @@ class App extends Component<Props, State> {
       return
     }
 
-    const nowPlayingItem = await getNowPlayingItem()
-
     if (state.type === 'wifi') {
       refreshDownloads()
-      if (nowPlayingItem) {
-        await addOrUpdateHistoryItem(nowPlayingItem)
-        await updateUserPlaybackPosition()
-      }
     } else if (state.type === 'cellular') {
       const downloadingWifiOnly = await AsyncStorage.getItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
-      if (!downloadingWifiOnly) refreshDownloads()
-      if (nowPlayingItem) {
-        await addOrUpdateHistoryItem(nowPlayingItem)
-        await updateUserPlaybackPosition()
+      if (downloadingWifiOnly) {
+        pauseDownloadingEpisodesAll()
+      } else {
+        refreshDownloads()
       }
     }
   }
@@ -118,7 +110,7 @@ class App extends Component<Props, State> {
     }
 
     return (
-      <View style={{ backgroundColor: PV.Colors.black, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ backgroundColor: PV.Colors.ink, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Image source={PV.Images.BANNER} resizeMode='contain' />
       </View>
     )

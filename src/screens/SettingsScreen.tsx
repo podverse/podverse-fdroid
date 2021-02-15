@@ -30,7 +30,6 @@ import { PV } from '../resources'
 import { deleteLoggedInUser } from '../services/user'
 import { logoutUser } from '../state/actions/auth'
 import * as DownloadState from '../state/actions/downloads'
-import { clearHistoryItems } from '../state/actions/history'
 import {
   saveCustomAPIDomain,
   saveCustomWebDomain,
@@ -39,6 +38,7 @@ import {
   setCustomWebDomainEnabled,
   setOfflineModeEnabled
 } from '../state/actions/settings'
+import { clearHistoryItems } from '../state/actions/userHistoryItem'
 import { core, darkTheme, hidePickerIconOnAndroidTransparent, lightTheme } from '../styles'
 
 type Props = {
@@ -65,11 +65,6 @@ type State = {
 const testIDPrefix = 'settings_screen'
 
 export class SettingsScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
-      title: translate('Settings')
-    }
-  }
 
   constructor(props: Props) {
     super(props)
@@ -84,6 +79,10 @@ export class SettingsScreen extends React.Component<Props, State> {
       offlineModeEnabled
     }
   }
+
+  static navigationOptions = () => ({
+      title: translate('Settings')
+    })
 
   async componentDidMount() {
     const downloadingWifiOnly = await AsyncStorage.getItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
@@ -123,28 +122,34 @@ export class SettingsScreen extends React.Component<Props, State> {
       }
     })
 
-    this.setState({ downloadingWifiOnly: value }, async () => {
-      value
-        ? await AsyncStorage.setItem(PV.Keys.DOWNLOADING_WIFI_ONLY, 'TRUE')
-        : await AsyncStorage.removeItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
+    this.setState({ downloadingWifiOnly: value }, () => {
+      (async () => {
+        value
+          ? await AsyncStorage.setItem(PV.Keys.DOWNLOADING_WIFI_ONLY, 'TRUE')
+          : await AsyncStorage.removeItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
+      })()
     })
   }
 
   _toggleAutoDeleteEpisodeOnEnd = (value: boolean) => {
-    this.setState({ autoDeleteEpisodeOnEnd: value }, async () => {
-      value
-        ? await AsyncStorage.setItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END, 'TRUE')
-        : await AsyncStorage.removeItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END)
+    this.setState({ autoDeleteEpisodeOnEnd: value }, () => {
+      (async () => {
+        value
+          ? await AsyncStorage.setItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END, 'TRUE')
+          : await AsyncStorage.removeItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END)
+      })()
     })
   }
 
   _setMaximumSpeed = (value: string) => {
     const maximumSpeedSelectOptions = PV.Player.maximumSpeedSelectOptions
     const maximumSpeedOptionSelected = maximumSpeedSelectOptions.find((x: any) => x.value === value) || placeholderItem
-    this.setState({ maximumSpeedOptionSelected }, async () => {
-      value
-        ? await AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, value.toString())
-        : await AsyncStorage.removeItem(PV.Keys.PLAYER_MAXIMUM_SPEED)
+    this.setState({ maximumSpeedOptionSelected }, () => {
+      (async () => {
+        value
+          ? await AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, value.toString())
+          : await AsyncStorage.removeItem(PV.Keys.PLAYER_MAXIMUM_SPEED)
+      })()
     })
   }
 
@@ -160,10 +165,12 @@ export class SettingsScreen extends React.Component<Props, State> {
   }
 
   _handleSelectDownloadedEpisodeLimitDefault = (value: boolean) => {
-    this.setState({ downloadedEpisodeLimitDefault: value }, async () => {
-      await setDownloadedEpisodeLimitGlobalDefault(value)
-      this._handleToggleSetAllDownloadDialog()
-      this.setGlobal({ downloadedEpisodeLimitDefault: value })
+    this.setState({ downloadedEpisodeLimitDefault: value }, () => {
+      (async () => {
+        await setDownloadedEpisodeLimitGlobalDefault(value)
+        this._handleToggleSetAllDownloadDialog()
+        this.setGlobal({ downloadedEpisodeLimitDefault: value })
+      })()
     })
   }
 
@@ -184,20 +191,20 @@ export class SettingsScreen extends React.Component<Props, State> {
     this.setState({ showSetAllDownloadDialog: false })
   }
 
-  _handleToggleNSFWText = async (value: boolean) => {
-    await setCensorNSFWText(value)
+  _handleToggleNSFWText = (value: boolean) => {
+    setCensorNSFWText(value)
   }
 
-  _handleToggleOfflineMode = async (value: boolean) => {
-    this.setState({ offlineModeEnabled: value }, async () => {
+  _handleToggleOfflineMode = (value: boolean) => {
+    this.setState({ offlineModeEnabled: value }, () => {
       setOfflineModeEnabled(value)
     })
     this.setGlobal({ offlineModeEnabled: value })
   }
 
-  _handleCustomAPIDomainToggle = async () => {
+  _handleCustomAPIDomainToggle = () => {
     const { customAPIDomainEnabled } = this.global
-    await setCustomAPIDomainEnabled(!customAPIDomainEnabled)
+    setCustomAPIDomainEnabled(!customAPIDomainEnabled)
   }
 
   _handleCustomAPIDomainDialogSave = async () => {
@@ -205,9 +212,9 @@ export class SettingsScreen extends React.Component<Props, State> {
     await saveCustomAPIDomain(customAPIDomain)
   }
 
-  _handleCustomWebDomainToggle = async () => {
+  _handleCustomWebDomainToggle = () => {
     const { customWebDomainEnabled } = this.global
-    await setCustomWebDomainEnabled(!customWebDomainEnabled)
+    setCustomWebDomainEnabled(!customWebDomainEnabled)
   }
 
   _handleCustomWebDomainDialogTextChange = async (text: string) => this.setGlobal({ customWebDomain: text })
@@ -230,16 +237,15 @@ export class SettingsScreen extends React.Component<Props, State> {
             {
               isLoading: true
             },
-            async () => {
-              try {
-                await clearHistoryItems()
-                this.setState({
-                  historyItems: [],
-                  isLoading: false
-                })
-              } catch (error) {
-                this.setState({ isLoading: false })
-              }
+            () => {
+              (async () => {
+                try {
+                  await clearHistoryItems()
+                  this.setState({ isLoading: false })
+                } catch (error) {
+                  this.setState({ isLoading: false })
+                }
+              })()
             }
           )
         }
@@ -259,14 +265,16 @@ export class SettingsScreen extends React.Component<Props, State> {
         isLoading: true,
         showDeleteDownloadedEpisodesDialog: false
       },
-      async () => {
-        try {
-          await removeAllDownloadedPodcasts()
-        } catch (error) {
-          //
-        }
-        DownloadState.updateDownloadedPodcasts()
-        this.setState({ isLoading: false })
+      () => {
+        (async () => {
+          try {
+            await removeAllDownloadedPodcasts()
+          } catch (error) {
+            //
+          }
+          DownloadState.updateDownloadedPodcasts()
+          this.setState({ isLoading: false })
+        })()
       }
     )
   }
@@ -337,105 +345,131 @@ export class SettingsScreen extends React.Component<Props, State> {
     const isDarkMode = globalTheme === darkTheme
 
     return (
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={styles.wrapper} {...testProps('settings_screen_view')}>
-        {isLoading && <ActivityIndicator styles={styles.activityIndicator} />}
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContentContainer}
+        style={styles.wrapper}
+        {...testProps('settings_screen_view')}>
+        {isLoading && <ActivityIndicator fillSpace />}
         {!isLoading && (
           <View>
-            <SwitchWithText
-              onValueChange={this._toggleTheme}
-              testID={`${testIDPrefix}_dark_mode`}
-              text={`${globalTheme === darkTheme ? translate('Dark Mode') : translate('Light Mode')}`}
-              value={globalTheme === darkTheme}
-            />
-            <SwitchWithText
-              onValueChange={this._toggleDownloadingWifiOnly}
-              testID={`${testIDPrefix}_only_allow_downloading_when_connected_to_wifi`}
-              text={translate('Only allow downloading when connected to Wifi')}
-              value={!!downloadingWifiOnly}
-            />
+            <View style={styles.itemWrapper}>
+              <SwitchWithText
+                onValueChange={this._handleToggleOfflineMode}
+                subText={translate('Offline mode can save battery life and improve performance')}
+                testID={`${testIDPrefix}_offline_mode`}
+                text={translate('Offline Mode')}
+                value={!!offlineModeEnabled}
+              />
+            </View>
+            <Divider style={styles.divider} />
+            {/* {!Config.DISABLE_THEME_SWITCH && (
+              <View style={styles.itemWrapper}>
+                <SwitchWithText
+                  onValueChange={this._toggleTheme}
+                  testID={`${testIDPrefix}_dark_mode`}
+                  text={`${globalTheme === darkTheme ? translate('Dark Mode') : translate('Light Mode')}`}
+                  value={globalTheme === darkTheme}
+                />
+              </View>
+            )} */}
+            <View style={styles.itemWrapper}>
+              <SwitchWithText
+                onValueChange={this._toggleDownloadingWifiOnly}
+                testID={`${testIDPrefix}_only_allow_downloading_when_connected_to_wifi`}
+                text={translate('Only allow downloading when connected to Wifi')}
+                value={!!downloadingWifiOnly}
+              />
+            </View>
+            <View style={styles.itemWrapper}>
+              <SwitchWithText
+                onValueChange={this._handleToggleNSFWText}
+                testID={`${testIDPrefix}_censor_nsfw_text`}
+                text={translate('Censor NSFW text')}
+                value={!!censorNSFWText}
+              />
+            </View>
+            <View style={styles.itemWrapperReducedHeight}>
+              <RNPickerSelect
+                items={PV.Player.maximumSpeedSelectOptions}
+                onValueChange={this._setMaximumSpeed}
+                placeholder={placeholderItem}
+                style={hidePickerIconOnAndroidTransparent(isDarkMode)}
+                useNativeAndroidPickerStyle={false}
+                value={maximumSpeedOptionSelected.value}>
+                <View style={core.selectorWrapper}>
+                  <View style={core.selectorWrapperLeft}>
+                    <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[styles.pickerSelect, globalTheme.text]}>
+                      {maximumSpeedOptionSelected.label}
+                    </Text>
+                    <Icon name='angle-down' size={14} style={[styles.pickerSelectIcon, globalTheme.text]} />
+                  </View>
+                  <View style={core.selectorWrapperRight}>
+                    <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[styles.pickerSelect, globalTheme.text]}>
+                      {translate('Max playback speed')}
+                    </Text>
+                  </View>
+                </View>
+              </RNPickerSelect>
+            </View>
             {/* <SwitchWithText
               onValueChange={this._toggleAutoDeleteEpisodeOnEnd}
               text='Delete downloaded episodes after end is reached'
               value={!!autoDeleteEpisodeOnEnd} /> */}
-            <SwitchWithText
-              onValueChange={this._handleSelectDownloadedEpisodeLimitDefault}
-              testID={`${testIDPrefix}_limit_the_number_of_downloaded_episodes`}
-              text={translate('Limit the number of downloaded episodes for each podcast by default')}
-              value={!!downloadedEpisodeLimitDefault}
-            />
-            <NumberSelectorWithText
-              handleChangeText={this._handleChangeDownloadedEpisodeLimitCountText}
-              handleSubmitEditing={this._handleSetGlobalDownloadedEpisodeLimitCount}
-              selectedNumber={downloadedEpisodeLimitCount}
-              testID={`${testIDPrefix}_default_downloaded_episode_limit`}
-              text={translate('Default downloaded episode limit for each podcast')}
-            />
-            <SwitchWithText
-              onValueChange={this._handleToggleNSFWText}
-              testID={`${testIDPrefix}_censor_nsfw_text`}
-              text={translate('Censor NSFW text')}
-              value={!!censorNSFWText}
-            />
-            <RNPickerSelect
-              items={PV.Player.maximumSpeedSelectOptions}
-              onValueChange={this._setMaximumSpeed}
-              placeholder={placeholderItem}
-              style={hidePickerIconOnAndroidTransparent(isDarkMode)}
-              useNativeAndroidPickerStyle={false}
-              value={maximumSpeedOptionSelected.value}>
-              <View style={core.selectorWrapper}>
-                <View style={core.selectorWrapperLeft}>
-                  <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[styles.pickerSelect, globalTheme.text]}>
-                    {maximumSpeedOptionSelected.label}
-                  </Text>
-                  <Icon name='angle-down' size={14} style={[styles.pickerSelectIcon, globalTheme.text]} />
-                </View>
-                <View style={core.selectorWrapperRight}>
-                  <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[styles.pickerSelect, globalTheme.text]}>
-                    {translate('Max playback speed')}
-                  </Text>
-                </View>
-              </View>
-            </RNPickerSelect>
-            <SwitchWithText
-              onValueChange={this._handleToggleOfflineMode}
-              subText={translate('Offline mode can save battery life and improve performance')}
-              testID={`${testIDPrefix}_offline_mode`}
-              text={translate('Offline Mode')}
-              value={!!offlineModeEnabled}
-            />
+            <View style={styles.itemWrapper}>
+              <SwitchWithText
+                onValueChange={this._handleSelectDownloadedEpisodeLimitDefault}
+                testID={`${testIDPrefix}_limit_the_number_of_downloaded_episodes`}
+                text={translate('Limit the number of downloaded episodes for each podcast by default')}
+                value={!!downloadedEpisodeLimitDefault}
+              />
+            </View>
+            <View style={styles.itemWrapper}>
+              <NumberSelectorWithText
+                handleChangeText={this._handleChangeDownloadedEpisodeLimitCountText}
+                handleSubmitEditing={this._handleSetGlobalDownloadedEpisodeLimitCount}
+                selectedNumber={downloadedEpisodeLimitCount}
+                testID={`${testIDPrefix}_default_downloaded_episode_limit`}
+                text={translate('Default downloaded episode limit for each podcast')}
+              />
+            </View>
             {!Config.DISABLE_CUSTOM_DOMAINS && (
               <View>
                 <Divider style={styles.divider} />
-                <SwitchWithText
-                  inputAutoCorrect={false}
-                  inputEditable={customAPIDomainEnabled}
-                  inputHandleBlur={this._handleCustomAPIDomainDialogSave}
-                  inputHandleSubmit={this._handleCustomAPIDomainDialogSave}
-                  inputHandleTextChange={(text?: string) => this.setGlobal({ customAPIDomain: text })}
-                  inputPlaceholder={PV.URLs.apiDefaultBaseUrl}
-                  inputShow={customAPIDomainEnabled}
-                  inputText={customAPIDomain}
-                  onValueChange={this._handleCustomAPIDomainToggle}
-                  text={translate('Use custom API domain')}
-                  testID={`${testIDPrefix}_custom_api_domain`}
-                  value={!!customAPIDomainEnabled}
-                />
-                <SwitchWithText
-                  inputAutoCorrect={false}
-                  inputEditable={customWebDomainEnabled}
-                  inputHandleBlur={this._handleCustomWebDomainDialogSave}
-                  inputHandleSubmit={this._handleCustomWebDomainDialogSave}
-                  inputHandleTextChange={(text?: string) => this.setGlobal({ customWebDomain: text })}
-                  inputPlaceholder={PV.URLs.webDefaultBaseUrl}
-                  inputShow={customWebDomainEnabled}
-                  inputText={customWebDomain}
-                  onValueChange={this._handleCustomWebDomainToggle}
-                  subText={translate('Custom Web Domain subtext')}
-                  testID={`${testIDPrefix}_custom_web_domain`}
-                  text={translate('Use custom web domain')}
-                  value={!!customWebDomainEnabled}
-                />
+                <View style={styles.itemWrapper}>
+                  <SwitchWithText
+                    inputAutoCorrect={false}
+                    inputEditable={customAPIDomainEnabled}
+                    inputEyebrowTitle={translate('Custom API domain')}
+                    inputHandleBlur={this._handleCustomAPIDomainDialogSave}
+                    inputHandleSubmit={this._handleCustomAPIDomainDialogSave}
+                    inputHandleTextChange={(text?: string) => this.setGlobal({ customAPIDomain: text })}
+                    inputPlaceholder={PV.URLs.apiDefaultBaseUrl}
+                    inputShow={customAPIDomainEnabled}
+                    inputText={customAPIDomain}
+                    onValueChange={this._handleCustomAPIDomainToggle}
+                    text={translate('Use custom API domain')}
+                    testID={`${testIDPrefix}_custom_api_domain`}
+                    value={!!customAPIDomainEnabled}
+                  />
+                </View>
+                <View style={styles.itemWrapper}>
+                  <SwitchWithText
+                    inputAutoCorrect={false}
+                    inputEditable={customWebDomainEnabled}
+                    inputEyebrowTitle={translate('Custom web domain')}
+                    inputHandleBlur={this._handleCustomWebDomainDialogSave}
+                    inputHandleSubmit={this._handleCustomWebDomainDialogSave}
+                    inputHandleTextChange={(text?: string) => this.setGlobal({ customWebDomain: text })}
+                    inputPlaceholder={PV.URLs.webDefaultBaseUrl}
+                    inputShow={customWebDomainEnabled}
+                    inputText={customWebDomain}
+                    onValueChange={this._handleCustomWebDomainToggle}
+                    subText={translate('Custom web domain subtext')}
+                    testID={`${testIDPrefix}_custom_web_domain`}
+                    text={translate('Use custom web domain')}
+                    value={!!customWebDomainEnabled}
+                  />
+                </View>
               </View>
             )}
             <Divider style={styles.divider} />
@@ -453,7 +487,7 @@ export class SettingsScreen extends React.Component<Props, State> {
             />
             {isLoggedIn && (
               <Button
-                isWarning={true}
+                isWarning
                 onPress={this._handleToggleDeleteAccountDialog}
                 testID={`${testIDPrefix}_delete_account`}
                 text={translate('Delete Account')}
@@ -535,11 +569,19 @@ const styles = StyleSheet.create({
   },
   button: {
     marginHorizontal: 12,
-    marginBottom: 16,
-    marginTop: 8
+    marginBottom: 24,
+    marginTop: 0,
+    borderRadius: 8
   },
   divider: {
-    marginVertical: 16
+    marginBottom: 24
+  },
+  itemWrapper: {
+    marginBottom: 24
+  },
+  itemWrapperReducedHeight: {
+    marginTop: -4,
+    marginBottom: 16
   },
   pickerSelect: {
     flex: 0,
@@ -551,11 +593,13 @@ const styles = StyleSheet.create({
     flex: 0,
     paddingHorizontal: 4
   },
+  scrollViewContentContainer: {
+    paddingBottom: 48
+  },
   wrapper: {
     flex: 1,
-    paddingBottom: 40,
-    paddingHorizontal: 12,
-    paddingTop: 8
+    paddingTop: 24,
+    paddingHorizontal: 12
   }
 })
 

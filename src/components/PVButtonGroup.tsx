@@ -21,6 +21,7 @@ export const PVButtonGroup = (props: Props) => {
 
   return (
     <ButtonGroup
+      activeOpacity={0.7}
       buttons={buttons}
       buttonStyle={[styles.button, globalTheme.buttonGroup]}
       containerStyle={styles.container}
@@ -35,11 +36,11 @@ export const PVButtonGroup = (props: Props) => {
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 52
+    minHeight: 40
   },
   container: {
     marginTop: 12,
-    minHeight: 52
+    minHeight: 40
   },
   selectedButton: {
     flex: 0

@@ -13,7 +13,6 @@ type Props = {
   getMediaRefId: any
   globalTheme?: GlobalTheme
   navigation: any
-  testID: string
 }
 
 type State = {
@@ -52,7 +51,7 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
     const isLoggedIn = safelyUnwrapNestedVariable(() => this.global.session.isLoggedIn, false)
     if (Config.DISABLE_ADD_TO_PLAYLIST || !isLoggedIn) return null
 
-    const { getEpisodeId, getMediaRefId, navigation, testID } = this.props
+    const { getEpisodeId, getMediaRefId, navigation } = this.props
     const episodeId = getEpisodeId ? getEpisodeId() : null
     const mediaRefId = getMediaRefId ? getMediaRefId() : null
     const { showActionSheet } = this.state
@@ -70,7 +69,7 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
           items={actionSheetButtons(episodeId, mediaRefId, navigation, this._dismissActionSheet)}
           {...(mediaRefId ? { message: translate('Do you want to add this episode or clip') } : '')}
           showModal={showActionSheet}
-          testID={testID}
+          testID={`nav_add_to_playlist_icon_action_sheet`}
           title={translate('Add to Playlist')}
         />
       </View>
@@ -82,7 +81,7 @@ const actionSheetButtons = (episodeId: string, mediaRefId: string, navigation: a
   {
     key: 'episode',
     text: translate('Episode'),
-    onPress: async () => {
+    onPress: () => {
       handleDismiss()
       navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { episodeId })
     }
@@ -90,7 +89,7 @@ const actionSheetButtons = (episodeId: string, mediaRefId: string, navigation: a
   {
     key: 'clip',
     text: translate('Clip'),
-    onPress: async () => {
+    onPress: () => {
       handleDismiss()
       navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { mediaRefId })
     }

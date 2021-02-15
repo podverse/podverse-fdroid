@@ -1,26 +1,23 @@
 import {
-  ActivityIndicator,
   Dimensions,
   Keyboard,
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity
 } from 'react-native'
 import React from 'reactn'
 import isEmail from 'validator/lib/isEmail'
-import { PasswordValidationInfo, TextInput } from '.'
 import { translate } from '../lib/i18n'
 import {
   hasAtLeastXCharacters as hasAtLeastXCharactersLib,
   hasLowercase as hasLowercaseLib,
   hasMatchingStrings,
   hasNumber as hasNumberLib,
-  hasUppercase as hasUppercaseLib,
-  testProps
+  hasUppercase as hasUppercaseLib
 } from '../lib/utility'
 import { PV } from '../resources'
+import { Button, PasswordValidationInfo, TextInput } from '.'
 
 type Props = {
   bottomButtons: any
@@ -139,9 +136,6 @@ export class SignUp extends React.Component<Props, State> {
       passwordVerification,
       submitIsDisabled
     } = this.state
-    const checkIfSubmitIsDisabledStyle = submitIsDisabled ? { backgroundColor: PV.Colors.grayDark } : null
-    const checkIfSubmitIsDisabledTextStyle = submitIsDisabled ? { color: PV.Colors.white } : null
-    const { fontScaleMode } = this.global
 
     const passwordMismatch = passwordVerification.length > 0 && passwordVerification !== password
     const errorStyle = {
@@ -149,16 +143,11 @@ export class SignUp extends React.Component<Props, State> {
       borderWidth: 2
     }
 
-    const signInButtonTextStyle =
-      PV.Fonts.fontScale.largest === fontScaleMode
-        ? [styles.signInButtonText, { fontSize: PV.Fonts.largeSizes.md }]
-        : [styles.signInButtonText]
-
     return (
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={true}>
+        showsVerticalScrollIndicator>
         <TextInput
           autoCapitalize='none'
           autoCompleteType='email'
@@ -170,7 +159,6 @@ export class SignUp extends React.Component<Props, State> {
           placeholder={translate('Email')}
           placeholderTextColor={PV.Colors.gray}
           returnKeyType='next'
-          style={styles.textField}
           testID={`${testIDPrefix}_email`}
           value={this.state.email}
         />
@@ -187,8 +175,7 @@ export class SignUp extends React.Component<Props, State> {
           placeholder={translate('Password')}
           placeholderTextColor={PV.Colors.gray}
           returnKeyType='next'
-          secureTextEntry={true}
-          style={styles.textField}
+          secureTextEntry
           testID={`${testIDPrefix}_password`}
           underlineColorAndroid='transparent'
           value={this.state.password}
@@ -206,8 +193,8 @@ export class SignUp extends React.Component<Props, State> {
           placeholder={translate('Verify Password')}
           placeholderTextColor={PV.Colors.gray}
           returnKeyType={Platform.OS === 'ios' ? 'done' : 'default'}
-          secureTextEntry={true}
-          style={[styles.textField, passwordMismatch ? errorStyle : null]}
+          secureTextEntry
+          style={passwordMismatch ? errorStyle : null}
           testID={`${testIDPrefix}_verify_password`}
           underlineColorAndroid='transparent'
           value={this.state.passwordVerification}
@@ -221,17 +208,15 @@ export class SignUp extends React.Component<Props, State> {
               hasUppercase={hasUppercase}
               style={styles.passwordValidationInfo}
             />
-            <TouchableOpacity
-              style={[styles.signInButton, checkIfSubmitIsDisabledStyle]}
-              disabled={submitIsDisabled || isLoading}
+            <Button
+              disabled={submitIsDisabled}
+              isLoading={isLoading}
+              isPrimary={!submitIsDisabled}
               onPress={this.signUp}
-              {...testProps(`${testIDPrefix}_submit`)}>
-              {isLoading ? (
-                <ActivityIndicator animating={true} color={PV.Colors.white} size='small' />
-              ) : (
-                <Text style={[signInButtonTextStyle, checkIfSubmitIsDisabledTextStyle]}>{translate('Sign Up')}</Text>
-              )}
-            </TouchableOpacity>
+              testID={`${testIDPrefix}_submit`}
+              text={translate('Sign Up')}
+              wrapperStyles={styles.signInButton}
+            />
             {bottomButtons}
           </>
         </TouchableOpacity>
@@ -254,18 +239,10 @@ const styles = StyleSheet.create({
     maxWidth: deviceWidth
   },
   signInButton: {
-    alignItems: 'center',
-    borderColor: PV.Colors.white,
-    borderWidth: 1,
     marginTop: 6,
-    marginBottom: 200,
-    padding: 16
+    marginBottom: 200
   },
-  signInButtonText: {
-    color: PV.Colors.white,
-    fontSize: PV.Fonts.sizes.md,
-    fontWeight: 'bold'
-  },
+  signInButtonText: {},
   textField: {
     backgroundColor: PV.Colors.white,
     color: PV.Colors.black,

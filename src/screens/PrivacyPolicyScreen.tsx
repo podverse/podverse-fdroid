@@ -5,16 +5,12 @@ import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 
-type Props = {}
+type Props = any
 
-type State = {}
-
-export class PrivacyPolicyScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
+export class PrivacyPolicyScreen extends React.Component<Props> {
+  static navigationOptions = () => ({
       title: translate('Privacy Policy')
-    }
-  }
+    })
 
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [

@@ -17,8 +17,9 @@ import {
 import { downloadEpisode } from '../lib/downloader'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
+import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import { getPlaylist, toggleSubscribeToPlaylist } from '../state/actions/playlist'
 import { core } from '../styles'
 
@@ -41,25 +42,6 @@ type State = {
 const testIDPrefix = 'playlist_screen'
 
 export class PlaylistScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    const playlistId = navigation.getParam('playlistId')
-    const playlistTitle = navigation.getParam('playlistTitle')
-
-    return {
-      title: translate('Playlist'),
-      headerRight: (
-        <RNView style={core.row}>
-          <NavShareIcon
-            endingText={translate('shared using brandName')}
-            playlistTitle={playlistTitle}
-            urlId={playlistId}
-            urlPath={PV.URLs.webPaths.playlist}
-          />
-          <NavSearchIcon navigation={navigation} />
-        </RNView>
-      )
-    } as NavigationStackOptions
-  }
 
   constructor(props: Props) {
     super(props)
@@ -69,7 +51,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
     )
     const playlist = this.props.navigation.getParam('playlist')
     const playlistId = (playlist && playlist.id) || this.props.navigation.getParam('playlistId')
-    const isSubscribed = subscribedPlaylistIds.some((x: string) => playlistId)
+    const isSubscribed = subscribedPlaylistIds.some((x: string) => x === playlistId)
 
     if (playlist && playlist.id) {
       this.props.navigation.setParams({ playlistId: playlist.id })
@@ -95,12 +77,31 @@ export class PlaylistScreen extends React.Component<Props, State> {
     })
   }
 
-  async componentDidMount() {
-    const { playlistId } = this.state
+  static navigationOptions = ({ navigation }) => {
+    const playlistId = navigation.getParam('playlistId')
+    const playlistTitle = navigation.getParam('playlistTitle')
+
+    return {
+      title: translate('Playlist'),
+      headerRight: () => (
+        <RNView style={core.row}>
+          <NavShareIcon
+            endingText={translate('shared using brandName')}
+            playlistTitle={playlistTitle}
+            urlId={playlistId}
+            urlPath={PV.URLs.webPaths.playlist}
+          />
+          <NavSearchIcon navigation={navigation} />
+        </RNView>
+      )
+    } as NavigationStackOptions
+  }
+
+  componentDidMount() {
     this._initializePageData()
   }
 
-  async _initializePageData() {
+  _initializePageData() {
     const playlistId = this.props.navigation.getParam('playlistId') || this.state.playlistId
 
     this.setState(
@@ -109,7 +110,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
         isLoading: true,
         playlistId
       },
-      async () => {
+      () => {
         setGlobal(
           {
             flatListData: [],
@@ -129,48 +130,37 @@ export class PlaylistScreen extends React.Component<Props, State> {
     )
   }
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
+  _ItemSeparatorComponent = () => <Divider />
 
   _renderItem = ({ item, index }) => {
     if (item.startTime) {
       return item.episode && item.episode.podcast ? (
         <ClipTableCell
-          endTime={item.endTime}
-          episodeId={item.episode.id}
-          {...(item.episode.pubDate ? { episodePubDate: item.episode.pubDate } : {})}
-          {...(item.episode.title ? { episodeTitle: item.episode.title } : {})}
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
-          hasZebraStripe={isOdd(index)}
-          podcastImageUrl={item.episode.podcast.shrunkImageUrl || item.episode.podcast.imageUrl}
-          {...(item.episode.podcast.title ? { podcastTitle: item.episode.podcast.title } : {})}
-          showEpisodeInfo={true}
-          showPodcastTitle={true}
-          startTime={item.startTime}
+          showEpisodeInfo
+          showPodcastInfo
           testID={`${testIDPrefix}_clip_item_${index}`}
-          {...(item.title ? { title: item.title } : {})}
+          item={item}
         />
       ) : (
         <></>
       )
     } else {
+      const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(item.id)
+
       return (
         <EpisodeTableCell
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
+          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null, userPlaybackPosition))}
           handleNavigationPress={() =>
             this.props.navigation.navigate(PV.RouteNames.MoreEpisodeScreen, {
               episode: item
             })
           }
-          hasZebraStripe={isOdd(index)}
-          id={item.id}
-          podcastImageUrl={(item.podcast && (item.podcast.shrunkImageUrl || item.podcast.imageUrl)) || ''}
-          {...(item.podcast && item.podcast.title ? { podcastTitle: item.podcast.title } : {})}
-          pubDate={item.pubDate}
-          showPodcastTitle={true}
+          item={item}
+          mediaFileDuration={mediaFileDuration}
+          showPodcastInfo
           testID={`${testIDPrefix}_episode_item_${index}`}
-          {...(item.title ? { title: item.title } : {})}
+          userPlaybackPosition={userPlaybackPosition}
         />
       )
     }
@@ -186,25 +176,25 @@ export class PlaylistScreen extends React.Component<Props, State> {
     const wasAlerted = await alertIfNoNetworkConnection('subscribe to playlist')
     if (wasAlerted) return
 
-    this.setState({ isSubscribing: true }, async () => {
-      try {
-        const subscribedPlaylistIds = await toggleSubscribeToPlaylist(id)
-        const isSubscribed = subscribedPlaylistIds.some((x: string) => x === id)
-        this.setState({
-          isSubscribed,
-          isSubscribing: false
-        })
-      } catch (error) {
-        this.setState({ isSubscribing: false })
-      }
+    this.setState({ isSubscribing: true }, () => {
+      (async () => {
+        try {
+          const subscribedPlaylistIds = await toggleSubscribeToPlaylist(id)
+          const isSubscribed = subscribedPlaylistIds.some((x: string) => x === id)
+          this.setState({
+            isSubscribed,
+            isSubscribing: false
+          })
+        } catch (error) {
+          this.setState({ isSubscribing: false })
+        }
+      })()
     })
   }
 
-  _handleCancelPress = () => {
-    return new Promise((resolve, reject) => {
+  _handleCancelPress = () => new Promise((resolve) => {
       this.setState({ showActionSheet: false }, resolve)
     })
-  }
 
   _handleMorePress = (selectedItem: any) => {
     this.setState({
@@ -250,14 +240,15 @@ export class PlaylistScreen extends React.Component<Props, State> {
           isSubscribing={isSubscribing}
           itemCount={playlist && playlist.itemCount}
           lastUpdated={playlist && playlist.updatedAt}
+          testID={testIDPrefix}
           title={playlist && playlist.title}
         />
-        {isLoading && <ActivityIndicator />}
+        {isLoading && <ActivityIndicator fillSpace />}
         {!isLoading && flatListData && (
           <FlatList
             data={flatListData}
             dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe={true}
+            disableLeftSwipe
             extraData={flatListData}
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}
@@ -269,15 +260,12 @@ export class PlaylistScreen extends React.Component<Props, State> {
         <ActionSheet
           handleCancelPress={this._handleCancelPress}
           items={() =>
-            PV.ActionSheet.media.moreButtons(
-              selectedItem,
-              navigation,
-              this._handleCancelPress,
-              this._handleDownloadPressed,
-              null, // handleDeleteClip
-              true, // includeGoToPodcast
-              true // includeGoToEpisode
-            )
+            PV.ActionSheet.media.moreButtons(selectedItem, navigation, {
+              handleDismiss: this._handleCancelPress,
+              handleDownload: this._handleDownloadPressed,
+              includeGoToPodcast: true,
+              includeGoToEpisode: true
+            })
           }
           showModal={showActionSheet}
           testID={testIDPrefix}
