@@ -379,16 +379,8 @@ export class EpisodesScreen extends React.Component<Props, State> {
     this.props.navigation.navigate(PV.RouteNames.SearchScreen)
   }
 
-  _handleScanQRCodeNavigation = () => {
-    this.props.navigation.navigate(PV.RouteNames.ScanQRCodeScreen)
-  }
-
   _handleNoResultsTopAction = () => {
-    if (Config.DEFAULT_ACTION_NO_SUBSCRIBED_PODCASTS === PV.Keys.DEFAULT_ACTION_BUTTON_SCAN_QR_CODE) {
-      this._handleScanQRCodeNavigation()
-    } else {
-      this._handleSearchNavigation()
-    }
+    this._handleSearchNavigation()
   }
 
   render() {
