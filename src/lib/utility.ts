@@ -16,8 +16,9 @@ const userAgent = ''
  * to parallel process handling, so we are trying to only call the getUserAgent
  * method once on app launch, then access that value in the userAgent constant.
  */
-export const setAppUserAgent = async () => {
+export const setAppUserAgent = () => {
   try {
+    // NOTE: Disabled for F-Droid
     // userAgent = await getUserAgent()
   } catch (e) {
     console.log('setAppUserAgent', e)

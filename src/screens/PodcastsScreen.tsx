@@ -291,7 +291,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     // Set the appUserAgent one time on initialization, then retrieve from a constant
     // using the getAppUserAgent method, or from the global state (for synchronous access).
-    await setAppUserAgent()
+    setAppUserAgent()
     const userAgent = getAppUserAgent()
     this.setGlobal({ userAgent })
 

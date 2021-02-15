@@ -36,7 +36,6 @@ import {
   playerPreviewStartTime,
   PVTrackPlayer
 } from '../services/player'
-import { trackPageView } from '../services/tracking'
 import { setNowPlayingItem, setPlaybackSpeed, togglePlay } from '../state/actions/player'
 import { core, playerStyles } from '../styles'
 
