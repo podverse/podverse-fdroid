@@ -17,7 +17,6 @@ import {
   togglePlay as togglePlayService
 } from '../../services/player'
 import { initSleepTimerDefaultTimeRemaining } from '../../services/sleepTimer'
-import { trackPlayerScreenPageView } from '../../services/tracking'
 import {
   clearNowPlayingItem as clearNowPlayingItemService,
   setNowPlayingItem as setNowPlayingItemService
@@ -139,11 +138,6 @@ export const initPlayerState = async (globalState: any) => {
 export const playNextFromQueue = async () => {
   const item = await playNextFromQueueService()
   await getQueueItems()
-
-  if (item) {
-    const globalState = getGlobal()
-    trackPlayerScreenPageView(item, globalState)
-  }
 }
 
 const handleLoadChapterForNowPlayingEpisode = async (item: NowPlayingItem) => {
@@ -192,8 +186,6 @@ export const loadItemAndPlayTrack = async (
       }
     },
     () => {
-      const globalState = getGlobal()
-      trackPlayerScreenPageView(item, globalState)
       loadChaptersForNowPlayingItem(item)
     }
   )

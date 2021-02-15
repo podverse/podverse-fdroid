@@ -36,7 +36,6 @@ import { getEpisodes } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
 import { getAddByRSSPodcastLocally } from '../services/parser'
 import { getPodcast } from '../services/podcast'
-import { trackPageView } from '../services/tracking'
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import * as DownloadState from '../state/actions/downloads'
 import { toggleAddByRSSPodcastFeedUrl } from '../state/actions/parser'
@@ -167,11 +166,6 @@ static navigationOptions = ({ navigation }) => {
       },
       () => {
         this._initializePageData()
-
-        const pageTitle = podcast
-          ? translate('Podcasts Screen - ') + podcast.title
-          : translate('PodcastsScreen - ') + translate('no info available')
-        trackPageView('/podcast/' + podcastId, pageTitle)
       }
     )
   }

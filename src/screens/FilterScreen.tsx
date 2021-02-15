@@ -6,7 +6,6 @@ import { generateSections } from '../lib/filters'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { getDefaultCategory } from '../services/category'
-import { trackPageView } from '../services/tracking'
 
 type Props = {
   navigation?: any
@@ -57,7 +56,6 @@ export class FilterScreen extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    trackPageView('/filter', 'Filter Screen')
     const { navigation } = this.props
     const { flatCategoryItems } = this.state
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')

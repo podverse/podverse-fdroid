@@ -28,7 +28,6 @@ import { getEpisode } from '../services/episode'
 import { checkIdlePlayerState, PVTrackPlayer, updateTrackPlayerCapabilities,
   updateUserPlaybackPosition } from '../services/player'
 import { getPodcast, getPodcasts } from '../services/podcast'
-import { trackPageView } from '../services/tracking'
 import { getNowPlayingItemLocally } from '../services/userNowPlayingItem'
 import { askToSyncWithNowPlayingItem, getAuthUserInfo } from '../state/actions/auth'
 import { initDownloads, removeDownloadedPodcast } from '../state/actions/downloads'
@@ -308,7 +307,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
     await initDownloads()
     await initializePlayerQueue()
     await initializePlaybackSpeed()
-    trackPageView('/podcasts', 'Podcasts Screen')
   }
 
   handleSelectFilterItem = async (selectedKey: string) => {

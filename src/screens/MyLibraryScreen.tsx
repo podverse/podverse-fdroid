@@ -5,7 +5,6 @@ import { Divider, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { core, table } from '../styles'
 
 type Props = {
@@ -25,10 +24,6 @@ export class MyLibraryScreen extends React.Component<Props, State> {
   static navigationOptions = () => ({
       title: translate('My Library')
     })
-
-  componentDidMount() {
-    trackPageView('/myLibrary', 'My Library Screen')
-  }
 
   _myLibraryOptions = (isLoggedIn: boolean) => {
     const loggedInFeatures = [_myClipsKey, _myProfileKey, _playlistsKey, _profilesKey]

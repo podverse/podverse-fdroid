@@ -13,7 +13,6 @@ import {
 import { translate } from '../lib/i18n'
 import { overrideImageUrlWithChapterImageUrl, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { loadItemAndPlayTrack } from '../state/actions/player'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
 import { core, darkTheme } from '../styles'
@@ -112,8 +111,6 @@ export class HistoryScreen extends React.Component<Props, State> {
     } catch (error) {
       this.setState({ isLoading: false })
     }
-
-    trackPageView('/history', 'History Screen')
   }
 
   _startEditing = () => {

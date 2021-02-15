@@ -7,7 +7,6 @@ import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { retrieveLatestChaptersForEpisodeId } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
-import { trackPageView } from '../services/tracking'
 
 type Props = {
   navigation: any
@@ -59,10 +58,6 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => ({
       title: navigation.getParam('title') || ''
     })
-
-  componentDidMount() {
-    trackPageView('/episode/mediaRefs', 'EpisodeMediaRef Screen')
-  }
 
   _queryData = async (
     filterKey: string | null,
