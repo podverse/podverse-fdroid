@@ -135,7 +135,6 @@ android {
         versionCode 4
         versionName "3.0.2"
         multiDexEnabled true
-        missingDimensionStrategy 'general'
     }
     splits {
         abi {
