@@ -6,16 +6,12 @@ import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 
-type Props = {}
+type Props = any
 
-type State = {}
-
-export class TermsOfServiceScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
+export class TermsOfServiceScreen extends React.Component<Props> {
+  static navigationOptions = () => ({
       title: translate('Terms of Service')
-    }
-  }
+    })
 
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
@@ -40,18 +36,18 @@ export class TermsOfServiceScreen extends React.Component<Props, State> {
             {translate('TermsOfServiceScreenText5')}
             {'\n\n'}
             {translate('TermsOfServiceScreenText6')}
+            {'\n\n'}
+            {translate('TermsOfServicesScreenText7')}
           </Text>
           <Divider style={styles.divider} />
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
             {translate('Third Party Libraries')}
           </Text>
-          {Object.keys(packageJson.dependencies).map((license) => {
-            return (
+          {Object.keys(packageJson.dependencies).map((license) => (
               <Text key={license} style={styles.text}>
                 {license}
               </Text>
-            )
-          })}
+            ))}
           <Divider style={styles.divider} />
           <RNView style={styles.copyLeftWrapper}>
             <Text

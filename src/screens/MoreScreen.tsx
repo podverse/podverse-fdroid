@@ -1,8 +1,7 @@
 import { Linking, SectionList, TouchableWithoutFeedback, View as RNView } from 'react-native'
 import Config from 'react-native-config'
-import { Badge } from 'react-native-elements'
 import React from 'reactn'
-import { Divider, TableSectionHeader, Text, View } from '../components'
+import { Divider, TableSectionSelectors, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { createEmailLinkUrl, getMembershipStatus, testProps } from '../lib/utility'
 import { PV } from '../resources'
@@ -18,24 +17,21 @@ type State = {
 }
 
 export class MoreScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
-      title: translate('More')
-    }
-  }
 
   state = {
     options: []
   }
 
+  static navigationOptions = () => ({
+    title: translate('More')
+  })
+
   _moreFeaturesOptions = (isLoggedIn: boolean) => {
     const moreFeaturesList = Config.NAV_STACK_MORE_FEATURES.split(',')
-    const loggedInFeatures = [_playlistsKey, _profilesKey, _myProfileKey, _myClipsKey, _logoutKey]
+    const loggedInFeatures = [_logoutKey]
 
     return allMoreFeatures
-      .filter((item: any) => {
-        return moreFeaturesList.find((screenKey: any) => item.key === screenKey)
-      })
+      .filter((item: any) => moreFeaturesList.find((screenKey: any) => item.key === screenKey))
       .filter((item = { key: '', title: '' }) => {
         if (isLoggedIn) {
           return item.key !== _loginKey
@@ -47,12 +43,6 @@ export class MoreScreen extends React.Component<Props, State> {
 
   _moreOtherOptions = (membershipStatus?: string) => {
     const allMoreOtherOptions = [
-      {
-        title: translate('Add Podcast by RSS'),
-        key: _addPodcastByRSSKey,
-        routeName: PV.RouteNames.AddPodcastByRSSScreen,
-        testID: 'more_screen_add_podcast_by_rss_cell'
-      },
       {
         title: membershipStatus,
         key: _membershipKey,
@@ -86,9 +76,8 @@ export class MoreScreen extends React.Component<Props, State> {
 
     const moreOtherList = Config.NAV_STACK_MORE_OTHER.split(',')
 
-    const options = allMoreOtherOptions.filter((item: any) => {
-      return moreOtherList.find((screenKey: string) => item.key === screenKey)
-    })
+    const options =
+      allMoreOtherOptions.filter((item: any) => moreOtherList.find((screenKey: string) => item.key === screenKey))
 
     return options
   }
@@ -99,38 +88,18 @@ export class MoreScreen extends React.Component<Props, State> {
       Linking.openURL(createEmailLinkUrl(PV.Emails.CONTACT_US))
     } else if (item.key === _logoutKey) {
       logoutUser()
-    } else if (item.key === _myProfileKey) {
-      const user = this.global.session.userInfo
-      navigation.navigate(PV.RouteNames.ProfileScreen, {
-        user,
-        navigationTitle: translate('My Profile'),
-        isMyProfile: true
-      })
-    } else if (item.key === _myClipsKey) {
-      const user = this.global.session.userInfo
-      navigation.navigate(PV.RouteNames.ProfileScreen, {
-        user,
-        navigationTitle: translate('My Profile'),
-        isMyProfile: true,
-        initializeClips: true
-      })
     } else {
       navigation.navigate(item.routeName)
     }
   }
 
   render() {
-    const { downloadsActive, fontScaleMode, globalTheme, session } = this.global
+    const { globalTheme, session } = this.global
     const { isLoggedIn = false, userInfo } = session
-
-    let downloadsActiveCount = 0
-    for (const id of Object.keys(downloadsActive)) {
-      if (downloadsActive[id]) downloadsActiveCount++
-    }
 
     const featureOptions = this._moreFeaturesOptions(isLoggedIn)
 
-    const membershipStatus = getMembershipStatus(userInfo) || translate('Membership')
+    const membershipStatus = getMembershipStatus(userInfo) || null
     const membershipTextStyle = getMembershipTextStyle(globalTheme, membershipStatus)
     const otherOptions = this._moreOtherOptions(membershipStatus)
 
@@ -141,42 +110,21 @@ export class MoreScreen extends React.Component<Props, State> {
           renderItem={({ item }) => (
             <TouchableWithoutFeedback onPress={() => this._onPress(item)} {...testProps(item.testID)}>
               <RNView style={[core.row, table.cellWrapper]}>
-                {item.key === _membershipKey && (
+                {item.key === _membershipKey ? (
                   <RNView style={[core.row, table.cellWrapper]}>
-                    {isLoggedIn ? (
+                    <Text
+                      fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                      style={[table.cellText, globalTheme.tableCellTextPrimary]}>
+                      {translate('Membership')}
+                    </Text>
+                    {isLoggedIn && (
                       <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[table.cellText, membershipTextStyle]}>
+                        <Text>- </Text>
                         {membershipStatus}
-                      </Text>
-                    ) : (
-                      <Text
-                        fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                        style={[table.cellText, globalTheme.tableCellTextPrimary]}>
-                        {translate('Membership')}
                       </Text>
                     )}
                   </RNView>
-                )}
-                {item.key === _downloadsKey && (
-                  <RNView style={[core.row, { position: 'relative' }, table.cellWrapper]}>
-                    <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={table.cellText}>
-                      {translate('Downloads')}
-                    </Text>
-                    {downloadsActiveCount > 0 &&
-                      fontScaleMode !== PV.Fonts.fontScale.larger &&
-                      fontScaleMode !== PV.Fonts.fontScale.largest && (
-                        <Badge
-                          containerStyle={{
-                            position: 'absolute',
-                            right: -22,
-                            top: 19
-                          }}
-                          status='error'
-                          value={downloadsActiveCount}
-                        />
-                      )}
-                  </RNView>
-                )}
-                {item.key !== _membershipKey && item.key !== _downloadsKey && (
+                ) : (
                   <Text
                     fontSizeLargestScale={PV.Fonts.largeSizes.md}
                     style={[table.cellText, globalTheme.tableCellTextPrimary]}>
@@ -186,11 +134,19 @@ export class MoreScreen extends React.Component<Props, State> {
               </RNView>
             </TouchableWithoutFeedback>
           )}
-          renderSectionHeader={({ section: { title } }) => <TableSectionHeader title={title} />}
+          renderSectionHeader={({ section }) => (
+            <TableSectionSelectors
+              hideFilter
+              includePadding
+              selectedFilterLabel={section.title}
+              textStyle={[globalTheme.headerText, core.headerText]}
+            />
+          )}
           sections={[
             { title: translate('Features'), data: featureOptions },
             { title: translate('Other'), data: otherOptions }
           ]}
+          stickySectionHeadersEnabled={false}
         />
       </View>
     )
@@ -200,46 +156,19 @@ export class MoreScreen extends React.Component<Props, State> {
 const _aboutKey = 'About'
 const _addPodcastByRSSKey = 'AddPodcastByRSS'
 const _contactKey = 'Contact'
-const _downloadsKey = 'Downloads'
 const _loginKey = 'Login'
 const _logoutKey = 'Logout'
 const _membershipKey = 'Membership'
-const _myClipsKey = 'MyClips'
-const _myProfileKey = 'MyProfile'
-const _playlistsKey = 'Playlists'
 const _privacyPolicyKey = 'PrivacyPolicy'
-const _profilesKey = 'Profiles'
 const _settingsKey = 'Settings'
 const _termsOfServiceKey = 'TermsOfService'
 
 const allMoreFeatures = [
   {
-    title: translate('Downloads'),
-    key: _downloadsKey,
-    routeName: PV.RouteNames.DownloadsScreen,
-    testID: 'more_screen_downloads_cell'
-  },
-  {
-    title: translate('Playlists'),
-    key: _playlistsKey,
-    routeName: PV.RouteNames.PlaylistsScreen,
-    testID: 'more_screen_playlists_cell'
-  },
-  {
-    title: translate('Profiles'),
-    key: _profilesKey,
-    routeName: PV.RouteNames.ProfilesScreen,
-    testID: 'more_screen_profiles_cell'
-  },
-  {
-    title: translate('My Profile'),
-    key: _myProfileKey,
-    testID: 'more_screen_my_profile_cell'
-  },
-  {
-    title: 'My Clips',
-    key: _myClipsKey,
-    testId: 'more_screen_my_clips_cell'
+    title: translate('Add Custom RSS Feed'),
+    key: _addPodcastByRSSKey,
+    routeName: PV.RouteNames.AddPodcastByRSSScreen,
+    testID: 'more_screen_add_podcast_by_rss_cell'
   },
   {
     title: translate('Settings'),

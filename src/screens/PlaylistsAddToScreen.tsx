@@ -34,20 +34,6 @@ type State = {
 const testIDPrefix = 'playlists_add_to_screen'
 
 export class PlaylistsAddToScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: translate('Add to Playlist'),
-      headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
-      headerRight: (
-        <RNView>
-          {navigation.getParam('isLoggedIn') && (
-            <NavHeaderButtonText handlePress={navigation.getParam('showNewPlaylistDialog')} text={translate('New')} />
-          )}
-        </RNView>
-      )
-    }
-  }
-
   constructor(props: Props) {
     super(props)
     const { navigation } = props
@@ -60,6 +46,22 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
 
     navigation.setParams({ isLoggedIn })
   }
+
+  static navigationOptions = ({ navigation }) => ({
+      title: translate('Add to Playlist'),
+      headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+      headerRight: () => (
+        <RNView>
+          {navigation.getParam('isLoggedIn') && (
+            <NavHeaderButtonText
+              handlePress={navigation.getParam('showNewPlaylistDialog')}
+              testID={`${testIDPrefix}_new`}
+              text={translate('New')}
+            />
+          )}
+        </RNView>
+      )
+    })
 
   async componentDidMount() {
     this.props.navigation.setParams({
@@ -83,24 +85,26 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         isLoading: true,
         showNewPlaylistDialog: false
       },
-      async () => {
-        const { newPlaylistTitle } = this.state
-
-        try {
-          await createPlaylist({ title: newPlaylistTitle }, this.global)
-        } catch (error) {
-          if (error.response) {
-            Alert.alert(
-              PV.Alerts.SOMETHING_WENT_WRONG.title,
-              PV.Alerts.SOMETHING_WENT_WRONG.message,
-              PV.Alerts.BUTTONS.OK
-            )
+      () => {
+        (async () => {
+          const { newPlaylistTitle } = this.state
+  
+          try {
+            await createPlaylist({ title: newPlaylistTitle }, this.global)
+          } catch (error) {
+            if (error.response) {
+              Alert.alert(
+                PV.Alerts.SOMETHING_WENT_WRONG.title,
+                PV.Alerts.SOMETHING_WENT_WRONG.message,
+                PV.Alerts.BUTTONS.OK
+              )
+            }
           }
-        }
-
-        this.setState({
-          isLoading: false
-        })
+  
+          this.setState({
+            isLoading: false
+          })
+        })()
       }
     )
   }
@@ -131,9 +135,11 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
               {
                 isSavingId: item.id
               },
-              async () => {
-                await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
-                this.setState({ isSavingId: '' })
+              () => {
+                (async () => {
+                  await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
+                  this.setState({ isSavingId: '' })
+                })()
               }
             )
           } catch (error) {
@@ -159,6 +165,7 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
       <View style={styles.view} {...testProps('playlists_add_to_screen_view')}>
         {!isLoggedIn && (
           <MessageWithAction
+            testID={testIDPrefix}
             topActionHandler={this._onPressLogin}
             topActionText={translate('Login')}
             message={translate('Login to add to playlists')}
@@ -166,12 +173,12 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         )}
         {isLoggedIn && (
           <View style={styles.view}>
-            {isLoading && <ActivityIndicator />}
+            {isLoading && <ActivityIndicator fillSpace />}
             {!isLoading && myPlaylists && (
               <FlatList
                 data={myPlaylists}
                 dataTotalCount={myPlaylists.length}
-                disableLeftSwipe={true}
+                disableLeftSwipe
                 extraData={myPlaylists}
                 ItemSeparatorComponent={this._ItemSeparatorComponent}
                 keyExtractor={(item: any, index: number) => `myPlaylists_${index}`}
@@ -184,10 +191,19 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
               <Dialog.Input
                 onChangeText={this._handleNewPlaylistTextChange}
                 placeholder={translate('title of playlist')}
+                {...testProps('new_playlist_title_input')}
                 value={newPlaylistTitle}
               />
-              <Dialog.Button label={translate('Cancel')} onPress={this._handleNewPlaylistDismiss} />
-              <Dialog.Button label={translate('Save')} onPress={this._saveNewPlaylist} />
+              <Dialog.Button
+                label={translate('Cancel')}
+                onPress={this._handleNewPlaylistDismiss}
+                {...testProps('new_playlist_title_cancel')}
+              />
+              <Dialog.Button
+                label={translate('Save')}
+                onPress={this._saveNewPlaylist}
+                {...testProps('new_playlist_title_save')}
+              />
             </Dialog.Container>
           </View>
         )}

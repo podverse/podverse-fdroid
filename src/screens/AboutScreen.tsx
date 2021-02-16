@@ -8,16 +8,12 @@ import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { button } from '../styles'
 
-type Props = {}
+type Props = any
 
-type State = {}
-
-export class AboutScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
-      title: translate('About brandName')
-    }
-  }
+export class AboutScreen extends React.Component<Props> {
+  static navigationOptions = () => ({
+    title: translate('About brandName')
+  })
 
   handleFollowLink = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
@@ -43,7 +39,7 @@ export class AboutScreen extends React.Component<Props, State> {
             {translate('Team')}
           </Text>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
-            {'Mitch Downey – Programmer\n\nCreon Creonopoulos - Programmer\n\nGary Johnson – Designer'}
+            {'Mitch Downey\n\nCreon Creonopoulos\n\nGary Johnson'}
           </Text>
           <Divider style={styles.divider} />
           {/* <Text

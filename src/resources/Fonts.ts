@@ -9,7 +9,10 @@ const sizes =
         sm: 14,
         md: 16,
         lg: 17,
-        xl: 18
+        xl: 18,
+        xxl: 20,
+        xxxl: 23,
+        huge: 26
       }
     : {
         tiny: 13,
@@ -17,16 +20,20 @@ const sizes =
         sm: 15,
         md: 17,
         lg: 18,
-        xl: 19
+        xl: 19,
+        xxl: 21,
+        xxxl: 24,
+        huge: 27
       }
 
 const largeSizes = {
-  tiny: 7,
+  tiny: 6,
   xs: 8,
   sm: 9,
   md: 11,
   lg: 12,
-  xl: 13
+  xl: 13,
+  xxl: 14
 }
 
 export const Fonts: IFonts = {

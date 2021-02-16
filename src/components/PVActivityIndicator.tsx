@@ -1,11 +1,11 @@
 import React, { Fragment } from 'react'
-import { ActivityIndicator, Dimensions, StyleSheet, TouchableWithoutFeedback } from 'react-native'
+import { ActivityIndicator, Dimensions, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import { useGlobal } from 'reactn'
-import { View } from '../components'
 import { core } from '../styles'
 
 type Props = {
   children?: any
+  fillSpace?: boolean
   isOverlay?: boolean
   onPress?: any
   size?: any
@@ -14,24 +14,21 @@ type Props = {
 
 export const PVActivityIndicator = (props: Props) => {
   const [globalTheme] = useGlobal('globalTheme')
-  const { isOverlay, onPress, size = 'large' } = props
+  const { fillSpace, isOverlay, onPress, size = 'large' } = props
+
+  const viewStyle = fillSpace ? { flex: 1 } : {}
 
   return (
     <Fragment>
       {isOverlay && (
         <View style={styles.activityOverlay}>
-          <ActivityIndicator animating={true} color={globalTheme.activityIndicator.color} size={size} />
+          <ActivityIndicator animating color={globalTheme.activityIndicator.color} size={size} />
         </View>
       )}
       {!isOverlay && (
         <TouchableWithoutFeedback onPress={onPress}>
-          <View style={[core.view, props.styles, styles.transparent]}>
-            <ActivityIndicator
-              animating={true}
-              color={globalTheme.activityIndicator.color}
-              size={size}
-              style={styles.transparent}
-            />
+          <View style={[core.view, styles.view, viewStyle, props.styles]}>
+            <ActivityIndicator animating color={globalTheme.activityIndicator.color} size={size} />
           </View>
         </TouchableWithoutFeedback>
       )}
@@ -49,7 +46,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: Dimensions.get('window').width
   },
-  transparent: {
-    backgroundColor: 'transparent'
+  view: {
+    flex: 0
   }
 })

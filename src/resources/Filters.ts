@@ -16,6 +16,7 @@ export const Filters: IFilters = {
   _topPastWeek: 'top-past-week',
   _topPastMonth: 'top-past-month',
   _topPastYear: 'top-past-year',
+  _topAllTime: 'top-all-time',
   _chronologicalKey: 'chronological',
   _oldestKey: 'oldest',
   _myClipsKey: 'my-clips',
@@ -25,11 +26,13 @@ export const Filters: IFilters = {
   _clipsKey: 'clips',
   _chaptersKey: 'chapters',
   _playlistsKey: 'playlists',
-  _aboutPodcastKey: 'about-podcast',
-  _showNotesKey: 'show-notes',
-  _titleKey: 'title',
   _myPlaylistsKey: 'my-playlists',
   _fromThisPodcastKey: 'from-this-podcast',
   _fromThisEpisodeKey: 'from-this-episode',
-  _allCategoriesKey: 'all-categories'
+  _sectionCategoryKey: 'section-category',
+  _sectionFilterKey: 'section-filter',
+  _sectionFromKey: 'section-from',
+  _sectionMyPlaylistsKey: 'section-my-playlists',
+  _sectionSortKey: 'section-sort',
+  _sectionSubscribedPlaylistsKey: 'section-subscribed-playlists'
 }

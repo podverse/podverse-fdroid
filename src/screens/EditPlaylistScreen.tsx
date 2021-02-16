@@ -7,7 +7,6 @@ import {
   QueueTableCell,
   SortableList,
   SortableListRow,
-  Text,
   TextInput,
   View
 } from '../components'
@@ -16,7 +15,6 @@ import { alertIfNoNetworkConnection } from '../lib/network'
 import { combineAndSortPlaylistItems, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { addOrRemovePlaylistItem, getPlaylist, updatePlaylist } from '../state/actions/playlist'
-import { core } from '../styles'
 
 type Props = {
   navigation?: any
@@ -33,21 +31,9 @@ type State = {
   sortableListData: any[]
 }
 
-export class EditPlaylistScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    const isEditing = !!navigation.getParam('isEditing')
-    const handlePress = navigation.getParam(isEditing ? '_stopEditing' : '_startEditing')
-    const text = isEditing ? translate('Done') : translate('Edit')
+const testIDPrefix = 'edit_playlist_screen'
 
-    return {
-      title: translate('Edit Playlist'),
-      headerRight: (
-        <RNView style={styles.headerButtonWrapper}>
-          <NavHeaderButtonText handlePress={handlePress} style={styles.navHeaderTextButton} text={text} />
-        </RNView>
-      )
-    }
-  }
+export class EditPlaylistScreen extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
@@ -61,6 +47,26 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
       newTitle: playlist.title,
       playlist,
       sortableListData: []
+    }
+  }
+
+  static navigationOptions = ({ navigation }) => {
+    const isEditing = !!navigation.getParam('isEditing')
+    const handlePress = navigation.getParam(isEditing ? '_stopEditing' : '_startEditing')
+    const text = isEditing ? translate('Done') : translate('Edit')
+
+    return {
+      title: translate('Edit Playlist'),
+      headerRight: () => (
+        <RNView style={styles.headerButtonWrapper}>
+          <NavHeaderButtonText
+            handlePress={handlePress}
+            style={styles.navHeaderTextButton}
+            testID={testIDPrefix}
+            text={text}
+          />
+        </RNView>
+      )
     }
   }
 
@@ -103,32 +109,33 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
       {
         isUpdating: true
       },
-      async () => {
-        const { newTitle, playlist } = this.state
-        const itemsOrder = await this._resortItemsAndGetOrder()
-
-        try {
-          await updatePlaylist({
-            id: playlist.id,
-            ...(itemsOrder && Array.isArray(itemsOrder) && itemsOrder.length > 0 ? { itemsOrder } : {}),
-            title: newTitle
-          })
-        } catch (error) {
-          if (error.response) {
-            Alert.alert(
-              PV.Alerts.SOMETHING_WENT_WRONG.title,
-              PV.Alerts.SOMETHING_WENT_WRONG.message,
-              PV.Alerts.BUTTONS.OK
-            )
+      () => {
+        (async () => {
+          const { newTitle, playlist } = this.state
+          const itemsOrder = await this._resortItemsAndGetOrder()
+  
+          try {
+            await updatePlaylist({
+              id: playlist.id,
+              ...(itemsOrder && Array.isArray(itemsOrder) && itemsOrder.length > 0 ? { itemsOrder } : {}),
+              title: newTitle
+            })
+          } catch (error) {
+            if (error.response) {
+              Alert.alert(
+                PV.Alerts.SOMETHING_WENT_WRONG.title,
+                PV.Alerts.SOMETHING_WENT_WRONG.message,
+                PV.Alerts.BUTTONS.OK
+              )
+            }
           }
-        }
-        this.setState({ isUpdating: false })
+          this.setState({ isUpdating: false })
+        })()
       }
     )
   }
 
-  _resortItemsAndGetOrder = () => {
-    return new Promise((resolve) => {
+  _resortItemsAndGetOrder = () => new Promise((resolve) => {
       const { newItemsOrderByIndex, sortableListData } = this.state
       const itemsOrder = [] as any
       const newSortableListData = []
@@ -145,13 +152,10 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
         resolve()
       }
     })
-  }
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
+  _ItemSeparatorComponent = () => <Divider />
 
-  _renderRow = ({ active, data }) => {
+  _renderRow = ({ active, data, index }) => {
     const { isEditing } = this.state
     let cell
 
@@ -169,6 +173,7 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
             {...(data.episode.podcast.title ? { podcastTitle: data.episode.podcast.title } : {})}
             showMoveButton={!isEditing}
             showRemoveButton={isEditing}
+            testID={`${testIDPrefix}_queue_item_${index}`}
           />
           <Divider style={styles.tableCellDivider} />
         </View>
@@ -184,6 +189,7 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
             {...(data.podcast && data.podcast.title ? { podcastTitle: data.podcast.title } : {})}
             showMoveButton={!isEditing}
             showRemoveButton={isEditing}
+            testID={`${testIDPrefix}_queue_item_${index}`}
           />
           <Divider style={styles.tableCellDivider} />
         </View>
@@ -193,22 +199,23 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
     return <SortableListRow active={active} cell={cell} />
   }
 
-  _handleRemovePlaylistItemPress = async (item: any) => {
+  _handleRemovePlaylistItemPress = (item: any) => {
     const { playlist, sortableListData } = this.state
 
-    this.setState({ isRemoving: true }, async () => {
-      try {
-        const episodeId = !item.startTime && item.id
-        const mediaRefId = item.startTime || item.startTime === 0 ? item.id : null
-        await addOrRemovePlaylistItem(playlist.id, episodeId, mediaRefId)
-        await getPlaylist(playlist.id)
-        const newSortableListData = sortableListData.filter((x) => {
-          return (mediaRefId && x.id !== mediaRefId) || (episodeId && x.id !== episodeId)
-        })
-        this.setState({ isRemoving: false, sortableListData: newSortableListData })
-      } catch (error) {
-        this.setState({ isRemoving: false })
-      }
+    this.setState({ isRemoving: true }, () => {
+      (async () => {
+        try {
+          const episodeId = !item.startTime && item.id
+          const mediaRefId = item.startTime || item.startTime === 0 ? item.id : null
+          await addOrRemovePlaylistItem(playlist.id, episodeId, mediaRefId)
+          await getPlaylist(playlist.id)
+          const newSortableListData =
+            sortableListData.filter((x) => (mediaRefId && x.id !== mediaRefId) || (episodeId && x.id !== episodeId))
+          this.setState({ isRemoving: false, sortableListData: newSortableListData })
+        } catch (error) {
+          this.setState({ isRemoving: false })
+        }
+      })()
     })
   }
 
@@ -228,17 +235,15 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
     return (
       <View style={styles.view} {...testProps('edit_playlist_screen_view')}>
         <View style={styles.topWrapper}>
-          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={core.textInputLabel}>
-            Title
-          </Text>
           <TextInput
             autoCapitalize='none'
             fontSizeLargestScale={PV.Fonts.largeSizes.md}
             onChangeText={this._onChangeTitle}
             onSubmitEditing={this._updatePlaylist}
-            placeholder={translate('playlist title')}
+            placeholder={translate('Playlist title')}
             returnKeyType='done'
             style={styles.textInput}
+            testID={`${testIDPrefix}_title`}
             underlineColorAndroid='transparent'
             value={newTitle}
           />
@@ -247,7 +252,7 @@ export class EditPlaylistScreen extends React.Component<Props, State> {
         {(isUpdating || (!isLoading && sortableListData && sortableListData.length > 0)) && (
           <SortableList data={sortableListData} onReleaseRow={this._onReleaseRow} renderRow={this._renderRow} />
         )}
-        {(isLoading || isRemoving || isUpdating) && <ActivityIndicator isOverlay={true} />}
+        {(isLoading || isRemoving || isUpdating) && <ActivityIndicator isOverlay />}
       </View>
     )
   }
@@ -268,9 +273,7 @@ const styles = StyleSheet.create({
   tableCellDivider: {
     marginBottom: 2
   },
-  textInput: {
-    fontSize: PV.Fonts.sizes.xl
-  },
+  textInput: {},
   topWrapper: {
     marginHorizontal: 8,
     marginVertical: 16

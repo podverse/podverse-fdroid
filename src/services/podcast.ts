@@ -34,7 +34,7 @@ export const getPodcasts = async (query: any = {}) => {
     ...(searchTitle ? { searchTitle } : {})
   } as any
 
-  if (query.categories && query.categories !== PV.Filters._allCategoriesKey) {
+  if (query.categories) {
     filteredQuery.categories = query.categories
   } else if (query.podcastIds) {
     filteredQuery.podcastId = query.podcastIds ? query.podcastIds.join(',') : ['no-results']
@@ -48,22 +48,31 @@ export const getPodcasts = async (query: any = {}) => {
   return response && response.data
 }
 
+const setSubscribedPodcasts = async (subscribedPodcasts: any[]) => {
+  await AsyncStorage.setItem(PV.Keys.SUBSCRIBED_PODCASTS_LAST_REFRESHED, new Date().toISOString())
+  if (Array.isArray(subscribedPodcasts)) {
+    await AsyncStorage.setItem(PV.Keys.SUBSCRIBED_PODCASTS, JSON.stringify(subscribedPodcasts))
+  }
+}
+
 export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
   const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
+
+  const query = {
+    podcastIds: subscribedPodcastIds,
+    sort: PV.Filters._alphabeticalKey,
+    maxResults: true
+  }
+  const isConnected = await hasValidNetworkConnection()
 
   if (subscribedPodcastIds.length < 1 && addByRSSPodcasts.length < 1) return [[], 0]
 
   if (subscribedPodcastIds.length < 1 && addByRSSPodcasts.length > 0) {
+    if (isConnected) await parseAllAddByRSSPodcasts()
+    await setSubscribedPodcasts([])
     const combinedPodcasts = await combineWithAddByRSSPodcasts()
     return [combinedPodcasts, combinedPodcasts.length]
   }
-
-  const query = {
-    podcastIds: subscribedPodcastIds,
-    sort: 'alphabetical',
-    maxResults: true
-  }
-  const isConnected = await hasValidNetworkConnection()
 
   if (isConnected) {
     try {
@@ -72,7 +81,7 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
 
       const autoDownloadSettingsString = await AsyncStorage.getItem(PV.Keys.AUTO_DOWNLOAD_SETTINGS)
       const autoDownloadSettings = autoDownloadSettingsString ? JSON.parse(autoDownloadSettingsString) : {}
-      const data = await getPodcasts(query, true)
+      const data = await getPodcasts(query)
       const subscribedPodcasts = data[0] || []
       const podcastIds = Object.keys(autoDownloadSettings).filter((key: string) => autoDownloadSettings[key] === true)
 
@@ -80,21 +89,22 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
 
       // Wait for app to initialize. Without this setTimeout, then when getSubscribedPodcasts is called in
       // PodcastsScreen _initializeScreenData, then downloadEpisode will not successfully update global state
-      setTimeout(async () => {
-        for (const episode of autoDownloadEpisodes[0]) {
-          const podcast = {
-            id: episode.podcast_id,
-            imageUrl: episode.podcast_shrunkImageUrl || episode.podcast_imageUrl,
-            title: episode.podcast_title
+      setTimeout(() => {
+        (async () => {
+          for (const episode of autoDownloadEpisodes[0]) {
+            const podcast = {
+              id: episode?.podcast?.id,
+              imageUrl: episode?.podcast?.shrunkImageUrl || episode?.podcast?.imageUrl,
+              title: episode?.podcast?.title
+            }
+            const restart = false
+            const waitToAddTask = true
+            await downloadEpisode(episode, podcast, restart, waitToAddTask)
           }
-          await downloadEpisode(episode, podcast, false, true)
-        }
+        })()
       }, 3000)
 
-      await AsyncStorage.setItem(PV.Keys.SUBSCRIBED_PODCASTS_LAST_REFRESHED, new Date().toISOString())
-      if (Array.isArray(subscribedPodcasts)) {
-        await AsyncStorage.setItem(PV.Keys.SUBSCRIBED_PODCASTS, JSON.stringify(subscribedPodcasts))
-      }
+      await setSubscribedPodcasts(subscribedPodcasts)
 
       await parseAllAddByRSSPodcasts()
 
@@ -110,12 +120,15 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: [string]) => {
     return [combinedPodcasts, combinedPodcasts.length]
   }
 }
+
 export const combineWithAddByRSSPodcasts = async () => {
-  // Combine the AddByRSSPodcast in with the subscribed podcast data, then alphabetize array
-  const subscribedPodcasts = await getSubscribedPodcastsLocally()
-  const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
-  // @ts-ignore
-  const combinedPodcasts = [...subscribedPodcasts[0], ...addByRSSPodcasts]
+  const subscribedPodcastsResults = await getSubscribedPodcastsLocally()
+  const addByRSSPodcastsResults = await getAddByRSSPodcastsLocally()
+  const subscribedPodcasts =
+    subscribedPodcastsResults[0] && Array.isArray(subscribedPodcastsResults[0]) && subscribedPodcastsResults[0] || []
+  const addByRSSPodcasts =
+    addByRSSPodcastsResults[0] && Array.isArray(addByRSSPodcastsResults[0]) && addByRSSPodcastsResults[0] || []
+  const combinedPodcasts = [...subscribedPodcasts, ...addByRSSPodcasts]
 
   return sortPodcastArrayAlphabetically(combinedPodcasts)
 }
@@ -137,7 +150,7 @@ export const searchPodcasts = async (title?: string, author?: string) => {
   const response = await request({
     endpoint: '/podcast',
     query: {
-      sort: 'alphabetical',
+      sort: PV.Filters._alphabeticalKey,
       ...(title ? { title } : {}),
       ...(author ? { author } : {}),
       page: 1
@@ -221,6 +234,8 @@ const toggleSubscribeToPodcastLocally = async (id: string) => {
 }
 
 const toggleSubscribeToPodcastOnServer = async (id: string) => {
+  await toggleSubscribeToPodcastLocally(id)
+
   const bearerToken = await getBearerToken()
   const response = await request({
     endpoint: `/podcast/toggle-subscribe/${id}`,
@@ -242,8 +257,8 @@ const toggleSubscribeToPodcastOnServer = async (id: string) => {
 
 export const sortPodcastArrayAlphabetically = (podcasts: any[]) => {
   podcasts.sort((a, b) => {
-    let titleA = a.sortableTitle || a.title || ''
-    let titleB = b.sortableTitle || b.title || ''
+    let titleA = (a && (a.sortableTitle || a.title)) || ''
+    let titleB = (b && (b.sortableTitle || b.title)) || ''
     titleA = titleA
       .toLowerCase()
       .trim()

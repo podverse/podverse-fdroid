@@ -3,19 +3,19 @@ import { PV } from './resources'
 
 export const darkTheme = StyleSheet.create({
   actionSheetButton: {
-    backgroundColor: PV.Colors.grayDarkest,
-    borderColor: PV.Colors.grayDark
+    backgroundColor: PV.Colors.ink,
+    borderColor: PV.Colors.grayLighterTransparent
   },
   actionSheetButtonCancel: {
-    backgroundColor: PV.Colors.grayDarker,
-    borderColor: PV.Colors.grayDark
+    backgroundColor: PV.Colors.velvet,
+    borderColor: PV.Colors.grayLighterTransparent
   },
   actionSheetButtonDelete: {
-    backgroundColor: PV.Colors.grayDarkest,
-    borderColor: PV.Colors.grayDark
+    backgroundColor: PV.Colors.ink,
+    borderColor: PV.Colors.grayLighterTransparent
   },
   actionSheetButtonDisabled: {
-    backgroundColor: PV.Colors.grayDarkest
+    backgroundColor: PV.Colors.grayLight
   },
   actionSheetButtonText: {
     color: PV.Colors.white
@@ -33,19 +33,19 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.yellow
   },
   actionSheetButtonUnderlay: {
-    backgroundColor: PV.Colors.grayDarker
+    backgroundColor: PV.Colors.velvet
   },
   actionSheetButtonCancelUnderlay: {
-    backgroundColor: PV.Colors.grayDark
+    backgroundColor: PV.Colors.blueDarker
   },
   actionSheetHeaderText: {
     color: PV.Colors.grayLighter
   },
   actionSheetView: {
-    backgroundColor: PV.Colors.grayDarker
+    backgroundColor: PV.Colors.ink
   },
   activityIndicator: {
-    color: PV.Colors.grayLighter
+    color: PV.Colors.brandBlueLight
   },
   activityIndicatorAlternate: {
     color: PV.Colors.grayDarkest
@@ -57,13 +57,13 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.red
   },
   buttonGroup: {
-    backgroundColor: PV.Colors.grayDarkest
+    backgroundColor: PV.Colors.velvet
   },
   buttonGroupSelected: {
-    backgroundColor: PV.Colors.grayDark
+    backgroundColor: PV.Colors.skyDark
   },
   buttonGroupText: {
-    color: PV.Colors.grayLighter
+    color: PV.Colors.white
   },
   buttonGroupTextSelected: {
     color: PV.Colors.white
@@ -76,7 +76,7 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.white
   },
   buttonDisabledText: {
-    color: PV.Colors.gray
+    color: PV.Colors.white
   },
   buttonSuccessText: {
     color: PV.Colors.white
@@ -85,10 +85,10 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.white
   },
   buttonPrimaryWrapper: {
-    backgroundColor: PV.Colors.grayDarker
+    backgroundColor: PV.Colors.brandColor
   },
   buttonDisabledWrapper: {
-    backgroundColor: PV.Colors.grayLighter
+    backgroundColor: PV.Colors.gray
   },
   buttonSuccessWrapper: {
     backgroundColor: PV.Colors.greenDarker
@@ -97,14 +97,19 @@ export const darkTheme = StyleSheet.create({
     backgroundColor: PV.Colors.redDarker
   },
   divider: {
-    backgroundColor: PV.Colors.grayDark
+    backgroundColor: PV.Colors.grayDark + '80'
+  },
+  dropdownButtonIcon: {
+    color: PV.Colors.white
+  },
+  dropdownButtonText: {
+    color: PV.Colors.white
   },
   flatList: {
-    backgroundColor: PV.Colors.black
+    backgroundColor: PV.Colors.ink
   },
-  inputContainerText: {
-    backgroundColor: PV.Colors.black,
-    borderColor: PV.Colors.grayDarker
+  headerText: {
+    color: PV.Colors.skyLight
   },
   link: {
     color: PV.Colors.blueLighter
@@ -125,7 +130,7 @@ export const darkTheme = StyleSheet.create({
     backgroundColor: '#00000075'
   },
   modalInnerWrapper: {
-    backgroundColor: PV.Colors.grayDarkest
+    backgroundColor: PV.Colors.velvet
   },
   overlayAlertDanger: {
     backgroundColor: PV.Colors.redLighter,
@@ -156,11 +161,11 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.white
   },
   swipeRowBack: {
-    backgroundColor: PV.Colors.gray,
+    backgroundColor: PV.Colors.skyLight,
     color: PV.Colors.white
   },
   tabbar: {
-    backgroundColor: PV.Colors.black,
+    backgroundColor: PV.Colors.ink,
     borderTopWidth: 1,
     borderTopColor: PV.Colors.grayDarker
   },
@@ -180,7 +185,7 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.white
   },
   tableSectionHeader: {
-    backgroundColor: PV.Colors.grayDarker
+    backgroundColor: PV.Colors.ink
   },
   tableSectionHeaderTransparent: {
     backgroundColor: PV.Colors.grayDarkerTransparent
@@ -195,24 +200,28 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.white
   },
   textInput: {
-    backgroundColor: PV.Colors.grayDarker,
+    backgroundColor: 'transparent',
     color: PV.Colors.white
   },
   textInputIcon: {
     backgroundColor: PV.Colors.grayDarker,
     color: PV.Colors.white
   },
+  textInputEyeBrow: {
+    color: PV.Colors.skyLight
+  },
   textInputWrapper: {
-    backgroundColor: PV.Colors.black,
+    backgroundColor: PV.Colors.velvet,
     borderColor: PV.Colors.grayDarker,
     borderTopColor: PV.Colors.grayDarker, // override native styles
-    borderBottomColor: PV.Colors.grayDarker // override native style
+    borderBottomColor: PV.Colors.grayDarker, // override native style,
+    marginBottom: 24
   },
   textSecondary: {
     color: PV.Colors.grayLightest
   },
   view: {
-    backgroundColor: PV.Colors.black
+    backgroundColor: PV.Colors.ink
   },
   viewWithZebraStripe: {
     backgroundColor: PV.Colors.grayDarkestZ
@@ -227,7 +236,7 @@ export const darkTheme = StyleSheet.create({
     color: PV.Colors.white
   },
   webViewStaticHTMLWrapper: {
-    backgroundColor: PV.Colors.black
+    backgroundColor: PV.Colors.ink
   }
 })
 
@@ -327,12 +336,17 @@ export const lightTheme = StyleSheet.create({
   divider: {
     backgroundColor: PV.Colors.grayLight
   },
+  dropdownButtonIcon: {
+    color: PV.Colors.black
+  },
+  dropdownButtonText: {
+    color: PV.Colors.black
+  },
   flatList: {
     backgroundColor: PV.Colors.white
   },
-  inputContainerText: {
-    backgroundColor: PV.Colors.white,
-    borderColor: PV.Colors.grayLighter
+  headerText: {
+    color: PV.Colors.skyLight
   },
   link: {
     color: PV.Colors.blueDarker
@@ -353,7 +367,7 @@ export const lightTheme = StyleSheet.create({
     backgroundColor: '#00000075'
   },
   modalInnerWrapper: {
-    backgroundColor: PV.Colors.grayLightest
+    backgroundColor: PV.Colors.velvet
   },
   overlayAlertDanger: {
     backgroundColor: PV.Colors.redLighter,
@@ -383,7 +397,7 @@ export const lightTheme = StyleSheet.create({
     color: PV.Colors.black
   },
   swipeRowBack: {
-    backgroundColor: PV.Colors.gray,
+    backgroundColor: PV.Colors.skyLight,
     color: PV.Colors.black
   },
   tabbar: {
@@ -422,15 +436,18 @@ export const lightTheme = StyleSheet.create({
     color: PV.Colors.black
   },
   textInput: {
-    backgroundColor: PV.Colors.grayLighter,
+    backgroundColor: 'transparent',
     color: PV.Colors.black
   },
   textInputIcon: {
     backgroundColor: PV.Colors.grayLighter,
     color: PV.Colors.black
   },
+  textInputEyeBrow: {
+    color: PV.Colors.skyDark
+  },
   textInputWrapper: {
-    backgroundColor: PV.Colors.white,
+    backgroundColor: PV.Colors.grayLighter,
     borderColor: PV.Colors.grayLighter,
     borderTopColor: PV.Colors.grayLighter, // override native styles
     borderBottomColor: PV.Colors.grayLighter // override native style
@@ -521,7 +538,8 @@ export const core = StyleSheet.create({
   },
   button: {
     justifyContent: 'center',
-    minHeight: 56
+    minHeight: 56,
+    borderRadius: 8
   },
   buttonText: {
     fontSize: PV.Fonts.sizes.xl,
@@ -539,6 +557,9 @@ export const core = StyleSheet.create({
     paddingRight: 16,
     paddingVertical: 8
   },
+  headerText: {
+    fontSize: PV.Fonts.sizes.xxxl
+  },
   ListHeaderComponent: {
     borderBottomWidth: 0,
     borderTopWidth: 0,
@@ -550,10 +571,6 @@ export const core = StyleSheet.create({
   row: {
     backgroundColor: 'transparent',
     flexDirection: 'row'
-  },
-  searchBar: {
-    borderBottomWidth: 1,
-    borderWidth: 1
   },
   selectorIcon: {
     flex: 0,
@@ -586,19 +603,20 @@ export const core = StyleSheet.create({
     marginHorizontal: 12
   },
   textInput: {
-    fontSize: PV.Fonts.sizes.xl,
-    minHeight: 44,
+    fontSize: PV.Fonts.sizes.xxl,
     justifyContent: 'center',
-    paddingHorizontal: 8
+    minHeight: 'auto',
+    paddingHorizontal: 8,
+    paddingVertical: 6
   },
-  textInputLabel: {
-    fontSize: PV.Fonts.sizes.xl,
+  textInputEyeBrow: {
+    fontSize: PV.Fonts.sizes.sm,
     fontWeight: PV.Fonts.weights.bold,
     marginBottom: 4
   },
-  textInputSubTitle: {
-    fontSize: PV.Fonts.sizes.md,
-    marginVertical: 8
+  textInputWrapper: {
+    paddingHorizontal: 16,
+    paddingVertical: 12
   },
   view: {
     alignItems: 'center',
@@ -606,14 +624,6 @@ export const core = StyleSheet.create({
     justifyContent: 'center'
   }
 })
-
-export const hidePickerIconOnAndroidSectionSelector = (isDarkMode: boolean) => {
-  return {
-    // inputAndroidContainer: {
-    //   backgroundColor: isDarkMode ? PV.Colors.grayDarker : PV.Colors.grayLighter
-    // }
-  }
-}
 
 export const hidePickerIconOnAndroidTransparent = (isDarkMode: boolean) => {
   return {
@@ -631,10 +641,7 @@ export const navHeader = StyleSheet.create({
   },
   buttonText: {
     color: PV.Colors.white,
-    fontSize: PV.Fonts.sizes.lg,
-    height: Platform.OS === 'android' ? PV.Navigation.header.height.android - 4 : PV.Navigation.header.height.ios - 4,
-    lineHeight:
-      Platform.OS === 'android' ? PV.Navigation.header.height.android - 10 : PV.Navigation.header.height.ios - 4,
+    fontSize: PV.Fonts.sizes.xl,
     marginLeft: 16,
     marginRight: 16
   },
@@ -644,10 +651,11 @@ export const navHeader = StyleSheet.create({
     paddingVertical: 8
   },
   headerHeight: {
-    paddingTop: Platform.select({
-      android: PV.Navigation.header.height.android,
-      ios: PV.Navigation.header.height.ios
-    })
+    paddingTop:
+      Platform.select({
+        android: PV.Navigation.header.height.android,
+        ios: PV.Navigation.header.height.ios
+      }) || 0
   }
 })
 
@@ -658,54 +666,41 @@ export const playerStyles = StyleSheet.create({
     justifyContent: 'center',
     width: 60
   },
-  iconDisabled: {
+  playButton: {
+    borderRadius: 35,
+    height: 70,
+    width: 70,
+    borderColor: PV.Colors.skyDark,
+    backgroundColor: PV.Colors.skyLight + '33',
+    borderWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    opacity: 0.5,
-    paddingHorizontal: 12,
-    paddingVertical: 4
-  },
-  iconLarge: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    width: 80
+    justifyContent: 'center'
   }
 })
 
 export const sliderStyles = StyleSheet.create({
-  clipEndTimeFlag: {
-    height: 36,
-    left: 0,
+  clipBarStyle: {
+    height: 32,
     position: 'absolute',
-    top: 2,
-    width: 2
-  },
-  clipStartTimeFlag: {
-    height: 36,
-    left: 0,
-    position: 'absolute',
-    top: 2,
-    width: 2
+    marginVertical: 4,
+    zIndex: -1
   },
   thumbStyle: {
-    borderRadius: 0,
-    height: 24,
-    width: 7
+    borderRadius: 6,
+    height: 12,
+    width: 12
   },
   time: {
     fontSize: PV.Fonts.sizes.xs,
-    marginHorizontal: 12
+    color: PV.Colors.skyLight
   },
   timeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
   wrapper: {
-    minHeight: 56,
-    marginBottom: 8,
-    position: 'relative'
+    minHeight: 50,
+    marginHorizontal: 15
   }
 })
 

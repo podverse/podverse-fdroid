@@ -20,9 +20,8 @@ import { isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getPodcasts } from '../services/podcast'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
-import { core } from '../styles'
 
-const { _aboutPodcastKey, _episodesKey, _clipsKey } = PV.Filters
+const { _episodesKey, _clipsKey } = PV.Filters
 
 type Props = {
   navigation?: any
@@ -44,13 +43,8 @@ type State = {
 const testIDPrefix = 'search_screen'
 
 export class SearchScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: translate('Search'),
-      headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
-      headerRight: null
-    }
-  }
+
+  searchBarInput: any
 
   constructor(props: Props) {
     super(props)
@@ -70,7 +64,17 @@ export class SearchScreen extends React.Component<Props, State> {
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
   }
 
-  _handleSearchBarClear = (text: string) => {
+  static navigationOptions = ({ navigation }) => ({
+    title: translate('Search'),
+    headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+    headerRight: () => null
+  })
+
+  componentDidMount() {
+    this.searchBarInput.focus()
+  }
+
+  _handleSearchBarClear = () => {
     this.setState({
       flatListData: [],
       flatListDataTotalCount: null,
@@ -79,46 +83,40 @@ export class SearchScreen extends React.Component<Props, State> {
   }
 
   _handleSearchBarTextChange = (text: string) => {
-    const { isLoading } = this.state
-
+    const shouldSearch = !!text && text.length > 1
     this.setState(
       {
-        ...(!isLoading && text ? { isLoading: true } : {}),
-        searchBarText: text
+        searchBarText: text,
+        isLoading: shouldSearch
       },
-      async () => {
+      () => {
         this._handleSearchBarTextQuery()
       }
     )
   }
 
-  _handleSearchBarTextQuery = async (nextPage?: boolean) => {
-    if (!this.state.searchBarText) {
-      this.setState({
-        flatListData: [],
-        flatListDataTotalCount: null,
-        isLoading: false,
-        queryPage: 1
-      })
-      return
-    }
+  _handleSearchBarTextQuery = (nextPage?: boolean) => {
+    const shouldSearch = !!this.state.searchBarText && this.state.searchBarText.length > 1
 
     this.setState(
       {
         flatListData: [],
         flatListDataTotalCount: null,
-        queryPage: 1
+        queryPage: 1,
+        isLoading: shouldSearch
       },
-      async () => {
-        const state = await this._queryData(nextPage)
-        this.setState(state)
+      () => {
+        (async () => {
+          if (shouldSearch) {
+            const state = await this._queryData(nextPage)
+            this.setState(state)
+          }
+        })()
       }
     )
   }
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
+  _ItemSeparatorComponent = () => <Divider />
 
   _onEndReached = ({ distanceFromEnd }) => {
     const { endOfResultsReached, isLoadingMore } = this.state
@@ -128,9 +126,11 @@ export class SearchScreen extends React.Component<Props, State> {
           {
             isLoadingMore: true
           },
-          async () => {
-            const newState = await this._queryData(true)
-            this.setState(newState)
+          () => {
+            (async () => {
+              const newState = await this._queryData(true)
+              this.setState(newState)
+            })()
           }
         )
       }
@@ -148,17 +148,13 @@ export class SearchScreen extends React.Component<Props, State> {
     })
   }
 
-  _handleNavigationPress = (podcast: any, viewType: string) => {
+  _handleNavigationPress = (podcast: any, viewType?: string) => {
     this.setState({ showActionSheet: false })
     navigateToPodcastScreenWithPodcast(this.props.navigation, podcast, viewType)
   }
 
   _handleAddPodcastByRSSURLNavigation = () => {
     this.props.navigation.navigate(PV.RouteNames.AddPodcastByRSSScreen)
-  }
-
-  _handleAddPodcastByRSSQRCodeNavigation = () => {
-    this.props.navigation.navigate(PV.RouteNames.ScanQRCodeScreen)
   }
 
   _renderPodcastItem = ({ item, index }) => (
@@ -195,9 +191,9 @@ export class SearchScreen extends React.Component<Props, State> {
         onPress: () => this._handleNavigationPress(selectedPodcast, _clipsKey)
       },
       {
-        key: 'about',
-        text: translate('About brandName'),
-        onPress: () => this._handleNavigationPress(selectedPodcast, _aboutPodcastKey)
+        key: 'goToPodcast',
+        text: translate('Go to Podcast'),
+        onPress: () => this._handleNavigationPress(selectedPodcast)
       }
     ]
   }
@@ -207,14 +203,14 @@ export class SearchScreen extends React.Component<Props, State> {
     if (wasAlerted) return
 
     try {
-      await toggleSubscribeToPodcast(id, this.global)
+      await toggleSubscribeToPodcast(id)
     } catch (error) {
       Alert.alert(PV.Alerts.SOMETHING_WENT_WRONG.title, PV.Alerts.SOMETHING_WENT_WRONG.message, PV.Alerts.BUTTONS.OK)
     }
     this.setState({ showActionSheet: false })
   }
 
-  _navToRequestPodcastForm = async () => {
+  _navToRequestPodcastForm = () => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
       { text: translate('Cancel') },
       { text: translate('Yes'), onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
@@ -237,9 +233,9 @@ export class SearchScreen extends React.Component<Props, State> {
         <ButtonGroup buttons={buttons} onPress={this._handleSearchTypePress} selectedIndex={searchType} />
         <SearchBar
           containerStyle={styles.searchBarContainer}
-          inputContainerStyle={core.searchBar}
+          handleClear={this._handleSearchBarClear}
+          inputRef={(ref: any) => (this.searchBarInput = ref)}
           onChangeText={this._handleSearchBarTextChange}
-          onClear={this._handleSearchBarClear}
           placeholder={translate('search')}
           testID={testIDPrefix}
           value={searchBarText}
@@ -249,23 +245,22 @@ export class SearchScreen extends React.Component<Props, State> {
           <FlatList
             data={flatListData}
             dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe={true}
+            disableLeftSwipe
             extraData={flatListData}
             handleNoResultsBottomAction={PV.URLs.requestPodcast ? this._navToRequestPodcastForm : null}
             handleNoResultsMiddleAction={this._handleAddPodcastByRSSURLNavigation}
-            handleNoResultsTopAction={!Config.DISABLE_QR_SCANNER ? this._handleAddPodcastByRSSQRCodeNavigation : null}
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}
             keyExtractor={(item: any) => item.id}
             noResultsBottomActionText={PV.URLs.requestPodcast ? translate('Request Podcast') : ''}
-            noResultsMessage={translate('No podcasts found')}
-            noResultsMiddleActionText={translate('Add by RSS')}
-            noResultsTopActionText={!Config.DISABLE_QR_SCANNER ? translate('Scan RSS Feed QR Code') : ''}
+            noResultsMessage={searchBarText.length > 1 && translate('No podcasts found')}
+            noResultsMiddleActionText={translate('Add Custom RSS Feed')}
             onEndReached={this._onEndReached}
             renderItem={this._renderPodcastItem}
+            testID={testIDPrefix}
           />
         )}
-        {isLoading && <ActivityIndicator />}
+        {isLoading && <ActivityIndicator fillSpace />}
         <ActionSheet
           handleCancelPress={this._handleCancelPress}
           items={this._moreButtons()}
@@ -292,8 +287,7 @@ export class SearchScreen extends React.Component<Props, State> {
       const results = await getPodcasts({
         page,
         ...(searchType === _podcastByTitle ? { searchTitle: searchBarText } : {}),
-        ...(searchType === _podcastByHost ? { searchAuthor: searchBarText } : {}),
-        sort: 'alphabetical'
+        ...(searchType === _podcastByHost ? { searchAuthor: searchBarText } : {})
       })
 
       const newFlatListData = [...flatListData, ...results[0]]
@@ -318,13 +312,7 @@ const buttons = [translate('Podcast'), translate('Host')]
 
 const styles = StyleSheet.create({
   searchBarContainer: {
-    borderBottomWidth: 0,
-    borderTopWidth: 0,
-    flex: 0,
-    justifyContent: 'center',
-    marginBottom: 16,
-    marginTop: 12,
-    minHeight: PV.FlatList.searchBar.height
+    marginVertical: 12
   },
   view: {
     flex: 1,

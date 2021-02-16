@@ -11,21 +11,17 @@ type Props = {
   navigation?: any
 }
 
-type State = {}
-
-export class PurchasingScreen extends React.Component<Props, State> {
-  static navigationOptions = () => {
-    return {
-      title: translate('Processing'),
-      headerRight: null
-    }
-  }
-
+export class PurchasingScreen extends React.Component<Props> {
   constructor(props: Props) {
     super(props)
   }
 
-  _handleContactSupportPress = async () => {
+  static navigationOptions = () => ({
+    title: translate('Processing'),
+    headerRight: () => null
+  })
+
+  _handleContactSupportPress = () => {
     Linking.openURL(createEmailLinkUrl(PV.Emails.CHECKOUT_ISSUE))
   }
 
@@ -39,7 +35,7 @@ export class PurchasingScreen extends React.Component<Props, State> {
     }
   }
 
-  _handleDismiss = async () => {
+  _handleDismiss = () => {
     this.props.navigation.dismiss()
   }
 
@@ -76,8 +72,6 @@ export class PurchasingScreen extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   activityIndicator: {
-    backgroundColor: 'transparent',
-    flex: 0,
     marginVertical: 16
   },
   button: {

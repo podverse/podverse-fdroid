@@ -1,8 +1,9 @@
 import { View } from 'react-native'
 import FastImage from 'react-native-fast-image'
+import { SvgUri } from 'react-native-svg'
 import React from 'reactn'
-import { Icon } from '.'
 import { isValidUrl } from '../lib/utility'
+import { Icon } from '.'
 const uuidv4 = require('uuid/v4')
 
 type Props = {
@@ -36,25 +37,32 @@ export class PVFastImage extends React.PureComponent<Props, State> {
     const { isSmall, resizeMode = 'contain', source, styles } = this.props
     const { hasError, uuid } = this.state
     const { offlineModeEnabled, userAgent } = this.global
-    const cache = offlineModeEnabled ? 'cacheOnly' : 'web'
+    const cache = offlineModeEnabled ? 'cacheOnly' : 'immutable'
     const isValid = isValidUrl(source)
+    const isSvg = source && source.indexOf('.svg') > 0
+
+    const image = isSvg ? (
+      <SvgUri width='100%' height='100%' uri={source} style={styles} />
+    ) : (
+      <FastImage
+        key={uuid}
+        onError={this._handleError}
+        resizeMode={resizeMode}
+        source={{
+          uri: source,
+          cache,
+          headers: {
+            ...(userAgent ? { 'User-Agent': userAgent } : {})
+          }
+        }}
+        style={styles}
+      />
+    )
 
     return (
       <>
         {isValid && !hasError ? (
-          <FastImage
-            key={uuid}
-            onError={this._handleError}
-            resizeMode={resizeMode}
-            source={{
-              uri: source,
-              cache,
-              headers: {
-                ...(userAgent ? { 'User-Agent': userAgent } : {})
-              }
-            }}
-            style={styles}
-          />
+          image
         ) : (
           <View
             style={{
@@ -62,7 +70,7 @@ export class PVFastImage extends React.PureComponent<Props, State> {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-            <Icon isSecondary={true} name='podcast' size={isSmall ? 32 : 36} />
+            <Icon isSecondary name='podcast' size={isSmall ? 32 : 36} />
           </View>
         )}
       </>

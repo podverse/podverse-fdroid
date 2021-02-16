@@ -1,8 +1,8 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import { getGlobal } from 'reactn'
-import { Icon } from '.'
 import { PV } from '../resources'
+import { Icon } from '.'
 
 type Props = {
   style?: any
@@ -20,16 +20,8 @@ export const IndicatorDownload = (props: Props) => {
   }
 
   return (
-    <View style={[styles.downloadedIcon, style]}>
-      <Icon isSecondary={true} name='download' size={size} />
+    <View style={style}>
+      <Icon isSecondary name='download' size={size} />
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  downloadedIcon: {
-    flex: 0,
-    marginLeft: 9,
-    marginTop: 6
-  }
-})

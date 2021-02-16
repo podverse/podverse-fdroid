@@ -1,25 +1,46 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import { convertNowPlayingItemToEpisode, convertNowPlayingItemToMediaRef, NowPlayingItem } from 'podverse-shared'
+import {
+  convertNowPlayingItemClipToNowPlayingItemEpisode,
+  convertNowPlayingItemToEpisode,
+  convertNowPlayingItemToMediaRef,
+  NowPlayingItem
+} from 'podverse-shared'
 import { getGlobal, setGlobal } from 'reactn'
 import { PV } from '../../resources'
 import {
-  clearNowPlayingItem as clearNowPlayingItemService,
-  getContinuousPlaybackMode,
   initializePlayerQueue as initializePlayerQueueService,
   loadItemAndPlayTrack as loadItemAndPlayTrackService,
   playNextFromQueue as playNextFromQueueService,
   PVTrackPlayer,
-  setNowPlayingItem as setNowPlayingItemService,
+  setPlaybackPosition,
   setPlaybackSpeed as setPlaybackSpeedService,
   togglePlay as togglePlayService
 } from '../../services/player'
 import { initSleepTimerDefaultTimeRemaining } from '../../services/sleepTimer'
+import {
+  clearNowPlayingItem as clearNowPlayingItemService,
+  setNowPlayingItem as setNowPlayingItemService
+} from '../../services/userNowPlayingItem'
 import { getQueueItems } from '../../state/actions/queue'
+import { clearChapterPlaybackInfo, loadChapterPlaybackInfo, loadChaptersForNowPlayingItem } from './playerChapters'
+
+const clearChaptersIfNewEpisode = async (previousNowPlayingItem: NowPlayingItem, nowPlayingItem: NowPlayingItem) => {
+  const shouldClearPreviousPlaybackInfo =
+    previousNowPlayingItem && previousNowPlayingItem.episodeId !== nowPlayingItem.episodeId
+  if (shouldClearPreviousPlaybackInfo) {
+    await clearChapterPlaybackInfo()
+  }
+}
 
 export const updatePlayerState = async (item: NowPlayingItem) => {
   if (!item) return
 
   const globalState = getGlobal()
+
+  const previousNowPlayingItem = globalState.player.nowPlayingItem || {}
+  await clearChaptersIfNewEpisode(previousNowPlayingItem, item)
+  loadChaptersForNowPlayingItem(item)
+
   const episode = convertNowPlayingItemToEpisode(item)
   episode.description = episode.description || 'No show notes available'
   const mediaRef = convertNowPlayingItemToMediaRef(item)
@@ -29,8 +50,7 @@ export const updatePlayerState = async (item: NowPlayingItem) => {
       ...globalState.player,
       episode,
       ...(!item.clipId ? { mediaRef } : { mediaRef: null }),
-      nowPlayingItem: item,
-      showMiniPlayer: true
+      nowPlayingItem: item
     }
   } as any
 
@@ -45,12 +65,15 @@ export const updatePlayerState = async (item: NowPlayingItem) => {
 }
 
 export const initializePlayerQueue = async () => {
-  const globalState = getGlobal()
   const nowPlayingItem = await initializePlayerQueueService()
+
   if (nowPlayingItem) {
-    await updatePlayerState(nowPlayingItem)
+    const shouldPlay = false
+    await loadItemAndPlayTrack(nowPlayingItem, shouldPlay)
+    showMiniPlayer()
   }
 
+  const globalState = getGlobal()
   setGlobal({
     screenPlayer: {
       ...globalState.screenPlayer,
@@ -60,8 +83,9 @@ export const initializePlayerQueue = async () => {
 }
 
 export const clearNowPlayingItem = async () => {
-  const globalState = getGlobal()
   await clearNowPlayingItemService()
+
+  const globalState = getGlobal()
   setGlobal({
     player: {
       ...globalState.player,
@@ -76,14 +100,32 @@ export const clearNowPlayingItem = async () => {
   })
 }
 
+export const hideMiniPlayer = () => {
+  const globalState = getGlobal()
+  setGlobal({
+    player: {
+      ...globalState.player,
+      showMiniPlayer: false
+    }
+  })
+}
+
+export const showMiniPlayer = () => {
+  const globalState = getGlobal()
+  setGlobal({
+    player: {
+      ...globalState.player,
+      showMiniPlayer: true
+    }
+  })
+}
+
 export const initPlayerState = async (globalState: any) => {
-  const shouldContinuouslyPlay = await getContinuousPlaybackMode()
   const sleepTimerDefaultTimeRemaining = await initSleepTimerDefaultTimeRemaining()
 
   setGlobal({
     player: {
       ...globalState.player,
-      shouldContinuouslyPlay,
       sleepTimer: {
         defaultTimeRemaining: sleepTimerDefaultTimeRemaining,
         isActive: false,
@@ -94,33 +136,65 @@ export const initPlayerState = async (globalState: any) => {
 }
 
 export const playNextFromQueue = async () => {
-  await playNextFromQueueService()
+  const item = await playNextFromQueueService()
   await getQueueItems()
+}
+
+const handleLoadChapterForNowPlayingEpisode = async (item: NowPlayingItem) => {
+  setPlaybackPosition(item.clipStartTime)
+  const nowPlayingItemEpisode = convertNowPlayingItemClipToNowPlayingItemEpisode(item)
+  await setNowPlayingItem(nowPlayingItemEpisode, item.clipStartTime || 0)
+  await PVTrackPlayer.play()
+  loadChapterPlaybackInfo()
 }
 
 export const loadItemAndPlayTrack = async (
   item: NowPlayingItem,
   shouldPlay: boolean,
-  skipAddOrUpdateHistory?: boolean
+  forceUpdateOrderDate?: boolean
 ) => {
+  const globalState = getGlobal()
+
   if (item) {
+    const { nowPlayingItem: previousNowPlayingItem } = globalState.player
+
+    await clearChaptersIfNewEpisode(previousNowPlayingItem, item)
+
+    item.clipId
+      ? await AsyncStorage.setItem(PV.Keys.PLAYER_CLIP_IS_LOADED, 'TRUE')
+      : await AsyncStorage.removeItem(PV.Keys.PLAYER_CLIP_IS_LOADED)
+
+    if (item.clipIsOfficialChapter) {
+      if (previousNowPlayingItem && item.episodeId === previousNowPlayingItem.episodeId) {
+        await handleLoadChapterForNowPlayingEpisode(item)
+        return
+      } else {
+        loadChapterPlaybackInfo()
+      }
+    }
+
     await updatePlayerState(item)
-    await loadItemAndPlayTrackService(item, shouldPlay, skipAddOrUpdateHistory)
+    await loadItemAndPlayTrackService(item, shouldPlay, forceUpdateOrderDate)
+    showMiniPlayer()
   }
 
-  const globalState = getGlobal()
-  setGlobal({
-    screenPlayer: {
-      ...globalState.screenPlayer,
-      isLoading: false
+  setGlobal(
+    {
+      screenPlayer: {
+        ...globalState.screenPlayer,
+        isLoading: false
+      }
+    },
+    () => {
+      loadChaptersForNowPlayingItem(item)
     }
-  })
+  )
 }
 
 export const setPlaybackSpeed = async (rate: number) => {
-  const globalState = getGlobal()
   await setPlaybackSpeedService(rate)
 
+  const globalState = getGlobal()
   setGlobal({
     player: {
       ...globalState.player,
@@ -135,43 +209,44 @@ export const togglePlay = async () => {
   const trackId = await PVTrackPlayer.getCurrentTrack()
   if (!trackId) {
     await initializePlayerQueue()
-    return
   }
-
   await togglePlayService()
+
+  showMiniPlayer()
 }
 
 export const updatePlaybackState = async (state?: any) => {
-  const globalState = getGlobal()
   let playbackState = state
 
   if (!playbackState) playbackState = await PVTrackPlayer.getState()
 
+  const backupDuration = await PVTrackPlayer.getDuration()
+
+  const globalState = getGlobal()
   setGlobal({
     player: {
       ...globalState.player,
-      playbackState
+      playbackState,
+      ...(backupDuration ? { backupDuration } : {})
     }
   })
 }
 
-export const setNowPlayingItem = async (item: NowPlayingItem | null) => {
+export const setNowPlayingItem = async (item: NowPlayingItem | null, playbackPosition: number) => {
   if (item) {
-    await setNowPlayingItemService(item)
+    await setNowPlayingItemService(item, playbackPosition)
     await updatePlayerState(item)
-  } else {
-    await clearNowPlayingItem()
   }
 }
 
 export const initializePlaybackSpeed = async () => {
-  const globalState = getGlobal()
   const playbackSpeedString = await AsyncStorage.getItem(PV.Keys.PLAYER_PLAYBACK_SPEED)
   let playbackSpeed = 1
   if (playbackSpeedString) {
     playbackSpeed = JSON.parse(playbackSpeedString)
   }
 
+  const globalState = getGlobal()
   setGlobal({
     player: {
       ...globalState.player,

@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import { convertToSortableTitle, convertURLToSecureProtocol, getAppUserAgent, isValidDate } from '../lib/utility'
+import { encode as btoa } from 'base-64'
+import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store'
+import { convertToSortableTitle, getAppUserAgent, isValidDate } from '../lib/utility'
 import { PV } from '../resources'
 import { checkIfLoggedIn, getBearerToken } from './auth'
 import { combineWithAddByRSSPodcasts } from './podcast'
@@ -17,7 +19,7 @@ addByRSSPodcast: object {
 */
 
 export const hasAddByRSSEpisodesLocally = async () => {
-  const results = await getAddByRSSEpisodesLocally(new Date(), new Date(0))
+  const results = await getAddByRSSEpisodesLocally()
   return results.length > 0
 }
 
@@ -44,7 +46,10 @@ export const combineEpisodesWithAddByRSSEpisodesLocally = async (results: any[])
   mostRecentDate = mostRecentDate ? mostRecentDate : new Date().toString()
   oldestDate = oldestDate ? oldestDate : new Date(0).toString()
 
-  const addByRSSEpisodes = await getAddByRSSEpisodesLocally(new Date(mostRecentDate), new Date(oldestDate))
+  const addByRSSEpisodes =
+    results.length > 0
+      ? await getAddByRSSEpisodesLocallyByDateRange(new Date(mostRecentDate), new Date(oldestDate))
+      : await getAddByRSSEpisodesLocally()
 
   const sortedResults = [...results[0], ...addByRSSEpisodes].sort((a: any, b: any) => {
     const dateA = new Date(a.pubDate) as any
@@ -57,7 +62,21 @@ export const combineEpisodesWithAddByRSSEpisodesLocally = async (results: any[])
   return [sortedResults, newCount]
 }
 
-export const getAddByRSSEpisodesLocally = async (mostRecentDate: Date, oldestDate: Date) => {
+export const getAddByRSSEpisodesLocally = async () => {
+  const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
+  const combinedEpisodes = [] as any[]
+
+  for (const addByRSSPodcast of addByRSSPodcasts) {
+    for (const episode of addByRSSPodcast.episodes) {
+      episode.podcast = addByRSSPodcast
+      combinedEpisodes.push(episode)
+    }
+  }
+
+  return combinedEpisodes
+}
+
+export const getAddByRSSEpisodesLocallyByDateRange = async (mostRecentDate: Date, oldestDate: Date) => {
   const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
   const combinedEpisodes = [] as any[]
 
@@ -71,6 +90,10 @@ export const getAddByRSSEpisodesLocally = async (mostRecentDate: Date, oldestDat
   return combinedEpisodes.filter((episode) => {
     if (!episode.pubDate) {
       return false
+    }
+
+    if (new Date(episode.pubDate).valueOf() > mostRecentDate.valueOf()) {
+      return true
     }
 
     return (
@@ -122,9 +145,12 @@ export const parseAllAddByRSSPodcasts = async () => {
   const parsedPodcasts = []
   const finalParsedPodcasts = []
 
+  const allAddByRSSPodcastCredentials = await getAllAddByRSSPodcastCredentials()
+
   for (const url of urls) {
     try {
-      const parsedPodcast = await parseAddByRSSPodcast(url)
+      const credentials = allAddByRSSPodcastCredentials[url] || ''
+      const parsedPodcast = await parseAddByRSSPodcast(url, credentials)
       if (parsedPodcast) {
         parsedPodcasts.push(parsedPodcast)
       }
@@ -150,13 +176,58 @@ export const parseAllAddByRSSPodcasts = async () => {
   return finalParsedPodcasts
 }
 
-export const parseAddByRSSPodcast = async (feedUrl: string) => {
-  const userAgent = await getAppUserAgent()
+const getAllAddByRSSPodcastCredentials = async () => {
+  let allCredentials = {}
+
+  try {
+    const allCredentialsString = await RNSecureKeyStore.get(PV.Keys.ADD_BY_RSS_PODCASTS_CREDENTIALS)
+    allCredentials = allCredentialsString ? JSON.parse(allCredentialsString) : {}
+  } catch (error) {
+    await RNSecureKeyStore.set(PV.Keys.ADD_BY_RSS_PODCASTS_CREDENTIALS, JSON.stringify({}), {
+      accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY
+    })
+  }
+
+  return allCredentials
+}
+
+// credentials are a string in format <username>:<password>
+const saveAddByRSSPodcastCredentials = async (feedUrl: string, credentials: string) => {
+  const allAddByRSSPodcastCredentials = await getAllAddByRSSPodcastCredentials()
+  allAddByRSSPodcastCredentials[feedUrl] = credentials
+
+  await RNSecureKeyStore.set(PV.Keys.ADD_BY_RSS_PODCASTS_CREDENTIALS, JSON.stringify(allAddByRSSPodcastCredentials), {
+    accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY
+  })
+}
+
+const removeAddByRSSPodcastCredentials = async (feedUrl: string) => {
+  const allAddByRSSPodcastCredentials = await getAllAddByRSSPodcastCredentials()
+  allAddByRSSPodcastCredentials[feedUrl] = ''
+
+  await RNSecureKeyStore.set(PV.Keys.ADD_BY_RSS_PODCASTS_CREDENTIALS, JSON.stringify(allAddByRSSPodcastCredentials), {
+    accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY
+  })
+}
+
+export const parseAddByRSSPodcast = async (feedUrl: string, credentials?: string) => {
+  const userAgent = getAppUserAgent()
+
+  const Authorization = credentials ? `Basic ${btoa(credentials)}` : ''
+
   const result = await podcastFeedParser.getPodcastFromURL({
     url: feedUrl,
-    headers: { 'User-Agent': userAgent },
+    headers: {
+      'User-Agent': userAgent,
+      ...(Authorization ? { Authorization } : {})
+    },
     timeout: 20000
   })
+
+  if (credentials) {
+    await saveAddByRSSPodcastCredentials(feedUrl, credentials)
+  }
+
   const { episodes: parsedEpisodes, meta } = result
 
   const title = meta.title && meta.title.trim()
@@ -165,7 +236,14 @@ export const parseAddByRSSPodcast = async (feedUrl: string) => {
   }
   const podcast = {} as any
 
+  // A unique podcast.id is needed for specialUserInfoForPodcast
+  podcast.id = uuidv4()
+
   podcast.addByRSSPodcastFeedUrl = feedUrl
+  // The podcast.id must be set to the addByRSSPodcastFeedUrl for
+  // addDownloadedPodcastEpisode to work properly.
+  podcast.id = feedUrl
+
   podcast.description = meta.description && meta.description.trim()
 
   const feedLastUpdated = new Date(meta.lastBuildDate || meta.pubDate)
@@ -177,13 +255,6 @@ export const parseAddByRSSPodcast = async (feedUrl: string) => {
   podcast.isExplicit = meta.explicit
   podcast.language = meta.language
 
-  if (parsedEpisodes && parsedEpisodes.length > 0) {
-    const lastEpisodePubDate = new Date(parsedEpisodes[0].pubDate)
-    podcast.lastEpisodePubDate = isValidDate(lastEpisodePubDate) ? lastEpisodePubDate : new Date()
-    podcast.lastEpisodePubDate = parsedEpisodes[0].published || new Date()
-    podcast.lastEpisodeTitle = parsedEpisodes[0].title && parsedEpisodes[0].title.trim()
-  }
-
   podcast.linkUrl = meta.link
   podcast.sortableTitle = convertToSortableTitle(title)
   podcast.title = title
@@ -192,15 +263,26 @@ export const parseAddByRSSPodcast = async (feedUrl: string) => {
 
   const episodes = [] as any[]
   if (parsedEpisodes && Array.isArray(parsedEpisodes)) {
+    parsedEpisodes.sort((a, b) => (new Date(b.pubDate) as any) - (new Date(a.pubDate) as any))
+
+    if (parsedEpisodes[0]) {
+      const lastEpisodePubDate = new Date(parsedEpisodes[0].pubDate)
+      podcast.lastEpisodePubDate = isValidDate(lastEpisodePubDate) && lastEpisodePubDate
+      podcast.lastEpisodePubDate = podcast.lastEpisodePubDate || parsedEpisodes[0].published || new Date()
+      podcast.lastEpisodeTitle = parsedEpisodes[0].title && parsedEpisodes[0].title.trim()
+    }
+
     for (const parsedEpisode of parsedEpisodes) {
       const episode = {} as any
       const enclosure = parsedEpisode.enclosure
       if (!enclosure || !enclosure.url) continue
 
-      episode.isPublic = true
+      episode.addedByRSS = true
 
-      // A unique episode.id is needed for downloading episodes.
-      episode.id = uuidv4()
+      // The episode.mediaUrl is used as the unique id by the downloads service,
+      // and as the unique key by the FlatList component.
+      episode.id = enclosure.url
+      episode.mediaUrl = enclosure.url
 
       // TODO: add chapters support for podcasts added by RSS feed
       // if (parsedEpisode.chapters) {
@@ -215,16 +297,16 @@ export const parseAddByRSSPodcast = async (feedUrl: string) => {
       episode.guid = parsedEpisode.guid
       episode.imageUrl = parsedEpisode.image
       episode.isExplicit = parsedEpisode.explicit
+      episode.isPublic = true
       episode.linkUrl = parsedEpisode.link
       episode.mediaType = enclosure.type
-      episode.mediaUrl = enclosure.url
 
       const pubDate = new Date(parsedEpisode.pubDate)
       episode.pubDate = isValidDate(pubDate) ? pubDate : new Date()
 
       episode.soundbite = parsedEpisode.soundbite
       episode.title = parsedEpisode.title && parsedEpisode.title.trim()
-      episodes.push(parsedEpisode)
+      episodes.push(episode)
     }
   }
 
@@ -282,6 +364,7 @@ export const removeAddByRSSPodcast = async (feedUrl: string) => {
   let podcasts = await getAddByRSSPodcastsLocally()
   podcasts = podcasts.filter((x: any) => x.addByRSSPodcastFeedUrl !== feedUrl)
   await setAddByRSSPodcastsLocally(podcasts)
+  await removeAddByRSSPodcastCredentials(feedUrl)
   let addByRSSPodcastFeedUrls = await getAddByRSSPodcastFeedUrlsLocally()
   addByRSSPodcastFeedUrls = addByRSSPodcastFeedUrls.filter((x: string) => x !== feedUrl)
   await setAddByRSSPodcastFeedUrlsLocally(addByRSSPodcastFeedUrls)

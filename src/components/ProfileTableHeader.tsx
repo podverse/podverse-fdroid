@@ -14,6 +14,7 @@ type Props = {
   isSubscribed?: boolean
   isSubscribing?: boolean
   name: string
+  testID: string
 }
 
 export const ProfileTableHeader = (props: Props) => {
@@ -25,14 +26,15 @@ export const ProfileTableHeader = (props: Props) => {
     isNotFound,
     isSubscribed,
     isSubscribing,
-    name = translate('anonymous')
+    name = translate('anonymous'),
+    testID
   } = props
 
   return (
     <View>
       {isLoading && (
         <View style={styles.wrapper}>
-          <ActivityIndicator />
+          <ActivityIndicator fillSpace />
         </View>
       )}
       {!isLoading && !isNotFound && (
@@ -50,6 +52,7 @@ export const ProfileTableHeader = (props: Props) => {
               handleToggleSubscribe={handleToggleSubscribe}
               isSubscribed={isSubscribed}
               isSubscribing={isSubscribing}
+              testID={testID}
             />
           )}
         </View>
@@ -57,7 +60,7 @@ export const ProfileTableHeader = (props: Props) => {
       {!isLoading && isNotFound && (
         <View style={[styles.wrapper, core.view]}>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.notFoundText}>
-            {translate('Playlist Not Found')}
+            {translate('Profile not found')}
           </Text>
         </View>
       )}
@@ -75,11 +78,11 @@ const styles = StyleSheet.create({
   },
   name: {
     flex: 0,
-    fontSize: PV.Fonts.sizes.xl,
+    fontSize: PV.Fonts.sizes.xxl,
     fontWeight: PV.Fonts.weights.bold
   },
   notFoundText: {
-    fontSize: PV.Fonts.sizes.xl,
+    fontSize: PV.Fonts.sizes.xxl,
     fontWeight: PV.Fonts.weights.bold
   },
   textWrapper: {
@@ -89,7 +92,7 @@ const styles = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
     flexDirection: 'row',
-    minHeight: PV.Table.cells.standard.height,
+    minHeight: 64,
     marginHorizontal: 8
   }
 })

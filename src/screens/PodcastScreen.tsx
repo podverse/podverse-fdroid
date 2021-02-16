@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
-import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podverse-shared'
+import { convertToNowPlayingItem } from 'podverse-shared'
 import { View as RNView } from 'react-native'
 import Dialog from 'react-native-dialog'
 import { NavigationStackOptions } from 'react-navigation-stack'
@@ -13,7 +13,6 @@ import {
   Divider,
   EpisodeTableCell,
   FlatList,
-  HTMLScrollView,
   NavSearchIcon,
   NavShareIcon,
   NumberSelectorWithText,
@@ -21,7 +20,6 @@ import {
   SearchBar,
   SwipeRowBack,
   SwitchWithText,
-  TableSectionHeader,
   TableSectionSelectors,
   Text,
   View
@@ -29,21 +27,16 @@ import {
 import { getDownloadedEpisodeLimit, setDownloadedEpisodeLimit } from '../lib/downloadedEpisodeLimiter'
 import { getDownloadedEpisodes, removeDownloadedPodcast } from '../lib/downloadedPodcast'
 import { downloadEpisode } from '../lib/downloader'
+import { getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import {
-  decodeHTMLString,
-  isOdd,
-  readableDate,
-  removeHTMLFromString,
-  safelyUnwrapNestedVariable,
-  testProps
-} from '../lib/utility'
+import { safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
 import { getAddByRSSPodcastLocally } from '../services/parser'
 import { getPodcast } from '../services/podcast'
+import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import * as DownloadState from '../state/actions/downloads'
 import { toggleAddByRSSPodcastFeedUrl } from '../state/actions/parser'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
@@ -68,6 +61,8 @@ type State = {
   queryPage: number
   querySort: string | null
   searchBarText: string
+  selectedFilterLabel?: string | null
+  selectedSortLabel?: string | null
   selectedItem?: any
   showActionSheet: boolean
   showDeleteDownloadedEpisodesDialog?: boolean
@@ -79,28 +74,6 @@ type State = {
 const testIDPrefix = 'podcast_screen'
 
 export class PodcastScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    const podcastId = navigation.getParam('podcastId')
-    const podcastTitle = navigation.getParam('podcastTitle')
-    const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
-
-    return {
-      title: translate('Podcast'),
-      headerRight: (
-        <RNView style={core.row}>
-          {!addByRSSPodcastFeedUrl && (
-            <NavShareIcon
-              endingText={translate('shared using brandName')}
-              podcastTitle={podcastTitle}
-              urlId={podcastId}
-              urlPath={PV.URLs.webPaths.podcast}
-            />
-          )}
-          <NavSearchIcon navigation={navigation} />
-        </RNView>
-      )
-    } as NavigationStackOptions
-  }
 
   constructor(props: Props) {
     super(props)
@@ -135,12 +108,37 @@ export class PodcastScreen extends React.Component<Props, State> {
       queryPage: 1,
       querySort: PV.Filters._mostRecentKey,
       searchBarText: '',
+      selectedFilterLabel: translate('Episodes'),
+      selectedSortLabel: translate('recent'),
       showActionSheet: false,
       showSettings: false,
       viewType
     }
 
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
+  }
+
+static navigationOptions = ({ navigation }) => {
+    const podcastId = navigation.getParam('podcastId')
+    const podcastTitle = navigation.getParam('podcastTitle')
+    const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
+
+    return {
+      title: translate('Podcast'),
+      headerRight: () => (
+        <RNView style={core.row}>
+          {!addByRSSPodcastFeedUrl && (
+            <NavShareIcon
+              endingText={translate('shared using brandName')}
+              podcastTitle={podcastTitle}
+              urlId={podcastId}
+              urlPath={PV.URLs.webPaths.podcast}
+            />
+          )}
+          <NavSearchIcon navigation={navigation} />
+        </RNView>
+      )
+    } as NavigationStackOptions
   }
 
   async componentDidMount() {
@@ -188,48 +186,49 @@ export class PodcastScreen extends React.Component<Props, State> {
         podcastId,
         queryPage: 1
       },
-      async () => {
-        let newState = {}
-        let newPodcast: any
-
-        try {
-          if (podcast && podcast.addByRSSPodcastFeedUrl) {
-            newPodcast = podcast
-            newState.flatListData = podcast.episodes || []
-            newState.flatListDataTotalCount = newState.flatListData.length
-          } else {
-            newPodcast = await getPodcast(podcastId)
-            if (viewType === PV.Filters._episodesKey) {
-              newState = await this._queryData(PV.Filters._episodesKey)
-            } else if (viewType === PV.Filters._clipsKey) {
-              newState = await this._queryData(PV.Filters._clipsKey)
+      () => {
+        (async () => {
+          let newState = {}
+          let newPodcast: any
+  
+          try {
+            if (podcast && podcast.addByRSSPodcastFeedUrl) {
+              newPodcast = podcast
+              newState.flatListData = podcast.episodes || []
+              newState.flatListDataTotalCount = newState.flatListData.length
+            } else {
+              newPodcast = await getPodcast(podcastId)
+              if (viewType === PV.Filters._episodesKey) {
+                newState = await this._queryData(PV.Filters._episodesKey)
+              } else if (viewType === PV.Filters._clipsKey) {
+                newState = await this._queryData(PV.Filters._clipsKey)
+              }
             }
+  
+            newPodcast.description = newPodcast.description || translate('No summary available')
+  
+            this.setState({
+              ...newState,
+              isLoading: false,
+              podcast: newPodcast
+            })
+          } catch (error) {
+            console.log('_initializePageData', error)
+            this.setState({
+              ...newState,
+              isLoading: false,
+              ...(newPodcast ? { podcast: newPodcast } : { podcast })
+            })
           }
-
-          newPodcast.description = newPodcast.description || translate('No summary available')
-
-          this.setState({
-            ...newState,
-            isLoading: false,
-            podcast: newPodcast
-          })
-        } catch (error) {
-          console.log('_initializePageData', error)
-          this.setState({
-            ...newState,
-            isLoading: false,
-            ...(newPodcast ? { podcast: newPodcast } : { podcast })
-          })
-        }
+        })()
       }
     )
   }
 
-  selectLeftItem = async (selectedKey: string) => {
-    if (!selectedKey) {
-      this.setState({ viewType: null })
-      return
-    }
+  handleSelectFilterItem = async (selectedKey: string) => {
+    if (!selectedKey) return
+
+    const selectedFilterLabel = await getSelectedFilterLabel(selectedKey)
 
     this.setState(
       {
@@ -239,20 +238,22 @@ export class PodcastScreen extends React.Component<Props, State> {
         isLoading: true,
         queryPage: 1,
         searchBarText: '',
+        selectedFilterLabel,
         viewType: selectedKey
       },
-      async () => {
-        const newState = await this._queryData(selectedKey)
-        this.setState(newState)
+      () => {
+        (async () => {
+          const newState = await this._queryData(selectedKey)
+          this.setState(newState)
+        })()
       }
     )
   }
 
-  selectRightItem = async (selectedKey: string) => {
-    if (!selectedKey) {
-      this.setState({ querySort: null })
-      return
-    }
+  handleSelectSortItem = async (selectedKey: string) => {
+    if (!selectedKey) return
+
+    const selectedSortLabel = await getSelectedSortLabel(selectedKey)
 
     this.setState(
       {
@@ -261,11 +262,14 @@ export class PodcastScreen extends React.Component<Props, State> {
         flatListDataTotalCount: null,
         isLoading: true,
         queryPage: 1,
-        querySort: selectedKey
+        querySort: selectedKey,
+        selectedSortLabel
       },
-      async () => {
-        const newState = await this._queryData(selectedKey)
-        this.setState(newState)
+      () => {
+        (async () => {
+          const newState = await this._queryData(selectedKey)
+          this.setState(newState)
+        })()
       }
     )
   }
@@ -284,12 +288,14 @@ export class PodcastScreen extends React.Component<Props, State> {
           {
             isLoadingMore: true
           },
-          async () => {
-            const newState = await this._queryData(viewType, {
-              queryPage: queryPage + 1,
-              searchAllFieldsText: this.state.searchBarText
-            })
-            this.setState(newState)
+          () => {
+            (async () => {
+              const newState = await this._queryData(viewType, {
+                queryPage: queryPage + 1,
+                searchAllFieldsText: this.state.searchBarText
+              })
+              this.setState(newState)
+            })()
           }
         )
       }
@@ -298,14 +304,15 @@ export class PodcastScreen extends React.Component<Props, State> {
 
   _onRefresh = () => {
     const { viewType } = this.state
-
     this.setState(
       {
         isRefreshing: true
       },
-      async () => {
-        const newState = await this._queryData(viewType, { queryPage: 1 })
-        this.setState(newState)
+      () => {
+        (async () => {
+          const newState = await this._queryData(viewType, { queryPage: 1 })
+          this.setState(newState)
+        })()
       }
     )
   }
@@ -325,15 +332,11 @@ export class PodcastScreen extends React.Component<Props, State> {
     )
   }
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
+  _ItemSeparatorComponent = () => <Divider style={{ marginHorizontal: 10 }} />
 
-  _handleCancelPress = () => {
-    return new Promise((resolve, reject) => {
+  _handleCancelPress = () => new Promise((resolve) => {
       this.setState({ showActionSheet: false }, resolve)
     })
-  }
 
   _handleMorePress = (selectedItem: any) => {
     this.setState({
@@ -342,91 +345,88 @@ export class PodcastScreen extends React.Component<Props, State> {
     })
   }
 
+  _handleDownloadPressed = (selectedItem: any) => {
+    const { podcast } = this.state
+    if (selectedItem) {
+      downloadEpisode(selectedItem, podcast)
+    }
+  }
+
   _renderItem = ({ item, index }) => {
     const { podcast, viewType } = this.state
-    const episode = {
-      ...item,
-      podcast
-    }
 
-    if (viewType === PV.Filters._downloadedKey) {
-      let description = removeHTMLFromString(item.description)
-      description = decodeHTMLString(description)
+    if (viewType === PV.Filters._clipsKey) {
+      return (
+        item &&
+        item.episode &&
+        item.episode.id && (
+          <ClipTableCell
+            handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
+            showEpisodeInfo
+            showPodcastInfo={false}
+            testID={`${testIDPrefix}_clip_item_${index}`}
+            item={item}
+            hideImage
+          />
+        )
+      )
+    } else {
+      const episode = {
+        ...item,
+        podcast
+      }
+
+      let testId = ''
+      if (viewType === PV.Filters._downloadedKey) {
+        testId = `${testIDPrefix}_episode_downloaded_item_${index}`
+      } else if (viewType === PV.Filters._episodesKey) {
+        testId = `${testIDPrefix}_episode_item_${index}`
+      }
+
+      const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(item.id)
+
       return (
         <EpisodeTableCell
-          description={description}
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
+          item={episode}
+          handleDownloadPress={() => this._handleDownloadPressed(item)}
+          handleMorePress={() =>
+            this._handleMorePress(convertToNowPlayingItem(item, null, podcast, userPlaybackPosition))
+          }
           handleNavigationPress={() => {
             this.props.navigation.navigate(PV.RouteNames.EpisodeScreen, {
               episode,
               addByRSSPodcastFeedUrl: podcast.addByRSSPodcastFeedUrl
             })
           }}
-          hasZebraStripe={isOdd(index)}
-          hideImage={true}
-          id={item.id}
-          pubDate={item.pubDate}
-          testID={`${testIDPrefix}_episode_downloaded_item_${index}`}
-          title={item.title}
+          hideImage
+          mediaFileDuration={mediaFileDuration}
+          testID={testId}
+          userPlaybackPosition={userPlaybackPosition}
         />
-      )
-    } else if (viewType === PV.Filters._episodesKey) {
-      let description = removeHTMLFromString(item.description)
-      description = decodeHTMLString(description)
-      return (
-        <EpisodeTableCell
-          description={description}
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
-          handleNavigationPress={() =>
-            this.props.navigation.navigate(PV.RouteNames.EpisodeScreen, {
-              episode,
-              addByRSSPodcastFeedUrl: podcast.addByRSSPodcastFeedUrl
-            })
-          }
-          hasZebraStripe={isOdd(index)}
-          hideImage={true}
-          id={item.id}
-          pubDate={item.pubDate}
-          testID={`${testIDPrefix}_episode_item_${index}`}
-          title={item.title}
-        />
-      )
-    } else {
-      return item && item.episode && item.episode.id ? (
-        <ClipTableCell
-          endTime={item.endTime}
-          episodeId={item.episode.id}
-          {...(item.episode.pubDate ? { episodePubDate: item.episode.pubDate } : {})}
-          {...(item.episode.title ? { episodeTitle: item.episode.title } : {})}
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
-          hasZebraStripe={isOdd(index)}
-          hideImage={true}
-          showEpisodeInfo={true}
-          showPodcastTitle={false}
-          startTime={item.startTime}
-          testID={`${testIDPrefix}_clip_item_${index}`}
-          {...(item.title ? { title: item.title } : {})}
-        />
-      ) : (
-        <></>
       )
     }
   }
 
-  _renderHiddenItem = ({ item }, rowMap) => (
-    <SwipeRowBack onPress={() => this._handleHiddenItemPress(item.id, rowMap)} text={translate('Delete')} />
+  _renderHiddenItem = ({ item, index }, rowMap) => (
+    <SwipeRowBack
+      onPress={() => this._handleHiddenItemPress(item.id, rowMap)}
+      testID={`${testIDPrefix}_clip_item_${index}`}
+      text={translate('Delete')}
+    />
   )
 
-  _handleHiddenItemPress = async (selectedId, rowMap) => {
+  _handleHiddenItemPress = (selectedId) => {
     const filteredEpisodes = this.state.flatListData.filter((x: any) => x.id !== selectedId)
     this.setState(
       {
         flatListData: filteredEpisodes
       },
-      async () => {
-        await DownloadState.removeDownloadedPodcastEpisode(selectedId)
-        const finalDownloadedEpisodes = await getDownloadedEpisodes()
-        this.setState({ flatListData: finalDownloadedEpisodes })
+      () => {
+        (async () => {
+          await DownloadState.removeDownloadedPodcastEpisode(selectedId)
+          const finalDownloadedEpisodes = await getDownloadedEpisodes()
+          this.setState({ flatListData: finalDownloadedEpisodes })
+        })()
       }
     )
   }
@@ -435,16 +435,18 @@ export class PodcastScreen extends React.Component<Props, State> {
     this.setState({ showDeleteDownloadedEpisodesDialog: !this.state.showDeleteDownloadedEpisodesDialog })
   }
 
-  _handleDeleteDownloadedEpisodes = async () => {
-    this.setState({ showDeleteDownloadedEpisodesDialog: false }, async () => {
-      const { podcast, podcastId } = this.state
-      const id = (podcast && podcast.id) || podcastId
-      try {
-        await removeDownloadedPodcast(id)
-      } catch (error) {
-        //
-      }
-      DownloadState.updateDownloadedPodcasts()
+  _handleDeleteDownloadedEpisodes = () => {
+    this.setState({ showDeleteDownloadedEpisodesDialog: false }, () => {
+      (async () => {
+        const { podcast, podcastId } = this.state
+        const id = (podcast && podcast.id) || podcastId
+        try {
+          await removeDownloadedPodcast(id)
+        } catch (error) {
+          //
+        }
+        DownloadState.updateDownloadedPodcasts()
+      })()
     })
   }
 
@@ -456,29 +458,31 @@ export class PodcastScreen extends React.Component<Props, State> {
         isLoadingMore: true,
         searchBarText: text
       },
-      async () => {
+      () => {
         this._handleSearchBarTextQuery(viewType, { searchAllFieldsText: text })
       }
     )
   }
 
-  _handleSearchBarTextQuery = async (viewType: string | null, queryOptions: any) => {
+  _handleSearchBarTextQuery = (viewType: string | null, queryOptions: any) => {
     this.setState(
       {
         flatListData: [],
         flatListDataTotalCount: null,
         queryPage: 1
       },
-      async () => {
-        const state = await this._queryData(viewType, {
-          searchAllFieldsText: queryOptions.searchAllFieldsText
-        })
-        this.setState(state)
+      () => {
+        (async () => {
+          const state = await this._queryData(viewType, {
+            searchAllFieldsText: queryOptions.searchAllFieldsText
+          })
+          this.setState(state)
+        })()
       }
     )
   }
 
-  _handleSearchBarClear = (text: string) => {
+  _handleSearchBarClear = () => {
     this.setState({ searchBarText: '' })
   }
 
@@ -490,32 +494,27 @@ export class PodcastScreen extends React.Component<Props, State> {
       const wasAlerted = await alertIfNoNetworkConnection(translate('subscribe to podcast'))
       if (wasAlerted) return
 
-      this.setState({ isSubscribing: true }, async () => {
-        try {
-          if (addByRSSPodcastFeedUrl) {
-            await toggleAddByRSSPodcastFeedUrl(podcastId)
-          } else {
-            await toggleSubscribeToPodcast(podcastId)
+      this.setState({ isSubscribing: true }, () => {
+        (async () => {
+          try {
+            if (addByRSSPodcastFeedUrl) {
+              await toggleAddByRSSPodcastFeedUrl(podcastId)
+            } else {
+              await toggleSubscribeToPodcast(podcastId)
+            }
+            this.setState({ isSubscribing: false })
+          } catch (error) {
+            this.setState({ isSubscribing: false })
           }
-          this.setState({ isSubscribing: false })
-        } catch (error) {
-          this.setState({ isSubscribing: false })
-        }
-
-        const downloadedEpisodeLimit = await getDownloadedEpisodeLimit(podcastId)
-
-        this.setState({
-          downloadedEpisodeLimit,
-          limitDownloadedEpisodes: downloadedEpisodeLimit && downloadedEpisodeLimit > 0
-        })
+  
+          const downloadedEpisodeLimit = await getDownloadedEpisodeLimit(podcastId)
+  
+          this.setState({
+            downloadedEpisodeLimit,
+            limitDownloadedEpisodes: downloadedEpisodeLimit && downloadedEpisodeLimit > 0
+          })
+        })()
       })
-    }
-  }
-
-  _handleDownloadPressed = () => {
-    if (this.state.selectedItem) {
-      const episode = convertNowPlayingItemToEpisode(this.state.selectedItem)
-      downloadEpisode(episode, episode.podcast)
     }
   }
 
@@ -564,6 +563,8 @@ export class PodcastScreen extends React.Component<Props, State> {
       podcast,
       podcastId,
       querySort,
+      selectedFilterLabel,
+      selectedSortLabel,
       selectedItem,
       showActionSheet,
       showDeleteDownloadedEpisodesDialog,
@@ -573,6 +574,7 @@ export class PodcastScreen extends React.Component<Props, State> {
     } = this.state
     const { offlineModeEnabled } = this.global
     const subscribedPodcastIds = safelyUnwrapNestedVariable(() => this.global.session.userInfo.subscribedPodcastIds, [])
+    const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
 
     let isSubscribed = subscribedPodcastIds.some((x: string) => x === podcastId)
     if (!isSubscribed) {
@@ -615,46 +617,58 @@ export class PodcastScreen extends React.Component<Props, State> {
           podcastImageUrl={podcast && (podcast.shrunkImageUrl || podcast.imageUrl)}
           podcastTitle={podcast && podcast.title}
           showSettings={showSettings}
+          testID={testIDPrefix}
         />
-        {!showSettings && (
+        {!showSettings ? (
           <TableSectionSelectors
-            handleSelectLeftItem={this.selectLeftItem}
-            handleSelectRightItem={this.selectRightItem}
-            isAddByRSSPodcastFeedUrl={podcast && podcast.addByRSSPodcastFeedUrl}
+            addByRSSPodcastFeedUrl={addByRSSPodcastFeedUrl}
+            filterScreenTitle={viewType === PV.Filters._clipsKey ? translate('Clips') : translate('Episodes')}
+            handleSelectFilterItem={this.handleSelectFilterItem}
+            handleSelectSortItem={this.handleSelectSortItem}
+            includePadding
+            navigation={navigation}
             screenName='PodcastScreen'
-            selectedLeftItemKey={viewType}
-            selectedRightItemKey={querySort}
+            selectedFilterItemKey={viewType}
+            selectedFilterLabel={selectedFilterLabel}
+            selectedSortItemKey={querySort}
+            selectedSortLabel={selectedSortLabel}
             testID={testIDPrefix}
           />
-        )}
-        {showSettings && <TableSectionHeader title={translate('Settings')} />}
-        {showSettings && (
+        ) : (
           <View style={styles.settingsView}>
+            <Text style={styles.settingsTitle}>{translate('Settings')}</Text>
             <SwitchWithText
               onValueChange={this._handleToggleLimitDownloads}
-              text={limitDownloadedEpisodes ? translate('Download limit on') : translate('Download limit off')}
+              testID={`${testIDPrefix}_toggle_download_limit`}
+              text={translate('Download limit')}
               value={limitDownloadedEpisodes}
+              wrapperStyle={styles.toggleLimitDownloadsSwitchWrapper}
             />
-            <NumberSelectorWithText
-              handleChangeText={this._handleChangeDownloadLimitText}
-              selectedNumber={downloadedEpisodeLimit}
-              text={translate('Download limit max')}
-            />
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} style={styles.settingsHelpText}>
-              {translate('Once the download limit is exceeded the oldest episode will be auto deleted')}
-            </Text>
+            {limitDownloadedEpisodes && (
+              <NumberSelectorWithText
+                handleChangeText={this._handleChangeDownloadLimitText}
+                selectedNumber={downloadedEpisodeLimit}
+                subText={translate(
+                  // eslint-disable-next-line max-len
+                  'Limit the number of downloaded episodes from this podcast on your device. Once the download limit is exceeded the oldest episode will be automatically deleted.'
+                )}
+                testID={`${testIDPrefix}_downloaded_episode_limit_count`}
+                text={translate('Download limit max')}
+              />
+            )}
             <Divider style={styles.divider} />
             <Button
               onPress={this._handleToggleDeleteDownloadedEpisodesDialog}
-              wrapperStyles={styles.button}
+              wrapperStyles={styles.settingsDeletebutton}
+              testID={`${testIDPrefix}_delete_downloaded_episodes`}
               text={translate('Delete Downloaded Episodes')}
             />
           </View>
         )}
         {!showSettings && (
           <View style={styles.view}>
-            {isLoading && <ActivityIndicator />}
-            {!isLoading && viewType !== PV.Filters._aboutPodcastKey && flatListData && podcast && (
+            {isLoading && <ActivityIndicator fillSpace />}
+            {!isLoading && flatListData && podcast && (
               <FlatList
                 data={flatListData}
                 dataTotalCount={flatListDataTotalCount}
@@ -676,26 +690,12 @@ export class PodcastScreen extends React.Component<Props, State> {
                 showNoInternetConnectionMessage={offlineModeEnabled || showNoInternetConnectionMessage}
               />
             )}
-            {!isLoading && viewType === PV.Filters._aboutPodcastKey && podcast && (
-              <HTMLScrollView
-                fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                html={
-                  podcast.description || (showNoInternetConnectionMessage ? translate('No internet connection') : '')
-                }
-              />
-            )}
             <ActionSheet
               handleCancelPress={this._handleCancelPress}
               items={() =>
-                PV.ActionSheet.media.moreButtons(
-                  selectedItem,
-                  navigation,
-                  this._handleCancelPress,
-                  this._handleDownloadPressed,
-                  null, // handleDeleteClip
-                  false, // includeGoToPodcast
-                  false // includeGoToEpisode
-                )
+                PV.ActionSheet.media.moreButtons(selectedItem, navigation, {
+                  handleDismiss: this._handleCancelPress
+                })
               }
               showModal={showActionSheet}
               testID={testIDPrefix}
@@ -707,14 +707,22 @@ export class PodcastScreen extends React.Component<Props, State> {
           <Dialog.Description>
             {translate('Are you sure you want to delete all of your downloaded episodes from this podcast')}
           </Dialog.Description>
-          <Dialog.Button label={translate('No')} onPress={this._handleToggleDeleteDownloadedEpisodesDialog} />
-          <Dialog.Button label={translate('Yes')} onPress={this._handleDeleteDownloadedEpisodes} />
+          <Dialog.Button
+            label={translate('No')}
+            onPress={this._handleToggleDeleteDownloadedEpisodesDialog}
+            {...testProps('dialog_delete_downloaded_episodes_no')}
+          />
+          <Dialog.Button
+            label={translate('Yes')}
+            onPress={this._handleDeleteDownloadedEpisodes}
+            {...testProps('dialog_delete_downloaded_episodes_yes')}
+          />
         </Dialog.Container>
       </View>
     )
   }
 
-  _queryEpisodes = async (sort: string | null, page: number = 1) => {
+  _queryEpisodes = async (sort: string | null, page = 1) => {
     const { podcastId, searchBarText: searchAllFieldsText } = this.state
     const results = await getEpisodes({
       sort,
@@ -726,7 +734,7 @@ export class PodcastScreen extends React.Component<Props, State> {
     return results
   }
 
-  _queryClips = async (sort: string | null, page: number = 1) => {
+  _queryClips = async (sort: string | null, page = 1) => {
     const { podcastId, searchBarText: searchAllFieldsText } = this.state
     const results = await getMediaRefs({
       sort,
@@ -743,7 +751,7 @@ export class PodcastScreen extends React.Component<Props, State> {
     filterKey: string | null,
     queryOptions: { queryPage?: number; searchAllFieldsText?: string } = {}
   ) => {
-    const { flatListData, podcast, podcastId, querySort, viewType } = this.state
+    const { flatListData, podcast, querySort, viewType } = this.state
     const newState = {
       isLoading: false,
       isLoadingMore: false,
@@ -784,13 +792,11 @@ export class PodcastScreen extends React.Component<Props, State> {
         newState.flatListData = [...flatListData, ...results[0]]
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
-      } else if (filterKey === PV.Filters._aboutPodcastKey) {
-        if (podcastId && hasInternetConnection) {
-          const newPodcast = await getPodcast(podcastId)
-          newState.podcast = newPodcast
-        }
       }
       newState.queryPage = queryOptions.queryPage || 1
+
+      newState.selectedFilterLabel = await getSelectedFilterLabel(viewType)
+
       return newState
     } catch (error) {
       console.log(error)
@@ -806,22 +812,33 @@ const styles = {
   aboutViewText: {
     fontSize: PV.Fonts.sizes.lg
   },
-  button: {
-    marginVertical: 8
+  settingsDeletebutton: {
+    margin: 8,
+    borderRadius: 8
   },
   divider: {
-    marginVertical: 16
+    marginBottom: 24,
+    marginTop: 12
   },
   settingsHelpText: {
     fontSize: PV.Fonts.sizes.md
   },
+  settingsTitle: {
+    fontSize: PV.Fonts.sizes.xxl,
+    fontWeight: PV.Fonts.weights.bold,
+    marginBottom: 16
+  },
   settingsView: {
     flex: 1,
-    padding: 8
+    paddingHorizontal: 8,
+    paddingVertical: 16
   },
   swipeRowBack: {
     marginBottom: 8,
     marginTop: 8
+  },
+  toggleLimitDownloadsSwitchWrapper: {
+    marginBottom: 16
   },
   view: {
     flex: 1

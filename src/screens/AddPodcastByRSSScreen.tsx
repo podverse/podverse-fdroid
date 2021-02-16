@@ -16,7 +16,6 @@ import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getAddByRSSPodcastLocally } from '../services/parser'
 import { addAddByRSSPodcast } from '../state/actions/parser'
-import { core } from '../styles'
 
 type Props = {
   navigation: any
@@ -27,27 +26,28 @@ type State = {
   url?: string
 }
 
-export class AddPodcastByRSSScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: translate('Add by RSS'),
-      headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
-      headerRight: (
-        <NavHeaderButtonText
-          disabled={navigation.getParam('_savePodcastByRSSUrlIsLoading')}
-          handlePress={navigation.getParam('_handleSavePodcastByRSSURL')}
-          text={translate('Save')}
-        />
-      )
-    }
-  }
+const testIDPrefix = 'add_podcast_by_rss_screen'
 
+export class AddPodcastByRSSScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {}
   }
 
-  async componentDidMount() {
+  static navigationOptions = ({ navigation }) => ({
+      title: translate('Add Custom RSS Feed'),
+      headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+      headerRight: () => (
+        <NavHeaderButtonText
+          disabled={navigation.getParam('_savePodcastByRSSUrlIsLoading')}
+          handlePress={navigation.getParam('_handleSavePodcastByRSSURL')}
+          testID={`${testIDPrefix}_save`}
+          text={translate('Save')}
+        />
+      )
+    })
+
+  componentDidMount() {
     this.props.navigation.setParams({
       _handleSavePodcastByRSSURL: this._handleSavePodcastByRSSURL
     })
@@ -58,7 +58,7 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     }
   }
 
-  _navToRequestPodcastForm = async () => {
+  _navToRequestPodcastForm = () => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
       { text: translate('Cancel') },
       { text: translate('Yes'), onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
@@ -69,60 +69,57 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     this.setState({ url: value })
   }
 
-  _handleSavePodcastByRSSURL = async () => {
+  _handleSavePodcastByRSSURL = () => {
     const { isLoading, url } = this.state
     if (isLoading) {
       return
     } else if (url) {
       this.props.navigation.setParams({ _savePodcastByRSSUrlIsLoading: true })
-      this.setState({ isLoading: true }, async () => {
-        try {
-          await addAddByRSSPodcast(url)
-          this.props.navigation.setParams({
-            _savePodcastByRSSUrlIsLoading: false
-          })
-          this.setState({ isLoading: false })
-          const podcast = await getAddByRSSPodcastLocally(url)
-          this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
-            podcast,
-            addByRSSPodcastFeedUrl: podcast.addByRSSPodcastFeedUrl
-          })
-        } catch (error) {
-          console.log('_handleSavePodcastByRSSURL', error)
-          Alert.alert(
-            PV.Alerts.SOMETHING_WENT_WRONG.title,
-            PV.Alerts.SOMETHING_WENT_WRONG.message,
-            PV.Alerts.BUTTONS.OK
-          )
-          this.props.navigation.setParams({
-            _savePodcastByRSSUrlIsLoading: false
-          })
-          this.setState({ isLoading: false })
-        }
+      this.setState({ isLoading: true }, () => {
+        (async () => {
+          try {
+            const addByRSSSucceeded = await addAddByRSSPodcast(url)
+            this.setState({ isLoading: false })
+  
+            if (addByRSSSucceeded) {
+              this.props.navigation.setParams({
+                _savePodcastByRSSUrlIsLoading: false
+              })
+              const podcast = await getAddByRSSPodcastLocally(url)
+              this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
+                podcast,
+                addByRSSPodcastFeedUrl: podcast.addByRSSPodcastFeedUrl
+              })
+            }
+          } catch (error) {
+            console.log('_handleSavePodcastByRSSURL', error)
+            this.props.navigation.setParams({
+              _savePodcastByRSSUrlIsLoading: false
+            })
+            this.setState({ isLoading: false })
+          }
+        })()
       })
     }
   }
 
   render() {
-    const { globalTheme } = this.global
     const { isLoading, url } = this.state
 
     return (
       <View style={styles.content} {...testProps('add_podcast_by_rss_screen_view')}>
-        {isLoading && <ActivityIndicator />}
+        {isLoading && <ActivityIndicator fillSpace />}
         {!isLoading && (
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={core.textInputLabel}>
-              {translate('RSS Feed')}
-            </Text>
             <TextInput
               autoCapitalize='none'
               autoCompleteType='off'
+              eyebrowTitle={translate('RSS feed link')}
               fontSizeLargestScale={PV.Fonts.largeSizes.md}
               onChangeText={this._handleChangeText}
               placeholder={translate('paste RSS feed link here')}
               returnKeyType='done'
-              style={[styles.textInput, globalTheme.textInput]}
+              testID={`${testIDPrefix}_rss_feed`}
               underlineColorAndroid='transparent'
               value={url}
             />
@@ -133,17 +130,12 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
             <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} style={styles.text}>
               {translate('AddPodcastByRSSScreenText2')}
             </Text>
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} style={styles.text}>
-              {translate('AddPodcastByRSSScreenText3')}
-            </Text>
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} style={styles.text}>
-              {translate('AddPodcastByRSSScreenText4')}
-            </Text>
             {!!PV.URLs.requestPodcast && (
               <TextLink
                 fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                 onPress={this._navToRequestPodcastForm}
-                style={styles.textLink}>
+                style={styles.textLink}
+                {...testProps(`${testIDPrefix}_request_podcast`)}>
                 {translate('Request Podcast')}
               </TextLink>
             )}
@@ -172,7 +164,7 @@ const styles = StyleSheet.create({
     marginVertical: 30
   },
   text: {
-    fontSize: PV.Fonts.sizes.md,
+    fontSize: PV.Fonts.sizes.lg,
     marginVertical: 12,
     textAlign: 'left'
   },

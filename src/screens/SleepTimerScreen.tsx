@@ -17,21 +17,21 @@ type Props = {
   navigation?: any
 }
 
-type State = {}
+const testIDPrefix = 'sleep_timer_screen'
 
-export class SleepTimerScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => ({
-    title: translate('Sleep Timer'),
-    headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
-    headerRight: <RNView />
-  })
-
+export class SleepTimerScreen extends React.Component<Props> {
   constructor(props: Props) {
     super(props)
     this.state = {}
   }
 
-  async componentDidMount() {
+  static navigationOptions = ({ navigation }) => ({
+    title: translate('Sleep Timer'),
+    headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+    headerRight: () => <RNView />
+  })
+
+  componentDidMount() {
     const isActive = sleepTimerIsRunning()
     updateSleepTimerTimeRemaining()
 
@@ -40,7 +40,7 @@ export class SleepTimerScreen extends React.Component<Props, State> {
     }
   }
 
-  async componentWillUnmount() {
+  componentWillUnmount() {
     pauseSleepTimerStateUpdates()
   }
 
@@ -75,6 +75,7 @@ export class SleepTimerScreen extends React.Component<Props, State> {
             isSuccess={!isActive}
             isWarning={isActive}
             onPress={this._toggleSleepTimer}
+            testID={`${testIDPrefix}_toggle_timer`}
             text={isActive ? translate('Stop Timer') : translate('Start Timer')}
             wrapperStyles={styles.button}
           />
@@ -86,7 +87,8 @@ export class SleepTimerScreen extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: 32
+    marginTop: 32,
+    borderRadius: 8
   },
   view: {
     flex: 1,
