@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native'
 import React from 'reactn'
-import { ActivityIndicator, Divider, FlatList, MessageWithAction, PlaylistTableCell, Text, View } from '../components'
+import { ActivityIndicator, Divider, FlatList, MessageWithAction, PlaylistTableCell,
+  TableSectionSelectors, View } from '../components'
 import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
 import { testProps } from '../lib/utility'
@@ -47,7 +48,7 @@ export class PlaylistsScreen extends React.Component<Props, State> {
     const playlistId = navigation.getParam('navToPlaylistWithId')
 
     if (playlistId) {
-      navigation.navigate(PV.RouteNames.MorePlaylistScreen, { playlistId })
+      navigation.navigate(PV.RouteNames.PlaylistScreen, { playlistId })
     }
   }
 
@@ -102,7 +103,7 @@ export class PlaylistsScreen extends React.Component<Props, State> {
 
   render() {
     const { isLoading, isLoadingMore, sections, showNoInternetConnectionMessage } = this.state
-    const { offlineModeEnabled } = this.global
+    const { globalTheme, offlineModeEnabled } = this.global
 
     const showOfflineMessage = offlineModeEnabled
 
@@ -119,10 +120,13 @@ export class PlaylistsScreen extends React.Component<Props, State> {
               noResultsMessage={translate('No playlists found')}
               renderItem={this._renderPlaylistItem}
               renderSectionHeader={({ section }) => (
-                  <View style={styles.sectionItemWrapper}>
-                    <Text style={styles.sectionItemText}>{section.title}</Text>
-                  </View>
-                )}
+                <TableSectionSelectors
+                  hideFilter
+                  includePadding
+                  selectedFilterLabel={section.title}
+                  textStyle={globalTheme.headerText}
+                />
+              )}
               sections={sections}
               showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
             />
