@@ -1,4 +1,4 @@
-import { Linking, SectionList, StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
+import { Linking, SectionList, TouchableWithoutFeedback, View as RNView } from 'react-native'
 import Config from 'react-native-config'
 import React from 'reactn'
 import { Divider, TableSectionSelectors, Text, View } from '../components'

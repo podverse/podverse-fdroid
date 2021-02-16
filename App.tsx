@@ -55,7 +55,7 @@ class App extends Component<Props, State> {
       globalTheme = lightTheme
     }
 
-    await this.setupGlobalState(globalTheme)
+    this.setupGlobalState(globalTheme)
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
   }
 
@@ -89,7 +89,7 @@ class App extends Component<Props, State> {
     })()
   }
 
-  async setupGlobalState(theme: GlobalTheme) {
+  setupGlobalState(theme: GlobalTheme) {
     const fontScale = 1
     // const fontScale = await getFontScale()
     const fontScaleMode = determineFontScaleMode(fontScale)
