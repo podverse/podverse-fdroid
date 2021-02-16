@@ -42,6 +42,11 @@ steps:
     script: 'python3 -m pip install paramiko'
 
 - task: CmdLine@2
+  displayName: Install pyqrcode Dependency
+  inputs:
+    script: 'python3 -m pip install pyqrcode'
+
+- task: CmdLine@2
   displayName: Clone frdoiddata
   inputs:
     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
