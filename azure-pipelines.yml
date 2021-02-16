@@ -44,7 +44,7 @@ steps:
 - task: CmdLine@2
   displayName: Install pyqrcode Dependency
   inputs:
-    script: 'python3 -m pip install pyqrcode'
+    script: 'python3 -m pip install qrcode'
 
 - task: CmdLine@2
   displayName: Clone frdoiddata
