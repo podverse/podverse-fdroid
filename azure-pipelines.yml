@@ -34,7 +34,7 @@ steps:
 - task: CmdLine@2
   displayName: Install setuptools Dependency
   inputs:
-    script: 'python3 -m pip install setuptools'
+    script: 'python3 -m pip install setuptools setuptools_rust'
 
 - task: CmdLine@2
   displayName: Install paramiko Dependency
