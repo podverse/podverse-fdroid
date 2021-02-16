@@ -49,7 +49,7 @@
     "@types/react-native-background-timer": "2.0.0",
     "@types/react-native-rss-parser": "1.4.0",
     "@types/validator": "12.0.1",
-    "axios": "0.20.0",
+    "axios": "0.21.1",
     "bad-words": "3.0.3",
     "bottleneck": "2.19.5",
     "eventemitter3": "4.0.7",
