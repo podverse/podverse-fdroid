@@ -32,6 +32,11 @@ steps:
     script: 'python3 -m pip install Pillow'
 
 - task: CmdLine@2
+  displayName: Install setuptools Dependency
+  inputs:
+    script: 'python3 -m pip install setuptools'
+
+- task: CmdLine@2
   displayName: Install paramiko Dependency
   inputs:
     script: 'python3 -m pip install paramiko'
