@@ -87,7 +87,7 @@ Builds:
 
   - versionName: 3.0.2
     versionCode: 3
-    commit: 4c462ede1f6aa70b51a4bda5cadd3d6c9db392f8
+    commit: 0d39437983839f67bc4cabc65aad2a8b158d0769
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
