@@ -42,7 +42,7 @@ steps:
     script: 'python3 -m pip install paramiko'
 
 - task: CmdLine@2
-  displayName: Install pyqrcode Dependency
+  displayName: Install qrcode Dependency
   inputs:
     script: 'python3 -m pip install qrcode'
 
