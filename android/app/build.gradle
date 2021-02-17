@@ -132,7 +132,7 @@ android {
         applicationId "com.podverse.fdroid"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
+        versionCode 3
         versionName "3.0.2"
         multiDexEnabled true
     }
