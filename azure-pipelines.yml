@@ -47,6 +47,11 @@ steps:
     script: 'python3 -m pip install qrcode'
 
 - task: CmdLine@2
+  displayName: Install androguard Dependency
+  inputs:
+    script: 'python3 -m pip install androguard'
+
+- task: CmdLine@2
   displayName: Clone frdoiddata
   inputs:
     script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
