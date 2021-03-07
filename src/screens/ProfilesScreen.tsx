@@ -24,8 +24,13 @@ type State = {
 const testIDPrefix = 'profiles_screen'
 
 export class ProfilesScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
+
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
+
     this.state = {
       endOfResultsReached: false,
       isLoading: this.global.session.isLoggedIn,
@@ -56,9 +61,11 @@ export class ProfilesScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, queryPage = 1 } = this.state
-    if (!endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryPage = 1 } = this.state
+    if (!endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
@@ -170,6 +177,7 @@ export class ProfilesScreen extends React.Component<Props, State> {
 
     if (!hasInternetConnection) {
       newState.showNoInternetConnectionMessage = true
+      this.shouldLoad = true
       return newState
     }
 
@@ -178,8 +186,10 @@ export class ProfilesScreen extends React.Component<Props, State> {
       const results = await getPublicUsersByQuery(subscribedUserIds, page)
       newState.endOfResultsReached = flatListData.length >= results[1]
       newState.queryPage = page
+      this.shouldLoad = true
       return newState
     } catch (error) {
+      this.shouldLoad = true
       return newState
     }
   }

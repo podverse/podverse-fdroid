@@ -29,7 +29,7 @@ import { checkIdlePlayerState, PVTrackPlayer, updateTrackPlayerCapabilities,
   updateUserPlaybackPosition } from '../services/player'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getNowPlayingItemLocally } from '../services/userNowPlayingItem'
-import { askToSyncWithNowPlayingItem, getAuthUserInfo } from '../state/actions/auth'
+import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
 import { initDownloads, removeDownloadedPodcast } from '../state/actions/downloads'
 import {
   initializePlaybackSpeed,
@@ -39,7 +39,8 @@ import {
   updatePlaybackState,
   updatePlayerState
 } from '../state/actions/player'
-import { getSubscribedPodcasts, removeAddByRSSPodcast, toggleSubscribeToPodcast } from '../state/actions/podcast'
+import { combineWithAddByRSSPodcasts,
+  getSubscribedPodcasts, removeAddByRSSPodcast, toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { initializeSettings } from '../state/actions/settings'
 import { core, darkTheme } from '../styles'
 
@@ -69,14 +70,15 @@ type State = {
 
 const testIDPrefix = 'podcasts_screen'
 
-// isInitialLoad is used to prevent rendering the PodcastsScreen components until
-// it knows which table header dropdown selectors to render (after the first query completes).
 let isInitialLoad = true
 
 export class PodcastsScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
 
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
 
     this.state = {
       endOfResultsReached: false,
@@ -288,28 +290,40 @@ export class PodcastsScreen extends React.Component<Props, State> {
     await initPlayerState(this.global)
     await initializeSettings()
 
+    // Load the AsyncStorage authenticatedUser and subscribed podcasts immediately,
+    // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
+    await getAuthenticatedUserInfoLocally()
+    await combineWithAddByRSSPodcasts()
+    this.handleSelectFilterItem(PV.Filters._subscribedKey)
+
     // Set the appUserAgent one time on initialization, then retrieve from a constant
     // using the getAppUserAgent method, or from the global state (for synchronous access).
     setAppUserAgent()
     const userAgent = getAppUserAgent()
     this.setGlobal({ userAgent })
-
-    try {
-      const isLoggedIn = await getAuthUserInfo()
-      if (isLoggedIn) await askToSyncWithNowPlayingItem()
-    } catch (error) {
-      console.log('initializeScreenData getAuthUserInfo', error)
-      // If getAuthUserInfo fails, continue with the networkless version of the app
-    }
-
-    this.handleSelectFilterItem(PV.Filters._subscribedKey)
-
-    await initDownloads()
-    await initializePlayerQueue()
-    await initializePlaybackSpeed()
+    this.setState({ isLoading: false },
+      () => {
+        (async () => {
+          try {
+            const isLoggedIn = await getAuthUserInfo()
+            if (isLoggedIn) await askToSyncWithNowPlayingItem()
+          } catch (error) {
+            console.log('initializeScreenData getAuthUserInfo', error)
+            // If getAuthUserInfo fails, continue with the networkless version of the app
+          }
+          
+          const preventIsLoading = true
+          this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading)
+      
+          await initDownloads()
+          await initializePlayerQueue()
+          await initializePlaybackSpeed()
+        })()
+      }
+    )
   }
 
-  handleSelectFilterItem = async (selectedKey: string) => {
+  handleSelectFilterItem = async (selectedKey: string, preventIsLoading?: boolean) => {
     if (!selectedKey) {
       return
     }
@@ -331,7 +345,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: true,
+        isLoading: !preventIsLoading,
         queryFrom: selectedKey,
         queryPage: 1,
         querySort: sort,
@@ -414,9 +428,12 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _onEndReached = (evt: any) => {
     const { distanceFromEnd } = evt
-    const { endOfResultsReached, isLoadingMore, queryFrom, queryPage = 1 } = this.state
-    if (queryFrom !== PV.Filters._subscribedKey && !endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryFrom, queryPage = 1 } = this.state
+
+    if (queryFrom !== PV.Filters._subscribedKey && !endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
@@ -813,9 +830,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
         newState.flatListDataTotalCount = results[1]
       }
 
+      this.shouldLoad = true
       return newState
     } catch (error) {
       console.log('PodcastsScreen _queryData error', error)
+      this.shouldLoad = true
       return newState
     }
   }

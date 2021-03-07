@@ -31,6 +31,7 @@ type State = {
 const testIDPrefix = 'episode_media_ref_screen'
 
 export class EpisodeMediaRefScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
 
   constructor(props: Props) {
     super()
@@ -38,6 +39,8 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
     const flatListDataTotalCount = props.navigation.getParam('totalItems') || 0
     const existingData = props.navigation.getParam('initialData') || []
 
+    this.shouldLoad = true
+    
     this.state = {
       endOfResultsReached: false,
       flatListData: existingData,
@@ -106,8 +109,10 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
 
       newState.queryPage = queryOptions.queryPage || 1
 
+      this.shouldLoad = true
       return newState
     } catch (error) {
+      this.shouldLoad = true
       return newState
     }
   }
@@ -163,9 +168,11 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }: { distanceFromEnd: number }) => {
-    const { endOfResultsReached, isLoadingMore, queryPage = 1, viewType } = this.state
-    if (viewType === PV.Filters._clipsKey && !endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryPage = 1, viewType } = this.state
+    if (viewType === PV.Filters._clipsKey && !endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
@@ -191,17 +198,18 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
   }
 
   _handleCancelPress = () => new Promise((resolve) => {
-      this.setState({ showActionSheet: false }, resolve)
-    })
+    this.setState({ showActionSheet: false }, resolve)
+  })
 
   _renderItem = ({ item }) => {
+    const { viewType } = this.state
     const episode = this.props.navigation.getParam('episode') || {}
     item.episode = episode
 
     return (
       <ClipTableCell
         handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, episode, episode.podcast))}
-        hideImage
+        showChapterInfo={viewType === PV.Filters._chaptersKey}
         showEpisodeInfo={false}
         showPodcastInfo={false}
         item={item}

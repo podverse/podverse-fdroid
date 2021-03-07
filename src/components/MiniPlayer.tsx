@@ -5,7 +5,7 @@ import { PV } from '../resources'
 import { checkIfStateIsBuffering, PVTrackPlayer } from '../services/player'
 import { togglePlay } from '../state/actions/player'
 import { darkTheme, iconStyles, playerStyles } from '../styles'
-import { ActivityIndicator, FastImage, Icon, Text } from './'
+import { ActivityIndicator, FastImage, Icon, Text, TextTicker } from './'
 
 type Props = {
   navigation: any
@@ -49,17 +49,20 @@ export class MiniPlayer extends React.PureComponent<Props> {
                 styles={styles.image}
               />
               <View style={styles.textWrapper}>
-                {![PV.Fonts.fontScale.larger, PV.Fonts.fontScale.largest].includes(fontScaleMode) && (
-                  <Text numberOfLines={1} style={[styles.podcastTitle, globalTheme.playerText]}>
-                    {nowPlayingItem.podcastTitle}
-                  </Text>
-                )}
-                <Text
-                  fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                  numberOfLines={1}
-                  style={[styles.episodeTitle, globalTheme.playerText]}>
-                  {nowPlayingItem.episodeTitle}
+                <Text allowFontScaling={false} numberOfLines={1} style={[styles.podcastTitle, globalTheme.playerText]}>
+                  {nowPlayingItem.podcastTitle}
                 </Text>
+                <TextTicker
+                  allowFontScaling={false}
+                  bounce
+                  loop
+                  textLength={nowPlayingItem?.episodeTitle?.length}>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.episodeTitle, globalTheme.playerText]}>
+                    {nowPlayingItem.episodeTitle}
+                  </Text>
+                </TextTicker>
               </View>
               <TouchableOpacity
                 onPress={() => togglePlay(this.global)}

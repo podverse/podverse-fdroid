@@ -104,7 +104,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
     const { player } = this.global
     const { nowPlayingItem } = player
     navigation.setParams({ _saveMediaRef: this._saveMediaRef })
-    const currentPosition = await PVTrackPlayer.getPosition()
+    const currentPosition = await PVTrackPlayer.getTrackPosition()
     const isEditing = this.props.navigation.getParam('isEditing')
 
     // Prevent the temporary progressValue from sticking in the progress bar
@@ -156,12 +156,12 @@ export class MakeClipScreen extends React.Component<Props, State> {
   }
 
   _setStartTime = async () => {
-    const currentPosition = await PVTrackPlayer.getPosition()
+    const currentPosition = await PVTrackPlayer.getTrackPosition()
     this.setState({ startTime: Math.floor(currentPosition) })
   }
 
   _setEndTime = async () => {
-    const currentPosition = await PVTrackPlayer.getPosition()
+    const currentPosition = await PVTrackPlayer.getTrackPosition()
     if (currentPosition && currentPosition > 0) {
       this.setState({ endTime: Math.floor(currentPosition) })
     }
@@ -250,10 +250,10 @@ export class MakeClipScreen extends React.Component<Props, State> {
           startTime,
           title
         }
-  
+
         try {
           const mediaRef = isEditing ? await updateMediaRef(data) : await createMediaRef(data)
-  
+
           if (isEditing) {
             const newItem = {
               ...nowPlayingItem,
@@ -261,10 +261,10 @@ export class MakeClipScreen extends React.Component<Props, State> {
               clipStartTime: mediaRef.startTime,
               clipTitle: mediaRef.title
             }
-            const position = await PVTrackPlayer.getPosition()
+            const position = await PVTrackPlayer.getTrackPosition()
             await setNowPlayingItem(newItem, position || 0)
           }
-  
+
           this.setState({ isSaving: false }, () => {
             // NOTE: setTimeout to prevent an error when Modal and Alert modal try to render at the same time
             setTimeout(() => {
@@ -375,7 +375,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
 
     return (
       <SafeAreaView style={styles.viewContainer}>
-        <View style={styles.view} transparent {...testProps('make_clip_screen_view')}>
+        <View style={styles.view} transparent testID='make_clip_screen_view'>
           <View style={styles.contentContainer}>
             <View style={styles.wrapperTop} transparent>
               <TextInput
@@ -474,7 +474,10 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       onPress={this._playerMiniJumpBackward}
                       style={playerStyles.icon}
                       {...testProps(`${testIDPrefix}_mini_jump_backward`)}>
-                      <Icon name='angle-left' size={30} />
+                      {this._renderPlayerControlIcon(PV.Images.JUMP_BACKWARDS)}
+                      <View style={styles.skipTimeTextWrapper} transparent>
+                        <Text style={styles.skipTimeText}>1</Text>
+                      </View>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => togglePlay()}
@@ -493,7 +496,10 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       onPress={this._playerMiniJumpForward}
                       style={playerStyles.icon}
                       {...testProps(`${testIDPrefix}_mini_jump_forward`)}>
-                      <Icon name='angle-right' size={30} />
+                      {this._renderPlayerControlIcon(PV.Images.JUMP_AHEAD)}
+                      <View style={styles.skipTimeTextWrapper} transparent>
+                        <Text style={styles.skipTimeText}>1</Text>
+                      </View>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={this._playerJumpForward}
@@ -601,9 +607,6 @@ export class MakeClipScreen extends React.Component<Props, State> {
               <RNView style={[styles.modalInnerWrapper, globalTheme.modalInnerWrapper]}>
                 <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.modalText}>
                   {translate('Tap the Start and End Time inputs to set them with the current track time')}
-                </Text>
-                <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.modalText}>
-                  {translate('Press the left or right caret symbols to adjust the current time by one second')}
                 </Text>
                 <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.modalText}>
                   {translate('If a podcast inserts dynamic ads the clip start time may not stay accurate')}

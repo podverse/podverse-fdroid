@@ -84,7 +84,6 @@ export interface InitialState {
   downloadedEpisodeLimitCount: number
   downloadedEpisodeLimitDefault: number | null
   downloadedPodcasts: any[]
-  addByRSSPodcasts: any[]
   censorNSFWText?: boolean
   customAPIDomain?: string
   customAPIDomainEnabled?: boolean
@@ -102,6 +101,7 @@ export interface InitialState {
     }
   }
   player: {
+    backupDuration?: number
     currentChapter: any
     currentChapters: any
     hasErrored: boolean

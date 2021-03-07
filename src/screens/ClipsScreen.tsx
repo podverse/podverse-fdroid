@@ -56,9 +56,13 @@ type State = {
 const testIDPrefix = 'clips_screen'
 
 export class ClipsScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
   
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
+
     const { subscribedPodcastIds } = this.global.session.userInfo
     const hasSubscribedPodcasts = subscribedPodcastIds && subscribedPodcastIds.length > 0
     
@@ -177,9 +181,11 @@ export class ClipsScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, queryFrom, queryPage = 1 } = this.state
-    if (!endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryFrom, queryPage = 1 } = this.state
+    if (!endOfResultsReached && this.shouldLoad) {      
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true,
@@ -504,6 +510,7 @@ export class ClipsScreen extends React.Component<Props, State> {
 
     if (!hasInternetConnection) {
       newState.showNoInternetConnectionMessage = true
+      this.shouldLoad = true
       return newState
     }
 
@@ -579,8 +586,10 @@ export class ClipsScreen extends React.Component<Props, State> {
         newState.flatListDataTotalCount = results[1]
       }
 
+      this.shouldLoad = true
       return newState
     } catch (error) {
+      this.shouldLoad = true
       return newState
     }
   }

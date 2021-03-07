@@ -56,9 +56,13 @@ type State = {
 const testIDPrefix = 'episodes_screen'
 
 export class EpisodesScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
 
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
+
     const { subscribedPodcasts } = this.global
 
     const hasSubscribedPodcasts = subscribedPodcasts && subscribedPodcasts.length > 0
@@ -215,9 +219,11 @@ export class EpisodesScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, queryFrom, queryPage = 1 } = this.state
-    if (!endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryFrom, queryPage = 1 } = this.state
+    if (!endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true,
@@ -274,8 +280,8 @@ export class EpisodesScreen extends React.Component<Props, State> {
   _ItemSeparatorComponent = () => <Divider style={{ marginHorizontal: 10 }} />
 
   _handleCancelPress = () => new Promise((resolve) => {
-      this.setState({ showActionSheet: false }, resolve)
-    })
+    this.setState({ showActionSheet: false }, resolve)
+  })
 
   _handleMorePress = (selectedItem: any) => {
     this.setState({
@@ -494,6 +500,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
     const hasInternetConnection = await hasValidNetworkConnection()
     if (!hasInternetConnection && filterKey !== PV.Filters._downloadedKey) {
       newState.showNoInternetConnectionMessage = true
+      this.shouldLoad = true
       return newState
     }
 
@@ -576,9 +583,11 @@ export class EpisodesScreen extends React.Component<Props, State> {
 
       newState.flatListData = getUniqueArrayByKey(newState.flatListData, 'id')
 
+      this.shouldLoad = true
       return newState
     } catch (error) {
       console.log(error)
+      this.shouldLoad = true
       return newState
     }
   }

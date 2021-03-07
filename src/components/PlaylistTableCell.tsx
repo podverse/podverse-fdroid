@@ -18,13 +18,13 @@ type Props = {
 export class PlaylistTableCell extends React.PureComponent<Props> {
   render() {
     const {
-      createdBy,
+      createdBy = translate('anonymous'),
       hasZebraStripe,
       isSaving,
       itemCount = 0,
       onPress,
       testID,
-      title = translate('untitled playlist')
+      title = translate('Untitled Playlist')
     } = this.props
 
     const wrapperTopStyles = [styles.wrapperTop]

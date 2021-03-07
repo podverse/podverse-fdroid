@@ -67,9 +67,12 @@ type State = {
 const testIDPrefix = 'profile_screen'
 
 export class ProfileScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
 
   constructor(props: Props) {
     super(props)
+    this.shouldLoad = true
+
     const id = safelyUnwrapNestedVariable(() => this.global.session.userInfo.id, '')
     const subscribedUserIds = safelyUnwrapNestedVariable(() => this.global.session.userInfo.subscribedUserIds, [])
     const user = this.props.navigation.getParam('user')
@@ -277,9 +280,11 @@ export class ProfileScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, queryPage = 1, viewType } = this.state
-    if (!endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryPage = 1, viewType } = this.state
+    if (!endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
@@ -309,8 +314,8 @@ export class ProfileScreen extends React.Component<Props, State> {
   }
 
   _handleCancelPress = () => new Promise((resolve) => {
-      this.setState({ showActionSheet: false }, resolve)
-    })
+    this.setState({ showActionSheet: false }, resolve)
+  })
 
   _handleMorePress = (selectedItem: any) => {
     this.setState({
@@ -672,6 +677,7 @@ export class ProfileScreen extends React.Component<Props, State> {
 
     if (!hasInternetConnection) {
       newState.showNoInternetConnectionMessage = true
+      this.shouldLoad = true
       return newState
     }
 
@@ -695,8 +701,10 @@ export class ProfileScreen extends React.Component<Props, State> {
 
       newState.selectedFilterLabel = await getSelectedFilterLabel(viewType)
 
+      this.shouldLoad = true
       return newState
     } catch (error) {
+      this.shouldLoad = true
       return newState
     }
   }

@@ -35,9 +35,12 @@ type State = {
 const testIDPrefix = 'history_screen'
 
 export class HistoryScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
 
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
 
     this.state = {
       endOfResultsReached: false,
@@ -121,17 +124,10 @@ export class HistoryScreen extends React.Component<Props, State> {
     this.setState({ isEditing: false }, () => this.props.navigation.setParams({ isEditing: false }))
   }
 
-  _handlePlayItem = (item: NowPlayingItem) => {
-    const isDarkMode = this.global.globalTheme === darkTheme
+  _handlePlayItem = async (item: NowPlayingItem) => {
     try {
-      const { navigation } = this.props
-      this.setState({ isLoading: true }, () => {
-        (async () => {
-          const shouldPlay = true
-          await loadItemAndPlayTrack(item, shouldPlay)
-          navigation.navigate(PV.RouteNames.PlayerScreen, { isDarkMode })
-        })()
-      })
+      const shouldPlay = true
+      await loadItemAndPlayTrack(item, shouldPlay)
     } catch (error) {
       // Error Loading and playing item
     }
@@ -141,29 +137,26 @@ export class HistoryScreen extends React.Component<Props, State> {
     const { isEditing, isTransparent } = this.state
 
     return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          if (!isEditing) {
-            this._handlePlayItem(item)
-          }
-        }}
-        {...testProps(`${testIDPrefix}_history_item_${index}`)}>
-        <View transparent={isTransparent}>
-          <QueueTableCell
-            clipEndTime={item.clipEndTime}
-            clipStartTime={item.clipStartTime}
-            {...(item.clipTitle ? { clipTitle: item.clipTitle } : {})}
-            {...(item.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
-            {...(item.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
-            handleRemovePress={() => this._handleRemoveHistoryItemPress(item)}
-            podcastImageUrl={item.podcastImageUrl}
-            {...(item.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
-            showRemoveButton={isEditing}
-            testID={`${testIDPrefix}_history_item_${index}`}
-            transparent={isTransparent}
-          />
-        </View>
-      </TouchableWithoutFeedback>
+      <View transparent={isTransparent}>
+        <QueueTableCell
+          clipEndTime={item.clipEndTime}
+          clipStartTime={item.clipStartTime}
+          {...(item.clipTitle ? { clipTitle: item.clipTitle } : {})}
+          {...(item.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
+          {...(item.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
+          handleRemovePress={() => this._handleRemoveHistoryItemPress(item)}
+          onPress={() => {
+            if (!isEditing) {
+              this._handlePlayItem(item)
+            }
+          }}
+          podcastImageUrl={item.podcastImageUrl}
+          {...(item.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
+          showRemoveButton={isEditing}
+          testID={`${testIDPrefix}_history_item_${index}`}
+          transparent={isTransparent}
+        />
+      </View>
     )
   }
 
@@ -181,9 +174,11 @@ export class HistoryScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, queryPage = 1 } = this.state
-    if (!endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached, queryPage = 1 } = this.state
+    if (!endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
@@ -245,8 +240,10 @@ export class HistoryScreen extends React.Component<Props, State> {
       const newHistoryItems = await getHistoryItems(page || 1, historyItems)
       newState.endOfResultsReached = newHistoryItems.length >= historyItemsCount
       newState.queryPage = page
+      this.shouldLoad = true
       return newState
     } catch (error) {
+      this.shouldLoad = true
       return newState
     }
   }

@@ -6,13 +6,13 @@ import {
   TouchableWithoutFeedback,
   View as RNView
 } from 'react-native'
-import TextTicker from 'react-native-text-ticker'
+
 import React from 'reactn'
 import { translate } from '../lib/i18n'
 import { readableClipTime } from '../lib/utility'
 import { PV } from '../resources'
 import { loadChapterPlaybackInfo } from '../state/actions/playerChapters'
-import { ActivityIndicator, FastImage, Text } from './'
+import { ActivityIndicator, FastImage, Text, TextTicker } from './'
 
 type Props = {
   handlePressClipInfo: any
@@ -45,7 +45,7 @@ export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
 
   render() {
     const { handlePressClipInfo, width } = this.props
-    const { fontScaleMode, player, screenPlayer } = this.global
+    const { player, screenPlayer } = this.global
     const { currentChapter, nowPlayingItem = {} } = player
     const { isLoading } = screenPlayer
     let { clipId, clipEndTime, clipStartTime, clipTitle, podcastImageUrl } = nowPlayingItem
@@ -75,25 +75,23 @@ export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
           ) : (
             !!nowPlayingItem && (
               <RNView style={styles.episodeTitleWrapper}>
-                <TextTicker duration={15000} loop bounce repeatSpacer={60}>
+                <TextTicker allowFontScaling={false} bounce loop textLength={nowPlayingItem?.episodeTitle?.length}>
                   <Text
-                    fontSizeLargestScale={PV.Fonts.largeSizes.xl}
+                    allowFontScaling={false}
                     numberOfLines={1}
                     style={styles.episodeTitle}
                     testID='media_player_carousel_viewer_episode_title'>
                     {nowPlayingItem.episodeTitle}
                   </Text>
                 </TextTicker>
-                {fontScaleMode !== PV.Fonts.fontScale.largest && (
-                  <Text
-                    fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                    isSecondary
-                    numberOfLines={1}
-                    style={styles.podcastTitle}
-                    testID='media_player_carousel_viewer_podcast_title'>
-                    {nowPlayingItem.podcastTitle}
-                  </Text>
-                )}
+                <Text
+                  allowFontScaling={false}
+                  isSecondary
+                  numberOfLines={1}
+                  style={styles.podcastTitle}
+                  testID='media_player_carousel_viewer_podcast_title'>
+                  {nowPlayingItem.podcastTitle}
+                </Text>
               </RNView>
             )
           )}
@@ -111,17 +109,16 @@ export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
             <TouchableWithoutFeedback onPress={handlePressClipInfo}>
               <RNView style={styles.clipWrapper}>
                 <TextTicker
-                  duration={10000}
-                  loop
+                  allowFontScaling={false}
                   bounce
-                  style={styles.clipTitle}
-                  repeatSpacer={50}
-                  testID='media_player_carousel_viewer_title'>{`${clipTitle}`}</TextTicker>
-                {fontScaleMode !== PV.Fonts.fontScale.largest && (
-                  <Text style={styles.clipTime} testID='media_player_carousel_viewer_time'>
-                    {readableClipTime(clipStartTime, clipEndTime)}
-                  </Text>
-                )}
+                  loop
+                  styles={styles.clipTitle}
+                  textLength={clipTitle?.length}>
+                  {`${clipTitle}`}
+                </TextTicker>
+                <Text allowFontScaling={false} style={styles.clipTime} testID='media_player_carousel_viewer_time'>
+                  {readableClipTime(clipStartTime, clipEndTime)}
+                </Text>
               </RNView>
             </TouchableWithoutFeedback>
           </RNView>
@@ -139,7 +136,7 @@ const styles = StyleSheet.create({
   },
   carouselTextTopWrapper: {
     justifyContent: 'flex-end',
-    marginBottom: 10
+    marginBottom: 12
   },
   carouselImageWrapper: {
     alignItems: 'center',
@@ -156,7 +153,7 @@ const styles = StyleSheet.create({
   },
   clipWrapper: {
     alignItems: 'center',
-    marginTop: 15
+    marginTop: 12
   },
   clipTime: {
     color: PV.Colors.skyLight,

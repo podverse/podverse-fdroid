@@ -74,9 +74,12 @@ type State = {
 const testIDPrefix = 'podcast_screen'
 
 export class PodcastScreen extends React.Component<Props, State> {
+  shouldLoad: boolean
 
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
 
     const podcast = this.props.navigation.getParam('podcast')
     const podcastId =
@@ -275,15 +278,17 @@ static navigationOptions = ({ navigation }) => {
   }
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, podcast, queryPage = 1, viewType } = this.state
+    const { endOfResultsReached, podcast, queryPage = 1, viewType } = this.state
 
     if (
       !podcast.addByRSSPodcastFeedUrl &&
       viewType !== PV.Filters._downloadedKey &&
       !endOfResultsReached &&
-      !isLoadingMore
+      this.shouldLoad
     ) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
@@ -335,8 +340,8 @@ static navigationOptions = ({ navigation }) => {
   _ItemSeparatorComponent = () => <Divider style={{ marginHorizontal: 10 }} />
 
   _handleCancelPress = () => new Promise((resolve) => {
-      this.setState({ showActionSheet: false }, resolve)
-    })
+    this.setState({ showActionSheet: false }, resolve)
+  })
 
   _handleMorePress = (selectedItem: any) => {
     this.setState({
@@ -763,6 +768,7 @@ static navigationOptions = ({ navigation }) => {
 
     if (!hasInternetConnection && filterKey !== PV.Filters._downloadedKey) {
       newState.showNoInternetConnectionMessage = true
+      this.shouldLoad = true
       return newState
     }
 
@@ -796,10 +802,11 @@ static navigationOptions = ({ navigation }) => {
       newState.queryPage = queryOptions.queryPage || 1
 
       newState.selectedFilterLabel = await getSelectedFilterLabel(viewType)
-
+      this.shouldLoad = true
       return newState
     } catch (error) {
       console.log(error)
+      this.shouldLoad = true
       return newState
     }
   }

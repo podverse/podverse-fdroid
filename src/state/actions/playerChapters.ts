@@ -38,12 +38,16 @@ export const loadChaptersForNowPlayingItem = async (item?: NowPlayingItem) => {
 export const loadChapterPlaybackInfo = () => {
   (async () => {
     const globalState = getGlobal()
-    const { currentChapters } = globalState.player
-    const playerPosition = await PVTrackPlayer.getPosition()
-  
-    if ((playerPosition || playerPosition === 0) && Array.isArray(currentChapters)) {
+    const { backupDuration, currentChapters } = globalState.player
+    const playerPosition = await PVTrackPlayer.getTrackPosition()
+
+    if ((playerPosition || playerPosition === 0) && Array.isArray(currentChapters) && currentChapters.length > 1) {
       const currentChapter = currentChapters.find(
-        (chapter: any) => playerPosition >= chapter.startTime && playerPosition < chapter.endTime
+        // If no chapter.endTime, then assume it is the last chapter, and use the duration instead
+        (chapter: any) =>
+          chapter.endTime
+            ? playerPosition >= chapter.startTime && playerPosition < chapter.endTime
+            : playerPosition >= chapter.startTime && backupDuration && playerPosition < backupDuration
       )
       if (currentChapter) {
         setChapterOnGlobalState(currentChapter)
@@ -59,6 +63,7 @@ export const retriveNowPlayingItemChapters = async (episodeId: string) => {
 
 const enrichChapterDataForPlayer = (chapters: any[]) => {
   const enrichedChapters = []
+  let hasCustomImage = false
 
   if (Array.isArray(chapters) && chapters.length > 0) {
     for (let i = 0; i < chapters.length; i++) {
@@ -67,7 +72,18 @@ const enrichChapterDataForPlayer = (chapters: any[]) => {
       if (chapter && !chapter.endTime && nextChapter) {
         chapter.endTime = nextChapter.startTime
       }
+      if (chapter && chapter.imageUrl) {
+        hasCustomImage = true
+      }
       enrichedChapters.push(chapter)
+    }
+  }
+
+  const enrichedChaptersFinal = []
+  for (const enrichedChapter of enrichedChapters) {
+    if (hasCustomImage) {
+      enrichedChapter.hasCustomImage = true
+      enrichedChaptersFinal.push(enrichedChapter)
     }
   }
 

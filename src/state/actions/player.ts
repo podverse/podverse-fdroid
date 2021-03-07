@@ -7,6 +7,7 @@ import {
 } from 'podverse-shared'
 import { getGlobal, setGlobal } from 'reactn'
 import { PV } from '../../resources'
+import PVEventEmitter from '../../services/eventEmitter'
 import {
   initializePlayerQueue as initializePlayerQueueService,
   loadItemAndPlayTrack as loadItemAndPlayTrackService,
@@ -61,7 +62,9 @@ export const updatePlayerState = async (item: NowPlayingItem) => {
     }
   }
 
-  setGlobal(newState)
+  setGlobal(newState, () => {
+    PVEventEmitter.emit(PV.Events.UPDATE_PLAYER_STATE_FINISHED)
+  })
 }
 
 export const initializePlayerQueue = async () => {
@@ -206,7 +209,7 @@ export const setPlaybackSpeed = async (rate: number) => {
 export const togglePlay = async () => {
   // If somewhere a play button is pressed, but nothing is currently loaded in the player,
   // then load the last time from memory by re-initializing the player.
-  const trackId = await PVTrackPlayer.getCurrentTrack()
+  const trackId = await PVTrackPlayer.getCurrentLoadedTrack()
   if (!trackId) {
     await initializePlayerQueue()
   }
@@ -220,7 +223,7 @@ export const updatePlaybackState = async (state?: any) => {
 
   if (!playbackState) playbackState = await PVTrackPlayer.getState()
 
-  const backupDuration = await PVTrackPlayer.getDuration()
+  const backupDuration = await PVTrackPlayer.getTrackDuration()
 
   const globalState = getGlobal()
   setGlobal({
