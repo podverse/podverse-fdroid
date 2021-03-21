@@ -164,6 +164,6 @@ Builds:
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
 AutoUpdateMode: None
-UpdateCheckMode: Tags
+UpdateCheckMode: None
 CurrentVersion: 3.0.4
 CurrentVersionCode: 4
