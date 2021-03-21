@@ -80,7 +80,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
 
   static navigationOptions = ({ navigation }) => {
     const playlistId = navigation.getParam('playlistId')
-    const playlistTitle = navigation.getParam('playlistTitle')
+    const playlistTitle = navigation.getParam('playlistTitle') || translate('Untitled Playlist')
 
     return {
       title: translate('Playlist'),
@@ -227,6 +227,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
     const flatListDataTotalCount = screenPlaylist.flatListDataTotalCount || 0
     const isLoggedInUserPlaylist = playlist?.owner?.id === session.userInfo.id
     const ownerName = playlist?.owner?.name || translate('anonymous')
+    const playlistTitle = playlist?.title || translate('Untitled Playlist')
     
     return (
       <View style={styles.view} {...testProps('playlist_screen_view')}>
@@ -242,7 +243,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
           itemCount={playlist && playlist.itemCount}
           lastUpdated={playlist && playlist.updatedAt}
           testID={testIDPrefix}
-          title={playlist && playlist.title}
+          title={playlistTitle}
         />
         {isLoading && <ActivityIndicator fillSpace />}
         {!isLoading && flatListData && (

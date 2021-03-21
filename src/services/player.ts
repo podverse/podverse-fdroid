@@ -179,6 +179,11 @@ export const playerPreviewEndTime = async (endTime: number) => {
   }, 500)
 }
 
+export const setRateWithLatestPlaybackSpeed = async () => {
+  const rate = await getPlaybackSpeed()
+  PVTrackPlayer.setRate(rate)
+}
+
 export const playerPreviewStartTime = async (startTime: number, endTime?: number | null) => {
   if (playerPreviewEndTimeInterval) {
     clearInterval(playerPreviewEndTimeInterval)
@@ -186,8 +191,7 @@ export const playerPreviewStartTime = async (startTime: number, endTime?: number
 
   TrackPlayer.seekTo(startTime)
   TrackPlayer.play()
-  const rate = await getPlaybackSpeed()
-  TrackPlayer.setRate(rate)
+  await setRateWithLatestPlaybackSpeed()
 
   if (endTime) {
     playerPreviewEndTimeInterval = setInterval(() => {
@@ -227,7 +231,13 @@ const checkIfFileIsDownloaded = async (id: string, episodeMediaUrl: string) => {
 export const updateUserPlaybackPosition = async (skipSetNowPlaying?: boolean) => {
   try {
     const currentTrackId = await PVTrackPlayer.getCurrentLoadedTrack()
-    const currentNowPlayingItem = await getNowPlayingItemFromQueueOrHistoryOrDownloadedByTrackId(currentTrackId)
+    const setPlayerClipIsLoadedIfClip = false
+    const skipRemoveQueue = true
+    const currentNowPlayingItem = await getNowPlayingItemFromQueueOrHistoryOrDownloadedByTrackId(
+      currentTrackId,
+      setPlayerClipIsLoadedIfClip,
+      skipRemoveQueue
+    )
 
     if (currentNowPlayingItem) {
       const lastPosition = await PVTrackPlayer.getTrackPosition()
@@ -340,7 +350,9 @@ export const playNextFromQueue = async () => {
     await PVTrackPlayer.skipToNext()
     const currentId = await PVTrackPlayer.getCurrentLoadedTrack()
     const setPlayerClipIsLoadedIfClip = true
-    const item = await getNowPlayingItemFromQueueOrHistoryOrDownloadedByTrackId(currentId, setPlayerClipIsLoadedIfClip)
+    const skipRemoveQueue = false
+    const item = await getNowPlayingItemFromQueueOrHistoryOrDownloadedByTrackId(
+      currentId, setPlayerClipIsLoadedIfClip, skipRemoveQueue)
     if (item) {
       await addOrUpdateHistoryItem(item, item.userPlaybackPosition || 0, item.episodeDuration || 0)
       await removeQueueItem(item)
@@ -534,16 +546,24 @@ export const getPlaybackSpeed = async () => {
   }
 }
 
+/*
+  WARNING! THIS UGLY FUNCTION DOES A LOT MORE THAN JUST "GETTING" THE ITEM.
+  IT ALSO REMOVES AN ITEM FROM THE QUEUE, AND HANDLES CONVERTING
+  A CLIP TO AN EPISODE OBJECT. THIS FUNCTION REALLY SHOULD BE REWRITTEN.
+*/
 export const getNowPlayingItemFromQueueOrHistoryOrDownloadedByTrackId = async (
   trackId: string,
-  setPlayerClipIsLoadedIfClip?: boolean
+  setPlayerClipIsLoadedIfClip?: boolean,
+  skipRemoveQueue?: boolean
 ) => {
   const queueItems = await getQueueItemsLocally()
+
   const queueItemIndex = queueItems.findIndex((x: any) =>
     checkIfIdMatchesClipIdOrEpisodeIdOrAddByUrl(trackId, x.clipId, x.episodeId)
   )
   let currentNowPlayingItem = queueItemIndex > -1 && queueItems[queueItemIndex]
-  if (currentNowPlayingItem) removeQueueItem(currentNowPlayingItem)
+
+  if (currentNowPlayingItem && !skipRemoveQueue) removeQueueItem(currentNowPlayingItem)
 
   if (!currentNowPlayingItem) {
     const results = await getHistoryItemsLocally()

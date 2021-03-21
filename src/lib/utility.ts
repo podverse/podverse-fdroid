@@ -59,10 +59,10 @@ export const getHHMMSSArray = (sec: number) => {
   const delimitedArray = str.split(':')
 
   if (delimitedArray.length === 1) {
-    delimitedArray.unshift(0)
-    delimitedArray.unshift(0)
+    delimitedArray.unshift('0')
+    delimitedArray.unshift('0')
   } else if (delimitedArray.length === 2) {
-    delimitedArray.unshift(0)
+    delimitedArray.unshift('0')
   }
 
   const parsedArray = delimitedArray.map((x) => parseInt(x, 10))
@@ -564,4 +564,27 @@ export const overrideImageUrlWithChapterImageUrl = (nowPlayingItem: any, current
     imageUrl = currentChapter.imageUrl
   }
   return imageUrl
+}
+
+export const parseOpmlFile = (data: any, topLevel = false): string[] => {
+  let outlineArr = data
+  if (topLevel) {
+    outlineArr = data.opml?.body[0]?.outline || []
+  }
+
+  const resultArr = new Array<string>()
+  for (const item of outlineArr) {
+    if (item.$?.type?.toLowerCase() === 'rss') {
+      const url = item.$?.xmlurl || item.$?.xmlUrl
+      if (url) {
+        resultArr.push(url)
+      }
+    } else {
+      if (item.outline) {
+        resultArr.push(...parseOpmlFile(item.outline))
+      }
+    }
+  }
+
+  return resultArr
 }

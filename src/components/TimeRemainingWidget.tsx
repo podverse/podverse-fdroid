@@ -2,7 +2,7 @@ import { convertToNowPlayingItem } from 'podverse-shared'
 import React, { useState } from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
 import { useGlobal } from 'reactn'
-import { convertSecToHhoursMMinutes, testProps } from '../lib/utility'
+import { convertSecToHhoursMMinutes, testProps, requestAppStoreReviewForEpisodePlayed } from '../lib/utility'
 import { PV } from '../resources'
 import { PVTrackPlayer, setPlaybackPosition } from '../services/player'
 import { loadItemAndPlayTrack, togglePlay } from '../state/actions/player'
@@ -75,7 +75,7 @@ export const TimeRemainingWidget = (props: Props) => {
   const [player] = useGlobal('player')
   const { nowPlayingItem, playbackState } = player
 
-  const hasStartedItem = !!userPlaybackPosition
+  const hasStartedItem = !!mediaFileDuration
   const totalTime = mediaFileDuration || playingItem.episodeDuration || 0
   const playedTime = userPlaybackPosition || 0
 
@@ -109,6 +109,7 @@ export const TimeRemainingWidget = (props: Props) => {
         loadItemAndPlayTrack(playingItem, true)
       }
     }
+    requestAppStoreReviewForEpisodePlayed()
   }
 
   const isInvalidDuration = totalTime <= 0
