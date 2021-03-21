@@ -25,7 +25,7 @@ import {
 } from '../components'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { requestAppStoreReview, testProps } from '../lib/utility'
+import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { createMediaRef, updateMediaRef } from '../services/mediaRef'
 import {
@@ -301,7 +301,6 @@ export class MakeClipScreen extends React.Component<Props, State> {
               ])
             }, 100)
           })
-          requestAppStoreReview()
         } catch (error) {
           if (error.response) {
             Alert.alert(PV.Alerts.SOMETHING_WENT_WRONG.title, error.response.data.message, PV.Alerts.BUTTONS.OK)
