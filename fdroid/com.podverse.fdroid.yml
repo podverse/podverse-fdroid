@@ -124,9 +124,9 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.0.4
-    versionCode: 4
-    commit: 3ddfbe424c295c5032d0ad9861c228d691d5fe44
+  - versionName: 3.0.5
+    versionCode: 5
+    commit: 607f481370db8a29b3f199cb54375daef719805d
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
@@ -165,5 +165,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.0.4
-CurrentVersionCode: 4
+CurrentVersion: 3.0.5
+CurrentVersionCode: 5
