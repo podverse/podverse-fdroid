@@ -35,7 +35,6 @@ import {
   PrivacyPolicyScreen,
   ProfileScreen,
   ProfilesScreen,
-  PurchasingScreen,
   QueueScreen,
   SearchScreen,
   SettingsScreen,
@@ -312,15 +311,6 @@ const EmailVerificationNavigator = createStackNavigator(
   }
 )
 
-const PurchasingNavigator = createStackNavigator(
-  {
-    [PV.RouteNames.PurchasingScreen]: PurchasingScreen
-  },
-  {
-    defaultNavigationOptions
-  }
-)
-
 const AddPodcastByRSSURLNavigator = createStackNavigator(
   {
     [PV.RouteNames.AddPodcastByRSSScreen]: {
@@ -344,7 +334,6 @@ const MainApp = createStackNavigator(
     SleepTimerNavigator,
     WebPageNavigator,
     EmailVerificationNavigator,
-    PurchasingNavigator,
     [PV.RouteNames.AddPodcastByRSSScreen]: {
       screen: AddPodcastByRSSURLNavigator,
       path: ''

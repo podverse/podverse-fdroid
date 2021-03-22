@@ -11,7 +11,6 @@ import {
   FlatList,
   PlayerEvents,
   PodcastTableCell,
-  PurchaseListener,
   SearchBar,
   SwipeRowBack,
   TableSectionSelectors,
@@ -726,7 +725,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
             {...testProps('alert_yes_allow_data')}
           />
         </Dialog.Container>
-        <PurchaseListener navigation={navigation} />
         <AddByRSSPodcastAuthModal navigation={navigation} />
       </View>
     )

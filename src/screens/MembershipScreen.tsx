@@ -1,14 +1,12 @@
-import { Alert, Platform, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, ComparisonTable, Text, TextLink, View } from '../components'
 import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
 import { getMembershipExpiration, getMembershipStatus, readableDate, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { buy1YearPremium } from '../services/purchaseShared'
+import { displayFOSSPurchaseAlert } from '../services/purchaseShared'
 import { getAuthUserInfo } from '../state/actions/auth'
-import { androidHandleStatusCheck } from '../state/actions/purchase.android'
-import { iosHandlePurchaseStatusCheck } from '../state/actions/purchase.ios'
 import { getMembershipTextStyle } from '../styles'
 
 type Props = {
@@ -54,38 +52,7 @@ export class MembershipScreen extends React.Component<Props, State> {
   }
 
   handleRenewPress = () => {
-    this.setState({ disableButton: true }, () => {
-      (async () => {
-        try {
-          await buy1YearPremium()
-        } catch (error) {
-          console.log(error)
-          // If attempting to renew, but a recent previous purchase did not complete successfully,
-          // then do not buy a new product, and instead navigate to the PurchasingScreen
-          // and attempt to check and update the status of the cached purchase.
-          if (error.code === 'E_ALREADY_OWNED') {
-            if (Platform.OS === 'android') {
-              this.props.navigation.navigate(PV.RouteNames.PurchasingScreen)
-              const { productId, purchaseToken, transactionId } = this.global.purchase
-              await androidHandleStatusCheck(productId, transactionId, purchaseToken)
-            } else if (Platform.OS === 'ios') {
-              this.props.navigation.navigate(PV.RouteNames.PurchasingScreen)
-              const { productId, transactionId, transactionReceipt } = this.global.purchase
-              await iosHandlePurchaseStatusCheck(productId, transactionId, transactionReceipt)
-            }
-          } else if (error.code === 'E_USER_CANCELLED') {
-            // do nothing
-          } else {
-            Alert.alert(
-              PV.Alerts.PURCHASE_SOMETHING_WENT_WRONG.title,
-              PV.Alerts.PURCHASE_SOMETHING_WENT_WRONG.message,
-              PV.Alerts.BUTTONS.OK
-            )
-          }
-        }
-        this.setState({ disableButton: false })
-      })()
-    })
+    displayFOSSPurchaseAlert()
   }
 
   handleSignUpPress = () => {

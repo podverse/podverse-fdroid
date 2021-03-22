@@ -34,7 +34,6 @@ export const RouteNames = {
   PrivacyPolicyScreen: 'PrivacyPolicyScreen',
   ProfilesScreen: 'ProfilesScreen',
   ProfileScreen: 'ProfileScreen',
-  PurchasingScreen: 'PurchasingScreen',
   QueueScreen: 'QueueScreen',
   SearchScreen: 'SearchScreen',
   SearchSearchScreen: 'SearchSearchScreen',
