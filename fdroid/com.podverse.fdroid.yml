@@ -13,6 +13,7 @@ Repo: https://github.com/podverse/podverse-fdroid
 Builds:
   - versionName: 2.9.3
     versionCode: 1
+    disable: Google Play Billing Library
     commit: 22b86654f7c982249819fd689c0519b357863fb5
     subdir: android/app
     sudo:
@@ -50,6 +51,7 @@ Builds:
 
   - versionName: 2.10.1
     versionCode: 2
+    disable: Google Play Billing Library
     commit: 5b41a8f323ddf9e73555b6297834e4d132f52da2
     subdir: android/app
     sudo:
@@ -87,6 +89,7 @@ Builds:
 
   - versionName: 3.0.2
     versionCode: 3
+    disable: Google Play Billing Library
     commit: 3dd8c923c87d8757e0c3da17145b0e255110218b
     subdir: android/app
     sudo:
