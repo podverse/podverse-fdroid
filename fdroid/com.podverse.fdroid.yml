@@ -129,7 +129,7 @@ Builds:
 
   - versionName: 3.0.5
     versionCode: 5
-    commit: d1692907b9d26ad08142ac41aec45f68757a60ea
+    commit: 3.0.5
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
