@@ -1,4 +1,4 @@
-import { getVersion } from 'react-native-device-info'
+// import { getVersion } from 'react-native-device-info'
 import { hasValidNetworkConnection } from '../lib/network'
 import { request } from './request'
 

@@ -58,7 +58,7 @@ class App extends Component<Props, State> {
       globalTheme = lightTheme
     }
 
-    await this.checkAppVersion()
+    // await this.checkAppVersion()
     this.setupGlobalState(globalTheme)
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
   }
@@ -110,10 +110,10 @@ class App extends Component<Props, State> {
     )
   }
 
-  checkAppVersion = async () => {
-    const versionValid = await isOnMinimumAllowedVersion()
-    this.setState({ minVersionMismatch: !versionValid })
-  }
+  // checkAppVersion = async () => {
+  //   const versionValid = await isOnMinimumAllowedVersion()
+  //   this.setState({ minVersionMismatch: !versionValid })
+  // }
 
   _renderIntersitial = () => {
     if (this.state.minVersionMismatch) {
