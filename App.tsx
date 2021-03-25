@@ -40,7 +40,7 @@ class App extends Component<Props, State> {
     super(props)
     this.state = {
       appReady: false,
-      minVersionMismatch: true
+      minVersionMismatch: false
     }
     this.unsubscribeNetListener = null
     downloadCategoriesList()
@@ -116,9 +116,9 @@ class App extends Component<Props, State> {
   // }
 
   _renderIntersitial = () => {
-    if (this.state.minVersionMismatch) {
-      return <UpdateRequiredOverlay />
-    }
+    // if (this.state.minVersionMismatch) {
+    //   return <UpdateRequiredOverlay />
+    // }
 
     if (Platform.OS === 'ios') {
       return null
