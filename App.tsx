@@ -7,7 +7,8 @@ import 'react-native-gesture-handler'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { setGlobal } from 'reactn'
-import { OverlayAlert } from './src/components'
+import { isOnMinimumAllowedVersion } from './src/services/versioning'
+import { UpdateRequiredOverlay, OverlayAlert } from './src/components'
 import { refreshDownloads } from './src/lib/downloader'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
@@ -25,6 +26,7 @@ type Props = any
 
 type State = {
   appReady: boolean
+  minVersionMismatch: boolean
 }
 
 setGlobal(initialState)
@@ -37,7 +39,8 @@ class App extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      appReady: false
+      appReady: false,
+      minVersionMismatch: true
     }
     this.unsubscribeNetListener = null
     downloadCategoriesList()
@@ -55,6 +58,7 @@ class App extends Component<Props, State> {
       globalTheme = lightTheme
     }
 
+    await this.checkAppVersion()
     this.setupGlobalState(globalTheme)
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
   }
@@ -89,7 +93,7 @@ class App extends Component<Props, State> {
     })()
   }
 
-  setupGlobalState(theme: GlobalTheme) {
+  setupGlobalState = (theme: GlobalTheme) => {
     const fontScale = 1
     // const fontScale = await getFontScale()
     const fontScaleMode = determineFontScaleMode(fontScale)
@@ -106,7 +110,16 @@ class App extends Component<Props, State> {
     )
   }
 
+  checkAppVersion = async () => {
+    const versionValid = await isOnMinimumAllowedVersion()
+    this.setState({ minVersionMismatch: !versionValid })
+  }
+
   _renderIntersitial = () => {
+    if (this.state.minVersionMismatch) {
+      return <UpdateRequiredOverlay />
+    }
+
     if (Platform.OS === 'ios') {
       return null
     }
@@ -127,7 +140,7 @@ class App extends Component<Props, State> {
       opacity: 1
     } : {}
 
-    return this.state.appReady ? (
+    return this.state.appReady && !this.state.minVersionMismatch ? (
       <SafeAreaProvider initialMetrics={initialWindowMetrics} style={wrapperStyle}>
         <View style={{ flex: 1 }}>
           <Router />
