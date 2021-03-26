@@ -51,11 +51,6 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     this.props.navigation.setParams({
       _handleSavePodcastByRSSURL: this._handleSavePodcastByRSSURL
     })
-    const feedUrl = navigation.getParam('podverse-param')
-
-    if (feedUrl) {
-      this.setState({ url: feedUrl })
-    }
   }
 
   _navToRequestPodcastForm = () => {
