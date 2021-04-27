@@ -127,9 +127,9 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.0.6
-    versionCode: 6
-    commit: 3.0.6
+  - versionName: 3.0.7
+    versionCode: 7
+    commit: 3.0.7
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
