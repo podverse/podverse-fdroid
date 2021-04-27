@@ -1,6 +1,5 @@
 import debounce from 'lodash/debounce'
 import { Alert, Linking, StyleSheet } from 'react-native'
-import Config from 'react-native-config'
 import React from 'reactn'
 import {
   ActionSheet,
@@ -71,10 +70,6 @@ export class SearchScreen extends React.Component<Props, State> {
     headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
     headerRight: () => null
   })
-
-  componentDidMount() {
-    this.searchBarInput.focus()
-  }
 
   _handleSearchBarClear = () => {
     this.setState({

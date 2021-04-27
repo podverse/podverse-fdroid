@@ -13,6 +13,7 @@ import {
   NumberSelectorWithText,
   ScrollView,
   SwitchWithText,
+  TableTextCell,
   Text,
   View
 } from '../components'
@@ -30,6 +31,7 @@ import { PV } from '../resources'
 import { deleteLoggedInUser } from '../services/user'
 import { logoutUser } from '../state/actions/auth'
 import * as DownloadState from '../state/actions/downloads'
+
 import {
   saveCustomAPIDomain,
   saveCustomWebDomain,
@@ -81,8 +83,8 @@ export class SettingsScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-      title: translate('Settings')
-    })
+    title: translate('Settings')
+  })
 
   async componentDidMount() {
     const downloadingWifiOnly = await AsyncStorage.getItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
@@ -93,6 +95,7 @@ export class SettingsScreen extends React.Component<Props, State> {
     const maximumSpeedSelectOptions = PV.Player.maximumSpeedSelectOptions
     const maximumSpeedOptionSelected = maximumSpeedSelectOptions.find((x: any) => x.value === Number(maximumSpeed))
     const offlineModeEnabled = await AsyncStorage.getItem(PV.Keys.OFFLINE_MODE_ENABLED)
+    
 
     this.setState(
       {
@@ -316,6 +319,15 @@ export class SettingsScreen extends React.Component<Props, State> {
     }
   }
 
+  _handleCryptoSetupPressed = async () => {
+    const consentGivenString = await AsyncStorage.getItem(PV.Keys.USER_CONSENT_CRYPTO_TERMS)
+    if(consentGivenString && JSON.parse(consentGivenString) === true) {
+      this.props.navigation.navigate(PV.RouteNames.CryptoSetupScreen)
+    } else {
+      this.props.navigation.navigate(PV.RouteNames.CryptoPreviewScreen)
+    }  
+  }
+
   render() {
     const {
       deleteAccountDialogConfirmed,
@@ -352,6 +364,14 @@ export class SettingsScreen extends React.Component<Props, State> {
         {isLoading && <ActivityIndicator fillSpace />}
         {!isLoading && (
           <View>
+            {Config.ENABLE_VALUE_TAG_TRANSACTIONS && <TableTextCell
+              onPress={this._handleCryptoSetupPressed}
+              testIDPrefix={testIDPrefix}
+              testIDSuffix='crypto_setup'
+              text={translate('Crypto Setup')}
+              hideChevron={false}
+              />}
+            <Divider style={styles.divider} />
             <View style={styles.itemWrapper}>
               <SwitchWithText
                 onValueChange={this._handleToggleOfflineMode}
@@ -595,6 +615,9 @@ const styles = StyleSheet.create({
   },
   scrollViewContentContainer: {
     paddingBottom: 48
+  },
+  textInputWrapper: {
+    marginVertical: 20
   },
   wrapper: {
     flex: 1,

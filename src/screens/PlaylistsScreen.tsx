@@ -193,7 +193,7 @@ export class PlaylistsScreen extends React.Component<Props, State> {
               renderItem={this._renderPlaylistItem}
               renderSectionHeader={({ section }) => (
                 <TableSectionSelectors
-                  hideFilter
+                  disableFilter
                   includePadding
                   selectedFilterLabel={section.title}
                   textStyle={globalTheme.headerText}

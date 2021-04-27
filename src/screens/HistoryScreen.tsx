@@ -1,5 +1,5 @@
 import { NowPlayingItem } from 'podverse-shared'
-import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
+import { StyleSheet, View as RNView } from 'react-native'
 import React, { getGlobal } from 'reactn'
 import {
   ActivityIndicator,
@@ -15,7 +15,7 @@ import { overrideImageUrlWithChapterImageUrl, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { loadItemAndPlayTrack } from '../state/actions/player'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
-import { core, darkTheme } from '../styles'
+import { core } from '../styles'
 
 type Props = {
   navigation?: any

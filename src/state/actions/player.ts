@@ -139,7 +139,7 @@ export const initPlayerState = async (globalState: any) => {
 }
 
 export const playNextFromQueue = async () => {
-  const item = await playNextFromQueueService()
+  await playNextFromQueueService()
   await getQueueItems()
 }
 
@@ -177,7 +177,13 @@ export const loadItemAndPlayTrack = async (
     }
 
     await updatePlayerState(item)
-    await loadItemAndPlayTrackService(item, shouldPlay, forceUpdateOrderDate)
+
+    // If the value tag is unavailable, try to enrich it from Podcast Index API
+    // then make sure the enrichedItem is on global state.
+    // If the transcript tag is available, parse it and assign it to the enrichedItem.
+    const enrichedItem = await loadItemAndPlayTrackService(item, shouldPlay, forceUpdateOrderDate)
+    if (enrichedItem) await updatePlayerState(enrichedItem)
+
     showMiniPlayer()
   }
 
@@ -204,6 +210,8 @@ export const setPlaybackSpeed = async (rate: number) => {
       playbackRate: rate
     }
   })
+
+  PVEventEmitter.emit(PV.Events.PLAYER_SPEED_UPDATED)
 }
 
 export const togglePlay = async () => {

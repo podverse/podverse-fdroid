@@ -25,6 +25,7 @@ import { Table } from './Table'
 import { Tabs } from './Tabs'
 import { TextInputs } from './TextInputs'
 import { URLs } from './URLs'
+import { ValueTag } from './ValueTag'
 
 export const PV = {
   ActionSheet,
@@ -53,5 +54,6 @@ export const PV = {
   Table,
   Tabs,
   TextInputs,
-  URLs
+  URLs,
+  ValueTag
 }

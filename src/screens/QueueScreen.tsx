@@ -1,5 +1,5 @@
 import { NowPlayingItem } from 'podverse-shared'
-import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
+import { StyleSheet, View as RNView } from 'react-native'
 import React, { getGlobal } from 'reactn'
 import {
   ActivityIndicator,
@@ -26,7 +26,7 @@ import { movePlayerItemToNewPosition } from '../services/player'
 import { loadItemAndPlayTrack } from '../state/actions/player'
 import { addQueueItemToServer, getQueueItems, removeQueueItem, setAllQueueItemsLocally } from '../state/actions/queue'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
-import { core, darkTheme } from '../styles'
+import { core } from '../styles'
 
 type Props = {
   navigation?: any
@@ -339,7 +339,7 @@ export class QueueScreen extends React.Component<Props, State> {
               <View transparent={isTransparent}>
                 <View style={styles.headerNowPlayingItemWrapper} transparent={isTransparent}>
                   <TableSectionSelectors
-                    hideFilter
+                    disableFilter
                     includePadding
                     selectedFilterLabel={translate('Now Playing')}
                     textStyle={styles.sectionHeaderText}
@@ -361,7 +361,7 @@ export class QueueScreen extends React.Component<Props, State> {
               </View>
             )}
             <TableSectionSelectors
-              hideFilter
+              disableFilter
               includePadding
               selectedFilterLabel={translate('Next Up')}
               textStyle={styles.sectionHeaderText}
