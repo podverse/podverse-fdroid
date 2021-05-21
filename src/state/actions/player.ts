@@ -62,9 +62,7 @@ export const updatePlayerState = async (item: NowPlayingItem) => {
     }
   }
 
-  setGlobal(newState, () => {
-    PVEventEmitter.emit(PV.Events.UPDATE_PLAYER_STATE_FINISHED)
-  })
+  setGlobal(newState)
 }
 
 export const initializePlayerQueue = async () => {
