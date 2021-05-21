@@ -181,10 +181,11 @@ Builds:
     gradle:
       - yes
     rm:
+      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
       - node_modules/bplist-parser
       - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
       - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
       - node_modules/react-native/template
       - functions
     scanignore:
