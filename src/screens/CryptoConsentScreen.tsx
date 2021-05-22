@@ -1,4 +1,3 @@
-/*
 import AsyncStorage from '@react-native-community/async-storage'
 import { StyleSheet, SafeAreaView, ScrollView } from 'react-native'
 import { CheckBox } from 'react-native-elements'
@@ -122,4 +121,3 @@ const styles = StyleSheet.create({
     width: '90%'
   }
 })
-*/

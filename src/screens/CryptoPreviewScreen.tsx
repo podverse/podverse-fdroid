@@ -1,4 +1,3 @@
-/*
 import { StyleSheet, SafeAreaView, Image } from 'react-native'
 import React, { getGlobal } from 'reactn'
 import { Button, NavDismissIcon, ScrollView, Text } from '../components'
@@ -93,4 +92,3 @@ const styles = StyleSheet.create({
     marginVertical:10
   }
 })
-*/

@@ -7,7 +7,7 @@ import 'react-native-gesture-handler'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { setGlobal } from 'reactn'
-import { OverlayAlert, /* BoostDropdownBanner */ } from './src/components'
+import { OverlayAlert, BoostDropdownBanner } from './src/components'
 import { refreshDownloads } from './src/lib/downloader'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
@@ -148,7 +148,7 @@ class App extends Component<Props, State> {
           <Router />
           <OverlayAlert />
         </View>
-        {/* <BoostDropdownBanner /> */}
+        <BoostDropdownBanner />
       </SafeAreaProvider>
     ) : (
       this._renderIntersitial()
