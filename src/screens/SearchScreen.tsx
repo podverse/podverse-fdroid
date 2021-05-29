@@ -15,7 +15,7 @@ import {
 import { translate } from '../lib/i18n'
 import { navigateToPodcastScreenWithPodcast } from '../lib/navigate'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { createEmailLinkUrl, isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getPodcasts } from '../services/podcast'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
@@ -209,11 +209,8 @@ export class SearchScreen extends React.Component<Props, State> {
     this.setState({ showActionSheet: false })
   }
 
-  _navToRequestPodcastForm = () => {
-    Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
-      { text: translate('Cancel') },
-      { text: translate('Yes'), onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
-    ])
+  _navToRequestPodcastEmail = () => {
+    Linking.openURL(createEmailLinkUrl(PV.Emails.REQUEST_PODCAST))
   }
 
   render() {
@@ -246,7 +243,7 @@ export class SearchScreen extends React.Component<Props, State> {
             dataTotalCount={flatListDataTotalCount}
             disableLeftSwipe
             extraData={flatListData}
-            handleNoResultsBottomAction={PV.URLs.requestPodcast ? this._navToRequestPodcastForm : null}
+            handleNoResultsBottomAction={PV.URLs.requestPodcast ? this._navToRequestPodcastEmail : null}
             handleNoResultsMiddleAction={this._handleAddPodcastByRSSURLNavigation}
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}

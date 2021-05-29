@@ -1,4 +1,4 @@
-import { Alert, Linking, StyleSheet } from 'react-native'
+import { Linking, StyleSheet } from 'react-native'
 import React from 'reactn'
 import {
   ActivityIndicator,
@@ -12,7 +12,7 @@ import {
   View
 } from '../components'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
+import { createEmailLinkUrl, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getAddByRSSPodcastLocally } from '../services/parser'
 import { addAddByRSSPodcast } from '../state/actions/parser'
@@ -53,11 +53,8 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     })
   }
 
-  _navToRequestPodcastForm = () => {
-    Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
-      { text: translate('Cancel') },
-      { text: translate('Yes'), onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
-    ])
+  _navToRequestPodcastEmail = () => {
+    Linking.openURL(createEmailLinkUrl(PV.Emails.REQUEST_PODCAST))
   }
 
   _handleChangeText = (value: string) => {
@@ -132,7 +129,7 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
             {!!PV.URLs.requestPodcast && (
               <TextLink
                 fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-                onPress={this._navToRequestPodcastForm}
+                onPress={this._navToRequestPodcastEmail}
                 style={styles.textLink}
                 {...testProps(`${testIDPrefix}_request_podcast`)}>
                 {translate('Request Podcast')}

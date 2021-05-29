@@ -140,7 +140,9 @@ class App extends Component<Props, State> {
             shadowOpacity: 1,
             opacity: 1
           }
-        : {}
+        : {
+          flex: 1
+        }
 
     return this.state.appReady ? (
       <SafeAreaProvider initialMetrics={initialWindowMetrics} style={wrapperStyle}>
