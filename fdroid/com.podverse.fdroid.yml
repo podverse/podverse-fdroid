@@ -250,7 +250,7 @@ Builds:
 
   - versionName: 3.1.0
     versionCode: 9
-    commit: 3.1.0
+    commit: 4b7d3e57436e73f2d1d56b0a0c13bad5646b9ebe
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
