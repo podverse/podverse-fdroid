@@ -38,6 +38,7 @@ import {
   setCensorNSFWText,
   setCustomAPIDomainEnabled,
   setCustomWebDomainEnabled,
+  setErrorReportingEnabled,
   setOfflineModeEnabled
 } from '../state/actions/settings'
 import { clearHistoryItems } from '../state/actions/userHistoryItem'
@@ -198,6 +199,10 @@ export class SettingsScreen extends React.Component<Props, State> {
     setCensorNSFWText(value)
   }
 
+  _handleToggleErrorReporting = (value: boolean) => {
+    setErrorReportingEnabled(value)
+  }
+
   _handleToggleOfflineMode = (value: boolean) => {
     this.setState({ offlineModeEnabled: value }, () => {
       setOfflineModeEnabled(value)
@@ -349,6 +354,7 @@ export class SettingsScreen extends React.Component<Props, State> {
       customAPIDomainEnabled,
       customWebDomain,
       customWebDomainEnabled,
+      errorReportingEnabled,
       globalTheme,
       session
     } = this.global
@@ -388,6 +394,21 @@ export class SettingsScreen extends React.Component<Props, State> {
               />
             </View>
             <Divider style={styles.divider} />
+            {!Config.DISABLE_CRASH_LOGS && (
+              <View>
+                <View style={styles.itemWrapper}>
+                  <SwitchWithText
+                    onValueChange={this._handleToggleErrorReporting}
+                    subText={translate('Error Reporting subtext')}
+                    testID={`${testIDPrefix}_error_reporting`}
+                    text={errorReportingEnabled
+                      ? translate('Error Reporting Enabled') : translate('Error Reporting Disabled')}
+                    value={!!errorReportingEnabled}
+                  />
+                </View>
+                <Divider style={styles.divider} />
+              </View>
+            )}
             {!Config.DISABLE_THEME_SWITCH && (
               <View style={styles.itemWrapper}>
                 <SwitchWithText
