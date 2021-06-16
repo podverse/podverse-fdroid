@@ -34,7 +34,7 @@ export class CryptoSetupScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-    title: translate('Crypto Setup')
+    title: translate('Bitcoin Lightning Setup')
   })
 
   componentDidMount() {
