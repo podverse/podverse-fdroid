@@ -7,9 +7,9 @@ import { PV } from '../resources'
 
 type Props = any
 
-const testIDPrefix = 'crypto_preview_screen'
+const testIDPrefix = 'value_tag_preview_screen'
 
-export class CryptoPreviewScreen extends React.Component<Props> {
+export class ValueTagPreviewScreen extends React.Component<Props> {
   static navigationOptions = ({ navigation }) => {
     const { globalTheme } = getGlobal()
 
@@ -23,7 +23,7 @@ export class CryptoPreviewScreen extends React.Component<Props> {
   }
 
   _navigateToConsentScreen() {
-    this.props.navigation.navigate(PV.RouteNames.CryptoConsentScreen)
+    this.props.navigation.navigate(PV.RouteNames.ValueTagConsentScreen)
   }
 
   render() {
@@ -32,13 +32,13 @@ export class CryptoPreviewScreen extends React.Component<Props> {
         <Text
           fontSizeLargestScale={PV.Fonts.largeSizes.xl}
           style={styles.title}>
-          {translate('crypto_preview_title')}
+          {translate('value_tag_preview_title')}
         </Text>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContentView}>
         <Text fontSizeLargestScale={PV.Fonts.largeSizes.lg}
-          style={styles.text}>{translate('crypto_preview_boost')}</Text>
+          style={styles.text}>{translate('value_tag_preview_boost')}</Text>
         <Text fontSizeLargestScale={PV.Fonts.largeSizes.lg}
-          style={styles.text}>{translate('crypto_preview_stream')}</Text>
+          style={styles.text}>{translate('value_tag_preview_stream')}</Text>
         <Image 
           source={require("../resources/images/crypto_exmpl_1.png")} 
           resizeMode="contain" 
