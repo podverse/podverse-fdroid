@@ -1,7 +1,7 @@
 import React from 'reactn'
 import { StyleSheet, SafeAreaView, View, Image, Platform } from 'react-native'
 import Config from 'react-native-config'
-import DeviceInfo from 'react-native-device-info'
+// import DeviceInfo from 'react-native-device-info'
 import { NavigationStackProp } from 'react-navigation-stack'
 import { NavigationActions, StackActions } from 'react-navigation'
 import { trackCrashEvent } from '../lib/crashManager'
@@ -37,7 +37,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         details: error.message + "\n" + errorInfo.componentStack.slice(0, 500), // Limitting error desc to 500 chars
         platform: Platform.OS,
         date: new Date().toDateString(),
-        app_version: DeviceInfo.getVersion()
+        // app_version: DeviceInfo.getVersion()
       }
       
       trackCrashEvent(errorRequestBody)
