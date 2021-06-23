@@ -30,7 +30,7 @@ import { downloadEpisode } from '../lib/downloader'
 import { getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import { safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { safeKeyExtractor, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
@@ -85,12 +85,12 @@ export class PodcastScreen extends React.Component<Props, State> {
 
     const podcast = this.props.navigation.getParam('podcast')
     const podcastId =
-      (podcast && podcast.id) ||
-      (podcast && podcast.addByRSSPodcastFeedUrl) ||
+      (podcast?.id) ||
+      (podcast?.addByRSSPodcastFeedUrl) ||
       this.props.navigation.getParam('podcastId')
     const viewType = this.props.navigation.getParam('viewType') || PV.Filters._episodesKey
 
-    if (podcast && (podcast.id || podcast.addByRSSPodcastFeedUrl)) {
+    if (podcast?.id || podcast?.addByRSSPodcastFeedUrl) {
       this.props.navigation.setParams({
         podcastId,
         podcastTitle: podcast.title,
@@ -364,9 +364,7 @@ static navigationOptions = ({ navigation }) => {
 
     if (viewType === PV.Filters._clipsKey) {
       return (
-        item &&
-        item.episode &&
-        item.episode.id && (
+        item?.episode?.id && (
           <ClipTableCell
             handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
             showEpisodeInfo
@@ -446,7 +444,7 @@ static navigationOptions = ({ navigation }) => {
     this.setState({ showDeleteDownloadedEpisodesDialog: false }, () => {
       (async () => {
         const { podcast, podcastId } = this.state
-        const id = (podcast && podcast.id) || podcastId
+        const id = podcast?.id || podcastId
         try {
           await removeDownloadedPodcast(id)
         } catch (error) {
@@ -527,7 +525,7 @@ static navigationOptions = ({ navigation }) => {
 
   _handleToggleAutoDownload = (autoDownloadOn: boolean) => {
     const { podcast, podcastId } = this.state
-    const id = (podcast && podcast.id) || podcastId
+    const id = podcast?.id || podcastId
     const { addByRSSPodcastFeedUrl } = podcast 
     
     if(addByRSSPodcastFeedUrl) { 
@@ -690,7 +688,7 @@ static navigationOptions = ({ navigation }) => {
                 isLoadingMore={isLoadingMore}
                 isRefreshing={isRefreshing}
                 ItemSeparatorComponent={this._ItemSeparatorComponent}
-                keyExtractor={(item: any) => item.id}
+                keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
                 ListHeaderComponent={
                   viewType === PV.Filters._episodesKey || viewType === PV.Filters._clipsKey
                     ? this._ListHeaderComponent
@@ -783,15 +781,18 @@ static navigationOptions = ({ navigation }) => {
     try {
       if (filterKey === PV.Filters._episodesKey && podcast && podcast.addByRSSPodcastFeedUrl) {
         newState.flatListData = podcast.episodes || []
+        newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
         newState.flatListDataTotalCount = newState.flatListData.length
       } else if (filterKey === PV.Filters._episodesKey) {
         const results = await this._queryEpisodes(querySort, queryOptions.queryPage)
         newState.flatListData = [...flatListData, ...results[0]]
+        newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
       } else if (filterKey === PV.Filters._clipsKey) {
         const results = await this._queryClips(querySort, queryOptions.queryPage)
         newState.flatListData = [...flatListData, ...results[0]]
+        newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
       } else if (PV.FilterOptions.screenFilters.PodcastScreen.sort.some((option) => option === filterKey)) {
@@ -804,18 +805,28 @@ static navigationOptions = ({ navigation }) => {
         }
 
         newState.flatListData = [...flatListData, ...results[0]]
+        newState.flatListData = this.cleanFlatListData(newState.flatListData, viewType)
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
       }
       newState.queryPage = queryOptions.queryPage || 1
 
       newState.selectedFilterLabel = await getSelectedFilterLabel(viewType)
-      this.shouldLoad = true
-      return newState
     } catch (error) {
-      console.log(error)
-      this.shouldLoad = true
-      return newState
+      console.log('PodcastScreen queryData error:', error)
+    }
+    this.shouldLoad = true
+    
+    return newState
+  }
+
+  cleanFlatListData = (flatListData: any[], viewTypeKey: string | null) => {
+    if (viewTypeKey === PV.Filters._episodesKey) {
+      return flatListData.filter((item: any) => !!item?.id)
+    } else if (viewTypeKey === PV.Filters._clipsKey) {
+      return flatListData.filter((item: any) => !!item?.episode?.id)
+    } else {
+      return flatListData
     }
   }
 }

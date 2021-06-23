@@ -20,16 +20,18 @@ import { getDownloadedPodcasts } from '../lib/downloadedPodcast'
 import { getDefaultSortForFilter, getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import { getAppUserAgent, setAppUserAgent, setCategoryQueryProperty, testProps } from '../lib/utility'
+import { getAppUserAgent, safeKeyExtractor, setAppUserAgent, setCategoryQueryProperty, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { assignCategoryQueryToState, assignCategoryToStateForSortSelect, getCategoryLabel } from '../services/category'
 import { getEpisode } from '../services/episode'
+import PVEventEmitter from '../services/eventEmitter'
 import { checkIdlePlayerState, PVTrackPlayer, updateTrackPlayerCapabilities,
   updateUserPlaybackPosition } from '../services/player'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getNowPlayingItemLocally } from '../services/userNowPlayingItem'
 import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
 import { initDownloads, removeDownloadedPodcast } from '../state/actions/downloads'
+import { updateWalletInfo } from '../state/actions/lnpay'
 import {
   initializePlaybackSpeed,
   initializePlayerQueue,
@@ -109,6 +111,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
   async componentDidMount() {
     Linking.addEventListener('url', this._handleOpenURLEvent)
     AppState.addEventListener('change', this._handleAppStateChange)
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    PVEventEmitter.on(PV.Events.LNPAY_WALLET_INFO_SHOULD_UPDATE, updateWalletInfo)
 
     try {
       const appHasLaunched = await AsyncStorage.getItem(PV.Keys.APP_HAS_LAUNCHED)
@@ -141,6 +145,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
   componentWillUnmount() {
     AppState.removeEventListener('change', this._handleAppStateChange)
     Linking.removeEventListener('url', this._handleOpenURLEvent)
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    PVEventEmitter.removeListener(PV.Events.LNPAY_WALLET_INFO_SHOULD_UPDATE, updateWalletInfo)
   }
 
   _handleAppStateChange = (nextAppState: any) => {
@@ -249,7 +255,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         } else if (path === PV.DeepLinks.Episode.pathPrefix) {
           const episode = await getEpisode(id)
           if (episode) {
-            const podcast = await getPodcast(episode.podcast.id)
+            const podcast = await getPodcast(episode.podcast?.id)
             navigate(PV.RouteNames.PodcastScreen, {
               podcast,
               navToEpisodeWithId: id
@@ -496,7 +502,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _renderPodcastItem = ({ item, index }) => (
       <PodcastTableCell
-        id={item.id}
+        id={item?.id}
         lastEpisodePubDate={item.lastEpisodePubDate}
         onPress={() =>
           this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
@@ -697,7 +703,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
               disableLeftSwipe={queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey}
               extraData={flatListData}
               handleNoResultsTopAction={this._handleNoResultsTopAction}
-              keyExtractor={(item: any) => item?.id}
+              keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
               isLoadingMore={isLoadingMore}
               isRefreshing={isRefreshing}
               ItemSeparatorComponent={this._ItemSeparatorComponent}
@@ -832,14 +838,19 @@ export class PodcastsScreen extends React.Component<Props, State> {
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
       }
-
-      this.shouldLoad = true
-      return newState
     } catch (error) {
       console.log('PodcastsScreen _queryData error', error)
-      this.shouldLoad = true
-      return newState
     }
+
+    newState.flatListData = this.cleanFlatListData(newState.flatListData)
+    
+    this.shouldLoad = true
+
+    return newState
+  }
+
+  cleanFlatListData = (flatListData: any[]) => {
+    return flatListData.filter((item) => !!item?.id)
   }
 }
 

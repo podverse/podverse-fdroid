@@ -48,7 +48,7 @@ export class FundingScreen extends React.Component<Props, State> {
   async componentDidMount() {
     const { player, podcastValueFinal, session } = this.global
     const { nowPlayingItem } = player
-    const { boostAmount, streamingAmount } = session?.valueTagSettings?.lightningNetwork?.globalSettings || {}
+    const { boostAmount, streamingAmount } = session?.valueTagSettings?.lightningNetwork?.lnpay?.globalSettings || {}
 
     const { episodeValue, podcastValue } = nowPlayingItem
     const valueTags = podcastValueFinal || episodeValue || podcastValue
@@ -142,7 +142,7 @@ export class FundingScreen extends React.Component<Props, State> {
     const podcastFunding = nowPlayingItem?.podcastFunding || []
     const episodeFunding = nowPlayingItem?.episodeFunding || []
 
-    const { globalSettings, lnpayEnabled } = session?.valueTagSettings?.lightningNetwork || {}
+    const { globalSettings, lnpayEnabled } = session?.valueTagSettings?.lightningNetwork?.lnpay || {}
     const { boostAmount, streamingAmount } = globalSettings || {}
 
     const podcastLinks = podcastFunding.map((item: any, index: number) =>
@@ -206,7 +206,7 @@ export class FundingScreen extends React.Component<Props, State> {
           {lnpayEnabled && hasValueInfo && (
             <View>
               <Text style={styles.textLabel} testID={`${testIDPrefix}_value_settings_lightning_label`}>
-                {translate('Bitcoin Lightning Network')}
+                {translate('Bitcoin Wallet')}
               </Text>
               <Text style={styles.textSubLabel} testID={`${testIDPrefix}_value_settings_lightning_sub_label`}>
                 {translate('via your LNPay wallet')}
