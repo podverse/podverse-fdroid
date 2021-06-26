@@ -156,7 +156,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         const currentItem = await getNowPlayingItemLocally()
   
         if (!lastItem || (lastItem && currentItem && currentItem.episodeId !== lastItem.episodeId)) {
-          await updatePlayerState(currentItem)
+          updatePlayerState(currentItem)
           await updateUserPlaybackPosition()
           showMiniPlayer()
         }
@@ -850,7 +850,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   cleanFlatListData = (flatListData: any[]) => {
-    return flatListData.filter((item) => !!item?.id)
+    return flatListData?.filter((item) => !!item?.id) || []
   }
 }
 
