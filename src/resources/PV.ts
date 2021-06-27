@@ -10,6 +10,7 @@ import { FilterOptions } from './FilterOptions'
 import { Filters } from './Filters'
 import { FlatList } from './FlatList'
 import { Fonts } from './Fonts'
+import { HTML } from './HTML'
 import { Icons } from './Icons'
 import { Images } from './Images'
 import { Keys } from './Keys'
@@ -24,6 +25,7 @@ import { Table } from './Table'
 import { Tabs } from './Tabs'
 import { TextInputs } from './TextInputs'
 import { URLs } from './URLs'
+import { ValueTag } from './ValueTag'
 
 export const PV = {
   ActionSheet,
@@ -38,6 +40,7 @@ export const PV = {
   FilterOptions,
   FlatList,
   Fonts,
+  HTML,
   Icons,
   Images,
   Keys,
@@ -51,5 +54,6 @@ export const PV = {
   Table,
   Tabs,
   TextInputs,
-  URLs
+  URLs,
+  ValueTag
 }

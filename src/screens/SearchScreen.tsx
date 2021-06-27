@@ -12,14 +12,15 @@ import {
   SearchBar,
   View
 } from '../components'
+import { translate } from '../lib/i18n'
+import { navigateToPodcastScreenWithPodcast } from '../lib/navigate'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { generateAuthorsText, isOdd, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { createEmailLinkUrl, isOdd, safeKeyExtractor, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { getPodcasts } from '../services/podcast'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
-import { core } from '../styles'
 
-const { aboutKey, allEpisodesKey, clipsKey } = PV.Filters
+const { _episodesKey, _clipsKey } = PV.Filters
 
 type Props = {
   navigation?: any
@@ -38,17 +39,16 @@ type State = {
   showActionSheet: boolean
 }
 
+const testIDPrefix = 'search_screen'
+
 export class SearchScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: 'Search',
-      headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
-      headerRight: null
-    }
-  }
+  shouldLoad: boolean
+  searchBarInput: any
 
   constructor(props: Props) {
     super(props)
+
+    this.shouldLoad = true
 
     this.state = {
       endOfResultsReached: false,
@@ -65,7 +65,13 @@ export class SearchScreen extends React.Component<Props, State> {
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
   }
 
-  _handleSearchBarClear = (text: string) => {
+  static navigationOptions = ({ navigation }) => ({
+    title: translate('Search'),
+    headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+    headerRight: () => null
+  })
+
+  _handleSearchBarClear = () => {
     this.setState({
       flatListData: [],
       flatListDataTotalCount: null,
@@ -74,58 +80,56 @@ export class SearchScreen extends React.Component<Props, State> {
   }
 
   _handleSearchBarTextChange = (text: string) => {
-    const { isLoading } = this.state
-
+    const shouldSearch = !!text && text.length > 1
     this.setState(
       {
-        ...(!isLoading && text ? { isLoading: true } : {}),
-        searchBarText: text
+        searchBarText: text,
+        isLoading: shouldSearch
       },
-      async () => {
+      () => {
         this._handleSearchBarTextQuery()
       }
     )
   }
 
-  _handleSearchBarTextQuery = async (nextPage?: boolean) => {
-    if (!this.state.searchBarText) {
-      this.setState({
-        flatListData: [],
-        flatListDataTotalCount: null,
-        isLoading: false,
-        queryPage: 1
-      })
-      return
-    }
+  _handleSearchBarTextQuery = (nextPage?: boolean) => {
+    const shouldSearch = !!this.state.searchBarText && this.state.searchBarText.length > 1
 
     this.setState(
       {
         flatListData: [],
         flatListDataTotalCount: null,
-        queryPage: 1
+        queryPage: 1,
+        isLoading: shouldSearch
       },
-      async () => {
-        const state = await this._queryData(nextPage)
-        this.setState(state)
+      () => {
+        (async () => {
+          if (shouldSearch) {
+            const state = await this._queryData(nextPage)
+            this.setState(state)
+          }
+        })()
       }
     )
   }
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
+  _ItemSeparatorComponent = () => <Divider />
 
   _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore } = this.state
-    if (!endOfResultsReached && !isLoadingMore) {
+    const { endOfResultsReached } = this.state
+    if (!endOfResultsReached && this.shouldLoad) {
       if (distanceFromEnd > -1) {
+        this.shouldLoad = false
+
         this.setState(
           {
             isLoadingMore: true
           },
-          async () => {
-            const newState = await this._queryData(true)
-            this.setState(newState)
+          () => {
+            (async () => {
+              const newState = await this._queryData(true)
+              this.setState(newState)
+            })()
           }
         )
       }
@@ -143,13 +147,9 @@ export class SearchScreen extends React.Component<Props, State> {
     })
   }
 
-  _handleNavigationPress = (podcast: any, viewType: string) => {
+  _handleNavigationPress = (podcast: any, viewType?: string) => {
     this.setState({ showActionSheet: false })
-    this.props.navigation.navigate(PV.RouteNames.SearchPodcastScreen, {
-      podcast,
-      viewType,
-      isSearchScreen: true
-    })
+    navigateToPodcastScreenWithPodcast(this.props.navigation, podcast, viewType)
   }
 
   _handleAddPodcastByRSSURLNavigation = () => {
@@ -162,9 +162,9 @@ export class SearchScreen extends React.Component<Props, State> {
       id={item.id}
       lastEpisodePubDate={item.lastEpisodePubDate}
       onPress={() => this._handleMorePress(item)}
-      podcastAuthors={generateAuthorsText(item.authors)}
       podcastImageUrl={item.shrunkImageUrl || item.imageUrl}
-      podcastTitle={item.title}
+      {...(item.title ? { podcastTitle: item.title } : {})}
+      testID={`${testIDPrefix}_podcast_item_${index}`}
     />
   )
 
@@ -176,44 +176,41 @@ export class SearchScreen extends React.Component<Props, State> {
     return [
       {
         key: 'toggleSubscribe',
-        text: isSubscribed ? 'Unsubscribe' : 'Subscribe',
+        text: isSubscribed ? translate('Unsubscribe') : translate('Subscribe'),
         onPress: () => selectedPodcast && this._toggleSubscribeToPodcast(selectedPodcast.id)
       },
       {
         key: 'episodes',
-        text: 'Episodes',
-        onPress: () => this._handleNavigationPress(selectedPodcast, allEpisodesKey)
+        text: translate('Episodes'),
+        onPress: () => this._handleNavigationPress(selectedPodcast, _episodesKey)
       },
       {
         key: 'clips',
-        text: 'Clips',
-        onPress: () => this._handleNavigationPress(selectedPodcast, clipsKey)
+        text: translate('Clips'),
+        onPress: () => this._handleNavigationPress(selectedPodcast, _clipsKey)
       },
       {
-        key: 'about',
-        text: 'About',
-        onPress: () => this._handleNavigationPress(selectedPodcast, aboutKey)
+        key: 'goToPodcast',
+        text: translate('Go to Podcast'),
+        onPress: () => this._handleNavigationPress(selectedPodcast)
       }
     ]
   }
 
   _toggleSubscribeToPodcast = async (id: string) => {
-    const wasAlerted = await alertIfNoNetworkConnection('subscribe to this podcast')
+    const wasAlerted = await alertIfNoNetworkConnection(translate('subscribe to this podcast'))
     if (wasAlerted) return
 
     try {
-      await toggleSubscribeToPodcast(id, this.global)
+      await toggleSubscribeToPodcast(id)
     } catch (error) {
       Alert.alert(PV.Alerts.SOMETHING_WENT_WRONG.title, PV.Alerts.SOMETHING_WENT_WRONG.message, PV.Alerts.BUTTONS.OK)
     }
     this.setState({ showActionSheet: false })
   }
 
-  _navToRequestPodcastForm = async () => {
-    Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
-      { text: 'Cancel' },
-      { text: 'Yes', onPress: () => Linking.openURL(PV.URLs.requestPodcast) }
-    ])
+  _navToRequestPodcastEmail = () => {
+    Linking.openURL(createEmailLinkUrl(PV.Emails.REQUEST_PODCAST))
   }
 
   render() {
@@ -232,10 +229,11 @@ export class SearchScreen extends React.Component<Props, State> {
         <ButtonGroup buttons={buttons} onPress={this._handleSearchTypePress} selectedIndex={searchType} />
         <SearchBar
           containerStyle={styles.searchBarContainer}
-          inputContainerStyle={core.searchBar}
+          handleClear={this._handleSearchBarClear}
+          inputRef={(ref: any) => (this.searchBarInput = ref)}
           onChangeText={this._handleSearchBarTextChange}
-          onClear={this._handleSearchBarClear}
-          placeholder='search'
+          placeholder={translate('search')}
+          testID={testIDPrefix}
           value={searchBarText}
         />
         <Divider />
@@ -243,25 +241,27 @@ export class SearchScreen extends React.Component<Props, State> {
           <FlatList
             data={flatListData}
             dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe={true}
+            disableLeftSwipe
             extraData={flatListData}
-            handleAddPodcastByRSSURLNavigation={this._handleAddPodcastByRSSURLNavigation}
-            handleRequestPodcast={this._navToRequestPodcastForm}
+            handleNoResultsBottomAction={!!Config.CURATOR_EMAIL ? this._navToRequestPodcastEmail : null}
+            handleNoResultsMiddleAction={this._handleAddPodcastByRSSURLNavigation}
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}
-            keyExtractor={(item: any) => item.id}
+            keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
+            noResultsBottomActionText={!!Config.CURATOR_EMAIL ? translate('Request Podcast') : ''}
+            noResultsMessage={searchBarText.length > 1 && translate('No podcasts found')}
+            noResultsMiddleActionText={translate('Add Custom RSS Feed')}
             onEndReached={this._onEndReached}
             renderItem={this._renderPodcastItem}
-            resultsText='podcasts'
-            showAddPodcastByRSS={flatListData && flatListData.length === 0}
-            showRequestPodcast={true}
+            testID={testIDPrefix}
           />
         )}
-        {isLoading && <ActivityIndicator />}
+        {isLoading && <ActivityIndicator fillSpace />}
         <ActionSheet
           handleCancelPress={this._handleCancelPress}
           items={this._moreButtons()}
           showModal={showActionSheet}
+          testID={testIDPrefix}
         />
       </View>
     )
@@ -276,21 +276,22 @@ export class SearchScreen extends React.Component<Props, State> {
       isLoadingMore: false
     }
 
-    const wasAlerted = await alertIfNoNetworkConnection('search podcasts')
-    if (wasAlerted) return newState
+    const wasAlerted = await alertIfNoNetworkConnection(translate('search podcasts'))
+    if (wasAlerted) {
+      this.shouldLoad = true
+      return newState
+    }
 
     try {
-      const results = await getPodcasts(
-        {
-          page,
-          ...(searchType === _podcastByTitle ? { searchTitle: searchBarText } : {}),
-          ...(searchType === _podcastByHost ? { searchAuthor: searchBarText } : {})
-        },
-        this.global.settings.nsfwMode
-      )
+      const results = await getPodcasts({
+        page,
+        ...(searchType === _podcastByTitle ? { searchTitle: searchBarText } : {}),
+        ...(searchType === _podcastByHost ? { searchAuthor: searchBarText } : {})
+      })
 
       const newFlatListData = [...flatListData, ...results[0]]
-
+      
+      this.shouldLoad = true
       return {
         ...newState,
         endOfResultsReached: newFlatListData.length >= results[1],
@@ -299,6 +300,7 @@ export class SearchScreen extends React.Component<Props, State> {
         queryPage: page
       }
     } catch (error) {
+      this.shouldLoad = true
       return newState
     }
   }
@@ -307,17 +309,11 @@ export class SearchScreen extends React.Component<Props, State> {
 const _podcastByTitle = 0
 const _podcastByHost = 1
 
-const buttons = ['Podcast', 'Host']
+const buttons = [translate('Podcast'), translate('Host')]
 
 const styles = StyleSheet.create({
   searchBarContainer: {
-    borderBottomWidth: 0,
-    borderTopWidth: 0,
-    flex: 0,
-    justifyContent: 'center',
-    marginBottom: 16,
-    marginTop: 12,
-    minHeight: PV.FlatList.searchBar.height
+    marginVertical: 12
   },
   view: {
     flex: 1,

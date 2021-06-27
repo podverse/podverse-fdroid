@@ -1,45 +1,40 @@
 import debounce from 'lodash/debounce'
 import { Alert, StyleSheet, View } from 'react-native'
 import React from 'reactn'
+import { clearTempMediaRef } from '../state/actions/mediaRef'
 import { refreshDownloadedPodcasts } from '../lib/downloadedPodcast'
 import { PV } from '../resources'
-import { getNowPlayingItem } from '../services/player'
-import PlayerEventEmitter from '../services/playerEventEmitter'
-import { clearNowPlayingItem, updatePlaybackState, updatePlayerState } from '../state/actions/player'
+import PVEventEmitter from '../services/eventEmitter'
+import { getNowPlayingItemLocally } from '../services/userNowPlayingItem'
+import { updatePlaybackState, updatePlayerState } from '../state/actions/player'
+import { getQueueItems } from '../state/actions/queue'
 
-type Props = {}
+type Props = any
 
-type State = {}
-
-export class PlayerEvents extends React.PureComponent<Props, State> {
+export class PlayerEvents extends React.PureComponent<Props> {
   constructor(props: Props) {
     super(props)
 
-    this._playerCannotStreamWithoutWifi = debounce(this._playerCannotStreamWithoutWifi, 3000)
+    this._playerCannotStreamWithoutWifi = debounce(this._playerCannotStreamWithoutWifi, 3000) as any
   }
 
   componentDidMount() {
-    PlayerEventEmitter.on(PV.Events.PLAYER_CANNOT_STREAM_WITHOUT_WIFI, this._playerCannotStreamWithoutWifi)
-    PlayerEventEmitter.on(PV.Events.PLAYER_RESUME_AFTER_CLIP_HAS_ENDED, this._refreshNowPlayingItem)
-    PlayerEventEmitter.on(PV.Events.PLAYER_STATE_CHANGED, this._playerStateUpdated)
-    PlayerEventEmitter.on(PV.Events.PLAYER_TRACK_CHANGED, this._handlePlayerTrackChanged)
-    PlayerEventEmitter.on(PV.Events.PLAYER_PLAYBACK_ERROR, this._handlePlayerPlaybackError)
+    PVEventEmitter.on(PV.Events.PLAYER_CANNOT_STREAM_WITHOUT_WIFI, this._playerCannotStreamWithoutWifi)
+    PVEventEmitter.on(PV.Events.PLAYER_RESUME_AFTER_CLIP_HAS_ENDED, this._refreshNowPlayingItem)
+    PVEventEmitter.on(PV.Events.PLAYER_STATE_CHANGED, this._playerStateUpdated)
+    PVEventEmitter.on(PV.Events.PLAYER_TRACK_CHANGED, this._refreshNowPlayingItem)
+    PVEventEmitter.on(PV.Events.PLAYER_PLAYBACK_ERROR, this._handlePlayerPlaybackError)
   }
 
   componentWillUnmount() {
-    PlayerEventEmitter.removeListener(PV.Events.PLAYER_CANNOT_STREAM_WITHOUT_WIFI)
-    PlayerEventEmitter.removeListener(PV.Events.PLAYER_RESUME_AFTER_CLIP_HAS_ENDED)
-    PlayerEventEmitter.removeListener(PV.Events.PLAYER_STATE_CHANGED)
-    PlayerEventEmitter.removeListener(PV.Events.PLAYER_TRACK_CHANGED)
-    PlayerEventEmitter.removeListener(PV.Events.PLAYER_PLAYBACK_ERROR)
+    PVEventEmitter.removeListener(PV.Events.PLAYER_CANNOT_STREAM_WITHOUT_WIFI)
+    PVEventEmitter.removeListener(PV.Events.PLAYER_RESUME_AFTER_CLIP_HAS_ENDED)
+    PVEventEmitter.removeListener(PV.Events.PLAYER_STATE_CHANGED)
+    PVEventEmitter.removeListener(PV.Events.PLAYER_TRACK_CHANGED)
+    PVEventEmitter.removeListener(PV.Events.PLAYER_PLAYBACK_ERROR)
   }
 
-  _handlePlayerTrackChanged = async () => {
-    refreshDownloadedPodcasts()
-    this._refreshNowPlayingItem()
-  }
-
-  _playerCannotStreamWithoutWifi = async () => {
+  _playerCannotStreamWithoutWifi = () => {
     Alert.alert(
       PV.Alerts.PLAYER_CANNOT_STREAM_WITHOUT_WIFI.title,
       PV.Alerts.PLAYER_CANNOT_STREAM_WITHOUT_WIFI.message,
@@ -47,22 +42,27 @@ export class PlayerEvents extends React.PureComponent<Props, State> {
     )
   }
 
-  _handlePlayerPlaybackError = async () => {
-    await updatePlaybackState(PV.Player.errorState)
+  _handlePlayerPlaybackError = () => {
+    updatePlaybackState(PV.Player.errorState)
   }
 
-  _playerStateUpdated = () => updatePlaybackState()
+  _playerStateUpdated = () => {
+    updatePlaybackState()
+  }
 
-  _refreshNowPlayingItem = async () => {
-    const nowPlayingItem = await getNowPlayingItem()
+  _refreshNowPlayingItem = () => {
+    clearTempMediaRef()
+    (async () => {
+      refreshDownloadedPodcasts()
 
-    if (nowPlayingItem) {
-      await updatePlayerState(nowPlayingItem)
-    } else {
-      await clearNowPlayingItem()
-    }
-
-    await updatePlaybackState()
+      const nowPlayingItem = await getNowPlayingItemLocally()
+      if (nowPlayingItem) {
+        updatePlayerState(nowPlayingItem)
+      }
+   
+      await updatePlaybackState()
+      await getQueueItems()
+    })()
   }
 
   render() {

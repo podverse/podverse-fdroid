@@ -1,28 +1,39 @@
 import { Dimensions, Linking, ScrollView, StyleSheet } from 'react-native'
 import HTML from 'react-native-render-html'
 import React, { useGlobal } from 'reactn'
-import { convertHHMMSSToAnchorTags, filterHTMLElementsFromString, removeHTMLAttributesFromString } from '../lib/utility'
+import {
+  convertHHMMSSToAnchorTags,
+  filterHTMLElementsFromString,
+  removeExtraInfoFromEpisodeDescription,
+  removeHTMLAttributesFromString
+} from '../lib/utility'
 import { PV } from '../resources'
 import { setPlaybackPosition } from '../services/player'
 
 type Props = {
+  disableScrolling?: boolean
+  disableTextSelectable?: boolean
   fontSizeLargerScale?: number
   fontSizeLargestScale?: number
   html: string
+  style: any
 }
 
 export const HTMLScrollView = (props: Props) => {
-  const { fontSizeLargerScale, fontSizeLargestScale, html } = props
+  const { disableScrolling, disableTextSelectable, fontSizeLargerScale, fontSizeLargestScale, html, style } = props
   const [globalTheme] = useGlobal('globalTheme')
   const [fontScaleMode] = useGlobal('fontScaleMode')
+  const [censorNSFWText] = useGlobal('censorNSFWText')
+
   const baseFontStyle = {
     ...globalTheme.text,
     ...styles.baseFontStyle
   }
 
-  let formattedHtml = removeHTMLAttributesFromString(html)
+  let formattedHtml = html ? removeHTMLAttributesFromString(html.sanitize(censorNSFWText)) : ''
   formattedHtml = filterHTMLElementsFromString(formattedHtml)
   formattedHtml = convertHHMMSSToAnchorTags(formattedHtml)
+  formattedHtml = removeExtraInfoFromEpisodeDescription(formattedHtml)
   formattedHtml = formattedHtml.linkifyHtml()
 
   if (fontScaleMode === PV.Fonts.fontScale.larger) {
@@ -32,22 +43,22 @@ export const HTMLScrollView = (props: Props) => {
   }
 
   return (
-    <ScrollView style={styles.scrollView}>
+    <ScrollView style={[styles.scrollView, style]} scrollEnabled={!disableScrolling}>
       <HTML
         baseFontStyle={baseFontStyle}
         containerStyle={styles.html}
         html={formattedHtml}
         imagesMaxWidth={Dimensions.get('window').width}
         onLinkPress={(event: any, href: string, attributes: any) => {
-          const isTimestamp = true
           const startTime = parseInt(attributes && attributes['data-start-time'], 10)
-          if (isTimestamp && (startTime || startTime === 0)) {
+          if ((startTime || startTime === 0)) {
             setPlaybackPosition(startTime)
           } else if (href) {
             Linking.openURL(href)
           }
         }}
         tagsStyles={customHTMLTagStyles}
+        textSelectable={!disableTextSelectable}
       />
     </ScrollView>
   )
@@ -96,7 +107,8 @@ const customHTMLTagStyles = {
     fontSize: PV.Fonts.sizes.lg
   },
   a: {
-    fontSize: PV.Fonts.sizes.lg
+    fontSize: PV.Fonts.sizes.lg,
+    color: PV.Colors.skyLight
   },
   ul: {
     marginBottom: 0,
@@ -121,7 +133,7 @@ const styles = StyleSheet.create({
   html: {
     backgroundColor: 'transparent',
     marginHorizontal: 8,
-    marginVertical: 12
+    marginBottom: 12
   },
   scrollView: {
     backgroundColor: 'transparent',

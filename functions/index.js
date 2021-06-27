@@ -1,5 +1,5 @@
 const functions = require('firebase-functions')
-const { runTests } = require('./tests/e2e/test')
+const { runTests } = require('./tests/e2e/runTests')
 const Client = require('ssh2').Client
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -24,7 +24,8 @@ exports.runTests = functions.runWith({ timeoutSeconds: 540 }).https.onRequest((r
 
     if (
       request.query['DEVICE_TYPE'].toLowerCase() !== 'ios' &&
-      request.query['DEVICE_TYPE'].toLowerCase() !== 'android'
+      request.query['DEVICE_TYPE'].toLowerCase() !== 'android' &&
+      request.query['DEVICE_TYPE'].toLowerCase() !== 'f-droid'
     ) {
       response.status(400).json({
         code: 400,
@@ -41,11 +42,17 @@ exports.runTests = functions.runWith({ timeoutSeconds: 540 }).https.onRequest((r
     }
 
     if (request.query['DEVICE_TYPE'].toLowerCase() === 'ios') {
-      capabilities.device = request.query['DEVICE_MODEL'] || 'iPhone 11 Pro Max'
+      capabilities.device = request.query['DEVICE_MODEL'] || 'iPhone 12 Pro Max'
       capabilities.os_version = request.query['OS_VERSION'] || '13.0'
       capabilities.project = `Mobile App - iOS`
       capabilities.build = 'iOS'
       capabilities.name = 'iOS'
+    } else if (request.query['DEVICE_TYPE'].toLowerCase() === 'f-droid') {
+      capabilities.device = request.query['DEVICE_MODEL'] || 'Google Pixel 3'
+      capabilities.os_version = request.query['OS_VERSION'] || '9.0'
+      capabilities.project = `Mobile App - F-Droid`
+      capabilities.build = 'F-Droid'
+      capabilities.name = 'F-Droid'
     } else {
       capabilities.device = request.query['DEVICE_MODEL'] || 'Google Pixel 3'
       capabilities.os_version = request.query['OS_VERSION'] || '9.0'
@@ -78,7 +85,7 @@ exports.resetStageDatabase = functions.runWith({ timeoutSeconds: 540 }).https.on
     const pg_pass = functions.config().pg.password
     const ip = functions.config().pg.ip
 
-    const resetDB = `docker stop podverse_db_stage; docker rm podverse_db_stage; docker-compose -f ./podverse-ops/docker-compose.stage.yml up -d podverse_db; sleep 10; PGPASSWORD='${pg_pass}' psql -h localhost -U postgres -d postgres -f ./podverse-ops/sample-database/qa-database.sql;`
+    const resetDB = `cd podverse-ops; git pull; cd ..; docker stop podverse_db_stage; docker rm podverse_db_stage; docker-compose -f ./podverse-ops/docker-compose.stage.yml up -d podverse_db; sleep 10; PGPASSWORD='${pg_pass}' psql -h localhost -U postgres -d postgres -f ./podverse-ops/sample-database/qa-database.sql;`
     const conn = new Client()
     conn
       .on('ready', function() {

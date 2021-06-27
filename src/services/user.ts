@@ -11,19 +11,16 @@ export const getPublicUser = async (id: string) => {
   return response && response.data
 }
 
-export const getUserMediaRefs = async (userId: string, query: any = {}, nsfwMode: boolean) => {
+export const getUserMediaRefs = async (userId: string, query: any = {}) => {
   const filteredQuery = {
     ...(query.page ? { page: query.page } : { page: 1 }),
     ...(query.sort ? { sort: query.sort } : { sort: 'most-recent' })
   }
 
-  const response = await request(
-    {
-      endpoint: `/user/${userId}/mediaRefs`,
-      query: filteredQuery
-    },
-    nsfwMode
-  )
+  const response = await request({
+    endpoint: `/user/${userId}/mediaRefs`,
+    query: filteredQuery
+  })
 
   return response && response.data
 }
@@ -89,34 +86,38 @@ const toggleSubscribeToUserOnServer = async (id: string) => {
   return response && response.data
 }
 
-export const getLoggedInUserMediaRefs = async (query: any = {}, nsfwMode?: boolean) => {
+export const getLoggedInUserMediaRefs = async (query: any = {}) => {
   const filteredQuery = {
     ...(query.page ? { page: query.page } : { page: 1 }),
     ...(query.sort ? { sort: query.sort } : { sort: 'top-past-week' })
   } as any
 
   const bearerToken = await getBearerToken()
-  const response = await request(
-    {
-      endpoint: '/user/mediaRefs',
-      query: filteredQuery,
-      headers: { Authorization: bearerToken }
-    },
-    nsfwMode
-  )
+  const response = await request({
+    endpoint: '/user/mediaRefs',
+    query: filteredQuery,
+    headers: { Authorization: bearerToken }
+  })
 
   return response && response.data
 }
 
-export const getLoggedInUserPlaylists = async (nsfwMode?: boolean) => {
+export const getLoggedInUserPlaylistsCombined = async () => {
   const bearerToken = await getBearerToken()
-  const response = await request(
-    {
-      endpoint: '/user/playlists',
-      headers: { Authorization: bearerToken }
-    },
-    nsfwMode
-  )
+  const response = await request({
+    endpoint: '/user/playlists/combined',
+    headers: { Authorization: bearerToken }
+  })
+
+  return response && response.data
+}
+
+export const getLoggedInUserPlaylists = async () => {
+  const bearerToken = await getBearerToken()
+  const response = await request({
+    endpoint: '/user/playlists',
+    headers: { Authorization: bearerToken }
+  })
 
   return response && response.data
 }
@@ -149,7 +150,7 @@ export const updateLoggedInUser = async (data: any) => {
   return response && response.data
 }
 
-export const downloadLoggedInUserData = async (id: string) => {
+export const downloadLoggedInUserData = async () => {
   const bearerToken = await getBearerToken()
   const response = await request({
     endpoint: '/user/download',
@@ -175,4 +176,31 @@ export const updateUserQueueItems = async (queueItems: any) => {
   })
 
   return response && response.data
+}
+
+export const saveSpecialUserInfoForPodcast = async (userInfo: any, podcastId: string) => {
+  if (userInfo && podcastId) {
+    const jsonData = JSON.stringify({ [podcastId]: userInfo })
+    await AsyncStorage.setItem('SPECIAL_USER_INFO', jsonData)
+  }
+}
+
+export const getSpecialUserInfoForPodcast = async (podcastId: string) => {
+  const specialInfoString = await AsyncStorage.getItem('SPECIAL_USER_INFO')
+  if (specialInfoString) {
+    const specialInfo = JSON.parse(specialInfoString)
+    return specialInfo[podcastId]
+  }
+
+  return null
+}
+
+export const clearSpecialUserInfoForPodcast = async (podcastId: string) => {
+  let specialInfoString = await AsyncStorage.getItem('SPECIAL_USER_INFO')
+  if (specialInfoString) {
+    const specialInfo = JSON.parse(specialInfoString)
+    delete specialInfo[podcastId]
+    specialInfoString = JSON.stringify(specialInfo)
+    await AsyncStorage.setItem('SPECIAL_USER_INFO', specialInfoString)
+  }
 }

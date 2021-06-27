@@ -1,28 +1,24 @@
-import debounce from 'lodash/debounce'
-import { StyleSheet, View as RNView } from 'react-native'
-import { NavigationStackOptions } from 'react-navigation-stack'
+import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podverse-shared'
+import { StyleSheet, TouchableOpacity, View as RNView } from 'react-native'
 import React from 'reactn'
 import {
   ActionSheet,
-  ActivityIndicator,
-  ClipTableCell,
-  Divider,
   EpisodeTableHeader,
-  FlatList,
   HTMLScrollView,
+  Icon,
   NavSearchIcon,
   NavShareIcon,
-  SearchBar,
-  TableSectionSelectors,
-  View
+  ScrollView,
+  Text
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
+import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
-import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from '../lib/NowPlayingItem'
-import { formatTitleViewHtml, isOdd, testProps } from '../lib/utility'
+import { replaceLinebreaksWithBrTags, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { getEpisode } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
+import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
+import { retriveNowPlayingItemChapters } from '../state/actions/playerChapters'
 import { core } from '../styles'
 
 type Props = {
@@ -30,54 +26,28 @@ type Props = {
 }
 
 type State = {
-  endOfResultsReached: boolean
   episode?: any
   episodeId?: any
-  flatListData: any[]
-  flatListDataTotalCount: number | null
-  includeGoToPodcast?: boolean
+  includeGoToPodcast: boolean
   isLoading: boolean
-  isLoadingMore: boolean
-  queryPage: number
-  querySort: string | null
-  searchBarText: string
   selectedItem?: any
   showActionSheet: boolean
-  showNoInternetConnectionMessage?: boolean
-  viewType: string | null
+  hasInternetConnection: boolean
+  clips: any[]
+  chapters: any[]
+  totalClips: number
+  totalChapters: number
 }
 
-export class EpisodeScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    const episodeId = navigation.getParam('episodeId')
-    const episodeTitle = navigation.getParam('episodeTitle')
-    const podcastTitle = navigation.getParam('podcastTitle')
-    const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
+const testIDPrefix = 'episode_screen'
 
-    return {
-      title: 'Episode',
-      headerRight: (
-        <RNView style={core.row}>
-          {!addByRSSPodcastFeedUrl && (
-            <NavShareIcon
-              endingText=' – shared using Podverse'
-              episodeTitle={episodeTitle}
-              podcastTitle={podcastTitle}
-              url={PV.URLs.episode + episodeId}
-            />
-          )}
-          <NavSearchIcon navigation={navigation} />
-        </RNView>
-      )
-    } as NavigationStackOptions
-  }
+export class EpisodeScreen extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
 
-    const viewType = this.props.navigation.getParam('viewType') || PV.Filters._showNotesKey
     const episode = this.props.navigation.getParam('episode')
-    const episodeId = (episode && episode.id) || this.props.navigation.getParam('episodeId')
+    const episodeId = episode?.id || this.props.navigation.getParam('episodeId')
     const includeGoToPodcast = this.props.navigation.getParam('includeGoToPodcast')
 
     if (episode && !episode.podcast) {
@@ -86,232 +56,94 @@ export class EpisodeScreen extends React.Component<Props, State> {
       }
     }
 
-    if (episode && episode.id) {
+    if (episode?.id) {
       this.props.navigation.setParams({
         episodeId: episode.id,
         episodeTitle: episode.title,
-        podcastTitle: (episode.podcast && episode.podcast.title) || ''
+        podcastTitle: episode.podcast?.title || ''
       })
     }
 
     this.state = {
-      endOfResultsReached: false,
       episode,
       episodeId,
-      flatListData: [],
-      flatListDataTotalCount: null,
       includeGoToPodcast,
-      isLoading: viewType === PV.Filters._clipsKey,
-      isLoadingMore: false,
-      queryPage: 1,
-      querySort: PV.Filters._chronologicalKey,
-      searchBarText: '',
+      isLoading: false,
       showActionSheet: false,
-      viewType
+      hasInternetConnection: false,
+      clips: [],
+      chapters: [],
+      totalChapters: 0,
+      totalClips: 0
     }
-
-    this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
   }
 
-  async componentDidMount() {
-    const { episode, episodeId } = this.state
+  static navigationOptions = ({ navigation }) => {
+    const episodeId = navigation.getParam('episodeId')
+    const episodeTitle = navigation.getParam('episodeTitle')
+    const podcastTitle = navigation.getParam('podcastTitle')
+    const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
+
+    return {
+      title: translate('Episode'),
+      headerRight: () => (
+        <RNView style={core.row}>
+          {!addByRSSPodcastFeedUrl && (
+            <NavShareIcon
+              endingText={translate('shared using brandName')}
+              episodeTitle={episodeTitle}
+              podcastTitle={podcastTitle}
+              urlId={episodeId}
+              urlPath={PV.URLs.webPaths.episode}
+            />
+          )}
+          <NavSearchIcon navigation={navigation} />
+        </RNView>
+      )
+    }
+  }
+
+  componentDidMount() {
     this._initializePageData()
-    const pageTitle =
-      episode && episode.podcast
-        ? 'Episode Screen - ' + episode.podcast.title + ' - ' + episode.title
-        : 'Episode Screen - ' + 'no info available'
   }
 
   async _initializePageData() {
-    const { episode, viewType } = this.state
-    const episodeId = this.props.navigation.getParam('episodeId') || this.state.episodeId
+    const hasInternetConnection = await hasValidNetworkConnection()
+    if (!hasInternetConnection) {
+      this.setState({
+        hasInternetConnection
+      })
+    } else {
+      const { episode } = this.state
 
-    this.setState(
-      {
-        endOfResultsReached: false,
-        episodeId,
-        flatListData: [],
-        flatListDataTotalCount: null,
-        isLoading: true,
-        queryPage: 1
-      },
-      async () => {
-        let newState = {}
-        let newEpisode: any
+      const [clips, totalClips] = await getMediaRefs({
+        episodeId: episode.id,
+        includeEpisode: false,
+        includePodcasts: false,
+        sort: PV.Filters._chronologicalKey
+      })
 
-        try {
-          if (episode && episode.podcast && episode.podcast.addByRSSPodcastFeedUrl) {
-            newEpisode = episode
-          } else {
-            newEpisode = await getEpisode(episodeId)
-            if (viewType === PV.Filters._clipsKey) {
-              newState = await this._queryData(PV.Filters._clipsKey)
-            }
-          }
+      const chapters = await retriveNowPlayingItemChapters(episode.id)
 
-          this.setState({
-            ...newState,
-            isLoading: false,
-            episode: newEpisode
-          })
-        } catch (error) {
-          this.setState({
-            ...newState,
-            isLoading: false,
-            ...(newEpisode ? { episode: newEpisode } : { episode })
-          })
-        }
-      }
-    )
-  }
-
-  selectLeftItem = async (selectedKey: string) => {
-    if (!selectedKey) {
-      this.setState({ viewType: null })
-      return
-    }
-
-    this.setState(
-      {
-        endOfResultsReached: selectedKey !== PV.Filters._clipsKey,
-        flatListData: [],
-        flatListDataTotalCount: null,
-        isLoading: selectedKey === PV.Filters._clipsKey,
-        queryPage: 1,
-        searchBarText: '',
-        viewType: selectedKey
-      },
-      async () => {
-        if (selectedKey === PV.Filters._clipsKey) {
-          const newState = await this._queryData(selectedKey)
-          this.setState(newState)
-        }
-      }
-    )
-  }
-
-  selectRightItem = async (selectedKey: string) => {
-    if (!selectedKey) {
-      this.setState({ querySort: null })
-      return
-    }
-
-    this.setState(
-      {
-        endOfResultsReached: false,
-        flatListData: [],
-        flatListDataTotalCount: null,
-        isLoading: true,
-        queryPage: 1,
-        querySort: selectedKey
-      },
-      async () => {
-        const newState = await this._queryData(selectedKey)
-        this.setState(newState)
-      }
-    )
-  }
-
-  _onEndReached = ({ distanceFromEnd }) => {
-    const { endOfResultsReached, isLoadingMore, queryPage = 1, viewType } = this.state
-    if (viewType === PV.Filters._clipsKey && !endOfResultsReached && !isLoadingMore) {
-      if (distanceFromEnd > -1) {
-        this.setState(
-          {
-            isLoadingMore: true
-          },
-          async () => {
-            const newState = await this._queryData(viewType, {
-              queryPage: queryPage + 1,
-              searchAllFieldsText: this.state.searchBarText
-            })
-            this.setState(newState)
-          }
-        )
-      }
+      this.setState({
+        chapters,
+        clips,
+        totalClips,
+        totalChapters: chapters && chapters.length,
+        hasInternetConnection
+      })
     }
   }
 
-  _ListHeaderComponent = () => {
-    const { searchBarText } = this.state
-
-    return (
-      <View style={core.ListHeaderComponent}>
-        <SearchBar
-          inputContainerStyle={core.searchBar}
-          onChangeText={this._handleSearchBarTextChange}
-          onClear={this._handleSearchBarClear}
-          value={searchBarText}
-        />
-      </View>
-    )
-  }
-
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
-
-  _renderItem = ({ item, index }) => {
-    const { episode } = this.state
-    return (
-      <ClipTableCell
-        episodeId={episode.id}
-        endTime={item.endTime}
-        handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, episode, episode.podcast))}
-        hasZebraStripe={isOdd(index)}
-        hideImage={true}
-        startTime={item.startTime}
-        testId={'episode_screen_clip_item_' + index}
-        title={item.title}
-      />
-    )
-  }
-
-  _handleCancelPress = () => {
-    return new Promise((resolve, reject) => {
-      this.setState({ showActionSheet: false }, resolve)
-    })
-  }
+  _handleCancelPress = () => new Promise((resolve) => {
+    this.setState({ showActionSheet: false }, resolve)
+  })
 
   _handleMorePress = (selectedItem: any) => {
     this.setState({
       selectedItem,
       showActionSheet: true
     })
-  }
-
-  _handleSearchBarTextChange = (text: string) => {
-    const { viewType } = this.state
-
-    this.setState(
-      {
-        isLoadingMore: true,
-        searchBarText: text
-      },
-      async () => {
-        this._handleSearchBarTextQuery(viewType, { searchAllFieldsText: text })
-      }
-    )
-  }
-
-  _handleSearchBarTextQuery = async (viewType: string | null, queryOptions: any) => {
-    this.setState(
-      {
-        flatListData: [],
-        flatListDataTotalCount: null,
-        queryPage: 1
-      },
-      async () => {
-        const state = await this._queryData(viewType, {
-          searchAllFieldsText: queryOptions.searchAllFieldsText
-        })
-        this.setState(state)
-      }
-    )
-  }
-
-  _handleSearchBarClear = (text: string) => {
-    this.setState({ searchBarText: '' })
   }
 
   _handleDownloadPressed = () => {
@@ -325,150 +157,136 @@ export class EpisodeScreen extends React.Component<Props, State> {
     const { navigation } = this.props
     const {
       episode,
-      flatListData,
-      flatListDataTotalCount,
       includeGoToPodcast,
       isLoading,
-      isLoadingMore,
-      querySort,
       selectedItem,
       showActionSheet,
-      showNoInternetConnectionMessage,
-      viewType
+      hasInternetConnection,
+      totalChapters,
+      totalClips,
+      clips,
+      chapters
     } = this.state
     const { downloadedEpisodeIds, downloadsActive } = this.global
 
+    const episodeId = episode && episode.id
+
+    if (episode?.description) episode.description = replaceLinebreaksWithBrTags(episode.description)
+
+    const episodeDownloaded = episode && !!downloadedEpisodeIds[episode.id]
+    const episodeDownloading = episode && !!downloadsActive[episode.id]
+
+    const showClipsCell = hasInternetConnection && totalClips > 0
+    const showChaptersCell = hasInternetConnection && totalChapters > 0
+
+    const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(episodeId)
+
+    const extraHtmlScrollViewPadding = showChaptersCell || showClipsCell
+      ? styles.htmlScrollView
+      : {}
+
     return (
-      <View style={styles.view} {...testProps('episode_screen_view')}>
+      <ScrollView style={styles.view} {...testProps('episode_screen_view')}>
         <EpisodeTableHeader
-          downloadedEpisodeIds={downloadedEpisodeIds}
-          downloadsActive={downloadsActive}
-          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(episode, null, episode.podcast))}
-          id={episode && episode.id}
-          isLoading={isLoading && !episode}
-          isNotFound={!isLoading && !episode}
-          podcastImageUrl={
-            episode && ((episode.podcast && episode.podcast.shrunkImageUrl) || episode.podcast_shrunkImageUrl)
+          episode={episode}
+          episodeDownloaded={episodeDownloaded}
+          handleMorePress={() =>
+            this._handleMorePress(convertToNowPlayingItem(episode, null, episode.podcast, userPlaybackPosition))
           }
-          pubDate={episode && episode.pubDate}
-          title={episode && episode.title}
+          isLoading={isLoading}
+          mediaFileDuration={mediaFileDuration}
+          testID={testIDPrefix}
+          userPlaybackPosition={userPlaybackPosition}
         />
-        <TableSectionSelectors
-          handleSelectLeftItem={this.selectLeftItem}
-          handleSelectRightItem={this.selectRightItem}
-          screenName='EpisodeScreen'
-          selectedLeftItemKey={viewType}
-          selectedRightItemKey={querySort}
+        {showClipsCell && (
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.showNotesCell}
+            onPress={() => {
+              this.props.navigation.navigate(PV.RouteNames.EpisodeMediaRefScreen, {
+                episode,
+                viewType: PV.Filters._clipsKey,
+                title: 'Clips',
+                initialData: clips,
+                totalItems: totalClips
+              })
+            }}>
+            <>
+              <Text style={styles.showNotesCellText} testID={testIDPrefix}>
+                {translate('Clips')}
+              </Text>
+              <Icon name='arrow-right' size={15} />
+            </>
+          </TouchableOpacity>
+        )}
+        {showChaptersCell && (
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.showNotesCell}
+            onPress={() => {
+              this.props.navigation.navigate(PV.RouteNames.EpisodeMediaRefScreen, {
+                episode,
+                viewType: PV.Filters._chaptersKey,
+                title: 'Chapters',
+                initialData: chapters,
+                totalItems: totalChapters
+              })
+            }}>
+            <>
+              <Text style={styles.showNotesCellText} testID={testIDPrefix}>
+                {translate('Chapters')}
+              </Text>
+              <Icon name='arrow-right' size={15} />
+            </>
+          </TouchableOpacity>
+        )}
+        <HTMLScrollView
+          disableScrolling
+          fontSizeLargestScale={PV.Fonts.largeSizes.md}
+          html={episode?.description || ''}
+          style={extraHtmlScrollViewPadding}
         />
-        {isLoading && viewType === PV.Filters._clipsKey && <ActivityIndicator />}
-        {!isLoading && viewType === PV.Filters._clipsKey && flatListData && (
-          <FlatList
-            data={flatListData}
-            dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe={true}
-            extraData={flatListData}
-            isLoadingMore={isLoadingMore}
-            ItemSeparatorComponent={this._ItemSeparatorComponent}
-            keyExtractor={(item: any) => item.id}
-            {...(viewType === PV.Filters._clipsKey ? { ListHeaderComponent: this._ListHeaderComponent } : {})}
-            onEndReached={this._onEndReached}
-            renderItem={this._renderItem}
-            showNoInternetConnectionMessage={showNoInternetConnectionMessage}
-          />
-        )}
-        {viewType === PV.Filters._showNotesKey && episode && (
-          <HTMLScrollView fontSizeLargestScale={PV.Fonts.largeSizes.md} html={episode.description || ''} />
-        )}
-        {viewType === PV.Filters._titleKey && episode && (
-          <HTMLScrollView fontSizeLargestScale={PV.Fonts.largeSizes.md} html={formatTitleViewHtml(episode)} />
-        )}
         <ActionSheet
           handleCancelPress={this._handleCancelPress}
           items={() =>
-            PV.ActionSheet.media.moreButtons(
-              selectedItem,
-              navigation,
-              this._handleCancelPress,
-              this._handleDownloadPressed,
-              null,
+            PV.ActionSheet.media.moreButtons(selectedItem, navigation, {
+              handleDismiss: this._handleCancelPress,
+              handleDownload: episodeDownloading ? null : this._handleDownloadPressed,
               includeGoToPodcast
-            )
+            })
           }
           showModal={showActionSheet}
+          testID={testIDPrefix}
         />
-      </View>
+      </ScrollView>
     )
-  }
-
-  _queryData = async (
-    filterKey: string | null,
-    queryOptions: {
-      queryPage?: number
-      searchAllFieldsText?: string
-    } = {}
-  ) => {
-    const { episode, flatListData, querySort, searchBarText: searchAllFieldsText } = this.state
-    const newState = {
-      isLoading: false,
-      isLoadingMore: false,
-      showNoInternetConnectionMessage: false
-    } as State
-
-    const hasInternetConnection = await hasValidNetworkConnection()
-    newState.showNoInternetConnectionMessage = !hasInternetConnection && filterKey === PV.Filters._clipsKey
-
-    try {
-      if (PV.FilterOptions.screenFilters.EpisodeScreen.sort.some((option) => option.value === filterKey)) {
-        const results = await getMediaRefs(
-          {
-            sort: filterKey,
-            page: queryOptions.queryPage,
-            episodeId: episode.id,
-            ...(searchAllFieldsText ? { searchAllFieldsText } : {})
-          },
-          this.global.settings.nsfwMode
-        )
-
-        newState.flatListData = [...flatListData, ...results[0]]
-        newState.endOfResultsReached = newState.flatListData.length >= results[1]
-        newState.flatListDataTotalCount = results[1]
-      } else if (!filterKey) {
-        newState.flatListData = []
-        newState.endOfResultsReached = true
-        newState.flatListDataTotalCount = null
-      } else {
-        const results = await getMediaRefs(
-          {
-            sort: querySort,
-            page: queryOptions.queryPage,
-            episodeId: episode.id,
-            ...(searchAllFieldsText ? { searchAllFieldsText } : {})
-          },
-          this.global.settings.nsfwMode
-        )
-
-        newState.flatListData = [...flatListData, ...results[0]]
-        newState.endOfResultsReached = newState.flatListData.length >= results[1]
-        newState.flatListDataTotalCount = results[1]
-      }
-
-      newState.queryPage = queryOptions.queryPage || 1
-
-      return newState
-    } catch (error) {
-      return newState
-    }
   }
 }
 
 const styles = StyleSheet.create({
+  view: {
+    flex: 1
+  },
+  htmlScrollView: {
+    marginVertical: 12
+  },
   showNotesView: {
     margin: 8
   },
   showNotesViewText: {
     fontSize: PV.Fonts.sizes.lg
   },
-  view: {
-    flex: 1
+  showNotesCell: {
+    padding: 15,
+    borderTopColor: PV.Colors.grayLighterTransparent,
+    borderBottomColor: PV.Colors.grayLighterTransparent,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  showNotesCellText: {
+    fontSize: PV.Fonts.sizes.md
   }
 })

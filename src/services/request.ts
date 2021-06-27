@@ -1,20 +1,19 @@
 import axios from 'axios'
 import { Alert } from 'react-native'
+import { getAppUserAgent } from '../lib/utility'
 import { PV } from '../resources'
 
 type PVRequest = {
   endpoint?: string
-  query?: {}
+  query?: any
   body?: any
   headers?: any
   method?: string
   opts?: any
 }
 
-export const request = async (req: PVRequest, nsfwMode?: boolean) => {
+export const request = async (req: PVRequest, customUrl?: string) => {
   const { endpoint = '', query = {}, headers = {}, body, method = 'GET', opts = {} } = req
-
-  headers.nsfwMode = nsfwMode ? 'on' : 'off'
 
   const queryString = Object.keys(query)
     .map((key) => {
@@ -22,9 +21,17 @@ export const request = async (req: PVRequest, nsfwMode?: boolean) => {
     })
     .join('&')
 
+  const userAgent = getAppUserAgent()
+  const urlsApi = await PV.URLs.api()
+
+  const url = customUrl ? customUrl : `${urlsApi.baseUrl}${endpoint}?${queryString}`
+
   const axiosRequest = {
-    url: `${PV.URLs.baseUrl}${endpoint}?${queryString}`,
-    headers,
+    url,
+    headers: {
+      ...headers,
+      'User-Agent': userAgent
+    },
     ...(body ? { data: body } : {}),
     method,
     ...opts,

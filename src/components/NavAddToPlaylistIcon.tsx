@@ -1,16 +1,18 @@
-import React from 'react'
 import { View } from 'react-native'
-import { testProps } from '../../src/lib/utility'
+import Config from 'react-native-config'
+import React from 'reactn'
 import { GlobalTheme } from '../../src/resources/Interfaces'
 import { darkTheme } from '../../src/styles'
+import { translate } from '../lib/i18n'
+import { safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
 import { ActionSheet, NavItemIcon, NavItemWrapper } from './'
 
 type Props = {
   getEpisodeId: any
   getMediaRefId: any
-  navigation: any
   globalTheme?: GlobalTheme
+  navigation: any
 }
 
 type State = {
@@ -46,6 +48,9 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
   }
 
   render() {
+    const isLoggedIn = safelyUnwrapNestedVariable(() => this.global.session.isLoggedIn, false)
+    if (Config.DISABLE_ADD_TO_PLAYLIST || !isLoggedIn) return null
+
     const { getEpisodeId, getMediaRefId, navigation } = this.props
     const episodeId = getEpisodeId ? getEpisodeId() : null
     const mediaRefId = getMediaRefId ? getMediaRefId() : null
@@ -56,15 +61,16 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
     }
     return (
       <View>
-        <NavItemWrapper handlePress={this._handleIconPress} testId='nav_add_to_playlist_icon'>
+        <NavItemWrapper handlePress={this._handleIconPress} testID='nav_add_to_playlist_icon'>
           <NavItemIcon name='plus' color={color} />
         </NavItemWrapper>
         <ActionSheet
           handleCancelPress={this._dismissActionSheet}
           items={actionSheetButtons(episodeId, mediaRefId, navigation, this._dismissActionSheet)}
-          {...(mediaRefId ? { message: 'Do you want to add this episode or clip?' } : '')}
+          {...(mediaRefId ? { message: translate('Do you want to add this episode or clip') } : '')}
           showModal={showActionSheet}
-          title='Add to Playlist'
+          testID={`nav_add_to_playlist_icon_action_sheet`}
+          title={translate('Add to Playlist')}
         />
       </View>
     )
@@ -74,16 +80,16 @@ export class NavAddToPlaylistIcon extends React.Component<Props, State> {
 const actionSheetButtons = (episodeId: string, mediaRefId: string, navigation: any, handleDismiss: any) => [
   {
     key: 'episode',
-    text: 'Episode',
-    onPress: async () => {
+    text: translate('Episode'),
+    onPress: () => {
       handleDismiss()
       navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { episodeId })
     }
   },
   {
     key: 'clip',
-    text: 'Clip',
-    onPress: async () => {
+    text: translate('Clip'),
+    onPress: () => {
       handleDismiss()
       navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { mediaRefId })
     }

@@ -1,15 +1,27 @@
+import AsyncStorage from '@react-native-community/async-storage'
 import { Alert } from 'react-native'
+import Config from 'react-native-config'
 import RNSecureKeyStore from 'react-native-secure-key-store'
 import { getGlobal, setGlobal } from 'reactn'
 import { safelyUnwrapNestedVariable, shouldShowMembershipAlert } from '../../lib/utility'
 import { PV } from '../../resources'
-import { getAuthenticatedUserInfo, getAuthenticatedUserInfoLocally, login, signUp } from '../../services/auth'
-import { setAllHistoryItemsLocally } from '../../services/history'
-import { getNowPlayingItem } from '../../services/player'
+import {
+  getAuthenticatedUserInfo,
+  getAuthenticatedUserInfoLocally as getAuthenticatedUserInfoLocallyService,
+  login,
+  signUp
+} from '../../services/auth'
+import { getWalletInfo } from '../../services/lnpay'
+import { setAddByRSSPodcastFeedUrlsLocally } from '../../services/parser'
 import { setAllQueueItemsLocally } from '../../services/queue'
+import { setAllHistoryItemsLocally } from '../../services/userHistoryItem'
+import { getNowPlayingItemLocally, getNowPlayingItemOnServer } from '../../services/userNowPlayingItem'
+import { getLNWallet } from './lnpay'
 import { getSubscribedPodcasts } from './podcast'
+import { DEFAULT_BOOST_PAYMENT, DEFAULT_STREAMING_PAYMENT } from './valueTag'
 
 export type Credentials = {
+  addByRSSPodcastFeedUrls?: []
   email: string
   password: string
   name?: string
@@ -22,55 +34,103 @@ export const getAuthUserInfo = async () => {
     const userInfo = results[0]
     const isLoggedIn = results[1]
     const shouldShowAlert = shouldShowMembershipAlert(userInfo)
+    let lnpayEnabled = await AsyncStorage.getItem(PV.Keys.LNPAY_ENABLED)
+    lnpayEnabled = lnpayEnabled ? JSON.parse(lnpayEnabled) : false
+    const boostAmount = await AsyncStorage.getItem(PV.Keys.GLOBAL_LIGHTNING_BOOST_AMOUNT)
+    const streamingAmount = await AsyncStorage.getItem(PV.Keys.GLOBAL_LIGHTNING_STREAMING_AMOUNT)
 
     const globalState = getGlobal()
     setGlobal({
       session: {
         userInfo,
-        isLoggedIn
+        isLoggedIn,
+        valueTagSettings: {
+          ...globalState.session.valueTagSettings,
+          lightningNetwork: {
+            lnpay: {
+              lnpayEnabled,
+              globalSettings: {
+                boostAmount: boostAmount ? Number(boostAmount) : DEFAULT_BOOST_PAYMENT,
+                streamingAmount: streamingAmount ? Number(streamingAmount) : DEFAULT_STREAMING_PAYMENT
+              }
+            }
+          },
+        }
       },
       overlayAlert: {
         ...globalState.overlayAlert,
         showAlert: shouldShowAlert
       }
-    })
-    return userInfo
-  } catch (error) {
-    console.log('getAuthUserInfo action', error)
+    }, async () => {
+      if (!!Config.ENABLE_VALUE_TAG_TRANSACTIONS && lnpayEnabled) {
+        const wallet = await getLNWallet()
+        if (wallet) {
+          const lnpayWalletInfo = await getWalletInfo(wallet)
 
-    try {
-      // If an error happens, try to get the same data from local storage.
-      const results = await getAuthenticatedUserInfoLocally()
-      const userInfo = results[0]
-      const isLoggedIn = results[1]
-      const shouldShowAlert = shouldShowMembershipAlert(userInfo)
-      const globalState = getGlobal()
-      setGlobal({
-        session: {
-          userInfo,
-          isLoggedIn
-        },
-        overlayAlert: {
-          ...globalState.overlayAlert,
-          showAlert: shouldShowAlert
+          setGlobal({
+            session: {
+              ...globalState.session,
+              valueTagSettings: {
+                ...globalState.session.valueTagSettings,
+                lightningNetwork: {
+                  ...globalState.session.valueTagSettings.lightningNetwork,
+                  lnpay: {
+                    ...globalState.session.valueTagSettings.lightningNetwork.lnpay,
+                    walletSatsBalance: lnpayWalletInfo?.balance || null,
+                    walletUserLabel: lnpayWalletInfo?.user_label || null
+                  }
+                }
+              }
+            }
+          })
         }
-      })
+      }
+    })
+
+    return isLoggedIn
+  } catch (error) {
+    try {
+      console.log('getAuthUserInfo action', error)
+      const isLoggedIn = await getAuthenticatedUserInfoLocally()
+      return isLoggedIn
     } catch (error) {
       throw error
     }
   }
 }
 
-const askToSyncWithLastHistoryItem = async (historyItems: any) => {
-  let nowPlayingItem = await getNowPlayingItem()
-  nowPlayingItem = nowPlayingItem || {}
-  if (historyItems && historyItems.length > 0) {
-    const mostRecentHistoryItem = historyItems[0]
-    const askToSyncWithLastHistoryItem = PV.Alerts.ASK_TO_SYNC_WITH_LAST_HISTORY_ITEM(mostRecentHistoryItem)
+export const getAuthenticatedUserInfoLocally = async () => {
+  // If an error happens, try to get the same data from local storage.
+  const results = await getAuthenticatedUserInfoLocallyService()
+  const userInfo = results[0]
+  const isLoggedIn = results[1]
+  const shouldShowAlert = shouldShowMembershipAlert(userInfo)
+  const globalState = getGlobal()
+  setGlobal({
+    session: {
+      userInfo,
+      isLoggedIn
+    },
+    overlayAlert: {
+      ...globalState.overlayAlert,
+      showAlert: shouldShowAlert
+    }
+  })
+
+  return isLoggedIn
+}
+
+export const askToSyncWithNowPlayingItem = async () => {
+  const localNowPlayingItem = await getNowPlayingItemLocally()
+  const serverNowPlayingItem = await getNowPlayingItemOnServer()
+
+  if (serverNowPlayingItem) {
     if (
-      (mostRecentHistoryItem.clipId && mostRecentHistoryItem.clipId !== nowPlayingItem.clipId) ||
-      (mostRecentHistoryItem.episodeId && mostRecentHistoryItem.episodeId !== nowPlayingItem.episodeId)
+      (!localNowPlayingItem ||
+      (localNowPlayingItem.clipId && localNowPlayingItem.clipId !== serverNowPlayingItem.clipId) ||
+      (!localNowPlayingItem.clipId && localNowPlayingItem.episodeId !== serverNowPlayingItem.episodeId))
     ) {
+      const askToSyncWithLastHistoryItem = PV.Alerts.ASK_TO_SYNC_WITH_LAST_HISTORY_ITEM(serverNowPlayingItem)
       Alert.alert(
         askToSyncWithLastHistoryItem.title,
         askToSyncWithLastHistoryItem.message,
@@ -86,6 +146,10 @@ const askToSyncWithLastHistoryItem = async (historyItems: any) => {
 // If we don't call syncItemsWithLocalStorage before loading the item,
 // syncNowPlayingItemWithTrack won't
 const syncItemsWithLocalStorage = async (userInfo: any) => {
+  if (userInfo && Array.isArray(userInfo.addByRSSPodcastFeedUrls)) {
+    await setAddByRSSPodcastFeedUrlsLocally(userInfo.addByRSSPodcastFeedUrls)
+  }
+
   if (userInfo && Array.isArray(userInfo.historyItems)) {
     await setAllHistoryItemsLocally(userInfo.historyItems)
   }
@@ -98,11 +162,22 @@ const syncItemsWithLocalStorage = async (userInfo: any) => {
 export const loginUser = async (credentials: Credentials) => {
   try {
     const userInfo = await login(credentials.email, credentials.password)
-    await getSubscribedPodcasts(userInfo.subscribedPodcastIds || [])
-    await syncItemsWithLocalStorage(userInfo)
-    await askToSyncWithLastHistoryItem(userInfo.historyItems)
+    const globalState = getGlobal()
+    const { valueTagSettings } = globalState.session
 
-    setGlobal({ session: { userInfo, isLoggedIn: true } })
+    setGlobal({
+      session: {
+        userInfo,
+        isLoggedIn: true,
+        valueTagSettings
+      }
+    }, () => {
+      getSubscribedPodcasts()
+    })
+
+    await syncItemsWithLocalStorage(userInfo)
+    await askToSyncWithNowPlayingItem()
+
     return userInfo
   } catch (error) {
     throw error

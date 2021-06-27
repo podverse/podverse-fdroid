@@ -1,0 +1,20 @@
+<b>Free features:</b>
+* Subscribe to podcasts
+* Auto-download episodes
+* Drag-and-drop queue
+* Sleep timer
+* Light / Dark mode
+
+<b>Premium features:</b>
+* Create and share podcast clips
+* Switch devices and play from where you left off
+* Sync your subscriptions across devices
+* Sync your queue across devices
+* Create and share playlists
+* Subscribe to playlists
+* Create and share a profile
+* Subscribe to profiles
+
+<a href="https://podverse.fm">podverse.fm</a>
+
+<a href="https://github.com/podverse">Podverse on Github</a>

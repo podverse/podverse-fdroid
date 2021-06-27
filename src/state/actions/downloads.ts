@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import { getGlobal, setGlobal } from 'reactn'
+import { getEpisodes } from '../../services/episode'
 import {
   getDownloadedEpisodeIds as getDownloadedEpisodeIdsService,
   getDownloadedPodcastEpisodeCounts as getDownloadedPodcastEpisodeCountsService,
@@ -8,6 +9,7 @@ import {
   removeDownloadedPodcastEpisode as removeDownloadedPodcastEpisodeService
 } from '../../lib/downloadedPodcast'
 import {
+  downloadEpisode,
   DownloadStatus,
   initDownloads as initDownloadsService,
   pauseDownloadTask,
@@ -19,6 +21,7 @@ import {
   getAutoDownloadSettings as getAutoDownloadSettingsService,
   updateAutoDownloadSettings as updateAutoDownloadSettingsService
 } from '../../services/autoDownloads'
+import { parseAddByRSSPodcast } from '../../services/parser'
 import { clearNowPlayingItem } from './player'
 
 // The DownloadTaskState should have the same episode and podcast properties as a NowPlayingItem,
@@ -29,6 +32,7 @@ export type DownloadTaskState = {
   bytesWritten?: string
   completed?: boolean
   episodeDescription?: string
+  episodeDuration?: number
   episodeId: string
   episodeImageUrl?: string
   episodeMediaUrl: string
@@ -41,6 +45,48 @@ export type DownloadTaskState = {
   podcastSortableTitle?: boolean
   podcastTitle?: string
   status?: DownloadStatus
+}
+
+export const convertDownloadTaskStateToPodcast = (downloadTaskState: any) => {
+  const {
+    addByRSSPodcastFeedUrl,
+    podcastId,
+    podcastImageUrl,
+    podcastIsExplicit,
+    podcastSortableTitle,
+    podcastTitle
+  } = downloadTaskState
+
+  return {
+    addByRSSPodcastFeedUrl,
+    id: podcastId,
+    imageUrl: podcastImageUrl,
+    isExplicit: podcastIsExplicit,
+    sortableTitle: podcastSortableTitle,
+    title: podcastTitle
+  }
+}
+
+export const convertDownloadTaskStateToEpisode = (downloadTaskState: any) => {
+  const {
+    episodeDescription,
+    episodeDuration,
+    episodeId,
+    episodeImageUrl,
+    episodeMediaUrl,
+    episodePubDate,
+    episodeTitle
+  } = downloadTaskState
+
+  return {
+    description: episodeDescription,
+    duration: episodeDuration,
+    id: episodeId,
+    imageUrl: episodeImageUrl,
+    mediaUrl: episodeMediaUrl,
+    pubDate: episodePubDate,
+    title: episodeTitle
+  }
 }
 
 export const getDownloadStatusText = (status?: string) => {
@@ -86,7 +132,7 @@ export const initDownloads = async () => {
   }, 1000)
 }
 
-export const updateAutoDownloadSettings = async (podcastId: string, autoDownloadOn: boolean) => {
+export const updateAutoDownloadSettings = (podcastId: string, autoDownloadOn: boolean) => {
   const { autoDownloadSettings } = getGlobal()
   autoDownloadSettings[podcastId] = autoDownloadOn
 
@@ -96,24 +142,63 @@ export const updateAutoDownloadSettings = async (podcastId: string, autoDownload
     },
     async () => {
       const newAutoDownloadSettings = await updateAutoDownloadSettingsService(podcastId)
-      setGlobal({ autoDownloadSettings: newAutoDownloadSettings })
+      setGlobal({ autoDownloadSettings: newAutoDownloadSettings }, async () => {
+        if(autoDownloadOn) {
+          const [serverEpisodes, episodesCount] = await getEpisodes({ 
+            sort:"most-recent", 
+            podcastId, 
+            includePodcast: true
+          })
+          
+          if(episodesCount) {
+            downloadEpisode(serverEpisodes[0], serverEpisodes[0].podcast)
+          }
+        }
+      })
     }
   )
 }
 
-export const updateDownloadedPodcasts = async () => {
+export const updateAutoDownloadSettingsAddByRSS = (addByRSSPodcastFeedUrl: string, autoDownloadOn: boolean) => {
+  const { autoDownloadSettings } = getGlobal()
+  autoDownloadSettings[addByRSSPodcastFeedUrl] = autoDownloadOn
+
+  setGlobal(
+    {
+      autoDownloadSettings
+    },
+    async () => {
+      const newAutoDownloadSettings = await updateAutoDownloadSettingsService(addByRSSPodcastFeedUrl)
+      setGlobal({ autoDownloadSettings: newAutoDownloadSettings }, async () => {
+        if(autoDownloadOn) {
+          const podcast = await parseAddByRSSPodcast(addByRSSPodcastFeedUrl)
+          if(podcast && podcast.episodes && podcast.episodes[0]) {
+            downloadEpisode(podcast.episodes[0], podcast)
+          }
+        }
+      })
+    }
+  )
+}
+
+export const updateDownloadedPodcasts = async (cb?: any) => {
   const downloadedEpisodeIds = await getDownloadedEpisodeIdsService()
   const downloadedPodcastEpisodeCounts = await getDownloadedPodcastEpisodeCountsService()
   const downloadedPodcasts = await getDownloadedPodcastsService()
 
-  setGlobal({
-    downloadedEpisodeIds,
-    downloadedPodcastEpisodeCounts,
-    downloadedPodcasts
-  })
+  setGlobal(
+    {
+      downloadedEpisodeIds,
+      downloadedPodcastEpisodeCounts,
+      downloadedPodcasts
+    },
+    () => {
+      if (cb) cb()
+    }
+  )
 }
 
-export const addDownloadTask = async (downloadTask: DownloadTaskState) => {
+export const addDownloadTask = (downloadTask: DownloadTaskState) => {
   const { downloadsActive, downloadsArray } = getGlobal()
 
   if (!downloadsArray.some((x: any) => x.episodeId === downloadTask.episodeId)) {
@@ -127,9 +212,10 @@ export const addDownloadTask = async (downloadTask: DownloadTaskState) => {
   }
 }
 
-export const resumeDownloadingEpisode = (episodeId: string) => {
+export const resumeDownloadingEpisode = (downloadTask: DownloadTaskState) => {
   const { downloadsActive, downloadsArray } = getGlobal()
-  resumeDownloadTask(episodeId)
+  const { episodeId } = downloadTask
+  resumeDownloadTask(downloadTask)
 
   for (const task of downloadsArray) {
     if (task.episodeId === episodeId) {
@@ -145,9 +231,17 @@ export const resumeDownloadingEpisode = (episodeId: string) => {
   })
 }
 
-export const pauseDownloadingEpisode = (episodeId: string) => {
+export const pauseDownloadingEpisodesAll = () => {
+  const { downloadsArray } = getGlobal()
+  for (const task of downloadsArray) {
+    pauseDownloadingEpisode(task)
+  }
+}
+
+export const pauseDownloadingEpisode = (downloadTask: DownloadTaskState) => {
   const { downloadsActive, downloadsArray } = getGlobal()
-  pauseDownloadTask(episodeId)
+  const { episodeId } = downloadTask
+  pauseDownloadTask(downloadTask)
 
   for (const task of downloadsArray) {
     if (task.episodeId === episodeId) {

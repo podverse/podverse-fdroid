@@ -1,67 +1,377 @@
 Categories:
   - Multimedia
 License: AGPL-3.0-or-later
+WebSite: https://podverse.fm
 SourceCode: https://github.com/podverse/podverse-fdroid
 IssueTracker: https://github.com/podverse/podverse-fdroid/issues
 
-Summary: Podcast manager with cross-platform syncing
-Description: |-
-  Podverse is an open source podcast manager for Android, iOS, and web
-  with cross-platform syncing, clip and playlist sharing, an intuitive interface,
-  and more!
-
-  All Podverse software is FOSS, but features that require updating our servers
-  are available only with a Premium membership ($10 annually).
-  Sign up today and get 1 year of Podverse premium for free.
-
-  Free features:
-  * Subscribe to podcasts
-  * Play clips and episodes
-  * Auto-download episodes
-  * Drag-and-drop queue
-  * Add podcasts by RSS
-  * Sleep timer
-  * Light / Dark mode
-
-  Premium features:
-  * Create and share podcast highlights
-  * Switch devices and play from where you left off
-  * Sync your subscriptions across devices
-  * Sync your "added by RSS" podcasts across devices
-  * Sync your queue across devices
-  * Create and share playlists
-  * Subscribe to playlists
-  * Share your user profile
-  * Subscribe to user profiles
-
-  Our mission is to support the original independent spirit of podcasting
-  by any means necessary. We would love to collaborate with all podcast apps
-  (especially open source ones) to make our technologies as cross-compatible,
-  convenient, and empowering for people as possible.
-
-  If you may be interested in collaborating or have any questions,
-  please email contact@podverse.fm(opens in new tab),
-  or reach us through one of our social media channels:
-  [https://github.com/podverse Github]
-  [https://reddit.com/u/podverse Reddit]
-  [https://twitter.com/podverse Twitter]
-  [https://facebook.com/podverse Facebook]
-  [https://linkedin.com/podverse LinkedIn]
-
-  Thank you!
+AutoName: Podverse
 
 RepoType: git
 Repo: https://github.com/podverse/podverse-fdroid
 
 Builds:
-  - versionName: 2.6.8
+  - versionName: 2.9.3
     versionCode: 1
-    commit: '9c88b5cc2a76dee690abffd804a0679c28ec8db2'
+    disable: Google Play Billing Library
+    commit: 22b86654f7c982249819fd689c0519b357863fb5
     subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
     gradle:
       - yes
+    rm:
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/react-native/android
+      - node_modules/react-native-gesture-handler/android/lib/build.gradle
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 2.10.1
+    versionCode: 2
+    disable: Google Play Billing Library
+    commit: 5b41a8f323ddf9e73555b6297834e4d132f52da2
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.0.2
+    versionCode: 3
+    disable: Google Play Billing Library
+    commit: 3dd8c923c87d8757e0c3da17145b0e255110218b
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.0.6
+    versionCode: 6
+    commit: 3.0.6
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+      - functions
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.0.7
+    versionCode: 7
+    commit: 3.0.7
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+      - functions
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.0.8
+    versionCode: 8
+    commit: 3.0.8
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+      - functions
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.1.0
+    versionCode: 9
+    commit: 3.1.0
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+      - functions
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.1.2
+    versionCode: 10
+    commit: 3.1.2
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+      - functions
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+
+  - versionName: 3.1.3
+    versionCode: 11
+    commit: 3.1.3
+    subdir: android/app
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y -t stretch-backports npm
+    init:
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
+    gradle:
+      - yes
+    rm:
+      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
+      - node_modules/bplist-parser
+      - node_modules/hermes-engine
+      - node_modules/jetifier/lib/*.jar
+      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
+      - node_modules/react-native/template
+      - functions
+    scanignore:
+      - android/build.gradle
+      - node_modules/jsc-android
+      - node_modules/linkifyjs/dist/linkifyjs.zip
+      - node_modules/npm/node_modules/term-size/vendor
+      - node_modules/react-native/android
+      - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-secure-key-store/example/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-webview/android/build.gradle
+      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/masked-view/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
 
 AutoUpdateMode: None
-UpdateCheckMode: Tags
-CurrentVersion: 2.6.8
-CurrentVersionCode: 1
+UpdateCheckMode: None
+CurrentVersion: 3.1.3
+CurrentVersionCode: 11

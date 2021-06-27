@@ -1,45 +1,40 @@
 import { Linking, Platform, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, SafeAreaView, Text, View } from '../components'
+import { translate } from '../lib/i18n'
 import { createEmailLinkUrl, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { androidHandleStatusCheck } from '../state/actions/purchase.android'
 import { iosHandlePurchaseStatusCheck } from '../state/actions/purchase.ios'
 
 type Props = {
   navigation?: any
 }
 
-type State = {}
-
-export class PurchasingScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Processing',
-    headerRight: null
-  }
-
+export class PurchasingScreen extends React.Component<Props> {
   constructor(props: Props) {
     super(props)
   }
 
-  _handleContactSupportPress = async () => {
-    const subject = 'Podverse Checkout Issue'
-    const body = "Please explain your issue below and we'll get back to you as soon as we can:"
-    const emailLinkUrl = createEmailLinkUrl(PV.Emails.SUPPORT, subject, body)
-    Linking.openURL(emailLinkUrl)
+  static navigationOptions = () => ({
+    title: translate('Processing'),
+    headerRight: () => null
+  })
+
+  _handleContactSupportPress = () => {
+    Linking.openURL(createEmailLinkUrl(PV.Emails.CHECKOUT_ISSUE))
   }
 
   _handleRetryProcessing = async () => {
     const purchase = this.global.purchase || {}
-    const { productId, purchaseToken, transactionId, transactionReceipt } = purchase
+    const { productId, transactionId, transactionReceipt } = purchase
     if (Platform.OS === 'android') {
-      await androidHandleStatusCheck(productId, transactionId, purchaseToken)
+      // removed react-native-iap to comply with F-Droid FOSS policy
     } else if (Platform.OS === 'ios') {
       await iosHandlePurchaseStatusCheck(productId, transactionId, transactionReceipt)
     }
   }
 
-  _handleDismiss = async () => {
+  _handleDismiss = () => {
     this.props.navigation.dismiss()
   }
 
@@ -65,7 +60,7 @@ export class PurchasingScreen extends React.Component<Props, State> {
           )}
           {!isLoading && showDismissLink && (
             <TouchableOpacity onPress={this._handleDismiss}>
-              <Text style={[globalTheme.text, styles.button]}>Close</Text>
+              <Text style={[globalTheme.text, styles.button]}>{translate('Close')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -76,8 +71,6 @@ export class PurchasingScreen extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   activityIndicator: {
-    backgroundColor: 'transparent',
-    flex: 0,
     marginVertical: 16
   },
   button: {

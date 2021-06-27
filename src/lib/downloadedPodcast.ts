@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import { PV } from '../resources'
-import { clearNowPlayingItem, getNowPlayingItem } from '../services/player'
 import { sortPodcastArrayAlphabetically } from '../services/podcast'
+import { clearNowPlayingItem, getNowPlayingItem } from '../services/userNowPlayingItem'
 import { getDownloadedEpisodeLimits } from './downloadedEpisodeLimiter'
 import { deleteDownloadedEpisode } from './downloader'
 
@@ -72,14 +72,21 @@ export const getDownloadedPodcastEpisodeCounts = async () => {
 export const getDownloadedEpisodes = async () => {
   const episodes = []
   const downloadedPodcasts = await getDownloadedPodcasts()
+
   for (const podcast of downloadedPodcasts) {
     for (const episode of podcast.episodes) {
       episode.podcast = podcast
       episodes.push(episode)
     }
   }
+
   episodes.sort((a: any, b: any) => new Date(b.pubDate) - new Date(a.pubDate))
   return episodes
+}
+
+export const getDownloadedEpisode = async (episodeId: string) => {
+  const episodes = await getDownloadedEpisodes()
+  return episodes.find((x) => x.id === episodeId)
 }
 
 export const getDownloadedPodcast = async (podcastId: string) => {
@@ -99,7 +106,7 @@ export const getDownloadedPodcasts = async () => {
 
 export const refreshDownloadedPodcasts = async () => {
   const downloadedPodcasts = await getDownloadedPodcasts()
-  setDownloadedPodcasts(downloadedPodcasts)
+  await setDownloadedPodcasts(downloadedPodcasts)
 }
 
 export const removeDownloadedPodcastEpisode = async (episodeId: string) => {
@@ -122,7 +129,7 @@ export const removeDownloadedPodcastEpisode = async (episodeId: string) => {
       newPodcasts.push(podcast)
     }
   }
-  setDownloadedPodcasts(newPodcasts)
+  await setDownloadedPodcasts(newPodcasts)
 
   const nowPlayingItem = await getNowPlayingItem()
   let clearedNowPlayingItem = false
@@ -151,6 +158,13 @@ export const removeDownloadedPodcast = async (podcastId: string) => {
   }
 
   return { clearedNowPlayingItem }
+}
+
+export const removeAllDownloadedPodcasts = async () => {
+  const downloadedPodcasts = await getDownloadedPodcasts()
+  for (const podcast of downloadedPodcasts) {
+    await removeDownloadedPodcast(podcast.id)
+  }
 }
 
 const setDownloadedPodcasts = async (podcasts: any[]) => {

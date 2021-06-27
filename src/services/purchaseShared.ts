@@ -1,15 +1,17 @@
-import { Platform } from 'react-native'
-import * as RNIap from 'react-native-iap'
+import { Alert, Linking } from 'react-native'
+import { translate } from '../lib/i18n'
 
-// Purchase items
-const itemSkus = Platform.select({
-  ios: ['podverse_premium_membership_1_year_non_renewing_subscription'],
-  android: ['podverse_premium_membership_1_year']
-})
-
-const _podversePremiumMembership1Year = itemSkus[0]
-
-export const buy1YearPremium = async () => {
-  await RNIap.getProducts(itemSkus)
-  await RNIap.requestPurchase(_podversePremiumMembership1Year, false)
+export const displayFOSSPurchaseAlert = () => {
+  console.log('displayFOSSPurchaseAlert')
+  Alert.alert(
+    translate('Leaving App'),
+    translate('FOSS purchase alert text'),
+    [
+      { text: translate('Cancel') },
+      {
+        text: translate('Renew Membership'),
+        onPress: () => Linking.openURL('https://podverse.fm?login=true')
+      }
+    ]
+  )
 }

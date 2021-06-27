@@ -3,17 +3,13 @@ import React from 'reactn'
 import { ActivityIndicator, View, WebViewStaticHTML } from '../components'
 import { testProps } from '../lib/utility'
 
-type Props = {}
+type Props = any
 
 type State = {
   isLoading: boolean
 }
 
 export class FAQScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'FAQ'
-  }
-
   constructor(props: Props) {
     super(props)
 
@@ -21,6 +17,10 @@ export class FAQScreen extends React.Component<Props, State> {
       isLoading: true
     }
   }
+
+  static navigationOptions = () => ({
+      title: 'FAQ'
+    })
 
   componentDidMount() {
     setTimeout(() => {
@@ -33,7 +33,7 @@ export class FAQScreen extends React.Component<Props, State> {
 
     return (
       <View style={styles.view} {...testProps('faq_screen_view')}>
-        {isLoading && <ActivityIndicator />}
+        {isLoading && <ActivityIndicator fillSpace />}
         <WebViewStaticHTML html={html} isLoading={isLoading} />
       </View>
     )

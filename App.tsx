@@ -1,32 +1,31 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import NetInfo, { NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo'
 import React, { Component } from 'react'
-import { Image, Platform, StatusBar, View, YellowBox } from 'react-native'
-import { getFontScale } from 'react-native-device-info'
+import { Image, LogBox, Platform, StatusBar, View } from 'react-native'
+import Config from 'react-native-config'
 import 'react-native-gesture-handler'
+import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { setGlobal } from 'reactn'
-import { OverlayAlert } from './src/components'
+import { OverlayAlert, BoostDropdownBanner } from './src/components'
 import { refreshDownloads } from './src/lib/downloader'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
 import Router from './src/Router'
 import { downloadCategoriesList } from './src/services/category'
-
-import { addOrUpdateHistoryItem } from './src/services/history'
-import { getNowPlayingItem, updateUserPlaybackPosition } from './src/services/player'
+import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
 
-YellowBox.ignoreWarnings(['Warning: componentWillUpdate'])
+LogBox.ignoreLogs(['Warning: componentWillUpdate'])
+LogBox.ignoreAllLogs(true)
 
-console.disableYellowBox = true
-
-type Props = {}
+type Props = any
 
 type State = {
   appReady: boolean
+  minVersionMismatch: boolean
 }
 
 setGlobal(initialState)
@@ -39,7 +38,8 @@ class App extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      appReady: false
+      appReady: false,
+      minVersionMismatch: false
     }
     this.unsubscribeNetListener = null
     downloadCategoriesList()
@@ -47,9 +47,18 @@ class App extends Component<Props, State> {
 
   async componentDidMount() {
     TrackPlayer.registerPlaybackService(() => require('./src/services/playerEvents'))
-    const darkModeEnabled = await AsyncStorage.getItem(PV.Keys.DARK_MODE_ENABLED)
     StatusBar.setBarStyle('light-content')
-    await this.setupGlobalState(darkModeEnabled === 'TRUE' || darkModeEnabled === null ? darkTheme : lightTheme)
+    Platform.OS === 'android' && StatusBar.setBackgroundColor(PV.Colors.ink, true)
+    const darkModeEnabled = await AsyncStorage.getItem(PV.Keys.DARK_MODE_ENABLED)
+    let globalTheme = darkTheme
+    if (darkModeEnabled === null) {
+      globalTheme = Config.DEFAULT_THEME_DARK ? darkTheme : lightTheme
+    } else if (darkModeEnabled === 'FALSE') {
+      globalTheme = lightTheme
+    }
+
+    // await this.checkAppVersion()
+    this.setupGlobalState(globalTheme)
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
   }
 
@@ -57,38 +66,35 @@ class App extends Component<Props, State> {
     this.unsubscribeNetListener && this.unsubscribeNetListener()
   }
 
-  handleNetworkChange = async (state: NetInfoState) => {
-    // isInternetReachable will be false
-    if (!state.isInternetReachable) {
-      return
-    }
-
-    // Don't continue handleNetworkChange when internet is first reachable on initial app launch
-    if (ignoreHandleNetworkChange) {
-      ignoreHandleNetworkChange = false
-      return
-    }
-
-    const nowPlayingItem = await getNowPlayingItem()
-
-    if (state.type === 'wifi') {
-      refreshDownloads()
-      if (nowPlayingItem) {
-        await addOrUpdateHistoryItem(nowPlayingItem)
-        await updateUserPlaybackPosition()
+  handleNetworkChange = (state: NetInfoState) => {
+    (async () => {
+      // isInternetReachable will be false
+      if (!state.isInternetReachable) {
+        return
       }
-    } else if (state.type === 'cellular') {
-      const downloadingWifiOnly = await AsyncStorage.getItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
-      if (!downloadingWifiOnly) refreshDownloads()
-      if (nowPlayingItem) {
-        await addOrUpdateHistoryItem(nowPlayingItem)
-        await updateUserPlaybackPosition()
+  
+      // Don't continue handleNetworkChange when internet is first reachable on initial app launch
+      if (ignoreHandleNetworkChange) {
+        ignoreHandleNetworkChange = false
+        return
       }
-    }
+  
+      if (state.type === 'wifi') {
+        refreshDownloads()
+      } else if (state.type === 'cellular') {
+        const downloadingWifiOnly = await AsyncStorage.getItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
+        if (downloadingWifiOnly) {
+          pauseDownloadingEpisodesAll()
+        } else {
+          refreshDownloads()
+        }
+      }
+    })()
   }
 
-  async setupGlobalState(theme: GlobalTheme) {
-    const fontScale = await getFontScale()
+  setupGlobalState = (theme: GlobalTheme) => {
+    const fontScale = 1
+    // const fontScale = await getFontScale()
     const fontScaleMode = determineFontScaleMode(fontScale)
 
     setGlobal(
@@ -103,24 +109,49 @@ class App extends Component<Props, State> {
     )
   }
 
+  // checkAppVersion = async () => {
+  //   const versionValid = await isOnMinimumAllowedVersion()
+  //   this.setState({ minVersionMismatch: !versionValid })
+  // }
+
   _renderIntersitial = () => {
+    // if (this.state.minVersionMismatch) {
+    //   return <UpdateRequiredOverlay />
+    // }
+
     if (Platform.OS === 'ios') {
       return null
     }
 
     return (
-      <View style={{ backgroundColor: PV.Colors.brandColor, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ backgroundColor: PV.Colors.ink, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Image source={PV.Images.BANNER} resizeMode='contain' />
       </View>
     )
   }
 
   render() {
+    // Prevent white screen flash on navigation on Android
+    const wrapperStyle =
+      Platform.OS === 'android'
+        ? {
+            backgroundColor: PV.Colors.ink,
+            borderColor: PV.Colors.ink,
+            shadowOpacity: 1,
+            opacity: 1
+          }
+        : {
+          flex: 1
+        }
+
     return this.state.appReady ? (
-      <View style={{ flex: 1 }}>
-        <Router />
-        <OverlayAlert />
-      </View>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics} style={wrapperStyle}>
+        <View style={{ flex: 1 }}>
+          <Router />
+          <OverlayAlert />
+        </View>
+        <BoostDropdownBanner />
+      </SafeAreaProvider>
     ) : (
       this._renderIntersitial()
     )

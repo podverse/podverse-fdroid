@@ -2,6 +2,7 @@ import React from 'react'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { useGlobal } from 'reactn'
+import { testProps } from '../lib/utility'
 import { darkTheme, iconStyles } from '../styles'
 
 type Props = {
@@ -13,10 +14,11 @@ type Props = {
   size: number
   solid?: boolean
   style?: any
+  testID: string
 }
 
 export const PVIcon = (props: Props) => {
-  const { brand, color: colorOverride, isSecondary, name, onPress, size, solid, style } = props
+  const { brand, color: colorOverride, isSecondary, name, onPress, size, solid, style, testID } = props
   const [globalTheme] = useGlobal('globalTheme')
   const isDarkMode = globalTheme === darkTheme
   const color = isDarkMode
@@ -35,7 +37,8 @@ export const PVIcon = (props: Props) => {
         right: 8,
         top: 8
       }}
-      onPress={onPress}>
+      onPress={onPress}
+      {...(testID ? testProps(`${testID}_icon_button`) : {})}>
       <Icon
         {...(brand ? { brand } : {})}
         color={colorOverride || color}

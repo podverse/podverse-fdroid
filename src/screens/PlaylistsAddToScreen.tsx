@@ -11,6 +11,7 @@ import {
   PlaylistTableCell,
   View
 } from '../components'
+import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
 import { isOdd, testProps } from '../lib/utility'
 import { PV } from '../resources'
@@ -30,19 +31,9 @@ type State = {
   showNewPlaylistDialog?: boolean
 }
 
-export class PlaylistsAddToScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => ({
-    title: 'Add to Playlist',
-    headerLeft: <NavDismissIcon handlePress={navigation.dismiss} />,
-    headerRight: (
-      <RNView>
-        {navigation.getParam('isLoggedIn') && (
-          <NavHeaderButtonText handlePress={navigation.getParam('showNewPlaylistDialog')} text='New' />
-        )}
-      </RNView>
-    )
-  })
+const testIDPrefix = 'playlists_add_to_screen'
 
+export class PlaylistsAddToScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     const { navigation } = props
@@ -55,6 +46,22 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
 
     navigation.setParams({ isLoggedIn })
   }
+
+  static navigationOptions = ({ navigation }) => ({
+      title: translate('Add to Playlist'),
+      headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+      headerRight: () => (
+        <RNView>
+          {navigation.getParam('isLoggedIn') && (
+            <NavHeaderButtonText
+              handlePress={navigation.getParam('showNewPlaylistDialog')}
+              testID={`${testIDPrefix}_new`}
+              text={translate('New')}
+            />
+          )}
+        </RNView>
+      )
+    })
 
   async componentDidMount() {
     this.props.navigation.setParams({
@@ -78,24 +85,26 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         isLoading: true,
         showNewPlaylistDialog: false
       },
-      async () => {
-        const { newPlaylistTitle } = this.state
-
-        try {
-          await createPlaylist({ title: newPlaylistTitle }, this.global)
-        } catch (error) {
-          if (error.response) {
-            Alert.alert(
-              PV.Alerts.SOMETHING_WENT_WRONG.title,
-              PV.Alerts.SOMETHING_WENT_WRONG.message,
-              PV.Alerts.BUTTONS.OK
-            )
+      () => {
+        (async () => {
+          const { newPlaylistTitle } = this.state
+  
+          try {
+            await createPlaylist({ title: newPlaylistTitle }, this.global)
+          } catch (error) {
+            if (error.response) {
+              Alert.alert(
+                PV.Alerts.SOMETHING_WENT_WRONG.title,
+                PV.Alerts.SOMETHING_WENT_WRONG.message,
+                PV.Alerts.BUTTONS.OK
+              )
+            }
           }
-        }
-
-        this.setState({
-          isLoading: false
-        })
+  
+          this.setState({
+            isLoading: false
+          })
+        })()
       }
     )
   }
@@ -126,9 +135,11 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
               {
                 isSavingId: item.id
               },
-              async () => {
-                await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
-                this.setState({ isSavingId: '' })
+              () => {
+                (async () => {
+                  await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
+                  this.setState({ isSavingId: '' })
+                })()
               }
             )
           } catch (error) {
@@ -136,7 +147,8 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
             this.setState({ isSavingId: '' })
           }
         }}
-        title={item.title}
+        testID={`${testIDPrefix}_playlist_item_${index}`}
+        title={item.title || translate('Untitled Playlist')}
       />
     )
   }
@@ -153,45 +165,45 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
       <View style={styles.view} {...testProps('playlists_add_to_screen_view')}>
         {!isLoggedIn && (
           <MessageWithAction
+            testID={testIDPrefix}
             topActionHandler={this._onPressLogin}
-            topActionText='Login'
-            message='Login to add to playlists'
+            topActionText={translate('Login')}
+            message={translate('Login to add to playlists')}
           />
         )}
         {isLoggedIn && (
           <View style={styles.view}>
-            {isLoading && <ActivityIndicator />}
-            {!isLoading && myPlaylists && myPlaylists.length > 0 && (
+            {isLoading && <ActivityIndicator fillSpace />}
+            {!isLoading && myPlaylists && (
               <FlatList
                 data={myPlaylists}
                 dataTotalCount={myPlaylists.length}
-                disableLeftSwipe={true}
+                disableLeftSwipe
                 extraData={myPlaylists}
                 ItemSeparatorComponent={this._ItemSeparatorComponent}
                 keyExtractor={(item: any, index: number) => `myPlaylists_${index}`}
-                renderItem={this._renderPlaylistItem}
-              />
-            )}
-            {!isLoading && myPlaylists && myPlaylists.length === 0 && (
-              <FlatList
-                data={myPlaylists}
-                dataTotalCount={0}
-                disableLeftSwipe={true}
-                extraData={myPlaylists}
-                ItemSeparatorComponent={this._ItemSeparatorComponent}
-                keyExtractor={(item: any, index: number) => `myPlaylists2_${index}`}
+                noResultsMessage={translate('No playlists found')}
                 renderItem={this._renderPlaylistItem}
               />
             )}
             <Dialog.Container visible={showNewPlaylistDialog}>
-              <Dialog.Title>New Playlist</Dialog.Title>
+              <Dialog.Title>{translate('New Playlist')}</Dialog.Title>
               <Dialog.Input
                 onChangeText={this._handleNewPlaylistTextChange}
-                placeholder='title of playlist'
+                placeholder={translate('title of playlist')}
+                {...testProps('new_playlist_title_input')}
                 value={newPlaylistTitle}
               />
-              <Dialog.Button label='Cancel' onPress={this._handleNewPlaylistDismiss} />
-              <Dialog.Button label='Save' onPress={this._saveNewPlaylist} />
+              <Dialog.Button
+                label={translate('Cancel')}
+                onPress={this._handleNewPlaylistDismiss}
+                {...testProps('new_playlist_title_cancel')}
+              />
+              <Dialog.Button
+                label={translate('Save')}
+                onPress={this._saveNewPlaylist}
+                {...testProps('new_playlist_title_save')}
+              />
             </Dialog.Container>
           </View>
         )}
