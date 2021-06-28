@@ -54,6 +54,7 @@ type State = {
   showHowToModal?: boolean
   startTime?: number
   title?: string
+  shouldClearClipInfo: boolean
 }
 
 const testIDPrefix = 'make_clip_screen'
@@ -75,7 +76,8 @@ export class MakeClipScreen extends React.Component<Props, State> {
       isSaving: false,
       ...(isEditing ? { mediaRefId: nowPlayingItem.clipId } : {}),
       progressValue: initialProgressValue || 0,
-      startTime: isEditing ? nowPlayingItem.clipStartTime : null
+      startTime: isEditing ? nowPlayingItem.clipStartTime : null,
+      shouldClearClipInfo: false
     }
   }
 
@@ -159,9 +161,13 @@ export class MakeClipScreen extends React.Component<Props, State> {
     )
   }
 
-  componentWillUnmount() {
+  async componentWillUnmount() {
     if(!this.props.navigation.getParam('isEditing')) {
-      saveTempMediaRef({startTime: this.state.startTime, endTime:this.state.endTime, clipTitle:this.state.title})
+      await saveTempMediaRef({startTime: this.state.startTime, endTime:this.state.endTime, clipTitle:this.state.title})
+    }
+
+    if(this.state.shouldClearClipInfo) {
+      await clearTempMediaRef()
     }
 
     this.setGlobal({
@@ -209,7 +215,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
       newSpeed = speeds[index + 1]
     }
 
-    await setPlaybackSpeed(newSpeed, this.global)
+    await setPlaybackSpeed(newSpeed)
   }
 
   _clearEndTime = () => {
@@ -295,7 +301,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
             await setNowPlayingItem(newItem, position || 0)
           }
 
-          this.setState({ isSaving: false }, () => {
+          this.setState({ isSaving: false, shouldClearClipInfo:true }, () => {
             // NOTE: setTimeout to prevent an error when Modal and Alert modal try to render at the same time
             setTimeout(() => {
               const alertText = isEditing ? translate('Clip Updated') : translate('Clip Created')
@@ -304,7 +310,6 @@ export class MakeClipScreen extends React.Component<Props, State> {
                 {
                   text: translate('Done'),
                   onPress: () => {
-                    clearTempMediaRef()
                     navigation.goBack(null)
                   }
                 },
@@ -326,7 +331,6 @@ export class MakeClipScreen extends React.Component<Props, State> {
                     } catch (error) {
                       console.log(error)
                     }
-                    clearTempMediaRef()
                     navigation.goBack(null)
                   }
                 }
