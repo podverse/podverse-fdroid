@@ -117,6 +117,7 @@ export class PlaylistsScreen extends React.Component<Props, State> {
 
   _renderHiddenItem = ({ item, index, section }, rowMap) => {
     const { isRemoving } = this.state
+    const sectionKey = section.value
     const buttonText =
       section.value === PV.Filters._sectionMyPlaylistsKey ? translate('Delete') : translate('Unsubscribe')
       
@@ -124,11 +125,15 @@ export class PlaylistsScreen extends React.Component<Props, State> {
       ? this._handleHiddenItemPressDelete
       : this._handleHiddenItemPressUnsubscribe
 
+    const testIDSuffix = section.value === PV.Filters._sectionMyPlaylistsKey
+      ? 'delete'
+      : 'unsubscribe'
+
     return (
       <SwipeRowBack
         isLoading={isRemoving}
         onPress={() => onPress(item.id, rowMap)}
-        testID={`${testIDPrefix}_playlist_item_${index}`}
+        testID={`${testIDPrefix}_playlist_${sectionKey}_item_${index}_${testIDSuffix}`}
         text={buttonText}
       />
     )
