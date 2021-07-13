@@ -1,5 +1,6 @@
 import debounce from 'lodash/debounce'
 import { Alert, Linking, StyleSheet } from 'react-native'
+import Config from 'react-native-config'
 import React from 'reactn'
 import {
   ActionSheet,
