@@ -139,10 +139,10 @@ export class PlaylistScreen extends React.Component<Props, State> {
       return item.episode && item.episode.podcast ? (
         <ClipTableCell
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
+          item={item}
           showEpisodeInfo
           showPodcastInfo
           testID={`${testIDPrefix}_clip_item_${index}`}
-          item={item}
         />
       ) : (
         <></>
@@ -152,6 +152,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
 
       return (
         <EpisodeTableCell
+          handleDownloadPress={() => this._handleDownloadPressed(item)}
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null, userPlaybackPosition))}
           handleNavigationPress={() =>
             navigateToEpisodeScreenWithItem(navigation, convertToNowPlayingItem(item, null, null, userPlaybackPosition))
@@ -203,9 +204,9 @@ export class PlaylistScreen extends React.Component<Props, State> {
     })
   }
 
-  _handleDownloadPressed = () => {
-    if (this.state.selectedItem) {
-      const episode = convertNowPlayingItemToEpisode(this.state.selectedItem)
+  _handleDownloadPressed = (selectedItem: any) => {
+    const episode = selectedItem || convertNowPlayingItemToEpisode(this.state.selectedItem)
+    if (episode) {
       downloadEpisode(episode, episode.podcast)
     }
   }
