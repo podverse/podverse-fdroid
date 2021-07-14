@@ -1,19 +1,14 @@
 import { StyleSheet } from 'react-native'
 import React from 'reactn'
-import {
-  ActivityIndicator,
-  Divider,
-  FlatList,
-  MessageWithAction,
-  PlaylistTableCell,
-  TableSectionSelectors,
-  View
-} from '../components'
-import { hasValidNetworkConnection } from '../lib/network'
-import { isOdd, testProps } from '../lib/utility'
+import { ActivityIndicator, Divider, FlatList, MessageWithAction, PlaylistTableCell,
+  SwipeRowBack, TableSectionSelectors, View } from '../components'
+import { translate } from '../lib/i18n'
+import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
+import { safeKeyExtractor, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { getPlaylists } from '../state/actions/playlist'
-import { getLoggedInUserPlaylists } from '../state/actions/user'
+import PVEventEmitter from '../services/eventEmitter'
+import { deletePlaylist, toggleSubscribeToPlaylist } from '../state/actions/playlist'
+import { getLoggedInUserPlaylistsCombined } from '../state/actions/user'
 
 type Props = {
   navigation?: any
@@ -22,138 +17,211 @@ type Props = {
 type State = {
   isLoading: boolean
   isLoadingMore: boolean
-  queryFrom: string | null
+  isRemoving?: boolean
+  sections?: any[]
   showNoInternetConnectionMessage?: boolean
 }
 
-export class PlaylistsScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Playlists'
-  }
+const testIDPrefix = 'playlists_screen'
 
+export class PlaylistsScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     const { isLoggedIn } = this.global.session
 
     this.state = {
       isLoading: isLoggedIn,
-      isLoadingMore: false,
-      queryFrom: isLoggedIn ? PV.Filters._myPlaylistsKey : PV.Filters._subscribedKey
+      isLoadingMore: false
     }
   }
 
+  static navigationOptions = () => ({
+      title: translate('Playlists')
+    })
+
   async componentDidMount() {
     const { navigation } = this.props
-    const { queryFrom } = this.state
 
     if (this.global.session.isLoggedIn) {
-      const newState = await this._queryData(queryFrom)
+      const newState = await this._queryData()
       this.setState(newState)
     }
 
     const playlistId = navigation.getParam('navToPlaylistWithId')
 
     if (playlistId) {
-      navigation.navigate(PV.RouteNames.MorePlaylistScreen, { playlistId })
-    }
-  }
-
-  selectLeftItem = async (selectedKey: string) => {
-    if (!selectedKey) {
-      this.setState({ queryFrom: null })
-      return
+      navigation.navigate(PV.RouteNames.PlaylistScreen, { playlistId })
     }
 
-    this.setState(
-      {
-        isLoading: true,
-        queryFrom: selectedKey
-      },
-      async () => {
-        const newState = await this._queryData(selectedKey)
-        this.setState(newState)
-      }
-    )
+    PVEventEmitter.on(PV.Events.PLAYLISTS_UPDATED, this._refreshSections)
   }
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
+  componentWillUnmount() {
+    PVEventEmitter.removeListener(PV.Events.PLAYLISTS_UPDATED, this._refreshSections)
   }
 
-  _renderPlaylistItem = ({ item, index }) => {
-    const { queryFrom } = this.state
-    const ownerName = (item.owner && item.owner.name) || 'anonymous'
+  _refreshSections = () => {
+    const sections = this.generatePlaylistsSections()
+    this.setState({ sections })
+  }
+
+  _ItemSeparatorComponent = () => <Divider />
+
+  _renderPlaylistItem = ({ index, item, section }) => {
+    const ownerName = (item.owner && item.owner.name) || translate('anonymous')
+    const sectionKey = section.value
+    const isSubscribed = sectionKey === PV.Filters._sectionSubscribedPlaylistsKey
 
     return (
       <PlaylistTableCell
-        {...(queryFrom === PV.Filters._subscribedKey ? { createdBy: ownerName } : {})}
-        hasZebraStripe={isOdd(index)}
+        {...(isSubscribed ? { createdBy: ownerName } : {})}
         itemCount={item.itemCount}
         onPress={() =>
           this.props.navigation.navigate(PV.RouteNames.PlaylistScreen, {
-            playlist: item,
-            navigationTitle: queryFrom === PV.Filters._myPlaylistsKey ? 'My Playlist' : 'Playlist'
+            playlist: item
           })
         }
-        title={item.title}
+        testID={`${testIDPrefix}_playlist_${sectionKey}_item_${index}`}
+        title={item.title || translate('Untitled Playlist')}
       />
     )
   }
 
-  _onPressLogin = () => this.props.navigation.navigate(PV.RouteNames.AuthScreen)
+  _onPressLogin = () => {
+    this.props.navigation.goBack(null)
+    this.props.navigation.navigate(PV.RouteNames.AuthScreen)
+  }
+
+  generatePlaylistsSections = () => {
+    const { myPlaylists, subscribedPlaylists } = this.global.playlists
+
+    const sections = []
+    if (myPlaylists && myPlaylists.length > 0) {
+      sections.push({
+        title: translate('My Playlists'),
+        data: myPlaylists,
+        value: PV.Filters._sectionMyPlaylistsKey
+      })
+    }
+
+    if (subscribedPlaylists && subscribedPlaylists.length > 0) {
+      sections.push({
+        title: translate('Subscribed Playlists'),
+        data: subscribedPlaylists,
+        value: PV.Filters._sectionSubscribedPlaylistsKey
+      })
+    }
+
+    return sections
+  }
+
+  _renderHiddenItem = ({ item, index, section }, rowMap) => {
+    const { isRemoving } = this.state
+    const sectionKey = section.value
+    const buttonText =
+      section.value === PV.Filters._sectionMyPlaylistsKey ? translate('Delete') : translate('Unsubscribe')
+      
+    const onPress = section.value === PV.Filters._sectionMyPlaylistsKey
+      ? this._handleHiddenItemPressDelete
+      : this._handleHiddenItemPressUnsubscribe
+
+    const testIDSuffix = section.value === PV.Filters._sectionMyPlaylistsKey
+      ? 'delete'
+      : 'unsubscribe'
+
+    return (
+      <SwipeRowBack
+        isLoading={isRemoving}
+        onPress={() => onPress(item.id, rowMap)}
+        testID={`${testIDPrefix}_playlist_${sectionKey}_item_${index}_${testIDSuffix}`}
+        text={buttonText}
+      />
+    )
+  }
+
+  _handleHiddenItemPressUnsubscribe = async (id: string, rowMap: any) => {
+    const wasAlerted = await alertIfNoNetworkConnection('subscribe to playlist')
+    if (wasAlerted) return
+
+    this.setState({ isRemoving: true }, () => {
+      (async () => {
+        try {
+          await toggleSubscribeToPlaylist(id)
+          const row = rowMap[id]
+          row?.closeRow()
+          const sections = this.generatePlaylistsSections()
+          this.setState({ isRemoving: false, sections })
+        } catch (error) {
+          this.setState({ isRemoving: false })
+        }
+      })()
+    })
+  }
+
+  _handleHiddenItemPressDelete = async (id: string, rowMap: any) => {
+    const wasAlerted = await alertIfNoNetworkConnection('delete playlist')
+    if (wasAlerted) return
+
+    this.setState({ isRemoving: true }, () => {
+      (async () => {
+        try {
+          await deletePlaylist(id)
+          const row = rowMap[id]
+          row?.closeRow()
+          const sections = this.generatePlaylistsSections()
+          this.setState({ isRemoving: false, sections })
+        } catch (error) {
+          this.setState({ isRemoving: false })
+        }
+      })()
+    })
+  }
 
   render() {
-    const { isLoading, isLoadingMore, queryFrom, showNoInternetConnectionMessage } = this.state
-    const { myPlaylists, subscribedPlaylists } = this.global.playlists
-    const flatListData = queryFrom === PV.Filters._myPlaylistsKey ? myPlaylists : subscribedPlaylists
+    const { isLoading, isLoadingMore, sections, showNoInternetConnectionMessage } = this.state
+    const { globalTheme, offlineModeEnabled } = this.global
+    const showOfflineMessage = offlineModeEnabled
 
     return (
       <View style={styles.view} {...testProps('playlists_screen_view')}>
         <View style={styles.view}>
-          <TableSectionSelectors
-            handleSelectLeftItem={this.selectLeftItem}
-            screenName='PlaylistsScreen'
-            selectedLeftItemKey={queryFrom}
-          />
-          {isLoading && <ActivityIndicator />}
-          {!isLoading && flatListData && flatListData.length > 0 && (
+          {isLoading && <ActivityIndicator fillSpace />}
+          {!isLoading && this.global.session.isLoggedIn && (
             <FlatList
-              data={flatListData}
-              disableLeftSwipe={true}
-              extraData={flatListData}
+              disableLeftSwipe={false}
+              extraData={sections}
               isLoadingMore={isLoadingMore}
               ItemSeparatorComponent={this._ItemSeparatorComponent}
-              keyExtractor={(item: any) => item.id}
+              keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
+              noResultsMessage={translate('No playlists found')}
+              renderHiddenItem={this._renderHiddenItem}
               renderItem={this._renderPlaylistItem}
-              showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+              renderSectionHeader={({ section }) => (
+                <TableSectionSelectors
+                  disableFilter
+                  includePadding
+                  selectedFilterLabel={section.title}
+                  textStyle={globalTheme.headerText}
+                />
+              )}
+              sections={sections}
+              showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
             />
           )}
-          {!isLoading && queryFrom === PV.Filters._myPlaylistsKey && !this.global.session.isLoggedIn && (
+          {!isLoading && !this.global.session.isLoggedIn && (
             <MessageWithAction
+              message={translate('Login to view your playlists')}
+              testID={testIDPrefix}
               topActionHandler={this._onPressLogin}
-              topActionText='Login'
-              message='Login to view your playlists'
+              topActionText={translate('Login')}
             />
-          )}
-          {!isLoading &&
-            queryFrom === PV.Filters._myPlaylistsKey &&
-            this.global.session.isLoggedIn &&
-            flatListData.length < 1 && <MessageWithAction message='You have no subscribed playlists' />}
-          {!isLoading && queryFrom === PV.Filters._subscribedKey && flatListData.length < 1 && (
-            <MessageWithAction message='You have no subscribed playlists' />
           )}
         </View>
       </View>
     )
   }
 
-  _queryData = async (
-    filterKey: string | null,
-    queryOptions: {
-      queryPage?: number
-      searchAllFieldsText?: string
-    } = {}
-  ) => {
+  _queryData = async () => {
     const newState = {
       isLoading: false,
       isLoadingMore: false,
@@ -161,29 +229,34 @@ export class PlaylistsScreen extends React.Component<Props, State> {
     } as State
 
     const hasInternetConnection = await hasValidNetworkConnection()
-    newState.showNoInternetConnectionMessage = !hasInternetConnection
 
-    try {
-      if (filterKey === PV.Filters._myPlaylistsKey) {
-        if (this.global.session.isLoggedIn) {
-          await getLoggedInUserPlaylists(this.global)
-        }
-      } else {
-        const playlistId = this.global.session.userInfo.subscribedPlaylistIds
-
-        if (playlistId && playlistId.length > 0) {
-          await getPlaylists(playlistId, this.global)
-        }
-      }
-
-      return newState
-    } catch (error) {
+    if (!hasInternetConnection) {
+      newState.showNoInternetConnectionMessage = true
       return newState
     }
+
+    try {
+      await getLoggedInUserPlaylistsCombined()
+      const sections = this.generatePlaylistsSections()
+      newState.sections = sections
+    } catch (error) {
+      console.log('PlaylistsScreen _queryData', error)
+      newState.sections = []
+    }
+    return newState
   }
 }
 
 const styles = StyleSheet.create({
+  sectionItemText: {
+    fontSize: PV.Fonts.sizes.xxxl,
+    fontWeight: PV.Fonts.weights.bold,
+    paddingHorizontal: 8
+  },
+  sectionItemWrapper: {
+    marginBottom: 20,
+    marginTop: 28
+  },
   view: {
     flex: 1
   }

@@ -1,3 +1,4 @@
+import Config from 'react-native-config'
 import React, { getGlobal } from 'reactn'
 import { GlobalTheme } from '../../src/resources/Interfaces'
 import { darkTheme } from '../../src/styles'
@@ -7,11 +8,13 @@ import { NavItemIcon, NavItemWrapper } from './'
 
 type Props = {
   getInitialProgressValue: any
-  navigation: any
   globalTheme: GlobalTheme
+  navigation: any
 }
 
 export const NavMakeClipIcon = (props: Props) => {
+  if (Config.DISABLE_MAKE_CLIP) return null
+
   const { getInitialProgressValue, navigation } = props
 
   const handlePress = async () => {
@@ -34,7 +37,7 @@ export const NavMakeClipIcon = (props: Props) => {
   }
 
   return (
-    <NavItemWrapper handlePress={handlePress} testId='nav_make_clip_icon'>
+    <NavItemWrapper handlePress={handlePress} testID='nav_make_clip_icon'>
       <NavItemIcon name='cut' color={color} />
     </NavItemWrapper>
   )

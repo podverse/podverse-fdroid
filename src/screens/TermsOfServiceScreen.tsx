@@ -2,17 +2,16 @@ import { Alert, Linking, StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 import packageJson from '../../package.json'
 import { Divider, ScrollView, Text, View } from '../components'
+import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 
-type Props = {}
+type Props = any
 
-type State = {}
-
-export class TermsOfServiceScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Terms of Service'
-  }
+export class TermsOfServiceScreen extends React.Component<Props> {
+  static navigationOptions = () => ({
+      title: translate('Terms of Service')
+    })
 
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
@@ -26,37 +25,35 @@ export class TermsOfServiceScreen extends React.Component<Props, State> {
       <View style={styles.content} {...testProps('terms_of_service_screen_view')}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
-            Podverse will never sell or share private user data.
+            {translate('TermsOfServiceScreenText1')}
             {'\n\n'}
-            We will never put advertisements next to or within a podcast's content without that podcast's permission.
+            {translate('TermsOfServiceScreenText2')}
             {'\n\n'}
-            All audio files found on podverse.fm load from the podcaster's own public server. We do not host podcast
-            audio files ourselves.
+            {translate('TermsOfServiceScreenText3')}
             {'\n\n'}
-            All clips hosted on podverse.fm are crowd-sourced and unofficial, unless otherwise noted by the podcaster.
+            {translate('TermsOfServiceScreenText4')}
             {'\n\n'}
-            Clips load within the full episode's media file, so the user always has access to the full recording.
+            {translate('TermsOfServiceScreenText5')}
             {'\n\n'}
-            We host podcast links and content from third-party podcast feeds and sites. These have their own independent
-            privacy policies, and we have no responsibility for their content or activities.
+            {translate('TermsOfServiceScreenText6')}
+            {'\n\n'}
+            {translate('TermsOfServicesScreenText7')}
           </Text>
           <Divider style={styles.divider} />
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
-            Third Party Libraries
+            {translate('Third Party Libraries')}
           </Text>
-          {Object.keys(packageJson.dependencies).map((license) => {
-            return (
+          {Object.keys(packageJson.dependencies).map((license) => (
               <Text key={license} style={styles.text}>
                 {license}
               </Text>
-            )
-          })}
+            ))}
           <Divider style={styles.divider} />
           <RNView style={styles.copyLeftWrapper}>
             <Text
               onPress={() => this.showLeavingAppAlert('https://www.gnu.org/licenses/agpl-3.0.en.html')}
               style={styles.copyLeftText}>
-              All Podverse software is provided free and open source under the AGPLv3 license.
+              {translate('All brandName software is provided free and open source under the AGPLv3 license')}
             </Text>
           </RNView>
           <RNView style={styles.copyLeftWrapper}>

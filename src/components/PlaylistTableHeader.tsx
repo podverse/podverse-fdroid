@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
+import { translate } from '../lib/i18n'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
 import { button, core } from '../styles'
@@ -16,6 +17,7 @@ type Props = {
   isSubscribing?: boolean
   itemCount: number
   lastUpdated: string
+  testID: string
   title: string
 }
 
@@ -31,6 +33,7 @@ export const PlaylistTableHeader = (props: Props) => {
     isSubscribing,
     itemCount,
     lastUpdated,
+    testID,
     title
   } = props
 
@@ -39,45 +42,62 @@ export const PlaylistTableHeader = (props: Props) => {
       <View style={core.row}>
         {isLoading && (
           <View style={[styles.wrapper, core.view]}>
-            <ActivityIndicator />
+            <ActivityIndicator fillSpace />
           </View>
         )}
         {!isLoading && !isNotFound && (
           <View style={[styles.wrapper, core.view]}>
             <View style={styles.textWrapper}>
-              <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} numberOfLines={1} style={styles.title}>
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                numberOfLines={1}
+                style={styles.title}
+                testID={`${testID}_title`}>
                 {title}
               </Text>
               {!!createdBy && (
                 <Text
                   fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-                  isSecondary={true}
+                  isSecondary
                   numberOfLines={1}
-                  style={styles.createdBy}>
-                  by: {createdBy}
+                  style={styles.createdBy}
+                  testID={`${testID}_created_by`}>
+                  {translate('by')} {createdBy}
                 </Text>
               )}
               <View style={styles.row}>
                 <Text
                   fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-                  isSecondary={true}
+                  isSecondary
                   numberOfLines={1}
-                  style={styles.itemCount}>
-                  items: {itemCount}
+                  style={styles.itemCount}
+                  testID={`${testID}_item_count`}>
+                  {translate('items')} {itemCount}
                 </Text>
-                <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} isSecondary={true} style={styles.lastUpdated}>
+                <Text
+                  fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                  isSecondary
+                  style={styles.lastUpdated}
+                  testID={`${testID}_last_updated`}>
                   {readableDate(lastUpdated)}
                 </Text>
               </View>
             </View>
             {handleEditPress && (
-              <Icon name='pencil-alt' onPress={() => handleEditPress(id)} size={26} style={button.iconOnlyMedium} />
+              <Icon
+                name='pencil-alt'
+                onPress={() => handleEditPress(id)}
+                size={26}
+                style={button.iconOnlyMedium}
+                testID={`${testID}_edit`}
+              />
             )}
             {handleToggleSubscribe && (
               <SubscribeButton
                 handleToggleSubscribe={handleToggleSubscribe}
                 isSubscribed={isSubscribed}
                 isSubscribing={isSubscribing}
+                testID={testID}
               />
             )}
           </View>
@@ -85,7 +105,7 @@ export const PlaylistTableHeader = (props: Props) => {
         {!isLoading && isNotFound && (
           <View style={[styles.wrapper, core.view]}>
             <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.notFoundText}>
-              Playlist Not Found
+              {translate('Playlist Not Found')}
             </Text>
           </View>
         )}

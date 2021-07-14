@@ -1,17 +1,17 @@
-import { PV } from '../resources'
 import { request } from './request'
 
-export const getEpisodes = async (query: any = {}, nsfwMode: boolean) => {
+export const getEpisodes = async (query: any = {}) => {
+  const searchAllFieldsText = query.searchAllFieldsText ? encodeURIComponent(query.searchAllFieldsText) : ''
   const filteredQuery = {
     ...(query.page ? { page: query.page } : { page: 1 }),
     ...(query.sort ? { sort: query.sort } : { sort: 'top-past-week' }),
     ...(query.podcastId ? { podcastId: query.podcastId } : {}),
-    ...(query.searchAllFieldsText ? { searchAllFieldsText: query.searchAllFieldsText } : {}),
+    ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
     ...(query.includePodcast ? { includePodcast: query.includePodcast } : {}),
     ...(query.sincePubDate ? { sincePubDate: query.sincePubDate } : {})
   } as any
 
-  if (query.categories && query.categories !== PV.Filters._allCategoriesKey) {
+  if (query.categories && query.categories) {
     filteredQuery.categories = query.categories
   }
 
@@ -19,13 +19,10 @@ export const getEpisodes = async (query: any = {}, nsfwMode: boolean) => {
     return [[], 0]
   }
 
-  const response = await request(
-    {
-      endpoint: '/episode',
-      query: filteredQuery
-    },
-    nsfwMode
-  )
+  const response = await request({
+    endpoint: '/episode',
+    query: filteredQuery
+  })
 
   return response && response.data
 }
@@ -33,6 +30,14 @@ export const getEpisodes = async (query: any = {}, nsfwMode: boolean) => {
 export const getEpisode = async (id: string) => {
   const response = await request({
     endpoint: `/episode/${id}`
+  })
+
+  return response && response.data
+}
+
+export const retrieveLatestChaptersForEpisodeId = async (id: string) => {
+  const response = await request({
+    endpoint: `/episode/${id}/retrieve-latest-chapters`
   })
 
   return response && response.data

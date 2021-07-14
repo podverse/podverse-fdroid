@@ -1,19 +1,23 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React from 'reactn'
 import isEmail from 'validator/lib/isEmail'
-import { TextInput } from '.'
+import { translate } from '../lib/i18n'
 import { PV } from '../resources'
+import { Button, TextInput } from '.'
 
 type Props = {
   isLoading: boolean
   onResetPasswordPressed?: any
   style?: any
+  bottomButtons: any
 }
 
 type State = {
   email: string
   submitIsDisabled: boolean
 }
+
+const testIDPrefix = 'reset_password'
 
 export class ResetPassword extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -40,16 +44,8 @@ export class ResetPassword extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading, style } = this.props
+    const { isLoading, style, bottomButtons } = this.props
     const { submitIsDisabled } = this.state
-    const disabledStyle = submitIsDisabled ? { backgroundColor: PV.Colors.gray } : null
-    const disabledTextStyle = submitIsDisabled ? { color: PV.Colors.white } : null
-    const { fontScaleMode } = this.global
-
-    const signInButtonTextStyle =
-      PV.Fonts.fontScale.largest === fontScaleMode
-        ? [styles.signInButtonText, disabledTextStyle, { fontSize: PV.Fonts.largeSizes.md }]
-        : [styles.signInButtonText, disabledTextStyle]
 
     return (
       <View style={[styles.view, style]}>
@@ -59,21 +55,21 @@ export class ResetPassword extends React.Component<Props, State> {
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
           keyboardType='email-address'
           onChangeText={this._emailChanged}
-          placeholder='Email'
+          placeholder={translate('Email')}
           returnKeyType='done'
-          style={styles.textField}
+          testID={`${testIDPrefix}_email`}
           value={this.state.email}
         />
-        <TouchableOpacity
-          style={[styles.signInButton, disabledStyle]}
-          disabled={submitIsDisabled || isLoading}
-          onPress={this._resetPassword}>
-          {isLoading ? (
-            <ActivityIndicator animating={true} color={PV.Colors.gray} size='small' />
-          ) : (
-            <Text style={[signInButtonTextStyle, disabledTextStyle]}>Send Reset</Text>
-          )}
-        </TouchableOpacity>
+        <Button
+          disabled={submitIsDisabled}
+          isLoading={isLoading}
+          isPrimary={!submitIsDisabled}
+          onPress={this._resetPassword}
+          testID={`${testIDPrefix}_submit`}
+          text={translate('Send Reset')}
+          wrapperStyles={styles.signInButton}
+        />
+        {bottomButtons}
       </View>
     )
   }
@@ -86,25 +82,8 @@ const styles = StyleSheet.create({
     fontWeight: PV.Fonts.weights.bold,
     marginBottom: 20
   },
-  signInButton: {
-    alignItems: 'center',
-    backgroundColor: PV.Colors.white,
-    marginBottom: 300,
-    padding: 16
-  },
-  signInButtonText: {
-    color: PV.Colors.brandColor,
-    fontSize: PV.Fonts.sizes.md,
-    fontWeight: 'bold'
-  },
-  textField: {
-    backgroundColor: PV.Colors.white,
-    color: PV.Colors.black,
-    fontSize: PV.Fonts.sizes.lg,
-    marginBottom: 40,
-    minHeight: 50,
-    paddingLeft: 20
-  },
+  signInButton: {},
+  signInButtonText: {},
   view: {
     paddingHorizontal: 20,
     justifyContent: 'center',

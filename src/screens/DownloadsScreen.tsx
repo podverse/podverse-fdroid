@@ -1,10 +1,16 @@
 import { StyleSheet } from 'react-native'
 import React from 'reactn'
-import { ActionSheet, Divider, DownloadTableCell, FlatList, MessageWithAction, SwipeRowBack, View } from '../components'
+import { ActionSheet, Divider, DownloadTableCell, FlatList, SwipeRowBack, View } from '../components'
 import { cancelDownloadTask, DownloadStatus } from '../lib/downloader'
-import { isOdd, testProps } from '../lib/utility'
+import { translate } from '../lib/i18n'
+import { safeKeyExtractor, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { pauseDownloadingEpisode, removeDownloadingEpisode, resumeDownloadingEpisode } from '../state/actions/downloads'
+import {
+  DownloadTaskState,
+  pauseDownloadingEpisode,
+  removeDownloadingEpisode,
+  resumeDownloadingEpisode
+} from '../state/actions/downloads'
 
 type Props = {
   navigation?: any
@@ -15,13 +21,9 @@ type State = {
   showActionSheet: boolean
 }
 
-export class DownloadsScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: 'Downloads'
-    }
-  }
+const testIDPrefix = 'downloads_screen'
 
+export class DownloadsScreen extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
@@ -30,26 +32,29 @@ export class DownloadsScreen extends React.Component<Props, State> {
     }
   }
 
+  static navigationOptions = () => ({
+    title: translate('Downloads')
+  })
+
   _ItemSeparatorComponent = () => {
     return <Divider />
   }
 
-  _handleItemPress = (downloadTask: any) => {
-    if (downloadTask.status === DownloadStatus.FINISHED) {
+  _handleItemPress = (downloadTaskState: DownloadTaskState) => {
+    if (downloadTaskState.status === DownloadStatus.FINISHED) {
       this.setState({
-        selectedItem: downloadTask,
+        selectedItem: downloadTaskState,
         showActionSheet: true
       })
       return
-    } else if (downloadTask.status === DownloadStatus.PAUSED) {
-      resumeDownloadingEpisode(downloadTask.episodeId)
+    } else if (downloadTaskState.status === DownloadStatus.PAUSED) {
+      resumeDownloadingEpisode(downloadTaskState)
     } else {
-      pauseDownloadingEpisode(downloadTask.episodeId)
+      pauseDownloadingEpisode(downloadTaskState)
     }
   }
 
-  _handleCancelPress = () => {
-    return new Promise((resolve, reject) => {
+  _handleCancelPress = () => new Promise((resolve) => {
       this.setState(
         {
           selectedItem: null,
@@ -58,27 +63,29 @@ export class DownloadsScreen extends React.Component<Props, State> {
         resolve
       )
     })
-  }
 
-  _renderItem = ({ item, index }) => {
-    return (
+  _renderItem = ({ item, index }) => (
       <DownloadTableCell
         bytesTotal={item.bytesTotal}
         bytesWritten={item.bytesWritten}
         completed={item.completed}
-        episodeTitle={item.episodeTitle}
-        hasZebraStripe={isOdd(index)}
+        {...(item.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
         onPress={() => this._handleItemPress(item)}
         percent={item.percent}
         podcastImageUrl={item.podcastImageUrl}
-        podcastTitle={item.podcastTitle}
+        {...(item.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
         status={item.status}
+        testID={`${testIDPrefix}_download_item_${index}`}
       />
     )
-  }
 
-  _renderHiddenItem = ({ item }, rowMap) => (
-    <SwipeRowBack onPress={() => this._handleHiddenItemPress(item.episodeId, rowMap)} text='Remove' />
+  _renderHiddenItem = ({ item, index }, rowMap) => (
+    <SwipeRowBack
+      onPress={() => this._handleHiddenItemPress(item.episodeId, rowMap)}
+      testID={`${testIDPrefix}_download_item_${index}`}
+      text='Remove'
+      styles={{ paddingVertical: 6 }}
+    />
   )
 
   _handleHiddenItemPress = async (selectedId, rowMap) => {
@@ -94,24 +101,25 @@ export class DownloadsScreen extends React.Component<Props, State> {
 
     return (
       <View style={styles.view} {...testProps('downloads_screen_view')}>
-        {!downloadsArray || (downloadsArray.length === 0 && <MessageWithAction message='No downloads in progress' />)}
-        {downloadsArray.length > 0 && (
-          <FlatList
-            data={downloadsArray}
-            dataTotalCount={downloadsArray.length}
-            disableLeftSwipe={false}
-            extraData={downloadsArray}
-            keyExtractor={(item: any) => item.episodeId}
-            ItemSeparatorComponent={this._ItemSeparatorComponent}
-            renderHiddenItem={this._renderHiddenItem}
-            renderItem={this._renderItem}
-          />
-        )}
+        <FlatList
+          data={downloadsArray}
+          dataTotalCount={downloadsArray.length}
+          disableLeftSwipe={false}
+          extraData={downloadsArray}
+          keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.episodeId)}
+          ItemSeparatorComponent={this._ItemSeparatorComponent}
+          noResultsMessage={translate('No downloads in progress')}
+          renderHiddenItem={this._renderHiddenItem}
+          renderItem={this._renderItem}
+        />
         {selectedItem && (
           <ActionSheet
             handleCancelPress={this._handleCancelPress}
-            items={() => PV.ActionSheet.media.moreButtons(selectedItem, navigation, this._handleCancelPress, null)}
+            items={() =>
+              PV.ActionSheet.media.moreButtons(selectedItem, navigation, { handleDismiss: this._handleCancelPress })
+            }
             showModal={showActionSheet}
+            testID={testIDPrefix}
           />
         )}
       </View>

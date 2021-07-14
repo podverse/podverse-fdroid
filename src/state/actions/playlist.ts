@@ -1,8 +1,11 @@
 import { getGlobal, setGlobal } from 'reactn'
 import { combineAndSortPlaylistItems } from '../../lib/utility'
+import { PV } from '../../resources'
+import PVEventEmitter from '../../services/eventEmitter'
 import {
   addOrRemovePlaylistItem as addOrRemovePlaylistItemService,
   createPlaylist as createPlaylistService,
+  deletePlaylistOnServer as deletePlaylistService,
   getPlaylist as getPlaylistService,
   getPlaylists as getPlaylistsService,
   toggleSubscribeToPlaylist as toggleSubscribeToPlaylistService,
@@ -35,6 +38,12 @@ export const addOrRemovePlaylistItem = async (playlistId: string, episodeId?: st
 export const toggleSubscribeToPlaylist = async (id: string) => {
   const globalState = getGlobal()
   const subscribedPlaylistIds = await toggleSubscribeToPlaylistService(id)
+
+  let subscribedPlaylists = []
+  if (subscribedPlaylistIds && subscribedPlaylistIds.length > 0) {
+    subscribedPlaylists = await getPlaylistsService({ playlistId: subscribedPlaylistIds })
+  }
+
   setGlobal({
     session: {
       ...globalState.session,
@@ -42,11 +51,19 @@ export const toggleSubscribeToPlaylist = async (id: string) => {
         ...globalState.session.userInfo,
         subscribedPlaylistIds
       }
+    },
+    playlists: {
+      myPlaylists: globalState.playlists.myPlaylists,
+      subscribedPlaylists
     }
+  }, () => {
+    PVEventEmitter.emit(PV.Events.PLAYLISTS_UPDATED)
   })
+
+  return subscribedPlaylistIds
 }
 
-export const getPlaylists = async (playlistId: string) => {
+export const getPlaylists = async (playlistId: string | []) => {
   const globalState = getGlobal()
   const results = await getPlaylistsService({ playlistId })
   setGlobal({
@@ -113,6 +130,8 @@ export const updatePlaylist = async (data: any) => {
       flatListDataTotalCount: screenPlaylistFlatListData.length,
       playlist: newPlaylist
     }
+  }, () => {
+    PVEventEmitter.emit(PV.Events.PLAYLISTS_UPDATED)
   })
 }
 
@@ -126,5 +145,22 @@ export const createPlaylist = async (data: any) => {
       myPlaylists: [newPlaylist, ...playlistsFlatListData],
       subscribedPlaylists: globalState.playlists.subscribedPlaylists
     }
+  }, () => {
+    PVEventEmitter.emit(PV.Events.PLAYLISTS_UPDATED)
+  })
+}
+
+export const deletePlaylist = async (id: string) => {
+  await deletePlaylistService(id)
+  const globalState = getGlobal()
+  const filteredPlaylistsFlatListData = globalState.playlists.myPlaylists.filter((x: any) => x.id !== id)
+
+  setGlobal({
+    playlists: {
+      myPlaylists: [...filteredPlaylistsFlatListData],
+      subscribedPlaylists: globalState.playlists.subscribedPlaylists
+    }
+  }, () => {
+    PVEventEmitter.emit(PV.Events.PLAYLISTS_UPDATED)
   })
 }

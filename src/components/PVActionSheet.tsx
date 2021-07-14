@@ -1,9 +1,9 @@
-import { Animated, Modal, Text, TouchableHighlight, View } from 'react-native'
+import { Animated, Modal, Text, TouchableHighlight, View, TouchableOpacity } from 'react-native'
 import React from 'reactn'
-import { ActivityIndicator } from '.'
-import { safelyUnwrapNestedVariable } from '../lib/utility'
+import { safelyUnwrapNestedVariable, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { actionSheetStyles } from '../styles'
+import { ActivityIndicator } from '.'
 
 type Props = {
   handleCancelPress?: any
@@ -11,6 +11,7 @@ type Props = {
   message?: string
   omitCancel?: boolean
   showModal?: boolean
+  testID: string
   title?: string
 }
 
@@ -22,7 +23,7 @@ type State = {
 
 export class PVActionSheet extends React.Component<Props, State> {
   constructor(props: Props) {
-    super()
+    super(props)
 
     this.state = {}
   }
@@ -35,16 +36,16 @@ export class PVActionSheet extends React.Component<Props, State> {
   }
 
   generateButtons = (items: any[]) => {
-    const { handleCancelPress, message, title } = this.props
+    const { handleCancelPress, message, testID, title } = this.props
     const { isLoadingQueueLast, isLoadingQueueNext } = this.state
     const { fontScaleMode, globalTheme } = this.global
     const buttons = []
 
-    if (items && items.length > 0) {
+    if (items && items.length >= 0) {
       items.forEach((item, index) => {
         const buttonStyle = [actionSheetStyles.button]
 
-        if (item.key === 'editClip') {
+        if (item.key === PV.Keys.edit_clip) {
           buttonStyle.push(actionSheetStyles.buttonTop)
         } else if (index === 0 && !message && !title) {
           buttonStyle.push(actionSheetStyles.buttonTop)
@@ -52,16 +53,16 @@ export class PVActionSheet extends React.Component<Props, State> {
           buttonStyle.push(actionSheetStyles.buttonBottom)
         }
 
-        if (item.key === 'deleteEpisode' || item.key === 'deleteClip') {
+        if (item.key === PV.Keys.delete_episode || item.key === PV.Keys.delete_clip) {
           buttonStyle.push(globalTheme.actionSheetButtonDelete)
         } else {
           buttonStyle.push(globalTheme.actionSheetButton)
         }
 
         let buttonTextStyle = globalTheme.actionSheetButtonText
-        if (item.key === 'deleteEpisode' || item.key === 'deleteClip') {
+        if (item.key === PV.Keys.delete_episode || item.key === PV.Keys.delete_clip) {
           buttonTextStyle = globalTheme.actionSheetButtonTextDelete
-        } else if (item.key === 'editClip') {
+        } else if (item.key === PV.Keys.edit_clip) {
           buttonTextStyle = globalTheme.actionSheetButtonTextEdit
         }
 
@@ -70,11 +71,11 @@ export class PVActionSheet extends React.Component<Props, State> {
           buttonTextStyle.push({ fontSize: PV.Fonts.largeSizes.md })
         }
 
-        const isQueueButton = item.key === 'queueNext' || item.key === 'queueLast'
+        const isQueueButton = item.key === PV.Keys.queue_next || item.key === PV.Keys.queue_last
         const queueOnPress = () => {
           this.setState(
             {
-              ...(item.key === 'queueNext'
+              ...(item.key === PV.Keys.queue_next
                 ? {
                     isLoadingQueueNext: true,
                     isLoadingQueueLast: false
@@ -84,12 +85,14 @@ export class PVActionSheet extends React.Component<Props, State> {
                     isLoadingQueueLast: true
                   })
             },
-            async () => {
-              await item.onPress()
-              this.setState({
-                isLoadingQueueLast: false,
-                isLoadingQueueNext: false
-              })
+            () => {
+              (async () => {
+                await item.onPress()
+                this.setState({
+                  isLoadingQueueLast: false,
+                  isLoadingQueueNext: false
+                })
+              })()
             }
           )
         }
@@ -102,14 +105,18 @@ export class PVActionSheet extends React.Component<Props, State> {
             key={item.key}
             onPress={onPress}
             style={buttonStyle}
+            {...(testID ? testProps(`${testID}_action_sheet_${item.key}_button`) : {})}
             underlayColor={globalTheme.actionSheetButtonUnderlay?.backgroundColor}>
             <View style={actionSheetStyles.buttonRow}>
-              <Text numberOfLines={1} style={[actionSheetStyles.buttonText, buttonTextStyle]}>
+              <Text
+                numberOfLines={1}
+                style={[actionSheetStyles.buttonText, buttonTextStyle]}
+                {...(testID ? testProps(`${testID}_action_sheet_${item.key}_text`) : {})}>
                 {item.text}
               </Text>
               {item.isDownloading && <ActivityIndicator size='small' styles={actionSheetStyles.activityIndicator} />}
-              {((item.key === 'queueNext' && isLoadingQueueNext) ||
-                (item.key === 'queueLast' && isLoadingQueueLast)) && (
+              {((item.key === PV.Keys.queue_next && isLoadingQueueNext) ||
+                (item.key === PV.Keys.queue_last && isLoadingQueueLast)) && (
                 <ActivityIndicator size='small' styles={actionSheetStyles.activityIndicator} />
               )}
             </View>
@@ -125,9 +132,10 @@ export class PVActionSheet extends React.Component<Props, State> {
 
         buttons.push(
           <TouchableHighlight
-            key='cancel'
+            key={PV.Keys.cancel}
             onPress={handleCancelPress}
             style={[actionSheetStyles.buttonCancel, globalTheme.actionSheetButtonCancel]}
+            {...(testID ? testProps(`${testID}_action_sheet_${PV.Keys.cancel}_button`) : {})}
             underlayColor={safelyUnwrapNestedVariable(
               () => globalTheme.actionSheetButtonCancelUnderlay.backgroundColor,
               ''
@@ -141,6 +149,12 @@ export class PVActionSheet extends React.Component<Props, State> {
     }
 
     return buttons
+  }
+
+  attemptClose = () => {
+    if (this.props.handleCancelPress) {
+      this.props.handleCancelPress()
+    }
   }
 
   render() {
@@ -159,8 +173,11 @@ export class PVActionSheet extends React.Component<Props, State> {
     }
 
     return (
-      <Modal transparent={true} visible={showModal}>
-        <View style={[actionSheetStyles.backdrop, globalTheme.modalBackdrop]}>
+      <Modal transparent visible={showModal} onRequestClose={this.attemptClose}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={this.attemptClose}
+          style={[actionSheetStyles.backdrop, globalTheme.modalBackdrop]}>
           <Animated.View
             style={[
               actionSheetStyles.animatedView,
@@ -180,7 +197,7 @@ export class PVActionSheet extends React.Component<Props, State> {
             )}
             {buttons}
           </Animated.View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     )
   }

@@ -1,11 +1,7 @@
-import { hasValidDownloadingConnection, hasValidNetworkConnection } from '../lib/network'
-import { PV } from '../resources'
 import { getBearerToken } from './auth'
 import { request } from './request'
 
 export const createMediaRef = async (data: any) => {
-  await hasValidNetworkConnection()
-  await hasValidDownloadingConnection()
   const bearerToken = await getBearerToken()
 
   const response = await request({
@@ -42,18 +38,21 @@ export const getMediaRef = async (id: string) => {
   return response && response.data
 }
 
-export const getMediaRefs = async (query: any = {}, nsfwMode: boolean) => {
+export const getMediaRefs = async (query: any = {}) => {
+  const searchAllFieldsText = query.searchAllFieldsText ? encodeURIComponent(query.searchAllFieldsText) : ''
+
   const filteredQuery = {
     ...(query.page ? { page: query.page } : { page: 1 }),
     ...(query.sort ? { sort: query.sort } : { sort: 'top-past-week' }),
     ...(query.podcastId ? { podcastId: query.podcastId } : {}),
     ...(query.episodeId ? { episodeId: query.episodeId } : {}),
-    ...(query.searchAllFieldsText ? { searchAllFieldsText: query.searchAllFieldsText } : {}),
+    ...(searchAllFieldsText ? { searchAllFieldsText } : {}),
     ...(query.includeEpisode ? { includeEpisode: true } : {}),
-    ...(query.includePodcast ? { includePodcast: true } : {})
+    ...(query.includePodcast ? { includePodcast: true } : {}),
+    ...(query.allowUntitled ? { allowUntitled: true } : {})
   } as any
 
-  if (query.categories && query.categories !== PV.Filters._allCategoriesKey) {
+  if (query.categories) {
     filteredQuery.categories = query.categories
   }
 
@@ -65,13 +64,10 @@ export const getMediaRefs = async (query: any = {}, nsfwMode: boolean) => {
     return [0, 0]
   }
 
-  const response = await request(
-    {
-      endpoint: '/mediaRef',
-      query: filteredQuery
-    },
-    nsfwMode
-  )
+  const response = await request({
+    endpoint: '/mediaRef',
+    query: filteredQuery
+  })
 
   return response && response.data
 }

@@ -1,9 +1,34 @@
+/* eslint-disable @typescript-eslint/prefer-regexp-exec */
 import AsyncStorage from '@react-native-community/async-storage'
 import he from 'he'
+import { NowPlayingItem } from 'podverse-shared'
+import Config from 'react-native-config'
+// import { getUserAgent } from 'react-native-device-info'
 import { PV } from '../resources'
-import { NowPlayingItem } from './NowPlayingItem'
 
 const cheerio = require('react-native-cheerio')
+
+// let userAgent = ''
+const userAgent = ''
+
+/*
+ * getUserAgent sometimes crashes in the iOS simulator. This is apparently related
+ * to parallel process handling, so we are trying to only call the getUserAgent
+ * method once on app launch, then access that value in the userAgent constant.
+ */
+export const setAppUserAgent = () => {
+  try {
+    // NOTE: Disabled for F-Droid
+    // userAgent = await getUserAgent()
+  } catch (e) {
+    console.log('setAppUserAgent', e)
+  }
+}
+
+export const getAppUserAgent = () => {
+  return `${Config.USER_AGENT_PREFIX || 'Unknown App'}/${`${Config.USER_AGENT_APP_TYPE}` ||
+    'Unknown App Type'}/${userAgent}`
+}
 
 export const safelyUnwrapNestedVariable = (func: any, fallbackValue: any) => {
   try {
@@ -14,17 +39,18 @@ export const safelyUnwrapNestedVariable = (func: any, fallbackValue: any) => {
   }
 }
 
+const getMonth = (date: any) => {
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return monthNames[date.getMonth()]
+}
+
 export const readableDate = (date: string) => {
   const dateObj = new Date(date)
   const year = dateObj.getFullYear()
-  const month = dateObj.getMonth() + 1
+  const monthAbbreviation = getMonth(dateObj)
   const day = dateObj.getDate()
 
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-
-  return month + '/' + day + '/' + year
+  return `${monthAbbreviation} ${day}, ${year}`
 }
 
 export const getHHMMSSArray = (sec: number) => {
@@ -33,10 +59,10 @@ export const getHHMMSSArray = (sec: number) => {
   const delimitedArray = str.split(':')
 
   if (delimitedArray.length === 1) {
-    delimitedArray.unshift(0)
-    delimitedArray.unshift(0)
+    delimitedArray.unshift('0')
+    delimitedArray.unshift('0')
   } else if (delimitedArray.length === 2) {
-    delimitedArray.unshift(0)
+    delimitedArray.unshift('0')
   }
 
   const parsedArray = delimitedArray.map((x) => parseInt(x, 10))
@@ -84,6 +110,21 @@ export const convertSecToHHMMSS = (sec: number) => {
   return result
 }
 
+export const convertSecToHhoursMMinutes = (sec: number) => {
+  let totalSec = Math.floor(sec)
+  const hours = Math.floor(totalSec / 3600)
+  totalSec %= 3600
+  const minutes = Math.floor(totalSec / 60)
+
+  let result = `${minutes} min`
+
+  if (hours >= 1) {
+    result = `${hours} hr ` + result
+  }
+
+  return result
+}
+
 export const readableClipTime = (startTime: number, endTime?: number) => {
   const s = convertSecToHHMMSS(startTime)
   if ((startTime || startTime === 0) && endTime) {
@@ -94,20 +135,44 @@ export const readableClipTime = (startTime: number, endTime?: number) => {
   }
 }
 
+export const checkIfStringContainsHTMLTags = (text: string) => {
+  if (text) {
+    // eslint-disable-next-line max-len
+    return /<(br|basefont|hr|input|source|frame|param|area|meta|!--|col|link|option|base|img|wbr|!DOCTYPE).*?>|<(a|abbr|acronym|address|applet|article|aside|audio|b|bdi|bdo|big|blockquote|body|button|canvas|caption|center|cite|code|colgroup|command|datalist|dd|del|details|dfn|dialog|dir|div|dl|dt|em|embed|fieldset|figcaption|figure|font|footer|form|frameset|head|header|hgroup|h1|h2|h3|h4|h5|h6|html|i|iframe|ins|kbd|keygen|label|legend|li|map|mark|menu|meter|nav|noframes|noscript|object|ol|optgroup|output|p|pre|progress|q|rp|rt|ruby|s|samp|script|section|select|small|span|strike|strong|style|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|title|tr|track|tt|u|ul|var|video).*?<\/\2>/i.test(
+      text
+    )
+  }
+  return false
+}
+
+export const replaceLinebreaksWithBrTags = (text: string) => {
+  if (text && !checkIfStringContainsHTMLTags(text)) {
+    const linebreaksRegex = /(?:\r\n|\r|\n)/g
+    text = text.replace(linebreaksRegex, '<br>')
+  }
+  return text
+}
+
 export const removeHTMLFromString = (text: string) => {
-  const htmlEntitiesRegex = /(<([^>]+)>)|(\r?\n|\r)/gi
-  return text.replace(htmlEntitiesRegex, '')
+  if (text) {
+    const htmlEntitiesRegex = /<[^>]*>?/gm
+    text = text.replace(htmlEntitiesRegex, '')
+  }
+  return text
 }
 
 export const decodeHTMLString = (text: string) => {
-  const limitSingleSpaceRegex = /\s+/g
-  const newString = text.replace(limitSingleSpaceRegex, ' ')
-  return he.decode(newString)
+  if (text) {
+    const limitSingleSpaceRegex = /\s+/g
+    const newString = text.replace(limitSingleSpaceRegex, ' ')
+    return he.decode(newString)
+  }
+  return text
 }
 
 export const removeHTMLAttributesFromString = (html: string) => {
   const $ = cheerio.load(html)
-  $('*').each(function(x: any) {
+  $('*').each(function() {
     this.attribs = {
       ...(this.attribs && this.attribs.href ? { href: this.attribs.href } : {})
     }
@@ -116,10 +181,18 @@ export const removeHTMLAttributesFromString = (html: string) => {
   return $.html()
 }
 
+export const removeExtraInfoFromEpisodeDescription = (html: string) => {
+  html = html.replace('<p>Show Notes</p>', '')
+  return html.replace(/<p>\s*<\/p>/, '')
+}
+
 export const filterHTMLElementsFromString = (html: string) => {
-  let finalHtml = html
-  finalHtml = finalHtml.replace(/<audio.*>.*?<\/audio>|<video.*>.*?<\/video>|<img.*>.*?<\/img>|<img.*>/gi, '')
-  return finalHtml
+  if (html) {
+    // eslint-disable-next-line max-len
+    const finalHtml = html.replace(/<audio.*>.*?<\/audio>|<video.*>.*?<\/video>|<iframe.*>.*?<\/iframe>|<img.*>.*?<\/img>|<img.*>/gi, '')
+    return finalHtml
+  }
+  return html
 }
 
 export const formatTitleViewHtml = (episode: any) => {
@@ -130,15 +203,7 @@ export const formatTitleViewHtml = (episode: any) => {
   } else if (episode.title) {
     return `<p>${episode.title}</p>`
   } else {
-    return 'untitled episode'
-  }
-}
-
-export const convertURLToSecureProtocol = (url?: string) => {
-  if (url && url.indexOf('http://') > -1) {
-    return url.replace('http://', 'https://')
-  } else {
-    return url
+    return 'Untitled Episode'
   }
 }
 
@@ -174,8 +239,8 @@ export const generateCategoryItems = (categories: any[]) => {
   if (categories && categories.length > 0) {
     for (const category of categories) {
       items.push({
-        label: category.title,
-        value: category.id
+        label: category?.title,
+        value: category?.id
       })
     }
   }
@@ -191,17 +256,18 @@ export const combineAndSortPlaylistItems = (episodes: [any], mediaRefs: [any], i
     const isSortedItem = Array.isArray(itemsOrder) && itemsOrder.some((id) => x.id === id)
     if (!isSortedItem) {
       return x
-    } else {
+    } else if (x) {
       remainingPlaylistItems.push(x)
     }
   })
 
-  const sortedItems = itemsOrder.map((id: string) => {
+  const sortedItems = itemsOrder.reduce((results: any[], id: string) => {
     const items = remainingPlaylistItems.filter((x: any) => x.id === id)
     if (items.length > 0) {
-      return items[0]
+      results.push(items[0])
     }
-  })
+    return results
+  }, [])
 
   return [...sortedItems, ...unsortedItems]
 }
@@ -306,28 +372,34 @@ export const removeArticles = (str: string) => {
   return str
 }
 
-export const checkIfIdMatchesClipIdOrEpisodeId = (
+export const checkIfIdMatchesClipIdOrEpisodeIdOrAddByUrl = (
   id?: string,
   clipId?: string,
   episodeId?: string,
   addByRSSPodcastFeedUrl?: string
 ) => {
-  return (
-    (clipId && id === clipId) ||
-    (!clipId && addByRSSPodcastFeedUrl && id === addByRSSPodcastFeedUrl) ||
-    (!clipId && episodeId && id === episodeId)
-  )
+  let matches = false
+
+  if (addByRSSPodcastFeedUrl) {
+    matches = addByRSSPodcastFeedUrl === id
+  } else if (clipId) {
+    matches = clipId === id
+  } else if (episodeId) {
+    matches = episodeId === id
+  }
+
+  return matches
 }
 
-export const createEmailLinkUrl = (email: string, subject?: string, body?: string) => {
-  let str = 'mailto:' + email + '?'
-  str += encodeURI(subject ? 'subject=' + subject + '&' : '')
-  str += encodeURI(body ? 'body=' + body : '')
+export const createEmailLinkUrl = (obj: any) => {
+  let str = 'mailto:' + obj.email + '?'
+  str += encodeURI(obj.subject ? 'subject=' + obj.subject + '&' : '')
+  str += encodeURI(obj.body ? 'body=' + obj.body : '')
   return str
 }
 
 export const getHHMMSSMatchesInString = (str: string) => {
-  const regex = /(?:2[0-3]|[01]?[0-9]):[0-5][0-9]:[0-5][0-9]/g
+  const regex = /([0-9]?[0-9]:[0-5]?[0-9]:[0-5][0-9])|([0-5]?[0-9]:[0-5][0-9])/g
   return str.match(regex)
 }
 
@@ -336,22 +408,33 @@ const createHHMMSSAnchorTag = (hhmmss: string) => {
   return `<a data-start-time='${sec}' href='#'>${hhmmss}</a>`
 }
 
-export const convertHHMMSSToAnchorTags = (html: string) => {
-  const matches = getHHMMSSMatchesInString(html) || []
-  let formattedHtml = html
-  for (const match of matches) {
-    const replace = match
-    const regex = new RegExp(replace, 'g')
-    const anchorTag = createHHMMSSAnchorTag(match)
-    formattedHtml = formattedHtml.replace(regex, anchorTag)
-  }
+export const convertTranscriptTimestampToSeconds = (timestamp: string) => {
+  // SRT time stamps use this formatting: 00:02:45,170
+  let hhmmss = timestamp.split(',')[0]
+  // VTT time stamps use this formatting: 00:02:45.170
+  hhmmss = timestamp.split('.')[0]
+  return convertHHMMSSToSeconds(hhmmss)  
+}
 
-  return formattedHtml
+export const convertHHMMSSToAnchorTags = (html: string) => {
+  if (html) {
+    const matches = getHHMMSSMatchesInString(html) || []
+    let formattedHtml = html
+    for (const match of matches) {
+      const replace = match
+      const regex = new RegExp(replace, 'g')
+      const anchorTag = createHHMMSSAnchorTag(match)
+      formattedHtml = formattedHtml.replace(regex, anchorTag)
+    }
+
+    return formattedHtml
+  }
+  return html
 }
 
 export function validateHHMMSSString(hhmmss: string) {
   const regex = new RegExp(
-    // tslint:disable-next-line: max-line-length
+    // eslint-disable-next-line max-len
     '^(([0-9][0-9]):([0-5][0-9]):([0-5][0-9]))$|(([0-9]):([0-5][0-9]):([0-5][0-9]))$|^(([0-5][0-9]):([0-5][0-9]))$|^(([0-9]):([0-5][0-9]))$|^([0-5][0-9])$|^([0-9])'
   )
   return regex.test(hhmmss)
@@ -379,7 +462,7 @@ export function convertHHMMSSToSeconds(hhmmssString: string) {
       }
 
       hours = hours * 3600
-      minutes = minutes * 60
+      minutes = minutes ? minutes * 60 : 0
     } else if (hhmmssArray.length === 2) {
       minutes = parseInt(hhmmssArray[0], 10)
       seconds = parseInt(hhmmssArray[1], 10)
@@ -418,7 +501,7 @@ export const convertToSortableTitle = (title: string) => {
   return sortableTitle ? sortableTitle.replace(/#/g, '') : ''
 }
 
-export const hasAtLeastXCharacters = (str?: string, x: number = 8) => {
+export const hasAtLeastXCharacters = (str?: string, x = 8) => {
   return str && str.match(`^(?=.{${x},})`) ? true : false
 }
 
@@ -450,33 +533,83 @@ export const getMakeClipIsPublic = async () => {
 
 export const isOdd = (num: number) => num % 2 === 1
 
-export const setCategoryQueryProperty = (queryFrom?: any, selectedCategory?: any, selectedSubCategory?: any) => {
+export const setCategoryQueryProperty = (queryFrom?: any, selectedCategory?: any, selectedCategorySub?: any) => {
   if (queryFrom === PV.Filters._categoryKey && selectedCategory) {
     return { categories: selectedCategory }
-  } else if (
-    queryFrom === PV.Filters._categoryKey &&
-    selectedSubCategory &&
-    selectedSubCategory !== PV.Filters._allCategoriesKey
-  ) {
-    return { categories: selectedSubCategory }
+  } else if (queryFrom === PV.Filters._categoryKey && selectedCategorySub) {
+    return { categories: selectedCategorySub }
   } else {
     return {}
   }
 }
 
+export const isValidDate = (date: any) => date instanceof Date && !isNaN(date as any)
+
 export const isValidUrl = (str?: string) => {
-  if (!str) return false
+  const regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/
+  return str ? regex.test(str) : false
+}
 
-  try {
-    // tslint:disable-next-line:no-unused-expression
-    new URL(str)
-  } catch (_) {
-    return false
-  }
-
-  return true
+export const convertUrlToSecureHTTPS = (originalUrl: string) => {
+  return originalUrl ? originalUrl.replace('http://', 'https://') : ''
 }
 
 export const testProps = (id: string) => {
   return { testID: id, accessibilityLabel: id }
+}
+
+export const getUniqueArrayByKey = (arr: any[], key: string) => {
+  return [...new Map(arr.map((item: any) => [item[key], item])).values()]
+}
+
+export const generateQueryParams = (query: any) => {
+  return Object.keys(query)
+    .map((key) => {
+      return `${key}=${query[key]}`
+    })
+    .join('&')
+}
+
+export const overrideImageUrlWithChapterImageUrl = (nowPlayingItem: any, currentChapter: any) => {
+  let imageUrl = nowPlayingItem ? nowPlayingItem.podcastImageUrl : ''
+  if (nowPlayingItem && !nowPlayingItem.clipId && currentChapter && currentChapter.imageUrl) {
+    imageUrl = currentChapter.imageUrl
+  }
+  return imageUrl
+}
+
+export const parseOpmlFile = (data: any, topLevel = false): string[] => {
+  let outlineArr = data
+  if (topLevel) {
+    outlineArr = data.opml?.body[0]?.outline || []
+  }
+
+  const resultArr = new Array<string>()
+  for (const item of outlineArr) {
+    if (item.$?.type?.toLowerCase() === 'rss') {
+      const url = item.$?.xmlurl || item.$?.xmlUrl
+      if (url) {
+        resultArr.push(url)
+      }
+    } else {
+      if (item.outline) {
+        resultArr.push(...parseOpmlFile(item.outline))
+      }
+    }
+  }
+
+  return resultArr
+}
+
+export const numberWithCommas = (x?: number) => {
+  if (!x || x === 0) return x  
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+export const safeKeyExtractor = (listName: string, index: number, id?: string) => {
+  if (id) {
+    return id
+  } else {
+    return `${listName}_${index}`
+  }
 }

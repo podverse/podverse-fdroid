@@ -1,7 +1,8 @@
+import { NowPlayingItem } from 'podverse-shared'
 import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import React from 'reactn'
-import { NowPlayingItem } from '../lib/NowPlayingItem'
-import { readableClipTime } from '../lib/utility'
+import { translate } from '../lib/i18n'
+import { readableClipTime, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { Text } from './'
 
@@ -10,27 +11,25 @@ type Props = {
   nowPlayingItem: NowPlayingItem
 }
 
-type State = {}
-
-export class PlayerClipInfoBar extends React.PureComponent<Props, State> {
+export class PlayerClipInfoBar extends React.PureComponent<Props> {
   render() {
     const { handleOnPress, nowPlayingItem } = this.props
     const { clipEndTime, clipStartTime } = nowPlayingItem
     const { globalTheme } = this.global
 
     return (
-      <TouchableWithoutFeedback onPress={handleOnPress}>
+      <TouchableWithoutFeedback onPress={handleOnPress} {...testProps('player_clip_info_bar')}>
         <View style={[styles.wrapper, globalTheme.player]}>
           <Text
             fontSizeLargestScale={PV.Fonts.largeSizes.md}
             numberOfLines={1}
             style={[styles.title, globalTheme.playerText]}>
-            {nowPlayingItem.clipTitle || 'untitled clip'}
+            {nowPlayingItem.clipTitle || translate('Untitled Clip')}
           </Text>
           {!!clipStartTime && (
             <Text
               fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-              isSecondary={true}
+              isSecondary
               numberOfLines={1}
               style={[styles.time, globalTheme.playerText]}>
               {readableClipTime(clipStartTime, clipEndTime)}

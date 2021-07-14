@@ -19,7 +19,8 @@ export const NavQueueIcon = (props: Props) => {
       routeName: PV.RouteNames.QueueScreen,
       params: {
         isTransparent,
-        showBackButton
+        showBackButton,
+        allowViewTypeChange: true
       }
     })
   }
@@ -30,9 +31,9 @@ export const NavQueueIcon = (props: Props) => {
   }
 
   return (
-    <NavItemWrapper handlePress={handlePress} testId='nav_queue_icon'>
+    <NavItemWrapper handlePress={handlePress} testID='nav_queue_icon'>
       <NavItemIcon name='list' color={color} />
-      {/*<Image
+      {/* <Image
         source={PV.Images.QUEUE}
         style={[navHeader.buttonIcon, { tintColor: '#fff', width: PV.Icons.NAV, height: PV.Icons.NAV }]}
       />*/}

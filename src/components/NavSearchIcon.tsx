@@ -1,12 +1,15 @@
 import React from 'react'
-import { NavItemIcon, NavItemWrapper } from '.'
+import Config from 'react-native-config'
 import { PV } from '../resources'
+import { NavItemIcon, NavItemWrapper } from '.'
 
 type Props = {
   navigation: any
 }
 
 export const NavSearchIcon = (props: Props) => {
+  if (Config.DISABLE_SEARCH) return null
+
   const { navigation } = props
 
   const handlePress = () => {
@@ -14,7 +17,7 @@ export const NavSearchIcon = (props: Props) => {
   }
 
   return (
-    <NavItemWrapper handlePress={handlePress} testId='nav_search_icon'>
+    <NavItemWrapper handlePress={handlePress} testID='nav_search_icon'>
       <NavItemIcon name='search' />
     </NavItemWrapper>
   )

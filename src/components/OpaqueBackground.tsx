@@ -8,20 +8,20 @@ import { View } from './'
 
 type Props = {
   children?: any
-  nowPlayingItem?: any
+  imageUrl?: string
 }
 
 export const OpaqueBackground = (props: Props) => {
-  const { children, nowPlayingItem } = props
+  const { children, imageUrl } = props
   const [globalTheme] = useGlobal('globalTheme')
 
-  const bgImageSource = nowPlayingItem && nowPlayingItem.podcastImageUrl ? { uri: nowPlayingItem.podcastImageUrl } : {}
+  const bgImageSource = imageUrl ? { uri: imageUrl } : {}
   const backdropColor =
-    globalTheme === darkTheme ? { backgroundColor: PV.Colors.blackOpaque } : { backgroundColor: PV.Colors.whiteOpaque }
+    globalTheme === darkTheme ? { backgroundColor: PV.Colors.ink } : { backgroundColor: PV.Colors.white }
 
   return (
     <ImageBackground blurRadius={65} source={bgImageSource} style={styles.imageBackground}>
-      <View style={[styles.viewBackdrop, backdropColor, navHeader.headerHeight]} transparent={true}>
+      <View style={[styles.viewBackdrop, backdropColor, navHeader.headerHeight]} transparent>
         <SafeAreaView
           forceInset={{ bottom: 'always', top: 'always' }}
           style={{

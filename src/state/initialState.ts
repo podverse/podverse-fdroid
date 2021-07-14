@@ -1,5 +1,6 @@
 import { PV } from '../resources'
 import { InitialState } from '../resources/Interfaces'
+import { DEFAULT_BOOST_PAYMENT, DEFAULT_STREAMING_PAYMENT } from './actions/lnpay'
 
 const initialTheme: InitialState = {
   globalTheme: {},
@@ -12,10 +13,26 @@ const initialTheme: InitialState = {
   downloadedEpisodeLimitCount: 5,
   downloadedEpisodeLimitDefault: null,
   downloadedPodcastEpisodeCounts: {},
+  downloadedPodcasts: [],
+  censorNSFWText: true,
+  customAPIDomain: '',
+  customAPIDomainEnabled: false,
+  customWebDomain: '',
+  customWebDomainEnabled: false,
+  errorReportingEnabled: false,
+  offlineModeEnabled: false,
   overlayAlert: {
     shouldShowAlert: false
   },
+  parsedTranscript: [],
+  parser: {
+    addByRSSPodcastAuthModal: {
+      feedUrl: ''
+    }
+  },
   player: {
+    currentChapter: null,
+    currentChapters: [],
     hasErrored: false,
     isPlaying: false,
     nowPlayingItem: null,
@@ -33,6 +50,7 @@ const initialTheme: InitialState = {
     myPlaylists: [],
     subscribedPlaylists: []
   },
+  podcastValueFinal: null,
   profile: {
     flatListData: [],
     user: null
@@ -43,13 +61,13 @@ const initialTheme: InitialState = {
   },
   purchase: {
     isLoading: true,
-    message: 'Updating the Podverse servers...',
+    message: '',
     productId: '',
     purchaseToken: '',
     showContactSupportLink: false,
     showDismissLink: false,
     showRetryLink: false,
-    title: 'Processing Transaction',
+    title: '',
     transactionId: '',
     transactionReceipt: ''
   },
@@ -63,11 +81,12 @@ const initialTheme: InitialState = {
     queryFrom: PV.Filters._fromThisEpisodeKey,
     queryPage: 1,
     querySort: PV.Filters._topPastWeek,
+    selectedFromLabel: '',
     showFullClipInfo: false,
     showHeaderActionSheet: false,
     showMoreActionSheet: false,
-    showShareActionSheet: false,
-    viewType: PV.Filters._showNotesKey
+    showNoInternetConnectionMessage: false,
+    showShareActionSheet: false
   },
   screenPlaylist: {
     flatListData: [],
@@ -76,6 +95,7 @@ const initialTheme: InitialState = {
   },
   session: {
     userInfo: {
+      addByRSSPodcastFeedUrls: [],
       email: '',
       freeTrialExpiration: '',
       historyItems: [],
@@ -88,13 +108,34 @@ const initialTheme: InitialState = {
       subscribedPodcastIds: [],
       subscribedUserIds: []
     },
-    isLoggedIn: false
-  },
-  settings: {
-    nsfwMode: true
+    isLoggedIn: false,
+    valueTagSettings: {
+      lightningNetwork: {
+        lnpay: {
+          lnpayEnabled: false,
+          globalSettings: {
+            boostAmount: DEFAULT_BOOST_PAYMENT,
+            streamingAmount: DEFAULT_STREAMING_PAYMENT
+          }
+        }
+      },
+      streamingEnabled: false
+    }
   },
   subscribedPodcasts: [],
-  subscribedPodcastsTotalCount: 0
+  subscribedPodcastsTotalCount: 0,
+  urlsAPI: null,
+  urlsWeb: null,
+  userAgent: '',
+  bannerInfo: {
+    show: false,
+    description: '',
+  },
+  tempMediaRefInfo: {
+    startTime: undefined,
+    endTime: null,
+    clipTitle: undefined
+  }
 }
 
 export default initialTheme

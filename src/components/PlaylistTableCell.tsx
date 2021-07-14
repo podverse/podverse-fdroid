@@ -1,5 +1,7 @@
 import React from 'react'
 import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
+import { translate } from '../lib/i18n'
+import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { ActivityIndicator, Text, View } from './'
 
@@ -9,38 +11,62 @@ type Props = {
   isSaving?: boolean
   itemCount?: number
   onPress?: any
+  testID: string
   title?: string
 }
 
 export class PlaylistTableCell extends React.PureComponent<Props> {
   render() {
-    const { createdBy, hasZebraStripe, isSaving, itemCount = 0, onPress, title = 'untitled playlist' } = this.props
+    const {
+      createdBy = translate('anonymous'),
+      hasZebraStripe,
+      isSaving,
+      itemCount = 0,
+      onPress,
+      testID,
+      title = translate('Untitled Playlist')
+    } = this.props
 
-    const wrapperTopStyles = [styles.wrapperTop]
-    if (createdBy) wrapperTopStyles.push(styles.wrapperTopWithCreatedBy)
+    const wrapperLeftStyles = [styles.wrapperLeft]
+    if (createdBy) wrapperLeftStyles.push(styles.wrapperLeftWithCreatedBy)
 
     return (
-      <TouchableWithoutFeedback onPress={onPress}>
+      <TouchableWithoutFeedback onPress={onPress} {...(testID ? testProps(testID) : {})}>
         <View hasZebraStripe={hasZebraStripe} style={styles.wrapper}>
-          <RNView style={wrapperTopStyles}>
-            <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} numberOfLines={1} style={styles.title}>
-              {title}
-            </Text>
-            {isSaving ? (
-              <ActivityIndicator styles={styles.activityIndicator} />
-            ) : (
-              <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} isSecondary={true} style={styles.itemCount}>
-                items: {itemCount}
+          <RNView style={wrapperLeftStyles}>
+            <RNView style={styles.wrapperLeftTop}>
+              {!!title && (
+                <Text
+                  fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                  numberOfLines={1}
+                  style={styles.title}
+                  testID={`${testID}_title`}>
+                  {title.trim()}
+                </Text>
+              )}
+              {!isSaving &&
+                <Text
+                  fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                  isSecondary
+                  style={styles.itemCount}
+                  testID={`${testID}_item_count`}>
+                  {translate('items')} {itemCount}
+                </Text>
+              }
+            </RNView>
+            {!!createdBy && (
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                isSecondary
+                style={styles.createdBy}
+                testID={`${testID}_created_by`}>
+                {translate('by')} {createdBy}
               </Text>
             )}
           </RNView>
-          {!!createdBy && (
-            <RNView style={styles.wrapperBottom}>
-              <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} isSecondary={true} style={styles.createdBy}>
-                by: {createdBy}
-              </Text>
-            </RNView>
-          )}
+          <RNView style={styles.wrapperRight}>
+            {isSaving && <ActivityIndicator styles={styles.activityIndicator} />}
+          </RNView>
         </View>
       </TouchableWithoutFeedback>
     )
@@ -58,10 +84,10 @@ const styles = StyleSheet.create({
   },
   itemCount: {
     alignItems: 'flex-end',
+    justifyContent: 'flex-start',
     flex: 0,
     fontSize: PV.Fonts.sizes.md,
-    marginBottom: 'auto',
-    marginTop: 'auto'
+    marginLeft: 12
   },
   title: {
     flex: 1,
@@ -71,22 +97,24 @@ const styles = StyleSheet.create({
     marginTop: 'auto'
   },
   wrapper: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'row',
     minHeight: PV.Table.cells.standard.height,
     paddingLeft: 8,
     paddingRight: 8
   },
-  wrapperBottom: {
-    alignItems: 'flex-start',
+  wrapperLeft: {
     flex: 1,
+    flexDirection: 'column'
+  },
+  wrapperLeftTop: {
     flexDirection: 'row'
   },
-  wrapperTop: {
-    flex: 1,
-    flexDirection: 'row'
-  },
-  wrapperTopWithCreatedBy: {
+  wrapperLeftWithCreatedBy: {
     paddingTop: 5
+  },
+  wrapperRight: {
+    flex: 0,
+    justifyContent: 'center',
+    marginLeft: 12
   }
 })

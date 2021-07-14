@@ -1,117 +1,129 @@
-import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
+import { Alert, Linking, StyleSheet, TouchableOpacity, View as RNView } from 'react-native'
 import React from 'reactn'
+import { translate } from '../lib/i18n'
 import { readableClipTime, readableDate, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { FastImage, IndicatorDownload, MoreButton, Text, View } from './'
+import { IndicatorDownload } from './IndicatorDownload'
+import { TimeRemainingWidget } from './TimeRemainingWidget'
+import { FastImage, Text, View } from './'
 
 type Props = {
-  downloadedEpisodeIds?: any
-  downloadsActive?: any
-  endTime?: number
-  episodeId: string
-  episodePubDate?: string
-  episodeTitle?: string
-  handleMorePress?: any
-  handleNavigationPress?: any
-  hasZebraStripe?: boolean
+  handleMorePress: any
   hideImage?: boolean
-  podcastImageUrl?: string
-  podcastTitle?: string
-  startTime: number
-  testId?: string
-  title?: string
+  item: any
+  loadTimeStampOnPlay?: boolean
+  showChapterInfo?: boolean
+  showEpisodeInfo?: boolean
+  showPodcastInfo?: boolean
+  testID: string
   transparent?: boolean
-  zebraStripeIndex?: number
 }
 
 export class ClipTableCell extends React.PureComponent<Props> {
+  handleChapterLinkPress = (url: string) => {
+    Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
+      { text: translate('Cancel') },
+      { text: translate('Yes'), onPress: () => Linking.openURL(url) }
+    ])
+  }
+
   render() {
-    const {
-      endTime,
-      episodeId,
-      episodePubDate = '',
-      episodeTitle,
-      handleMorePress,
-      handleNavigationPress,
-      hasZebraStripe,
-      hideImage,
-      podcastImageUrl,
-      podcastTitle,
-      startTime,
-      testId,
-      title = 'untitled clip',
-      transparent
-    } = this.props
+    const { handleMorePress, hideImage, item, loadTimeStampOnPlay,
+      showChapterInfo, showEpisodeInfo, showPodcastInfo, testID, transparent } = this.props
+
+    const episodePubDate = item?.episode?.pubDate || ''
+    const episodeId = item?.episode?.id || ''
+    const podcastImageUrl = item?.episode?.podcast?.shrunkImageUrl || item?.episode?.podcast?.imageUrl
+    const chapterImageUrl = item?.imageUrl
+    const hasChapterCustomImage = item?.hasCustomImage
+    const startTime = item.startTime
+    const endTime = item.endTime
+    const title = item?.title?.trim() || translate('Untitled Clip')
+    const episodeTitle = item?.episode?.title?.trim() || translate('Untitled Episode')
+    const podcastTitle = item?.episode?.podcast?.title?.trim() || translate('Untitled Podcast')
     const clipTime = readableClipTime(startTime, endTime)
-    const { downloadedEpisodeIds, downloadsActive, fontScaleMode } = this.global
-    const isDownloading = downloadsActive[episodeId]
+    const { downloadsActive, downloadedEpisodeIds, fontScaleMode } = this.global
     const isDownloaded = downloadedEpisodeIds[episodeId]
-    const showEpisodeInfo = !!episodePubDate || !!episodeTitle
+    const episodeDownloading = item?.episode?.id && !!downloadsActive[item.episode.id]
+    const chapterImageStyle = item?.linkUrl
+      ? [styles.chapterImage, styles.chapterImageBorder]
+      : styles.chapterImage
+
 
     const innerTopView = (
-      <RNView style={styles.innerTopView}>
-        <TouchableWithoutFeedback onPress={handleNavigationPress} {...(testId ? testProps(testId) : {})}>
-          <RNView style={{ flex: 1, flexDirection: 'row' }}>
-            {!!podcastImageUrl && <FastImage isSmall={true} source={podcastImageUrl} styles={styles.image} />}
-            <RNView style={styles.textWrapper}>
-              {!!podcastTitle && (
-                <Text
-                  fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-                  isSecondary={true}
-                  numberOfLines={1}
-                  style={styles.podcastTitle}>
-                  {podcastTitle}
-                </Text>
+      <RNView style={styles.innerTopView} {...(testID ? testProps(`${testID}_top_view_nav`) : {})}>
+        <RNView style={{ flex: 1, flexDirection: 'column' }}>
+          {(showEpisodeInfo || showPodcastInfo) && (
+            <RNView style={styles.imageAndTopRightTextWrapper}>
+              {showPodcastInfo && !!podcastImageUrl && !hideImage && (
+                <FastImage isSmall source={podcastImageUrl} styles={styles.image} />
               )}
-              {!!episodeTitle && PV.Fonts.fontScale.largest !== fontScaleMode && (
-                <Text numberOfLines={1} style={styles.episodeTitle}>
-                  {episodeTitle}
-                </Text>
-              )}
-              <RNView style={styles.textWrapperBottomRow}>
-                <Text
-                  fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-                  isSecondary={true}
-                  numberOfLines={1}
-                  style={styles.episodePubDate}>
-                  {readableDate(episodePubDate)}
-                </Text>
-                {isDownloaded && <IndicatorDownload />}
+              <RNView style={styles.textWrapper}>
+                {showPodcastInfo && podcastTitle && (
+                  <Text
+                    fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                    isSecondary
+                    numberOfLines={1}
+                    style={styles.podcastTitle}
+                    testID={`${testID}_podcast_title`}>
+                    {podcastTitle.trim()}
+                  </Text>
+                )}
+                {showEpisodeInfo && PV.Fonts.fontScale.largest !== fontScaleMode && episodeTitle && (
+                  <Text numberOfLines={2} style={styles.episodeTitle} testID={`${testID}_episode_title`}>
+                    {episodeTitle.trim()}
+                  </Text>
+                )}
+                {showEpisodeInfo && !!episodePubDate && (
+                  <RNView style={styles.textWrapperBottomRow}>
+                    <Text
+                      fontSizeLargerScale={PV.Fonts.largeSizes.md}
+                      fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                      isSecondary
+                      numberOfLines={1}
+                      style={styles.episodePubDate}
+                      testID={`${testID}_episode_pub_date`}>
+                      {readableDate(episodePubDate)}
+                    </Text>
+                    {isDownloaded && <IndicatorDownload />}
+                  </RNView>
+                )}
               </RNView>
             </RNView>
-          </RNView>
-        </TouchableWithoutFeedback>
-        <MoreButton handleShowMore={handleMorePress} height={hideImage ? 44 : 64} isLoading={isDownloading} />
-      </RNView>
-    )
-
-    const bottomText = (
-      <RNView style={styles.wrapperBottom}>
-        <RNView style={styles.wrapperBottomTextWrapper}>
-          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} numberOfLines={4} style={styles.title}>
+          )}
+          <Text
+            fontSizeLargestScale={PV.Fonts.largeSizes.md}
+            numberOfLines={4}
+            style={styles.title}
+            testID={`${testID}_title`}>
             {title}
           </Text>
-          <Text
-            fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-            isSecondary={true}
-            numberOfLines={1}
-            style={styles.clipTime}>
-            {clipTime}
-          </Text>
         </RNView>
-        {!showEpisodeInfo && handleMorePress && <MoreButton handleShowMore={handleMorePress} height={44} />}
       </RNView>
     )
 
     return (
-      <View hasZebraStripe={hasZebraStripe} style={styles.wrapper} transparent={transparent}>
-        {!!showEpisodeInfo && <RNView style={styles.wrapperTop}>{innerTopView}</RNView>}
-        {handleNavigationPress ? (
-          <TouchableWithoutFeedback onPress={handleNavigationPress} {...(testId ? testProps(testId) : {})}>
-            {bottomText}
-          </TouchableWithoutFeedback>
-        ) : (
-          bottomText
+      <View style={styles.wrapper} transparent={transparent}>
+        <View style={styles.wrapperInner} transparent={transparent}>
+          <RNView style={styles.wrapperTop}>
+            {innerTopView}
+          </RNView>
+          <TimeRemainingWidget
+            clipTime={clipTime}
+            episodeDownloading={episodeDownloading}
+            handleMorePress={handleMorePress}
+            item={item}
+            loadTimeStampOnPlay={loadTimeStampOnPlay}
+            testID={testID}
+            transparent={transparent}
+          />
+        </View>
+        {showChapterInfo && (chapterImageUrl || hasChapterCustomImage) && (
+          <TouchableOpacity
+            activeOpacity={1}
+            {...(item?.linkUrl ? { onPress: () => this.handleChapterLinkPress(item.linkUrl) } : {})}>
+            <FastImage isSmall source={chapterImageUrl || podcastImageUrl} styles={chapterImageStyle} />
+          </TouchableOpacity>
         )}
       </View>
     )
@@ -119,28 +131,36 @@ export class ClipTableCell extends React.PureComponent<Props> {
 }
 
 const styles = StyleSheet.create({
-  buttonView: {
-    flex: 0
+  chapterImage: {
+    height: 64,
+    marginLeft: 12,
+    width: 64
   },
-  clipTime: {
-    flex: 0,
-    fontSize: PV.Fonts.sizes.sm,
-    justifyContent: 'flex-end',
-    marginTop: 6
+  chapterImageBorder: {
+    borderColor: PV.Colors.skyDark,
+    borderWidth: 4
   },
   episodePubDate: {
-    flex: 0,
     fontSize: PV.Fonts.sizes.sm,
-    marginTop: 2
+    fontWeight: PV.Fonts.weights.semibold,
+    color: PV.Colors.skyLight,
+    marginTop: 3,
+    marginRight: 10
   },
   episodeTitle: {
-    fontSize: PV.Fonts.sizes.xl
+    fontSize: PV.Fonts.sizes.xxl,
+    fontWeight: PV.Fonts.weights.thin
   },
   image: {
-    flex: 0,
     height: 64,
     marginRight: 12,
     width: 64
+  },
+  imageAndTopRightTextWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    marginBottom: 8,
+    alignItems: 'center'
   },
   innerTopView: {
     flex: 1,
@@ -152,8 +172,8 @@ const styles = StyleSheet.create({
     fontWeight: PV.Fonts.weights.bold
   },
   podcastTitle: {
-    flex: 0,
-    fontSize: PV.Fonts.sizes.md,
+    fontSize: PV.Fonts.sizes.lg,
+    fontWeight: PV.Fonts.weights.bold,
     justifyContent: 'flex-start'
   },
   textWrapper: {
@@ -162,22 +182,20 @@ const styles = StyleSheet.create({
   },
   textWrapperBottomRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    alignItems: 'center'
   },
   title: {
-    flex: 0,
-    fontSize: PV.Fonts.sizes.xl,
-    fontWeight: PV.Fonts.weights.bold
+    fontSize: PV.Fonts.sizes.lg,
+    fontWeight: PV.Fonts.weights.bold,
+    color: PV.Colors.white
   },
   wrapper: {
-    paddingLeft: 8,
-    paddingRight: 4,
+    flexDirection: 'row',
+    paddingHorizontal: 8,
     paddingVertical: 16
   },
-  wrapperBottom: {
-    flexDirection: 'row'
-  },
-  wrapperBottomTextWrapper: {
+  wrapperInner: {
     flex: 1
   },
   wrapperTop: {

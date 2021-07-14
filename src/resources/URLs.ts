@@ -1,26 +1,56 @@
+import AsyncStorage from '@react-native-community/async-storage'
 import Config from 'react-native-config'
-console.log('huh', Config)
+import { PV } from './PV'
+
 const protocol = 'https://'
 const domain = Config.WEB_DOMAIN || 'stage.podverse.fm'
 const root = protocol + domain
 
+const apiDefaultBaseUrl = Config.API_DOMAIN || 'https://api.stage.podverse.fm/api/v1'
+const webDefaultBaseUrl = root
+
+const webPaths = {
+  clip: `/clip/`,
+  episode: `/episode/`,
+  playlist: `/playlist/`,
+  podcast: `/podcast/`,
+  profile: `/profile/`
+}
+
 export const URLs = {
-  about: `${root}/about`,
-  // tslint:disable-next-line: max-line-length
-  baseUrl: Config.API_DOMAIN || 'https://api.stage.podverse.fm/api/v1',
-  clip: `${root}/clip/`,
-  contact: 'https://docs.google.com/forms/d/e/1FAIpQLSe-1_1qmv5Z21ZLc37KWke3cXFluItnzmstjqGwm9_BT7BGRg/viewform',
-  episode: `${root}/episode/`,
-  playlist: `${root}/playlist/`,
-  podcast: `${root}/podcast/`,
-  profile: `${root}/profile/`,
-  // tslint:disable-next-line: max-line-length
-  requestPodcast: `https://docs.google.com/forms/d/e/1FAIpQLSdewKP-YrE8zGjDPrkmoJEwCxPl_gizEkmzAlTYsiWAuAk1Ng/viewform?usp=sf_link`,
-  terms: `${root}/terms`,
+  api: async () => {
+    const isEnabled = await AsyncStorage.getItem(PV.Keys.CUSTOM_API_DOMAIN_ENABLED)
+    const baseUrlOverride = await AsyncStorage.getItem(PV.Keys.CUSTOM_API_DOMAIN)
+    return {
+      baseUrl: (isEnabled && baseUrlOverride) || apiDefaultBaseUrl
+    }
+  },
+  apiDefaultBaseUrl,
   social: {
-    facebook: 'https://facebook.com/podverse',
-    github: 'https://github.com/podverse',
-    reddit: 'https://reddit.com/r/podverse',
-    twitter: 'https://twitter.com/podverse'
+    facebook: Config.URL_SOCIAL_FACEBOOK || '',
+    github: Config.URL_SOCIAL_GITHUB || '',
+    linkedin: Config.URL_SOCIAL_LINKEDIN || '',
+    reddit: Config.URL_SOCIAL_REDDIT || '',
+    twitter: Config.URL_SOCIAL_TWITTER || ''
+  },
+  web: async () => {
+    const isEnabled = await AsyncStorage.getItem(PV.Keys.CUSTOM_WEB_DOMAIN_ENABLED)
+    const baseUrlOverride = await AsyncStorage.getItem(PV.Keys.CUSTOM_WEB_DOMAIN)
+    const base = isEnabled && baseUrlOverride ? baseUrlOverride : webDefaultBaseUrl
+    return {
+      baseUrl: base,
+      clip: `${base}${webPaths.clip}`,
+      episode: `${base}${webPaths.episode}`,
+      playlist: `${base}${webPaths.playlist}`,
+      podcast: `${base}${webPaths.podcast}`,
+      profile: `${base}${webPaths.profile}`
+    }
+  },
+  webDefaultBaseUrl,
+  webPaths,
+  lnpay: {
+    baseUrl: 'https://api.lnpay.co/v1',
+    DeveloperDashboardUrl: 'https://lnpay.co/developers/dashboard',
+    LoginUrl: 'https://dashboard.lnpay.co/home/login'
   }
 }

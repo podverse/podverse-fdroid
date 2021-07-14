@@ -1,3 +1,5 @@
+import { TranscriptRow, ValueTransaction } from 'podverse-shared'
+
 export interface GlobalTheme {
   actionSheetButton?: any
   actionSheetButtonCancel?: any
@@ -19,7 +21,10 @@ export interface GlobalTheme {
   buttonPrimaryWrapper?: any
   buttonDisabledWrapper?: any
   divider?: any
+  dropdownButtonIcon?: any
+  dropdownButtonText?: any
   flatList?: any
+  headerText?: any
   inputContainerText?: any
   link?: any
   makeClipPlayerControlsWrapper?: any
@@ -39,19 +44,26 @@ export interface GlobalTheme {
   tableCellTextPrimary?: any
   tableCellTextSecondary?: any
   tableSectionHeader?: any
+  tableSectionHeaderTransparent?: any
   tableSectionHeaderIcon?: any
   tableSectionHeaderText?: any
   text?: any
   textInput?: any
   textInputIcon?: any
+  textInputEyeBrow?: any
+  textInputPreLabel?: any
   textInputWrapper?: any
   view?: any
 }
 
 export interface UserInfo {
+  addByRSSPodcastFeedUrls?: []
   email?: string
   freeTrialExpiration?: string
   historyItems?: []
+  historyItemsCount: number
+  historyItemsIndex: any
+  historyQueryPage: number
   id?: string
   membershipExpiration?: string | null
   name?: string
@@ -73,10 +85,29 @@ export interface InitialState {
   downloadedPodcastEpisodeCounts: any
   downloadedEpisodeLimitCount: number
   downloadedEpisodeLimitDefault: number | null
+  downloadedPodcasts: any[]
+  censorNSFWText?: boolean
+  customAPIDomain?: string
+  customAPIDomainEnabled?: boolean
+  customWebDomain?: string
+  customWebDomainEnabled?: boolean
+  errorReportingEnabled: boolean
+  urlsAPI?: any
+  urlsWeb?: any
+  offlineModeEnabled?: any
   overlayAlert: {
     shouldShowAlert: boolean
   }
+  parsedTranscript: TranscriptRow[]
+  parser: {
+    addByRSSPodcastAuthModal: {
+      feedUrl: string
+    }
+  }
   player: {
+    backupDuration?: number
+    currentChapter: any
+    currentChapters: any
     hasErrored: boolean
     isPlaying: boolean
     nowPlayingItem: any
@@ -90,6 +121,7 @@ export interface InitialState {
     myPlaylists: []
     subscribedPlaylists: []
   }
+  podcastValueFinal: any
   profile: {
     flatListData: []
     user: any
@@ -120,10 +152,13 @@ export interface InitialState {
     queryFrom: string | null
     queryPage: number
     querySort: string | null
+    selectedFromLabel?: string | null
     selectedItem?: any
+    selectedSortLabel?: string | null
     showFullClipInfo: boolean
     showHeaderActionSheet: boolean
     showMoreActionSheet: boolean
+    showNoInternetConnectionMessage: boolean
     showShareActionSheet: boolean
     viewType: string | null
   }
@@ -132,21 +167,53 @@ export interface InitialState {
     flatListDataTotalCount: number | null
     playlist?: any
   }
-  settings: {
-    nsfwMode: boolean
-  }
   session: {
     isLoggedIn: boolean
     userInfo: UserInfo
+    valueTagSettings: {
+      lightningNetwork: {
+        lnpay: {
+          walletSatsBalance?: number
+          walletUserLabel?: string
+          lnpayEnabled: boolean
+          globalSettings: {
+            boostAmount: number
+            streamingAmount: number
+          }
+        }
+      }
+      streamingEnabled: boolean
+    }
   }
   subscribedPodcasts: []
   subscribedPodcastsTotalCount: number
+  userAgent?: string
+  bannerInfo: BannerInfo
+}
+
+export interface BannerInfoError {
+  error: Error
+  details: Record<string, any>
+}
+
+export interface BannerInfo {
+  show: boolean
+  description: string
+  errors?: BannerInfoError[]
+  transactions?: ValueTransaction[]
+  totalAmount?: number
 }
 
 export interface IActionSheet {
   media: {
     moreButtons: any
   }
+}
+
+export interface TempMediaRef {
+  startTime: number | undefined
+  endTime: number | null
+  clipTitle: string | undefined
 }
 
 export interface IFilters {
@@ -161,6 +228,7 @@ export interface IFilters {
   _topPastWeek: string
   _topPastMonth: string
   _topPastYear: string
+  _topAllTime: string
   _chronologicalKey: string
   _oldestKey: string
   _myClipsKey: string
@@ -168,14 +236,17 @@ export interface IFilters {
   _podcastsKey: string
   _episodesKey: string
   _clipsKey: string
+  _chaptersKey: string
   _playlistsKey: string
-  _aboutKey: string
-  _showNotesKey: string
-  _titleKey: string
   _myPlaylistsKey: string
   _fromThisPodcastKey: string
   _fromThisEpisodeKey: string
-  _allCategoriesKey: string
+  _sectionCategoryKey: string
+  _sectionFilterKey: string
+  _sectionFromKey: string
+  _sectionMyPlaylistsKey: string
+  _sectionSortKey: string
+  _sectionSubscribedPlaylistsKey: string
 }
 
 interface IFontLargeSizes {
