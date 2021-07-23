@@ -45,7 +45,7 @@ export class AboutScreen extends React.Component<Props> {
             fontSizeLargestScale={PV.Fonts.largeSizes.md}
             style={styles.text}>
               {/* eslint-disable-next-line max-len */}
-              {`Version ${Config.FDROID_VERSION} ${Config.FDROID_BUILD ? `- Build ${Config.FDROID_BUILD} ` : ''}- ${Config.RELEASE_TYPE || ''}`}</Text>
+              {`Version: ${Config.FDROID_VERSION} ${Config.FDROID_BUILD ? `build ${Config.FDROID_BUILD} ` : ''}for ${Config.RELEASE_TYPE || ''}`}</Text>
           <Divider style={styles.divider} />
           <RNView style={styles.socialLinksWrapper}>
             <Icon

@@ -4,7 +4,6 @@ import { SwitchWithText, Text, TextInput, TextRow, View } from '../components'
 import { translate } from '../lib/i18n'
 import { numberWithCommas, testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { removeLNPayWallet, toggleLNPayFeature, updateWalletInfo } from '../state/actions/lnpay'
 import {
   MINIMUM_BOOST_PAYMENT,
