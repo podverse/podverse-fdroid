@@ -47,6 +47,8 @@ export class TermsOfServiceScreen extends React.Component<Props> {
             {translate('Popularity Analytics')}
           </Text>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
+            {translate('TermsOfServiceScreenMatomoTrackingTextFDroid')}
+            {'\n\n'}
             {translate('TermsOfServiceScreenMatomoTrackingText1')}
             {'\n\n'}
             {translate('TermsOfServiceScreenMatomoTrackingText2')}

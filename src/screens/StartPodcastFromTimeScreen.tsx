@@ -6,7 +6,6 @@ import { getStartPodcastFromTime, setStartPodcastFromTime } from '../lib/startPo
 import { convertHoursMinutesSecondsToSeconds, testProps } from '../lib/utility'
 import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
-import { trackPageView } from '../services/tracking'
 
 type Props = {
   navigation?: any

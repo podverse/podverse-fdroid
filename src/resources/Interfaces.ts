@@ -92,7 +92,6 @@ export interface InitialState {
   customWebDomain?: string
   customWebDomainEnabled?: boolean
   errorReportingEnabled: boolean
-  listenTrackingEnabled: boolean
   urlsAPI?: any
   urlsWeb?: any
   offlineModeEnabled?: any

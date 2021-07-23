@@ -46,7 +46,6 @@ export const RouteNames = {
   StartPodcastFromTimeScreen: 'StartPodcastFromTimeScreen',
   TabNavigator: 'TabNavigator',
   TermsOfServiceScreen: 'TermsOfServiceScreen',
-  TrackingConsentScreen: 'TrackingConsentScreen',
   ValueTagConsentScreen: 'ValueTagConsentScreen',
   ValueTagPreviewScreen: 'ValueTagPreviewScreen',
   ValueTagSetupScreen: 'ValueTagSetupScreen',
