@@ -10,8 +10,8 @@ type Props = any
 
 export class TermsOfServiceScreen extends React.Component<Props> {
   static navigationOptions = () => ({
-      title: translate('Terms of Service')
-    })
+    title: translate('Terms of Service')
+  })
 
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
@@ -24,6 +24,9 @@ export class TermsOfServiceScreen extends React.Component<Props> {
     return (
       <View style={styles.content} {...testProps('terms_of_service_screen_view')}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
+            {translate('Terms of Service')}
+          </Text>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
             {translate('TermsOfServiceScreenText1')}
             {'\n\n'}
@@ -38,6 +41,21 @@ export class TermsOfServiceScreen extends React.Component<Props> {
             {translate('TermsOfServiceScreenText6')}
             {'\n\n'}
             {translate('TermsOfServicesScreenText7')}
+          </Text>
+          <Divider style={styles.divider} />
+          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
+            {translate('Popularity Analytics')}
+          </Text>
+          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
+            {translate('TermsOfServiceScreenMatomoTrackingText1')}
+            {'\n\n'}
+            {translate('TermsOfServiceScreenMatomoTrackingText2')}
+            {'\n\n'}
+            {translate('TermsOfServiceScreenMatomoTrackingText3')}
+            {'\n\n'}
+            {translate('TermsOfServiceScreenMatomoTrackingText4')}
+            {'\n\n'}
+            {translate('TermsOfServiceScreenMatomoTrackingText5')}
           </Text>
           <Divider style={styles.divider} />
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
