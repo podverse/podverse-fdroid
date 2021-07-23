@@ -412,9 +412,9 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.1.5-qa
+  - versionName: 3.1.5-beta
     versionCode: 13
-    commit: 3.1.5-qa
+    commit: 3.1.5-beta
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
@@ -455,5 +455,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.1.5-qa
+CurrentVersion: 3.1.5-beta
 CurrentVersionCode: 13
