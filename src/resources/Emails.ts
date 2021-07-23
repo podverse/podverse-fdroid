@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { Platform } from 'react-native'
 import Config from 'react-native-config'
-import { getBuildNumber, getVersion } from 'react-native-device-info'
+// import { getBuildNumber, getVersion } from 'react-native-device-info'
 
 
 export const Emails = {
