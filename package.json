@@ -1,6 +1,6 @@
 {
   "name": "podverse",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "private": true,
   "contributors": [
     "Creon Creonopoulos",
@@ -156,4 +156,3 @@
   },
   "isSwift": true
 }
-
