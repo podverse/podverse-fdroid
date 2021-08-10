@@ -132,8 +132,8 @@ android {
         applicationId "com.podverse.fdroid"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
-        versionName "3.1.5"
+        versionCode 14
+        versionName "3.1.10"
         multiDexEnabled true
     }
     splits {

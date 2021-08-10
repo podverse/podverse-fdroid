@@ -9,6 +9,8 @@ type State = {
   isLoading: boolean
 }
 
+const testIDPrefix = 'faq_screen'
+
 export class FAQScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
@@ -32,8 +34,8 @@ export class FAQScreen extends React.Component<Props, State> {
     const { isLoading } = this.state
 
     return (
-      <View style={styles.view} {...testProps('faq_screen_view')}>
-        {isLoading && <ActivityIndicator fillSpace />}
+      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
+        {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
         <WebViewStaticHTML html={html} isLoading={isLoading} />
       </View>
     )
