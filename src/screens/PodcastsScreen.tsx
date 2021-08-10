@@ -24,7 +24,7 @@ import { PV } from '../resources'
 import { assignCategoryQueryToState, assignCategoryToStateForSortSelect, getCategoryLabel } from '../services/category'
 import { getEpisode } from '../services/episode'
 import PVEventEmitter from '../services/eventEmitter'
-import { checkIdlePlayerState, PVTrackPlayer, updateTrackPlayerCapabilities,
+import { checkIdlePlayerState, updateTrackPlayerCapabilities,
   updateUserPlaybackPosition } from '../services/player'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getNowPlayingItemLocally } from '../services/userNowPlayingItem'
@@ -127,7 +127,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
           await AsyncStorage.setItem(PV.Keys.ERROR_REPORTING_ENABLED, 'TRUE')
         }
 
-        this.setState({ showDataSettingsConfirmDialog: true })
+        this.setState({
+          showDataSettingsConfirmDialog: true,
+          isLoading: false
+        })
       } else {
         this._initializeScreenData()
       }
@@ -153,13 +156,14 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _handleAppStateChange = (nextAppState: any) => {
     (async () => {
+      updateUserPlaybackPosition()
+
       if (nextAppState === 'active' && !isInitialLoad) {
         const { nowPlayingItem: lastItem } = this.global.player
         const currentItem = await getNowPlayingItemLocally()
   
         if (!lastItem || (lastItem && currentItem && currentItem.episodeId !== lastItem.episodeId)) {
           updatePlayerState(currentItem)
-          await updateUserPlaybackPosition()
           showMiniPlayer()
         }
   
@@ -184,16 +188,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
         if (Platform.OS === 'ios') {
           updateTrackPlayerCapabilities()
         }
-  
-        const currentState = await PVTrackPlayer.getState()
-        // If an episode is not playing, then assume its latest playback position does not
-        // need to get updated in history.
-        // This will also prevent the history from being updated when a user closes the app on Device A,
-        // then reloads it to make it load with last history item (currently playing item) on Device B.
-        if (currentState === PVTrackPlayer.STATE_PLAYING) {
-          updateUserPlaybackPosition()
-        }
-  
       }
     })()
   }
@@ -702,7 +696,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
             selectedSortLabel={selectedSortLabel}
             testID={testIDPrefix}
           />
-          {isLoading && <ActivityIndicator fillSpace />}
+          {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
           {!isLoading && queryFrom && (
             <FlatList
               data={flatListData}
