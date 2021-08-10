@@ -154,19 +154,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
       PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW, this._handleNavigateToAddPodcastByRSSAuthScreen)
   }
 
-  _handleTrackingTermsAcknowledged = async () => {
-    /* Get tracking terms from AsyncStorage only here so that getTrackingConsentAcknowledged does not
-       return true the first time _handleTrackingTermsAcknowledged is run on iOS */
-    const trackingConsentAcknowledged = await AsyncStorage.getItem(PV.Keys.TRACKING_TERMS_ACKNOWLEDGED)
-    if (!trackingConsentAcknowledged) {
-      await setTrackingConsentAcknowledged()
-      this.setState({
-        showDataSettingsConfirmDialog: true,
-        isLoading: false
-      })
-    }
-  }
-
   _handleAppStateChange = (nextAppState: any) => {
     (async () => {
       updateUserPlaybackPosition()

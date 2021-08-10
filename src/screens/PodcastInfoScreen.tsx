@@ -4,7 +4,6 @@ import { HTMLScrollView, PodcastTableHeader, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { testProps } from '../lib/utility'
 import { PV } from '../resources'
-import { getTrackingIdText, trackPageView } from '../services/tracking'
 
 type Props = any
 
@@ -35,15 +34,6 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
     title: translate('Podcast Info'),
     headerRight: null
   })
-
-  componentDidMount() {
-    const { podcast, podcastId } = this.state
-
-    const titleToEncode = podcast
-      ? podcast.title
-      : translate('no info available')
-    trackPageView('/podcast/info/' + getTrackingIdText(podcastId), translate('PodcastInfoScreen - '), titleToEncode)
-  }
 
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
