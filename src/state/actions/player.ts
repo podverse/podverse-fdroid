@@ -35,7 +35,7 @@ const clearEnrichedPodcastDataIfNewEpisode =
   const shouldClearPreviousPlaybackInfo =
     previousNowPlayingItem && previousNowPlayingItem.episodeId !== nowPlayingItem.episodeId
   if (shouldClearPreviousPlaybackInfo) {
-    await clearChapterPlaybackInfo()
+    await clearChapterPlaybackInfo(nowPlayingItem)
     setGlobal({ podcastValueFinal: null })
   }
 }
