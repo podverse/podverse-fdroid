@@ -50,8 +50,6 @@ export class StartPodcastFromTimeScreen extends React.Component<Props, State> {
 
     const startPodcastFromTime = await getStartPodcastFromTime(podcastId)
     this.setState({ startPodcastFromTime })
-
-    trackPageView('/start-podcast-from-time', 'Preset podcast start time')
   }
 
   _updateStartPodcastFromTime = async (hours: number, minutes: number, seconds: number) => {

@@ -164,8 +164,6 @@ export class QueueScreen extends React.Component<Props, State> {
     })
 
     this._getQueueItems()
-
-    trackPageView('/queue', 'Queue Screen')
   }
 
   componentWillUnmount() {
