@@ -1,12 +1,14 @@
 import React from 'react'
 import { ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useGlobal } from 'reactn'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { core } from '../styles'
 import { Text } from '.'
 
 type Props = {
+  accessibilityHint?: string
+  accessibilityLabel?: string
+  accessible?: boolean
   disabled?: boolean
   isDisabledStyle?: boolean
   isLoading?: boolean
@@ -21,8 +23,8 @@ type Props = {
 }
 
 export const PVButton = (props: Props) => {
-  const { disabled, isDisabledStyle, isLoading, isPrimary, isSuccess, isTransparent,
-    isWarning, onPress, testID, text, wrapperStyles } = props
+  const { accessibilityHint, accessibilityLabel, accessible, disabled, isDisabledStyle, isLoading,
+    isPrimary, isSuccess, isTransparent, isWarning, onPress, testID, text, wrapperStyles } = props
   const [globalTheme] = useGlobal('globalTheme')
 
   const disabledStyle = disabled || isDisabledStyle ? globalTheme.buttonDisabledWrapper : null
@@ -37,6 +39,10 @@ export const PVButton = (props: Props) => {
 
   return (
     <TouchableOpacity
+      accessible={accessible}
+      accessibilityHint={accessibilityHint}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole='button'
       style={[
         core.button,
         globalTheme.buttonPrimaryWrapper,
@@ -49,12 +55,13 @@ export const PVButton = (props: Props) => {
       ]}
       disabled={disabled || isLoading}
       onPress={onPress}
-      {...(testID ? testProps(`${testID}_button`) : {})}>
+      {...(testID ? { testID: `${testID}_button`.prependTestId() } : {})}>
       {isLoading ? (
         <ActivityIndicator animating color={globalTheme.buttonPrimaryText.color} size='small' />
       ) : (
         <Text
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
+          importantForAccessibility='no'
           style={[
             core.buttonText,
             globalTheme.buttonPrimaryText,

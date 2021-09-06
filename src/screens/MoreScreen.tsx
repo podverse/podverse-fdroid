@@ -8,7 +8,7 @@ import RNFS from 'react-native-fs'
 import { Divider, TableSectionSelectors, Text, View, ActivityIndicator, TableCell } from '../components'
 import { translate } from '../lib/i18n'
 import { exportSubscribedPodcastsAsOPML } from '../lib/opmlExport'
-import { createEmailLinkUrl, getMembershipStatus, testProps, parseOpmlFile } from '../lib/utility'
+import { createEmailLinkUrl, getMembershipStatus, parseOpmlFile } from '../lib/utility'
 import { PV } from '../resources'
 import { logoutUser } from '../state/actions/auth'
 import { core, getMembershipTextStyle, table } from '../styles'
@@ -161,16 +161,25 @@ export class MoreScreen extends React.Component<Props, State> {
     const membershipTextStyle = getMembershipTextStyle(globalTheme, membershipStatus)
     const otherOptions = this._moreOtherOptions(membershipStatus)
 
+    const membershipAccessibilityLabel =
+      `${translate('Membership')}${isLoggedIn ? ' - ' : ''} ${membershipStatus ? membershipStatus : ''}`
+
     return (
-      <View style={core.backgroundView} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={core.backgroundView}
+        testID={`${testIDPrefix}_view`}>
         <SectionList
           ItemSeparatorComponent={() => <Divider />}
-          renderItem={({ item }) => (
-              <TableCell 
-                testIDPrefix={`${testIDPrefix}_${item.key}`}
-                testIDSuffix=''
+          renderItem={({ item }) => {
+            return (
+              <TableCell
+                accessibilityLabel={item.key === _membershipKey
+                  ? membershipAccessibilityLabel
+                  : item.title
+                }
                 onPress={() => this._onPress(item)}
-              >
+                testIDPrefix={`${testIDPrefix}_${item.key}`}
+                testIDSuffix=''>
                 {item.key === _membershipKey ? (
                   <>
                     <Text
@@ -192,7 +201,8 @@ export class MoreScreen extends React.Component<Props, State> {
                   </Text>
                 )}
               </TableCell>
-          )}
+            )
+          }}
           renderSectionHeader={({ section }) => (
             <TableSectionSelectors
               disableFilter

@@ -1,12 +1,13 @@
 import React from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { ActivityIndicator, Text, View } from './'
 
 type Props = {
   handleToggleSubscribe: any
+  isPlaylist?: boolean
+  isProfile?: boolean
   isSubscribed?: boolean
   isSubscribing?: boolean
   testID: string
@@ -18,9 +19,12 @@ export const SubscribeButton = (props: Props) => {
 
   const buttonTitle = isSubscribed ? translate('Unsubscribe') : translate('Subscribe')
   const buttonTextTestId = isSubscribed ? `${testID}_is_subscribed` : `${testID}_is_not_subscribed`
+  
+  const accessibilityLabel = isSubscribed ? translate('Unsubscribe') : translate('Subscribe')
 
   return (
     <TouchableOpacity
+      accessibilityLabel={accessibilityLabel}
       hitSlop={{
         bottom: 4,
         left: 8,
@@ -29,7 +33,7 @@ export const SubscribeButton = (props: Props) => {
       }}
       onPress={handleToggleSubscribe}
       style={[styles.buttonView, props.style]}
-      {...(testID ? testProps(`${testID}_subscribe_button`) : {})}>
+      {...(testID ? { testID: `${testID}_subscribe_button`.prependTestId() } : {})}>
       <View>
         {isSubscribing && (
           <View style={styles.activityIndicator}>
@@ -40,7 +44,7 @@ export const SubscribeButton = (props: Props) => {
           <Text
             fontSizeLargerScale={PV.Fonts.largeSizes.md}
             fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-            testID={buttonTextTestId}
+            testID={buttonTextTestId.prependTestId()}
             style={styles.buttonText}>
             {buttonTitle.toUpperCase()}
           </Text>

@@ -1,8 +1,7 @@
 import { Alert, Linking, StyleSheet } from 'react-native'
 import React from 'reactn'
-import { HTMLScrollView, PodcastTableHeader, Text, View } from '../components'
+import { HTMLScrollView, PodcastTableHeader, View } from '../components'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 
 type Props = any
@@ -31,7 +30,7 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-    title: translate('Podcast Info'),
+    title: translate('More Info'),
     headerRight: null
   })
 
@@ -45,16 +44,18 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
   render() {
     const { podcast } = this.state
     return (
-      <View style={styles.content} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.content}
+        testID={`${testIDPrefix}_view`}>
         <PodcastTableHeader
           podcastImageUrl={podcast && (podcast.shrunkImageUrl || podcast.imageUrl)}
           podcastTitle={podcast && podcast.title}
           testID={testIDPrefix}
         />
-        <Text style={styles.text}>{translate('About')}</Text>
         <HTMLScrollView
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
-          html={podcast.description ? podcast.description : ''} />
+          html={podcast.description ? `<body>${podcast.description}</body>` : ''}
+          sectionTitle={translate('About')} />
       </View>
     )
   }

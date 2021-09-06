@@ -4,9 +4,9 @@ import Dots from 'react-native-dots-pagination'
 import React from 'reactn'
 import ConfettiCannon from 'react-native-confetti-cannon'
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback'
+import { State as RNTPState } from 'react-native-track-player'
 import { PV } from '../resources'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { sendBoost } from '../lib/valueTagHelpers'
 
 const HapticOptions = {
@@ -15,7 +15,7 @@ const HapticOptions = {
 }
 
 import { toggleValueStreaming } from '../state/actions/valueTag'
-import { PVTrackPlayer } from '../services/player'
+
 import {
   ActivityIndicator,
   MediaPlayerCarouselChapters,
@@ -124,12 +124,12 @@ export class MediaPlayerCarousel extends React.PureComponent<Props, State> {
     const { parsedTranscript, player, podcastValueFinal } = this.global
     const { episode, nowPlayingItem, playbackState } = player
     const hasChapters = episode?.chaptersUrl
-    const hasTranscript = parsedTranscript?.length > 0
+    const hasTranscript = !!parsedTranscript
     const { lightningNetwork, streamingEnabled } = this.global.session?.valueTagSettings || {}
-    const { lnpay } = lightningNetwork
+    const { lnpay } = lightningNetwork || {}
     const { globalSettings, lnpayEnabled } = lnpay || {}
     const { boostAmount, streamingAmount } = globalSettings || {}
-    const isPlaying = playbackState === PVTrackPlayer.STATE_PLAYING
+    const isPlaying = playbackState === RNTPState.Playing
 
 
     let itemCount = 3
@@ -174,23 +174,27 @@ export class MediaPlayerCarousel extends React.PureComponent<Props, State> {
           <MediaPlayerCarouselClips navigation={navigation} width={screenWidth} />
           {hasTranscript && <MediaPlayerCarouselTranscripts width={screenWidth} />}
         </ScrollView>
-        <Dots
-          active={activeIndex}
-          activeColor={PV.Colors.skyDark}
-          activeDotHeight={9}
-          activeDotWidth={9}
-          length={itemCount}
-          paddingVertical={12}
-          passiveColor={PV.Colors.grayLighter}
-          passiveDotHeight={8}
-          passiveDotWidth={8}
-        />
+        <View
+          accessible={false}
+          importantForAccessibility='no-hide-descendants'>
+          <Dots
+            active={activeIndex}
+            activeColor={PV.Colors.skyDark}
+            activeDotHeight={9}
+            activeDotWidth={9}
+            length={itemCount}
+            paddingVertical={12}
+            passiveColor={PV.Colors.grayLighter}
+            passiveDotHeight={8}
+            passiveDotWidth={8}
+          />
+        </View>
         {!!Config.ENABLE_VALUE_TAG_TRANSACTIONS && lnpayEnabled && hasValueInfo && (
           <View style={styles.boostButtonsContainer}>
             <TouchableOpacity
               onPress={this._toggleSatStreaming}
               style={styles.boostButton}
-              {...testProps('stream_button')}>
+              testID={'stream_button'.prependTestId()}>
               <Text style={streamingButtonMainTextStyles} testID='stream_button_text_1'>
                 {satStreamText.toUpperCase()}
               </Text>
@@ -211,7 +215,7 @@ export class MediaPlayerCarousel extends React.PureComponent<Props, State> {
               }}
               onPress={this._attemptBoost}
               style={styles.boostButton}
-              {...testProps('boost_button')}>
+              testID={'boost_button'.prependTestId()}>
               {boostIsSending ? (
                 <ActivityIndicator testID={testIDPrefix} />
               ) : (

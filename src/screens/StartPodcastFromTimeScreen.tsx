@@ -3,7 +3,7 @@ import React from 'reactn'
 import { Button, NavDismissIcon, SafeAreaView, TimePicker, View } from '../components'
 import { translate } from '../lib/i18n'
 import { getStartPodcastFromTime, setStartPodcastFromTime } from '../lib/startPodcastFromTime'
-import { convertHoursMinutesSecondsToSeconds, testProps } from '../lib/utility'
+import { convertHoursMinutesSecondsToSeconds } from '../lib/utility'
 import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
 
@@ -71,13 +71,15 @@ export class StartPodcastFromTimeScreen extends React.Component<Props, State> {
     const { startPodcastFromTime } = this.state
 
     return (
-      <SafeAreaView {...testProps(`${testIDPrefix}_view`)}>
+      <SafeAreaView testID={`${testIDPrefix}_view`}>
         <View style={styles.view}>
           <TimePicker
             currentTime={startPodcastFromTime}
             handleUpdateSleepTimer={this._updateStartPodcastFromTime}
             isActive />
           <Button
+            accessibilityHint={translate('ARIA HINT - dismiss this screen')}
+            accessibilityLabel={translate('Done')}
             isPrimary
             onPress={this.handleDismiss}
             testID={`${testIDPrefix}_done`}

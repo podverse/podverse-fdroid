@@ -1,11 +1,11 @@
 import React from 'react'
 import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { ActivityIndicator, Text, View } from './'
 
 type Props = {
+  accessibilityHint?: string
   createdBy?: string
   hasZebraStripe?: boolean
   isSaving?: boolean
@@ -18,7 +18,8 @@ type Props = {
 export class PlaylistTableCell extends React.PureComponent<Props> {
   render() {
     const {
-      createdBy = translate('anonymous'),
+      accessibilityHint,
+      createdBy,
       hasZebraStripe,
       isSaving,
       itemCount = 0,
@@ -30,8 +31,17 @@ export class PlaylistTableCell extends React.PureComponent<Props> {
     const wrapperLeftStyles = [styles.wrapperLeft]
     if (createdBy) wrapperLeftStyles.push(styles.wrapperLeftWithCreatedBy)
 
+    const trimmedTitle = title.trim()
+    const itemsCount = `${translate('items')} ${itemCount}`
+    const byText = `${translate('by')} ${createdBy}`
+    const accessibilityLabel = `${trimmedTitle}, ${itemsCount} ${createdBy ? `,${byText}` : ''}`
+
     return (
-      <TouchableWithoutFeedback onPress={onPress} {...(testID ? testProps(testID) : {})}>
+      <TouchableWithoutFeedback
+        accessibilityHint={accessibilityHint}
+        accessibilityLabel={accessibilityLabel}
+        onPress={onPress}
+        {...(testID ? { testID: testID.prependTestId() } : {})}>
         <View hasZebraStripe={hasZebraStripe} style={styles.wrapper}>
           <RNView style={wrapperLeftStyles}>
             <RNView style={styles.wrapperLeftTop}>
@@ -100,7 +110,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     minHeight: PV.Table.cells.standard.height,
     paddingLeft: 8,
-    paddingRight: 8
+    paddingRight: 8,
+    alignItems: 'center'
   },
   wrapperLeft: {
     flex: 1,

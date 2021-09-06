@@ -3,7 +3,6 @@ import Config from 'react-native-config'
 import React from 'reactn'
 import { Divider, Icon, ScrollView, Text, View } from '../components'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { button } from '../styles'
 
@@ -23,18 +22,22 @@ export class AboutScreen extends React.Component<Props> {
 
   render() {
     return (
-      <View style={styles.content} {...testProps('about_screen_view')}>
+      <View
+        style={styles.content}
+        testID='about_screen_view'>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
             {'Podverse is an open source podcast manager for iOS, Android, and web.'}
           </Text>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
-            {'All Podverse software is provided under a free and open source (FOSS) licence.' +
+            {'All Podverse software is provided under a free and open source licence.' +
               ' Features that require updating our servers are available only with a Premium membership.' +
               ' Sign up today and get 1 year of Premium for free!'}
           </Text>
           <Divider style={styles.divider} />
-          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
+          <Text
+            accessibilityRole='header'
+            fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
             {translate('Team')}
           </Text>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
@@ -49,30 +52,40 @@ export class AboutScreen extends React.Component<Props> {
           <Divider style={styles.divider} />
           <RNView style={styles.socialLinksWrapper}>
             <Icon
+              accessibilityLabel={translate('Social Media - reddit')}
+              accessibilityRole='button'
               name='reddit'
               onPress={() => this.handleFollowLink(PV.URLs.social.reddit)}
               size={28}
               style={[button.iconOnlySmall, styles.icon]}
             />
             <Icon
+              accessibilityLabel={translate('Social Media - Twitter')}
+              accessibilityRole='button'
               name='twitter'
               onPress={() => this.handleFollowLink(PV.URLs.social.twitter)}
               size={28}
               style={[button.iconOnlySmall, styles.icon]}
             />
             <Icon
+              accessibilityLabel={translate('Social Media - Facebook')}
+              accessibilityRole='button'
               name='facebook'
               onPress={() => this.handleFollowLink(PV.URLs.social.facebook)}
               size={28}
               style={[button.iconOnlySmall, styles.icon]}
             />
             <Icon
+              accessibilityLabel={translate('Social Media - LinkedIn')}
+              accessibilityRole='button'
               name='linkedin'
               onPress={() => this.handleFollowLink(PV.URLs.social.linkedin)}
               size={28}
               style={[button.iconOnlySmall, styles.icon]}
             />
             <Icon
+              accessibilityLabel={translate('Social Media - GitHub')}
+              accessibilityRole='button'
               name='github'
               onPress={() => this.handleFollowLink(PV.URLs.social.github)}
               size={28}

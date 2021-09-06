@@ -4,15 +4,17 @@ import { NowPlayingItem } from 'podverse-shared'
 import { Platform } from 'react-native'
 import { getGlobal, setGlobal } from 'reactn'
 import BackgroundTimer from 'react-native-background-timer'
+import { State as RNTPState } from 'react-native-track-player'
 import { processValueTransactionQueue, saveStreamingValueTransactionsToTransactionQueue } from '../lib/valueTagHelpers'
 import { translate } from '../lib/i18n'
 import { getStartPodcastFromTime } from '../lib/startPodcastFromTime'
 import { PV } from '../resources'
-import { handleEnrichingPlayerState, hideMiniPlayer, updatePlaybackState } from '../state/actions/player'
+import { handleEnrichingPlayerState, updatePlaybackState } from '../state/actions/player'
 import { clearChapterPlaybackInfo } from '../state/actions/playerChapters'
 import PVEventEmitter from './eventEmitter'
 import {
   getClipHasEnded,
+  getCurrentLoadedTrackId,
   getNowPlayingItemFromQueueOrHistoryOrDownloadedByTrackId,
   getPlaybackSpeed,
   handlePlay,
@@ -56,7 +58,7 @@ const handleSyncNowPlayingItem = async (trackId: string, currentNowPlayingItem: 
   } else {
     const { podcastId } = currentNowPlayingItem
     const startPodcastFromTime = await getStartPodcastFromTime(podcastId)
-
+    
     if (!currentNowPlayingItem.clipId && startPodcastFromTime) {
       debouncedSetPlaybackPosition(startPodcastFromTime, trackId)
     }
@@ -65,7 +67,7 @@ const handleSyncNowPlayingItem = async (trackId: string, currentNowPlayingItem: 
   PVEventEmitter.emit(PV.Events.PLAYER_TRACK_CHANGED)
 
   // Call updateUserPlaybackPosition to make sure the current item is saved as the userNowPlayingItem
-  updateUserPlaybackPosition()
+  await updateUserPlaybackPosition()
 
   handleEnrichingPlayerState(currentNowPlayingItem)
 }
@@ -90,7 +92,7 @@ const syncNowPlayingItemWithTrack = () => {
       updatePlaybackState()
       await AsyncStorage.removeItem(PV.Keys.PLAYER_CLIP_IS_LOADED)
 
-      const currentTrackId = await PVTrackPlayer.getCurrentLoadedTrack()
+      const currentTrackId = await getCurrentLoadedTrackId()
       const setPlayerClipIsLoadedIfClip = true
 
       /*
@@ -111,6 +113,7 @@ const syncNowPlayingItemWithTrack = () => {
             clearInterval(retryInterval)
             await handleSyncNowPlayingItem(currentTrackId, currentNowPlayingItem)
             await removeQueueItem(currentNowPlayingItem)
+            PVEventEmitter.emit(PV.Events.QUEUE_HAS_UPDATED)
           }
         }
       }, 1000)
@@ -140,14 +143,19 @@ const resetHistoryItem = async (x: any) => {
 const handleQueueEnded = (x: any) => {
   setTimeout(() => {
     (async () => {
-      hideMiniPlayer()
-      await resetHistoryItem(x)
-
-      // Don't call reset on Android because it triggers the playback-queue-ended event
-      // and will cause an infinite loop
-      if (Platform.OS === 'ios') {
-        PVTrackPlayer.reset()
-      }
+      /*
+        The app is calling TrackPlayer.reset() on iOS only in loadItemAndPlayTrack
+        because .reset() is the only way to clear out the current item from the queue,
+        but .reset() results in the playback-queue-ended event in firing.
+        We don't want the playback-queue-ended event handling logic below to happen
+        during loadItemAndPlayTrack, so to work around this, I am setting temporary
+        AsyncStorage state so we can know when a queue has actually ended or
+        when the event is the result of .reset() called within loadItemAndPlayTrack.
+      */
+     const preventHandleQueueEnded = await AsyncStorage.getItem(PV.Keys.PLAYER_PREVENT_HANDLE_QUEUE_ENDED)
+     if (!preventHandleQueueEnded) {
+       await resetHistoryItem(x)
+     }
     })()
   }, 0)
 }
@@ -189,18 +197,17 @@ module.exports = async () => {
         const { clipEndTime } = nowPlayingItem
         const currentPosition = await PVTrackPlayer.getTrackPosition()
         const currentState = await PVTrackPlayer.getState()
-        const isPlaying = currentState === PVTrackPlayer.STATE_PLAYING
+        const isPlaying = currentState === RNTPState.Playing
 
         const shouldHandleAfterClip = clipHasEnded && clipEndTime && currentPosition >= clipEndTime && isPlaying
         if (shouldHandleAfterClip) {
           await handleResumeAfterClipHasEnded()
         } else {
           if (Platform.OS === 'ios') {
-            if (x.state === PVTrackPlayer.STATE_PLAYING) {
-              updateUserPlaybackPosition()
+            if (x.state === RNTPState.Playing) {
               await setRateWithLatestPlaybackSpeed()
-            } else if (x.state === PVTrackPlayer.STATE_PAUSED || PVTrackPlayer.STATE_STOPPED) {
-              updateUserPlaybackPosition()
+            } else if (x.state === RNTPState.Paused || RNTPState.Stopped) {
+              await updateUserPlaybackPosition()
             }
           } else if (Platform.OS === 'android') {
             /*
@@ -221,7 +228,7 @@ module.exports = async () => {
               const rate = await getPlaybackSpeed()
               PVTrackPlayer.setRate(rate)
             } else if (x.state === paused || x.state === stopped) {
-              updateUserPlaybackPosition()
+              await updateUserPlaybackPosition()
             }
           }
         }
@@ -290,7 +297,7 @@ module.exports = async () => {
         // Thanks to nesinervink and bakkerjoeri for help resolving this issue:
         // https://github.com/react-native-kit/react-native-track-player/issues/687#issuecomment-660149163
         const currentState = await PVTrackPlayer.getState()
-        const isPlaying = currentState === PVTrackPlayer.STATE_PLAYING
+        const isPlaying = currentState === RNTPState.Playing
         if (permanent && isPlaying) {
           PVTrackPlayer.stop()
         } else if (paused) {
@@ -313,7 +320,7 @@ module.exports = async () => {
       /* Always save the user playback position whenever the remote-duck event happens.
          I'm not sure if playback-state gets called whenever remote-duck gets called,
          so it's possible we are calling updateUserPlaybackPosition more times than necessary. */
-      updateUserPlaybackPosition()
+      await updateUserPlaybackPosition()
     })()
   })
 }
@@ -471,7 +478,7 @@ const playbackStateIsPlaying = (playbackState: string | number) => {
   let isPlaying = false
 
   if (Platform.OS === 'ios') {
-    if (playbackState === PVTrackPlayer.STATE_PLAYING) {
+    if (playbackState === RNTPState.Playing) {
       isPlaying = true
     }
   } else if (Platform.OS === 'android') {
