@@ -16,12 +16,10 @@ import {
 import { translate } from '../lib/i18n'
 import { navigateToPodcastScreenWithPodcast } from '../lib/navigate'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { createEmailLinkUrl, isOdd, safeKeyExtractor, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { createEmailLinkUrl, isOdd, safeKeyExtractor, safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
 import { getPodcasts } from '../services/podcast'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
-
-const { _episodesKey, _clipsKey } = PV.Filters
 
 type Props = {
   navigation?: any
@@ -67,10 +65,14 @@ export class SearchScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = ({ navigation }) => ({
-    title: translate('Search'),
-    headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
-    headerRight: () => null
-  })
+      title: translate('Search'),
+      headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
+      headerRight: () => null
+    })
+
+  componentDidMount() {
+    this.searchBarInput.focus()
+  }
 
   _handleSearchBarClear = () => {
     this.setState({
@@ -142,6 +144,9 @@ export class SearchScreen extends React.Component<Props, State> {
   _handleCancelPress = () => this.setState({ showActionSheet: false })
 
   _handleMorePress = (podcast: any) => {
+    /* Have to blur to make sure screen reader focuses on the ActionSheet */
+    this.searchBarInput.blur()
+
     this.setState({
       selectedPodcast: podcast,
       showActionSheet: true
@@ -176,21 +181,13 @@ export class SearchScreen extends React.Component<Props, State> {
 
     return [
       {
+        accessibilityLabel: isSubscribed ? translate('Unsubscribe') : translate('Subscribe'),
         key: 'toggleSubscribe',
         text: isSubscribed ? translate('Unsubscribe') : translate('Subscribe'),
         onPress: () => selectedPodcast && this._toggleSubscribeToPodcast(selectedPodcast.id)
       },
       {
-        key: 'episodes',
-        text: translate('Episodes'),
-        onPress: () => this._handleNavigationPress(selectedPodcast, _episodesKey)
-      },
-      {
-        key: 'clips',
-        text: translate('Clips'),
-        onPress: () => this._handleNavigationPress(selectedPodcast, _clipsKey)
-      },
-      {
+        accessibilityLabel: translate('Go to Podcast'),
         key: 'goToPodcast',
         text: translate('Go to Podcast'),
         onPress: () => this._handleNavigationPress(selectedPodcast)
@@ -226,7 +223,9 @@ export class SearchScreen extends React.Component<Props, State> {
     } = this.state
 
     return (
-      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.view}
+        testID={`${testIDPrefix}_view`}>
         <ButtonGroup
           buttons={buttons}
           onPress={this._handleSearchTypePress}
@@ -237,7 +236,11 @@ export class SearchScreen extends React.Component<Props, State> {
           handleClear={this._handleSearchBarClear}
           inputRef={(ref: any) => (this.searchBarInput = ref)}
           onChangeText={this._handleSearchBarTextChange}
-          placeholder={translate('search')}
+          placeholder={
+            searchType === _podcastByTitle
+            ? translate('search by podcast title')
+            : translate('search by podcast host')
+          }
           subText={searchType === _podcastByTitle ? translate('use double quotes for exact matches') : null}
           testID={testIDPrefix}
           value={searchBarText}
@@ -255,8 +258,13 @@ export class SearchScreen extends React.Component<Props, State> {
             ItemSeparatorComponent={this._ItemSeparatorComponent}
             keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
             noResultsBottomActionText={!!Config.CURATOR_EMAIL ? translate('Request Podcast') : ''}
+            noResultsBottomActionTextAccessibilityHint={
+              translate('ARIA HINT - send us an email to request a podcast')
+            }
             noResultsMessage={searchBarText.length > 1 && translate('No podcasts found')}
             noResultsMiddleActionText={translate('Add Custom RSS Feed')}
+            noResultsMiddleActionTextAccessibilityHint={translate('ARIA HINT - add a podcast by its RSS feed')}
+            noResultsTopActionText={!Config.DISABLE_QR_SCANNER ? translate('Scan RSS Feed QR Code') : ''}
             onEndReached={this._onEndReached}
             renderItem={this._renderPodcastItem}
             testID={testIDPrefix}
@@ -315,7 +323,10 @@ export class SearchScreen extends React.Component<Props, State> {
 const _podcastByTitle = 0
 const _podcastByHost = 1
 
-const buttons = [translate('Podcast'), translate('Host')]
+const buttons = [
+  translate('Podcast'),
+  translate('Host')
+]
 
 const styles = StyleSheet.create({
   searchBarContainer: {

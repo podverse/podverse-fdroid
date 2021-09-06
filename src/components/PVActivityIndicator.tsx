@@ -1,13 +1,17 @@
 import React, { Fragment } from 'react'
 import { ActivityIndicator, Dimensions, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import { useGlobal } from 'reactn'
+import { ImportantForAccessibility } from '../lib/accessibilityHelpers'
 import { Colors } from '../resources/Colors'
 import { core } from '../styles'
-import { testProps } from '../lib/utility'
 
 type Props = {
+  accessible?: boolean
+  accessibilityHint?: string
+  accessibilityLabel?: string
   children?: any
   fillSpace?: boolean
+  importantForAccessibility?: ImportantForAccessibility
   isOverlay?: boolean
   onPress?: any
   size?: any
@@ -18,7 +22,8 @@ type Props = {
 
 export const PVActivityIndicator = (props: Props) => {
   const [globalTheme] = useGlobal('globalTheme')
-  const { fillSpace, isOverlay, onPress, size = 'large', testID, transparent = true } = props
+  const { accessible = true, accessibilityHint, accessibilityLabel, fillSpace, importantForAccessibility = 'auto', 
+    isOverlay, onPress, size = 'large', testID, transparent = true } = props
 
   const viewStyle = fillSpace ? { flex: 1 } : {}
   const backgroundColor = transparent ? {} : { backgroundColor: Colors.blackOpaque }
@@ -26,22 +31,32 @@ export const PVActivityIndicator = (props: Props) => {
   return (
     <Fragment>
       {isOverlay && (
-        <View style={[styles.activityOverlay, backgroundColor]}>
+        <View
+          accessible={accessible}
+          accessibilityHint={accessibilityHint}
+          accessibilityLabel={accessibilityLabel}
+          importantForAccessibility={importantForAccessibility}
+          style={[styles.activityOverlay, backgroundColor]}>
           <ActivityIndicator
             animating
             color={globalTheme.activityIndicator.color}
             size={size}
-            {...testProps(`${testID}_activity_indicator`)} />
+            testID={`${testID}_activity_indicator`.prependTestId()} />
         </View>
       )}
       {!isOverlay && (
-        <TouchableWithoutFeedback onPress={onPress}>
-          <View style={[core.view, styles.view, viewStyle, props.styles]}>
+        <TouchableWithoutFeedback
+          accessible={accessible}
+          accessibilityHint={accessibilityHint}
+          accessibilityLabel={accessibilityLabel}
+          onPress={onPress}>
+          <View accessible={false} style={[core.view, styles.view, viewStyle, props.styles]}>
             <ActivityIndicator
+              accessible={false}
               animating
               color={globalTheme.activityIndicator.color}
               size={size}
-              {...testProps(`${testID}_activity_indicator`)} />
+              testID={`${testID}_activity_indicator`.prependTestId()} />
           </View>
         </TouchableWithoutFeedback>
       )}

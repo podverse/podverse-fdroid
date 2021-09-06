@@ -11,6 +11,7 @@ import {
   ImageSourcePropType
 } from 'react-native'
 import Share from 'react-native-share'
+import { State as RNTPState } from 'react-native-track-player'
 import React from 'reactn'
 import { clearTempMediaRef, saveTempMediaRef } from '../state/actions/mediaRef'
 import {
@@ -26,7 +27,6 @@ import {
 } from '../components'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 import { createMediaRef, updateMediaRef } from '../services/mediaRef'
 import {
@@ -38,7 +38,7 @@ import {
   PVTrackPlayer
 } from '../services/player'
 import { setNowPlayingItem, setPlaybackSpeed, togglePlay } from '../state/actions/player'
-import { core, playerStyles } from '../styles'
+import { core, darkTheme, iconStyles, playerStyles } from '../styles'
 
 type Props = {
   navigation?: any
@@ -92,6 +92,11 @@ export class MakeClipScreen extends React.Component<Props, State> {
       headerRight: () => (
         <RNView style={styles.navHeaderButtonWrapper}>
           <NavHeaderButtonText
+            accessibilityHint={isLoggedIn
+              ? ''
+              : translate('ARIA HINT - go to the login screen')
+            }
+            accessibilityLabel={isLoggedIn ? translate('Save Clip') : translate('Go to Login')}
             color={globalTheme.text.color}
             handlePress={navigation.getParam('_saveMediaRef')}
             testID={testIDPrefix}
@@ -398,6 +403,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
     const { navigation } = this.props
     const { globalTheme, player } = this.global
     const { backupDuration, playbackRate, playbackState } = player
+    const hasErrored = playbackState === PV.Player.errorState
     const {
       endTime,
       isLoggedIn,
@@ -409,17 +415,53 @@ export class MakeClipScreen extends React.Component<Props, State> {
       title
     } = this.state
 
+    let playButtonIcon = <Icon name='play' size={20} testID={`${testIDPrefix}_play_button`} />
+    let playButtonAdjust = { paddingLeft: 2 } as any
+    let playButtonAccessibilityHint = translate('ARIA HINT - resume playing')
+    let playButtonAccessibilityLabel = translate('Play')
+    if (hasErrored) {
+      playButtonIcon = (
+        <Icon
+          color={globalTheme === darkTheme ? iconStyles.lightRed.color : iconStyles.darkRed.color}
+          name={'exclamation-triangle'}
+          size={35}
+          testID={`${testIDPrefix}_error`}
+        />
+      )
+      playButtonAdjust = { paddingBottom: 8 } as any
+    } else if (playbackState === RNTPState.Playing) {
+      playButtonIcon = <Icon name='pause' size={20} testID={`${testIDPrefix}_pause_button`} />
+      playButtonAdjust = {}
+      playButtonAccessibilityHint = translate('ARIA HINT - pause playback')
+      playButtonAccessibilityLabel = translate('Pause')
+    } else if (checkIfStateIsBuffering(playbackState)) {
+      playButtonIcon = <ActivityIndicator testID={testIDPrefix} />
+      playButtonAdjust = { paddingLeft: 2, paddingTop: 2 }
+      playButtonAccessibilityHint = ''
+      playButtonAccessibilityLabel = translate('Episode is loading')
+    }
+
+    const jumpBackAccessibilityLabel =
+      `${translate(`Jump back`)} ${PV.Player.jumpBackSeconds} ${translate('seconds')}`
+    const jumpForwardAccessibilityLabel =
+      `${translate(`Jump forward`)} ${PV.Player.jumpSeconds} ${translate('seconds')}`
+    const miniJumpBackAccessibilityLabel =
+      `${translate(`Jump back`)} ${PV.Player.miniJumpSeconds} ${translate('seconds')}`
+    const miniJumpForwardAccessibilityLabel =
+      `${translate(`Jump forward`)} ${PV.Player.miniJumpSeconds} ${translate('seconds')}`
+
     return (
       <SafeAreaView style={styles.viewContainer}>
         <View style={styles.view} transparent testID='make_clip_screen_view'>
           <View style={styles.contentContainer}>
             <View style={styles.wrapperTop} transparent>
               <TextInput
+                accessibilityHint={translate('ARIA HINT - You can optionally provide a title for your clip here')}
                 autoCapitalize='none'
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 onChangeText={this._onChangeTitle}
                 numberOfLines={3}
-                placeholder={translate('Clip name')}
+                placeholder={translate('Clip title')}
                 returnKeyType='done'
                 style={globalTheme.textInput}
                 underlineColorAndroid='transparent'
@@ -429,7 +471,9 @@ export class MakeClipScreen extends React.Component<Props, State> {
               />
             </View>
             <DropdownButtonSelect
-              helpText={translate('Tip: Naming your clips')}
+              accessibilityHint={translate('ARIA HINT - change the privacy setting for your clip')}
+              helpText={translate('Tip: Titling your clips')}
+              hideHelpTextInAccessibility
               items={privacyItems()}
               label={isPublicItemSelected.label}
               onValueChange={this._handleSelectPrivacy}
@@ -442,6 +486,8 @@ export class MakeClipScreen extends React.Component<Props, State> {
             <View style={styles.wrapperBottom} transparent>
               <View style={styles.wrapperBottomInside} transparent>
                 <TimeInput
+                  // eslint-disable-next-line max-len
+                  accessibilityHint={translate('ARIA HINT - tap to set the current playback position as the start time for this clip')}
                   handlePreview={() => {
                     if (startTime) {
                       playerPreviewStartTime(startTime, endTime)
@@ -450,11 +496,14 @@ export class MakeClipScreen extends React.Component<Props, State> {
                   handleSetTime={this._setStartTime}
                   labelText={translate('Start time')}
                   placeholder='--:--'
+                  previewAccessibilityLabel={translate('Preview Start Time')}
                   testID={`${testIDPrefix}_start`}
                   time={startTime}
                 />
                 <View style={styles.wrapperBottomInsideSpacer} transparent />
                 <TimeInput
+                  // eslint-disable-next-line max-len
+                  accessibilityHint={translate('ARIA HINT - tap to set the current playback position as the end time for this clip')}
                   handleClearTime={endTime ? this._clearEndTime : null}
                   handlePreview={() => {
                     if (endTime) {
@@ -464,6 +513,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                   handleSetTime={this._setEndTime}
                   labelText={translate('End time')}
                   placeholder={translate('optional')}
+                  previewAccessibilityLabel={translate('Preview End Time')}
                   testID={`${testIDPrefix}_end`}
                   time={endTime}
                 />
@@ -472,6 +522,11 @@ export class MakeClipScreen extends React.Component<Props, State> {
                 <View style={styles.clearEndTimeTextSpacer} transparent />
                 {endTime && (
                   <TouchableWithoutFeedback
+                    accessible
+                    accessibilityHint={translate('ARIA HINT - clear the end time for this clip')}
+                    accessibilityLabel={translate('Remove end time')}
+                    accessibilityRole='button'
+                    importantForAccessibility='yes'
                     hitSlop={{
                       bottom: 0,
                       left: 2,
@@ -479,8 +534,10 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       top: 4
                     }}
                     onPress={this._clearEndTime}
-                    {...testProps(`${testIDPrefix}_time_input_clear_button`)}>
-                    <Text style={styles.clearEndTimeText}>Remove end time</Text>
+                    testID={`${testIDPrefix}_time_input_clear_button`.prependTestId()}>
+                    <Text style={styles.clearEndTimeText}>
+                      {translate('Remove end time')}
+                    </Text>
                   </TouchableWithoutFeedback>
                 )}
               </View>
@@ -498,50 +555,59 @@ export class MakeClipScreen extends React.Component<Props, State> {
                 <View style={styles.playerControlsMiddleRow} transparent>
                   <View style={styles.playerControlsMiddleRowTop} transparent>
                     <TouchableOpacity
+                      accessibilityLabel={jumpBackAccessibilityLabel}
+                      accessibilityRole='button'
                       onPress={this._playerJumpBackward}
                       style={playerStyles.icon}
-                      {...testProps(`${testIDPrefix}_jump_backward`)}>
+                      testID={`${testIDPrefix}_jump_backward`.prependTestId()}>
                       {this._renderPlayerControlIcon(PV.Images.JUMP_BACKWARDS)}
-                      <View style={styles.skipTimeTextWrapper} transparent>
+                      <View
+                        importantForAccessibility='no-hide-descendants' style={styles.skipTimeTextWrapper} transparent>
                         <Text style={styles.skipTimeText}>{PV.Player.jumpBackSeconds}</Text>
                       </View>
                     </TouchableOpacity>
                     <TouchableOpacity
+                      accessibilityLabel={miniJumpBackAccessibilityLabel}
+                      accessibilityRole='button'
                       onPress={this._playerMiniJumpBackward}
                       style={playerStyles.icon}
-                      {...testProps(`${testIDPrefix}_mini_jump_backward`)}>
+                      testID={`${testIDPrefix}_mini_jump_backward`.prependTestId()}>
                       {this._renderPlayerControlIcon(PV.Images.JUMP_BACKWARDS)}
-                      <View style={styles.skipTimeTextWrapper} transparent>
+                      <View
+                        importantForAccessibility='no-hide-descendants'
+                        style={styles.skipTimeTextWrapper}
+                        transparent>
                         <Text style={styles.skipTimeText}>1</Text>
                       </View>
                     </TouchableOpacity>
                     <TouchableOpacity
+                      accessibilityHint={playButtonAccessibilityHint}
+                      accessibilityLabel={playButtonAccessibilityLabel}
                       onPress={() => togglePlay()}
-                      style={playerStyles.playButton}
-                      {...testProps(`${testIDPrefix}_toggle_play`)}>
-                      {!checkIfStateIsBuffering(playbackState) ? (
-                        <Icon
-                          name={playbackState === PVTrackPlayer.STATE_PLAYING ? 'pause' : 'play'}
-                          size={20}
-                          testID={`${testIDPrefix}_${playbackState === PVTrackPlayer.STATE_PLAYING ? 'pause' : 'play'}`}
-                        />
-                      ) : (
-                        <ActivityIndicator testID={testIDPrefix} />
-                      )}
+                      testID={`${testIDPrefix}_toggle_play`.prependTestId()}>
+                      <View
+                        importantForAccessibility='no-hide-descendants'
+                        style={[playerStyles.playButton, playButtonAdjust]}>
+                        {playButtonIcon}
+                      </View>
                     </TouchableOpacity>
                     <TouchableOpacity
+                      accessibilityLabel={miniJumpForwardAccessibilityLabel}
+                      accessibilityRole='button'
                       onPress={this._playerMiniJumpForward}
                       style={playerStyles.icon}
-                      {...testProps(`${testIDPrefix}_mini_jump_forward`)}>
+                      testID={`${testIDPrefix}_mini_jump_forward`.prependTestId()}>
                       {this._renderPlayerControlIcon(PV.Images.JUMP_AHEAD)}
                       <View style={styles.skipTimeTextWrapper} transparent>
                         <Text style={styles.skipTimeText}>1</Text>
                       </View>
                     </TouchableOpacity>
                     <TouchableOpacity
+                      accessibilityLabel={jumpForwardAccessibilityLabel}
+                      accessibilityRole='button'
                       onPress={this._playerJumpForward}
                       style={playerStyles.icon}
-                      {...testProps(`${testIDPrefix}_jump_forward`)}>
+                      testID={`${testIDPrefix}_jump_forward`.prependTestId()}>
                       {this._renderPlayerControlIcon(PV.Images.JUMP_AHEAD)}
                       <View style={styles.skipTimeTextWrapper} transparent>
                         <Text style={styles.skipTimeText}>{PV.Player.jumpSeconds}</Text>
@@ -551,6 +617,9 @@ export class MakeClipScreen extends React.Component<Props, State> {
                 </View>
                 <View style={styles.playerControlsBottomRow} transparent>
                   <TouchableOpacity
+                    accessibilityHint={translate('ARIA HINT - show how to information for the make clip screen')}
+                    accessibilityLabel={translate('How To')}
+                    accessibilityRole='button'
                     hitSlop={{
                       bottom: 4,
                       left: 4,
@@ -558,7 +627,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       top: 4
                     }}
                     onPress={() => this.setState({ showHowToModal: true })}
-                    {...testProps(`${testIDPrefix}_show_how_to`)}>
+                    testID={`${testIDPrefix}_show_how_to`.prependTestId()}>
                     <View transparent>
                       <Text
                         fontSizeLargestScale={PV.Fonts.largeSizes.sm}
@@ -572,6 +641,9 @@ export class MakeClipScreen extends React.Component<Props, State> {
                     </View>
                   </TouchableOpacity>
                   <TouchableWithoutFeedback
+                    accessibilityHint={translate('ARIA HINT - current playback speed')}
+                    accessibilityLabel={`${playbackRate}X`}
+                    accessibilityRole='button'
                     hitSlop={{
                       bottom: 4,
                       left: 4,
@@ -579,7 +651,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       top: 4
                     }}
                     onPress={this._adjustSpeed}
-                    {...testProps(`${testIDPrefix}_adjust_speed`)}>
+                    testID={`${testIDPrefix}_adjust_speed`.prependTestId()}>
                     <View transparent>
                       <Text
                         fontSizeLargestScale={PV.Fonts.largeSizes.sm}
@@ -594,6 +666,9 @@ export class MakeClipScreen extends React.Component<Props, State> {
                     </View>
                   </TouchableWithoutFeedback>
                   <TouchableOpacity
+                    accessibilityHint={translate('ARIA HINT - go to the FAQ page')}
+                    accessibilityLabel={translate('FAQ')}
+                    accessibilityRole='button'
                     hitSlop={{
                       bottom: 4,
                       left: 4,
@@ -601,7 +676,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       top: 4
                     }}
                     onPress={() => navigation.navigate(PV.RouteNames.PlayerFAQScreen)}
-                    {...testProps(`${testIDPrefix}_show_faq`)}>
+                    testID={`${testIDPrefix}_show_faq`.prependTestId()}>
                     <View transparent>
                       <Text
                         fontSizeLargestScale={PV.Fonts.largeSizes.sm}
@@ -610,7 +685,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                           styles.playerControlsBottomRowText,
                           globalTheme.textSecondary
                         ]}>
-                        FAQ
+                        {translate('FAQ')}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -648,8 +723,17 @@ export class MakeClipScreen extends React.Component<Props, State> {
                 <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.modalText}>
                   {translate('If a podcast inserts dynamic ads the clip start time may not stay accurate')}
                 </Text>
-                <TouchableOpacity onPress={this._hideHowTo} {...testProps(`${testIDPrefix}_close`)}>
-                  <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} numberOfLines={1} style={styles.modalButton}>
+                <TouchableOpacity
+                  accessibilityHint={translate('ARIA HINT - continue to the Make Clip screen')}
+                  accessibilityLabel={translate('Got It')}
+                  accessibilityRole='button'
+                  onPress={this._hideHowTo}
+                  style={{ marginTop: 12 }}
+                  testID={`${testIDPrefix}_close`.prependTestId()}>
+                  <Text
+                    fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                    numberOfLines={1}
+                    style={styles.modalButton}>
                     {translate('Got It')}
                   </Text>
                 </TouchableOpacity>
@@ -720,16 +804,17 @@ const styles = StyleSheet.create({
     color: PV.Colors.skyLight,
     flex: 1,
     fontSize: PV.Fonts.sizes.sm,
-    paddingBottom: 14,
-    paddingTop: 8,
+    paddingBottom: 12,
+    paddingTop: 10,
     textAlign: 'center'
   },
   clearEndTimeTextSpacer: {
     flex: 1
   },
   clearEndTimeWrapper: {
-    minHeight: 40,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    marginHorizontal: 8,
+    minHeight: 40
   },
   divider: {
     marginBottom: 8,
@@ -777,7 +862,6 @@ const styles = StyleSheet.create({
   modalButton: {
     fontSize: PV.Fonts.sizes.xl,
     fontWeight: PV.Fonts.weights.bold,
-    marginTop: 16,
     textAlign: 'center',
     color: PV.Colors.skyLight,
     borderWidth: 1,

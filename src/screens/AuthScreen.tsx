@@ -1,8 +1,7 @@
-import { Alert, Image, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Image, StyleSheet, View } from 'react-native'
 import React from 'reactn'
-import { Login, NavDismissIcon, ResetPassword, SafeAreaView, SignUp, Text } from '../components'
+import { Login, NavDismissIcon, ResetPassword, SafeAreaView, ScrollView, SignUp, Text } from '../components'
 import { translate } from '../lib/i18n'
-import { alertIfNoNetworkConnection } from '../lib/network'
 import { PV } from '../resources'
 import { sendResetPassword } from '../services/auth'
 import { Credentials, loginUser, signUpUser } from '../state/actions/auth'
@@ -52,11 +51,8 @@ export class AuthScreen extends React.Component<Props, State> {
     }
   }
 
-  attemptLogin = async (credentials: Credentials) => {
+  attemptLogin = (credentials: Credentials) => {
     const { navigation } = this.props
-
-    const wasAlerted = await alertIfNoNetworkConnection('login')
-    if (wasAlerted) return
 
     this.setState({ isLoadingLogin: true }, () => {
       (async () => {
@@ -108,11 +104,12 @@ export class AuthScreen extends React.Component<Props, State> {
     })
   }
 
-  attemptSignUp = async (credentials: Credentials) => {
-    const { navigation } = this.props
+  _handleSignUpPress = () => {
+    this.setState({ screenType: _signup })
+  }
 
-    const wasAlerted = await alertIfNoNetworkConnection('sign up')
-    if (wasAlerted) return
+  attemptSignUp = (credentials: Credentials) => {
+    const { navigation } = this.props
 
     this.setState({ isLoadingSignUp: true }, () => {
       (async () => {
@@ -159,6 +156,9 @@ export class AuthScreen extends React.Component<Props, State> {
     if (screenType === _login) {
       bottomButtons = [
         <Text
+          accessible
+          accessibilityLabel={translate('Reset Password')}
+          accessibilityRole='button'
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
           key='reset'
           onPress={this._showResetPassword}
@@ -167,17 +167,37 @@ export class AuthScreen extends React.Component<Props, State> {
           {translate('Reset Password')}
         </Text>,
         <Text
+          accessible
+          accessibilityHint={translate('ARIA HINT - sign up for a premium account')}
+          accessibilityLabel={translate('Sign Up')}
+          accessibilityRole='button'
+          fontSizeLargestScale={PV.Fonts.largeSizes.md}
+          key='moreInfo'
+          onPress={this._handleSignUpPress}
+          style={[switchOptionTextStyle, { marginTop: 0, width: '100%' }]}
+          testID={`${testIDPrefix}_sign_up_button`}>
+          {translate('Sign Up')}
+        </Text>,
+        <Text
+          accessible
+          accessibilityHint={translate('ARIA HINT - learn more about premium memberships')}
+          accessibilityLabel={translate('About Premium')}
+          accessibilityRole='button'
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
           key='moreInfo'
           onPress={this._showMembership}
           style={[switchOptionTextStyle, { marginTop: 0, width: '100%' }]}
-          testID={`${testIDPrefix}_sign_up_button`}>
-          {translate('Sign Up')}
+          testID={`${testIDPrefix}_about_premium_button`}>
+          {translate('About Premium')}
         </Text>
       ]
     } else if (screenType === _resetPassword) {
       bottomButtons = [
         <Text
+          accessible
+          accessibilityHint={translate('ARIA HINT - go back to the login screen')}
+          accessibilityLabel={translate('Back To Login')}
+          accessibilityRole='button'
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
           key='login'
           onPress={this._showLogin}
@@ -190,30 +210,31 @@ export class AuthScreen extends React.Component<Props, State> {
 
     return (
       <SafeAreaView style={styles.safeAreaView} testID={`${testIDPrefix}_safe_area_view`}>
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-          <View style={screenType === _signup ? styles.viewWithoutBanner : styles.view}>
-            {screenType !== _signup && <Image source={PV.Images.BANNER} style={styles.banner} resizeMode='contain' />}
-            <View style={styles.contentView}>
-              {screenType === _login && (
-                <Login bottomButtons={bottomButtons} isLoading={isLoadingLogin} onLoginPressed={this.attemptLogin} />
-              )}
-              {screenType === _resetPassword && (
-                <ResetPassword
-                  bottomButtons={bottomButtons}
-                  isLoading={isLoadingResetPassword}
-                  onResetPasswordPressed={this.attemptResetPassword}
-                />
-              )}
-              {screenType === _signup && (
-                <SignUp
-                  bottomButtons={bottomButtons}
-                  isLoading={isLoadingSignUp}
-                  onSignUpPressed={this.attemptSignUp}
-                />
-              )}
-            </View>
+        <ScrollView contentContainerStyle={screenType === _signup ? styles.viewWithoutBanner : styles.view}>
+          {screenType !== _signup && <Image source={PV.Images.BANNER} style={styles.banner} resizeMode='contain' />}
+          <View style={styles.contentView}>
+            {screenType === _login && (
+              <Login
+                bottomButtons={bottomButtons}
+                isLoading={isLoadingLogin}
+                onLoginPressed={this.attemptLogin} />
+            )}
+            {screenType === _resetPassword && (
+              <ResetPassword
+                bottomButtons={bottomButtons}
+                isLoading={isLoadingResetPassword}
+                onResetPasswordPressed={this.attemptResetPassword}
+              />
+            )}
+            {screenType === _signup && (
+              <SignUp
+                bottomButtons={bottomButtons}
+                isLoading={isLoadingSignUp}
+                onSignUpPressed={this.attemptSignUp}
+              />
+            )}
           </View>
-        </TouchableWithoutFeedback>
+        </ScrollView>
       </SafeAreaView>
     )
   }

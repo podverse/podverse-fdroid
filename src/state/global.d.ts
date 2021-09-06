@@ -13,13 +13,13 @@ declare module 'reactn/default' {
     downloadedEpisodeIds: any
     downloadedPodcastEpisodeCounts: any
     downloadedEpisodeLimitCount: number
-    downloadedEpisodeLimitDefault: number | null
+    downloadedEpisodeLimitDefault: boolean | null
     downloadedPodcasts: any[]
     offlineModeEnabled: any
     overlayAlert: {
       shouldShowAlert: boolean
     }
-    parsedTranscript: TranscriptRow[]
+    parsedTranscript: TranscriptRow[] | null
     player: {
       backupDuration?: number
       currentChapter: any
@@ -65,12 +65,14 @@ declare module 'reactn/default' {
       isLoading: boolean
       isLoadingMore: boolean
       isQuerying: boolean
+      mediaRefIdToDelete?: string
       queryFrom: string | null
       queryPage: number
       querySort: string | null
       selectedFromLabel?: string | null
       selectedItem?: any
       selectedSortLabel?: string | null
+      showDeleteConfirmDialog: boolean
       showFullClipInfo: boolean
       showHeaderActionSheet: boolean
       showMoreActionSheet: boolean
@@ -112,7 +114,8 @@ declare module 'reactn/default' {
     urlsAPI?: any
     urlsWeb?: any
     userAgent?: string
-    bannerInfo: BannerInfo,
+    bannerInfo: BannerInfo
     tempMediaRefInfo: TempMediaRef
+    screenReaderEnabled: boolean
   }
 }

@@ -51,10 +51,7 @@ import {
 } from './screens'
 import { darkTheme } from './styles'
 import { PodcastInfoScreen } from './screens/PodcastInfoScreen'
-
-const tabTestProps = (id: string) => {
-  return { tabBarTestID: id, tabBarAccessibilityLabel: id }
-}
+import { translate } from './lib/i18n'
 
 const defaultNavigationOptions = ({ navigation }) => {
   return {
@@ -105,11 +102,12 @@ const PodcastsNavigator = createStackNavigator(
     defaultNavigationOptions,
     initialRouteName: PV.RouteNames.PodcastsScreen,
     navigationOptions: {
+      tabBarAccessibilityLabel: translate('Podcasts'),
       tabBarIcon: ({ tintColor }: { tintColor: any }) => (
         <Image source={PV.Tabs.Podcasts.icon} style={{ tintColor }} resizeMode={'contain'} />
       ),
       tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.Podcasts.title} />,
-      ...tabTestProps('tab_podcasts_screen')
+      testID: 'tab_podcasts_screen'.prependTestId()
     }
   }
 )
@@ -128,9 +126,10 @@ const EpisodesNavigator = createStackNavigator(
       tabBarIcon: ({ tintColor }: { tintColor: any }) => (
         <Image source={PV.Tabs.Episodes.icon} style={{ tintColor }} resizeMode={'contain'} />
       ),
+      tabBarAccessibilityLabel: translate('Episodes'),
       tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.Episodes.title} />,
-      ...tabTestProps('tab_episodes_screen')
-    }
+      testID: 'tab_episodes_screen'.prependTestId()
+    },
   }
 )
 
@@ -141,10 +140,11 @@ const ClipsNavigator = createStackNavigator(
   {
     defaultNavigationOptions,
     navigationOptions: {
+      tabBarAccessibilityLabel: translate('Clips'),
       tabBarIcon: ({ tintColor }: { tintColor: any }) =>
         <Image source={PV.Tabs.Clips.icon} style={{ tintColor }} resizeMode={'contain'} />,
       tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.Clips.title} />,
-      ...tabTestProps('tab_clips_screen')
+      testID: 'tab_clips_screen'.prependTestId()
     }
   }
 )
@@ -182,6 +182,7 @@ const MoreNavigator = createStackNavigator(
   {
     defaultNavigationOptions,
     navigationOptions: {
+      tabBarAccessibilityLabel: translate('More'),
       tabBarIcon: ({ tintColor }: { tintColor: any }) => {
         return (
           <View>
@@ -189,8 +190,8 @@ const MoreNavigator = createStackNavigator(
           </View>
         )
       },
-      tabBarLabel: (props) => <TabBarLabel {...props} title='More' />,
-      ...tabTestProps('tab_more_screen')
+      tabBarLabel: (props) => <TabBarLabel {...props} title={translate('More')} />,
+      testID: 'tab_more_screen'.prependTestId()
     }
   }
 )
@@ -225,6 +226,7 @@ const MyLibraryNavigator = createStackNavigator(
     initialRouteName: PV.RouteNames.MyLibraryScreen,
     defaultNavigationOptions,
     navigationOptions: {
+      tabBarAccessibilityLabel: translate('My Library'),
       // eslint-disable-next-line react/prop-types
       tabBarIcon: ({ tintColor }: { tintColor: any }) => {
         return (
@@ -235,7 +237,7 @@ const MyLibraryNavigator = createStackNavigator(
         )
       },
       tabBarLabel: (props) => <TabBarLabel {...props} title='My Library' />,
-      ...tabTestProps('tab_my_library_screen')
+      testID: 'tab_my_library_screen'.prependTestId()
     }
   }
 )
@@ -253,7 +255,10 @@ const OnboardingNavigator = createStackNavigator(
 )
 
 const allTabs = {
-  Podcasts: { screen: PodcastsNavigator, path: '' },
+  Podcasts: {
+    screen: PodcastsNavigator,
+    path: ''
+  },
   Episodes: EpisodesNavigator,
   'My Library': { screen: MyLibraryNavigator, path: '' },
   Clips: ClipsNavigator,

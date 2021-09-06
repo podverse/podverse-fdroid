@@ -1,16 +1,18 @@
 import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
 import React from 'reactn'
 import { translate } from '../lib/i18n'
-import { decodeHTMLString, readableDate, removeHTMLFromString, testProps } from '../lib/utility'
+import { decodeHTMLString, readableDate, removeHTMLFromString } from '../lib/utility'
 import { PV } from '../resources'
-import { DownloadButton } from './DownloadButton'
+import { images } from '../styles'
+import { DownloadOrDeleteButton } from './DownloadOrDeleteButton'
 import { TimeRemainingWidget } from './TimeRemainingWidget'
-import { FastImage, IndicatorDownload, Text, View } from './'
+import { FastImage, Text, View } from './'
 
 type Props = {
+  handleDeletePress?: any
+  handleDownloadPress?: any
   handleMorePress?: any
   handleNavigationPress?: any
-  handleDownloadPress?: any
   hideImage?: boolean
   item?: any
   mediaFileDuration?: number
@@ -24,9 +26,10 @@ type Props = {
 export class EpisodeTableCell extends React.PureComponent<Props> {
   render() {
     const {
+      handleDeletePress,
+      handleDownloadPress,
       handleMorePress,
       handleNavigationPress,
-      handleDownloadPress,
       hideImage,
       item,
       mediaFileDuration,
@@ -42,6 +45,7 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
     const podcastTitle = podcast.title || translate('Untitled Podcast')
     description = removeHTMLFromString(description)
     description = decodeHTMLString(description)
+    description = description?.trim() || ''
 
     const { downloadedEpisodeIds, downloadsActive, fontScaleMode } = this.global
 
@@ -54,10 +58,20 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
 
     const imageUrl = podcast.shrunkImageUrl || podcast.imageUrl
 
+    const podcastTitleText = podcastTitle.trim()
+    const episodeTitleText = title.trim()
+    const pubDateText = readableDate(pubDate)
+    const accessibilityLabel =
+      `${showPodcastInfo ? `${podcastTitleText}, ` : ''} ${title ? `${title}, ` : ''} ${pubDateText}`
+
     const innerTopView = (
-      <RNView style={styles.innerTopView}>
+      <RNView
+        accessibilityHint={translate('ARIA HINT - tap to go to this episode')}
+        accessibilityLabel={accessibilityLabel}
+        style={styles.innerTopView}>
         {!!imageUrl && !hideImage && <FastImage isSmall source={imageUrl} styles={styles.image} />}
-        <RNView style={styles.textWrapper}>
+        <RNView
+          style={styles.textWrapper}>
           {showPodcastInfo && podcastTitle && (
             <Text
               fontSizeLargestScale={PV.Fonts.largeSizes.sm}
@@ -65,7 +79,7 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
               numberOfLines={1}
               style={styles.podcastTitle}
               testID={`${testID}_podcast_title`}>
-              {podcastTitle.trim()}
+              {podcastTitleText}
             </Text>
           )}
           {title && (
@@ -74,7 +88,7 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
               numberOfLines={2}
               style={titleStyle}
               testID={`${testID}_title`}>
-              {title.trim()}
+              {episodeTitleText}
             </Text>
           )}
           <RNView style={styles.textWrapperBottomRow}>
@@ -83,9 +97,8 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
               isSecondary
               style={styles.pubDate}
               testID={`${testID}_pub_date`}>
-              {readableDate(pubDate)}
+              {pubDateText}
             </Text>
-            {isDownloaded && <IndicatorDownload />}
           </RNView>
         </RNView>
       </RNView>
@@ -95,12 +108,14 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
 
     const bottomText = (
       <Text
+        accessibilityHint={translate('ARIA HINT - This is the episode description')}
+        accessibilityLabel={description}
         fontSizeLargestScale={PV.Fonts.largeSizes.md}
         isSecondary
         numberOfLines={2}
         style={descriptionStyle}
         testID={`${testID}_description`}>
-        {description.trim()}
+        {description}
       </Text>
     )
 
@@ -109,21 +124,28 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
         <RNView style={styles.wrapperTop}>
           {handleNavigationPress ? (
             <TouchableWithoutFeedback
+              accessibilityHint={translate('ARIA HINT - tap to go to this episode')}
+              accessibilityLabel={accessibilityLabel}
               onPress={handleNavigationPress}
-              {...(testID ? testProps(`${testID}_top_view_nav`) : {})}>
+              {...(testID ? { testID: `${testID}_top_view_nav`.prependTestId() } : {})}>
               {innerTopView}
             </TouchableWithoutFeedback>
           ) : (
             innerTopView
           )}
-          {!isDownloaded && (
-            <DownloadButton testID={testID} isDownloading={isDownloading} onPress={() => handleDownloadPress(item)} />
-          )}
+          <DownloadOrDeleteButton
+            isDownloaded={isDownloaded}
+            isDownloading={isDownloading}
+            onPressDelete={() => handleDeletePress(item)}
+            onPressDownload={() => handleDownloadPress(item)}
+            testID={testID} />
         </RNView>
         {handleNavigationPress ? (
           <TouchableWithoutFeedback
+            accessibilityHint={translate('ARIA HINT - tap to go to this episode')}
+            accessibilityLabel={description.trim()}
             onPress={handleNavigationPress}
-            {...(testID ? testProps(`${testID}_bottom_view_nav`) : {})}>
+            {...(testID ? { testID: `${testID}_bottom_view_nav`.prependTestId() } : {})}>
             <RNView>{PV.Fonts.fontScale.largest !== fontScaleMode && bottomText}</RNView>
           </TouchableWithoutFeedback>
         ) : (
@@ -133,6 +155,7 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
           <TimeRemainingWidget
             handleMorePress={handleMorePress}
             item={item}
+            itemType='episode'
             mediaFileDuration={mediaFileDuration}
             testID={testID}
             userPlaybackPosition={userPlaybackPosition}
@@ -147,13 +170,13 @@ const styles = StyleSheet.create({
   description: {
     fontSize: PV.Fonts.sizes.sm,
     color: PV.Colors.grayLighter,
-    marginTop: 15
+    marginTop: 12
   },
   image: {
     flex: 0,
-    height: 64,
+    height: images.medium.height,
     marginRight: 12,
-    width: 64
+    width: images.medium.width
   },
   innerTopView: {
     flex: 1,

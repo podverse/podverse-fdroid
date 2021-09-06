@@ -6,12 +6,14 @@ import {
   NowPlayingItem
 } from 'podverse-shared'
 import Config from 'react-native-config'
+import { State as RNTPState } from 'react-native-track-player'
 import { getGlobal, setGlobal } from 'reactn'
 import { getParsedTranscript } from '../../lib/transcriptHelpers'
 import { convertPodcastIndexValueTagToStandardValueTag } from '../../lib/valueTagHelpers'
 import { PV } from '../../resources'
 import PVEventEmitter from '../../services/eventEmitter'
 import {
+  getCurrentLoadedTrackId,
   handlePlay,
   initializePlayerQueue as initializePlayerQueueService,
   loadItemAndPlayTrack as loadItemAndPlayTrackService,
@@ -94,7 +96,7 @@ export const clearNowPlayingItem = async () => {
     player: {
       ...globalState.player,
       nowPlayingItem: null,
-      playbackState: PVTrackPlayer.STATE_STOPPED,
+      playbackState: RNTPState.Stopped,
       showMiniPlayer: false
     },
     screenPlayer: {
@@ -209,17 +211,19 @@ export const handleEnrichingPlayerState = (item: NowPlayingItem) => {
 }
 
 const enrichParsedTranscript = (item: NowPlayingItem) => {
-  setGlobal({ parsedTranscript: [] }, async () => {
-    if (item.episodeTranscript && item.episodeTranscript[0] && item.episodeTranscript[0].url) {
+  if (item.episodeTranscript && item.episodeTranscript[0] && item.episodeTranscript[0].url) {
+    setGlobal({ parsedTranscript: [] }, async () => {
       try {
         const parsedTranscript =
-        await getParsedTranscript(item.episodeTranscript[0].url, item.episodeTranscript[0].type)
+          await getParsedTranscript(item.episodeTranscript[0].url, item.episodeTranscript[0].type)
         setGlobal({ parsedTranscript })
       } catch (error) {
         console.log('loadItemAndPlayTrack transcript parsing error', error)
       }
-    }
-  })
+    })
+  } else {
+    setGlobal({ parsedTranscript: null })
+  }
 }
 
 const enrichPodcastValue = async (item: NowPlayingItem) => {
@@ -260,7 +264,7 @@ export const setPlaybackSpeed = async (rate: number) => {
 export const togglePlay = async () => {
   // If somewhere a play button is pressed, but nothing is currently loaded in the player,
   // then load the last time from memory by re-initializing the player.
-  const trackId = await PVTrackPlayer.getCurrentLoadedTrack()
+  const trackId = await getCurrentLoadedTrackId()
   if (!trackId) {
     await initializePlayerQueue()
   }

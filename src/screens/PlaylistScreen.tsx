@@ -18,7 +18,7 @@ import { downloadEpisode } from '../lib/downloader'
 import { translate } from '../lib/i18n'
 import { navigateToEpisodeScreenWithItem } from '../lib/navigate'
 import { alertIfNoNetworkConnection } from '../lib/network'
-import { safeKeyExtractor, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { safeKeyExtractor, safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import { getPlaylist, toggleSubscribeToPlaylist } from '../state/actions/playlist'
@@ -231,7 +231,9 @@ export class PlaylistScreen extends React.Component<Props, State> {
     const playlistTitle = playlist?.title || translate('Untitled Playlist')
     
     return (
-      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.view}
+        testID={`${testIDPrefix}_view`}>
         <PlaylistTableHeader
           createdBy={ownerName}
           handleEditPress={isLoggedInUserPlaylist ? this._handleEditPress : null}
@@ -263,12 +265,17 @@ export class PlaylistScreen extends React.Component<Props, State> {
         <ActionSheet
           handleCancelPress={this._handleCancelPress}
           items={() =>
-            PV.ActionSheet.media.moreButtons(selectedItem, navigation, {
-              handleDismiss: this._handleCancelPress,
-              handleDownload: this._handleDownloadPressed,
-              includeGoToPodcast: true,
-              includeGoToEpisode: true
-            })
+            PV.ActionSheet.media.moreButtons(
+              selectedItem,
+              navigation,
+              {
+                handleDismiss: this._handleCancelPress,
+                handleDownload: this._handleDownloadPressed,
+                includeGoToPodcast: true,
+                includeGoToEpisode: true
+              },
+              !!selectedItem?.startTime ? 'clip' : 'episode'
+            )
           }
           showModal={showActionSheet}
           testID={testIDPrefix}
