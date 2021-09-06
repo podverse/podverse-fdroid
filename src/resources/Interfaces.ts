@@ -51,8 +51,9 @@ export interface GlobalTheme {
   textInput?: any
   textInputIcon?: any
   textInputEyeBrow?: any
-  textInputPreLabel?: any
   textInputWrapper?: any
+  textSecondary?: boolean
+  textNowPlaying?: boolean
   view?: any
 }
 
@@ -98,7 +99,7 @@ export interface InitialState {
   overlayAlert: {
     shouldShowAlert: boolean
   }
-  parsedTranscript: TranscriptRow[]
+  parsedTranscript: TranscriptRow[] | null
   player: {
     backupDuration?: number
     currentChapter: any
@@ -144,12 +145,14 @@ export interface InitialState {
     isLoading: boolean
     isLoadingMore: boolean
     isQuerying: boolean
+    mediaRefIdToDelete?: string
     queryFrom: string | null
     queryPage: number
     querySort: string | null
     selectedFromLabel?: string | null
     selectedItem?: any
     selectedSortLabel?: string | null
+    showDeleteConfirmDialog: boolean
     showFullClipInfo: boolean
     showHeaderActionSheet: boolean
     showMoreActionSheet: boolean

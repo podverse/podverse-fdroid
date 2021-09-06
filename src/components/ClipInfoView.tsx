@@ -74,23 +74,35 @@ export class ClipInfoView extends React.PureComponent<Props> {
     const sectionHeaderTitle = isOfficialChapter ? translate('Chapter Info') : translate('Clip Info')
 
     return (
-      <View style={styles.wrapper}>
+      <View accessible={false} style={styles.wrapper}>
         {isLoading && <ActivityIndicator testID={testIDPrefix} />}
         {!isLoading && (
           <Fragment>
-            <TableSectionSelectors disableFilter selectedFilterLabel={sectionHeaderTitle} />
+            <TableSectionSelectors
+              accessible={false}
+              disableFilter
+              selectedFilterLabel={sectionHeaderTitle} />
             <View style={core.row}>
-              <View style={styles.topTextWrapper}>
-                <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.title}>
+              <View
+                accessible={false}
+                style={styles.topTextWrapper}>
+                <Text
+                  accessible={false}
+                  fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                  style={styles.title}>
                   {title}
                 </Text>
-                <Text fontSizeLargestScale={PV.Fonts.largeSizes.sm} style={styles.time}>
+                <Text
+                  accessible={false}
+                  fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+                  style={styles.time}>
                   {readableClipTime(startTime, endTime)}
                 </Text>
               </View>
               {userId && userId === ownerId && (
-                <View style={styles.topEditButtonWrapper}>
+                <View accessible={false} style={styles.topEditButtonWrapper}>
                   <Icon
+                    accessible={false}
                     name='pencil-alt'
                     onPress={() => this._handleEditPress()}
                     size={26}
@@ -101,18 +113,24 @@ export class ClipInfoView extends React.PureComponent<Props> {
             </View>
             {!isOfficialChapter && !isOfficialSoundBite && (
               <View style={core.row}>
-                <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.ownerName}>
-                  By:{' '}
+                <Text
+                  accessible={false}
+                  fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                  style={styles.ownerName}>
+                  {`${translate('By')} `}
                 </Text>
                 {ownerIsPublic ? (
                   <TextLink
+                    accessible={false}
                     fontSizeLargestScale={PV.Fonts.largeSizes.md}
                     onPress={this._navToProfileScreen}
-                    style={styles.ownerName}>
-                    {ownerName || translate('anonymous')}
-                  </TextLink>
+                    style={styles.ownerName}
+                    text={ownerName || translate('anonymous')} />
                 ) : (
-                  <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.ownerName}>
+                  <Text
+                    accessible={false}
+                    fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                    style={styles.ownerName}>
                     {translate('anonymous')}
                   </Text>
                 )}
@@ -120,11 +138,11 @@ export class ClipInfoView extends React.PureComponent<Props> {
             )}
             {!isOfficialChapter && (
               <TextLink
+                accessible={false}
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 onPress={restartNowPlayingItemClip}
-                style={styles.replayClip}>
-                {translate('Replay Clip')}
-              </TextLink>
+                style={styles.replayClip}
+                text={translate('Replay Clip')} />
             )}
             <Divider style={styles.divider} />
           </Fragment>
@@ -162,8 +180,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: PV.Fonts.sizes.xl,
-    fontWeight: PV.Fonts.weights.bold,
-    marginTop: 12
+    fontWeight: PV.Fonts.weights.bold
   },
   topEditButtonWrapper: {
     flex: 0,
@@ -171,7 +188,8 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   topTextWrapper: {
-    flex: 1
+    flex: 1,
+    marginVertical: 8
   },
   wrapper: {
     flex: 1,

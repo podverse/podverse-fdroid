@@ -19,20 +19,19 @@ import {
   PodcastTableHeader,
   ScrollView,
   SearchBar,
-  SwipeRowBack,
   SwitchWithText,
   TableSectionSelectors,
   Text,
   View
 } from '../components'
 import { getDownloadedEpisodeLimit, setDownloadedEpisodeLimit } from '../lib/downloadedEpisodeLimiter'
-import { getDownloadedEpisodes, removeDownloadedPodcast } from '../lib/downloadedPodcast'
+import { removeDownloadedPodcast } from '../lib/downloadedPodcast'
 import { downloadEpisode } from '../lib/downloader'
 import { getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { getStartPodcastFromTime } from '../lib/startPodcastFromTime'
-import { safeKeyExtractor, safelyUnwrapNestedVariable, testProps } from '../lib/utility'
+import { safeKeyExtractor, safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
 import { getEpisodes } from '../services/episode'
 import PVEventEmitter from '../services/eventEmitter'
@@ -408,7 +407,7 @@ static navigationOptions = ({ navigation }) => {
 
       return (
         <EpisodeTableCell
-          item={episode}
+          handleDeletePress={() => this._handleDeleteEpisode(item)}
           handleDownloadPress={() => this._handleDownloadPressed(item)}
           handleMorePress={() =>
             this._handleMorePress(convertToNowPlayingItem(item, null, podcast, userPlaybackPosition))
@@ -420,6 +419,7 @@ static navigationOptions = ({ navigation }) => {
             })
           }}
           hideImage
+          item={episode}
           mediaFileDuration={mediaFileDuration}
           testID={testId}
           userPlaybackPosition={userPlaybackPosition}
@@ -428,28 +428,11 @@ static navigationOptions = ({ navigation }) => {
     }
   }
 
-  _renderHiddenItem = ({ item, index }: RenderItemArg) => (
-    <SwipeRowBack
-      onPress={() => this._handleHiddenItemPress(item.id)}
-      testID={`${testIDPrefix}_clip_item_${index}`}
-      text={translate('Delete')}
-    />
-  )
-
-  _handleHiddenItemPress = (selectedId: string) => {
-    const filteredEpisodes = this.state.flatListData.filter((x: any) => x.id !== selectedId)
-    this.setState(
-      {
-        flatListData: filteredEpisodes
-      },
-      () => {
-        (async () => {
-          await DownloadState.removeDownloadedPodcastEpisode(selectedId)
-          const finalDownloadedEpisodes = await getDownloadedEpisodes()
-          this.setState({ flatListData: finalDownloadedEpisodes })
-        })()
-      }
-    )
+  _handleDeleteEpisode = async (item: any) => {
+    const selectedId = item?.episodeId || item?.id
+    if (selectedId) {
+      await DownloadState.removeDownloadedPodcastEpisode(selectedId)
+    }
   }
 
   _handleToggleDeleteDownloadedEpisodesDialog = () => {
@@ -647,7 +630,9 @@ static navigationOptions = ({ navigation }) => {
       (viewType === PV.Filters._clipsKey && translate('No clips found'))
 
     return (
-      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.view}
+        testID={`${testIDPrefix}_view`}>
         <PodcastTableHeader
           autoDownloadOn={autoDownloadOn}
           description={podcast && podcast.description}
@@ -681,8 +666,20 @@ static navigationOptions = ({ navigation }) => {
           />
         ) : (
           <ScrollView style={styles.settingsView}>
-            <Text style={styles.settingsTitle}>{translate('Settings')}</Text>
+            <Text
+              accessibilityRole='header'
+              style={styles.settingsTitle}>
+              {translate('Settings')}
+            </Text>
             <SwitchWithText
+              accessibilityHint={limitDownloadedEpisodes
+                ? translate('ARIA HINT - disable the downloaded episode limit for this podcast')
+                : translate('ARIA HINT - limit the number of episodes from this podcast to save on your device')
+              }
+              accessibilityLabel={limitDownloadedEpisodes
+                ? translate('Download limit on')
+                : translate('Download limit off')
+              }
               onValueChange={this._handleToggleLimitDownloads}
               testID={`${testIDPrefix}_toggle_download_limit`}
               text={translate('Download limit')}
@@ -692,6 +689,10 @@ static navigationOptions = ({ navigation }) => {
             {limitDownloadedEpisodes && (
               <View style={styles.itemWrapper}>
                 <NumberSelectorWithText
+                  // eslint-disable-next-line max-len
+                  accessibilityHint={`${translate('ARIA HINT - set the maximum number of downloaded episodes to save from this podcast on your device')},${translate('Limit the number of downloaded episodes from this podcast on your device. Once the download limit is exceeded the oldest episode will be automatically deleted.')}`}
+                  // eslint-disable-next-line max-len
+                  accessibilityLabel={`${translate('Download limit max')} ${!!downloadedEpisodeLimit ? downloadedEpisodeLimit : ''}`}
                   handleChangeText={this._handleChangeDownloadLimitText}
                   selectedNumber={downloadedEpisodeLimit}
                   subText={translate(
@@ -705,6 +706,10 @@ static navigationOptions = ({ navigation }) => {
             )}
             <View style={styles.itemWrapper}>
               <NumberSelectorWithText
+                accessibilityHint={
+                  translate('ARIA HINT - set the time you want this episode to always start playing from')
+                }
+                accessibilityLabel={translate('Preset podcast start time')}
                 editable={false}
                 isHHMMSS
                 selectedNumber={startPodcastFromTime}
@@ -713,10 +718,15 @@ static navigationOptions = ({ navigation }) => {
                 text={translate('Preset podcast start time')}
                 textInputOnPress={this._handleNavigateToStartPodcastFromTimeScreen}
                 textInputStyle={{ width: 76 }}
+                wrapperOnPress={this._handleNavigateToStartPodcastFromTimeScreen}
               />
             </View>
             <Divider style={styles.divider} />
             <Button
+              accessibilityHint={
+                translate('ARIA HINT - delete all the episodes you have downloaded for this podcast')
+              }
+              accessibilityLabel={translate('Delete Downloaded Episodes')}
               onPress={this._handleToggleDeleteDownloadedEpisodesDialog}
               wrapperStyles={styles.settingsDeletebutton}
               testID={`${testIDPrefix}_delete_downloaded_episodes`}
@@ -752,9 +762,15 @@ static navigationOptions = ({ navigation }) => {
             <ActionSheet
               handleCancelPress={this._handleCancelPress}
               items={() =>
-                PV.ActionSheet.media.moreButtons(selectedItem, navigation, {
-                  handleDismiss: this._handleCancelPress
-                })
+                PV.ActionSheet.media.moreButtons(
+                  selectedItem,
+                  navigation,
+                  {
+                    handleDismiss: this._handleCancelPress,
+                    handleDownload: this._handleDownloadPressed
+                  },
+                  viewType === PV.Filters._clipsKey ? 'clip' : 'episode'
+                )
               }
               showModal={showActionSheet}
               testID={testIDPrefix}
@@ -769,12 +785,12 @@ static navigationOptions = ({ navigation }) => {
           <Dialog.Button
             label={translate('No')}
             onPress={this._handleToggleDeleteDownloadedEpisodesDialog}
-            {...testProps('dialog_delete_downloaded_episodes_no')}
+            testID={'dialog_delete_downloaded_episodes_no'.prependTestId()}
           />
           <Dialog.Button
             label={translate('Yes')}
             onPress={this._handleDeleteDownloadedEpisodes}
-            {...testProps('dialog_delete_downloaded_episodes_yes')}
+            testID={'dialog_delete_downloaded_episodes_yes'.prependTestId()}
           />
         </Dialog.Container>
       </View>

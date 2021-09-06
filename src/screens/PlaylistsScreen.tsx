@@ -4,7 +4,7 @@ import { ActivityIndicator, Divider, FlatList, MessageWithAction, PlaylistTableC
   SwipeRowBack, TableSectionSelectors, View } from '../components'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import { safeKeyExtractor, testProps } from '../lib/utility'
+import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
 import { deletePlaylist, toggleSubscribeToPlaylist } from '../state/actions/playlist'
@@ -74,6 +74,7 @@ export class PlaylistsScreen extends React.Component<Props, State> {
 
     return (
       <PlaylistTableCell
+        accessibilityHint={translate('ARIA HINT - tap to go to this playlist')}
         {...(isSubscribed ? { createdBy: ownerName } : {})}
         itemCount={item.itemCount}
         onPress={() =>
@@ -183,7 +184,9 @@ export class PlaylistsScreen extends React.Component<Props, State> {
     const showOfflineMessage = offlineModeEnabled
 
     return (
-      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.view}
+        testID={`${testIDPrefix}_view`}>
         <View style={styles.view}>
           {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
           {!isLoading && this.global.session.isLoggedIn && (

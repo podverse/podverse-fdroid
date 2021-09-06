@@ -11,7 +11,7 @@ import {
   View
 } from '../components'
 import { translate } from '../lib/i18n'
-import { overrideImageUrlWithChapterImageUrl, safeKeyExtractor, testProps } from '../lib/utility'
+import { overrideImageUrlWithChapterImageUrl, safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import { loadItemAndPlayTrack } from '../state/actions/player'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
@@ -73,16 +73,20 @@ export class HistoryScreen extends React.Component<Props, State> {
             {!navigation.getParam('isEditing') ? (
               <RNView style={styles.headerButtonWrapper}>
                 <NavHeaderButtonText
+                  accessibilityHint={translate('ARIA HINT - tap to start removing items from your history')}
+                  accessibilityLabel={translate('Remove')}
                   color={textColor}
                   handlePress={navigation.getParam('_startEditing')}
                   style={styles.navHeaderTextButton}
                   testID={`${testIDPrefix}_header_edit`}
-                  text={translate('Edit')}
+                  text={translate('Remove')}
                 />
               </RNView>
             ) : (
               <RNView style={styles.headerButtonWrapper}>
                 <NavHeaderButtonText
+                  accessibilityHint={translate('ARIA HINT - tap to stop removing items from your history')}
+                  accessibilityLabel={translate('Done')}
                   color={textColor}
                   handlePress={navigation.getParam('_stopEditing')}
                   style={styles.navHeaderTextButton}
@@ -137,26 +141,24 @@ export class HistoryScreen extends React.Component<Props, State> {
     const { isEditing, isTransparent } = this.state
 
     return (
-      <View transparent={isTransparent}>
-        <QueueTableCell
-          clipEndTime={item?.clipEndTime}
-          clipStartTime={item?.clipStartTime}
-          {...(item?.clipTitle ? { clipTitle: item.clipTitle } : {})}
-          {...(item?.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
-          {...(item?.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
-          handleRemovePress={() => this._handleRemoveHistoryItemPress(item)}
-          onPress={() => {
-            if (!isEditing) {
-              this._handlePlayItem(item)
-            }
-          }}
-          podcastImageUrl={item?.podcastImageUrl}
-          {...(item?.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
-          showRemoveButton={isEditing}
-          testID={`${testIDPrefix}_history_item_${index}`}
-          transparent={isTransparent}
-        />
-      </View>
+      <QueueTableCell
+        clipEndTime={item?.clipEndTime}
+        clipStartTime={item?.clipStartTime}
+        {...(item?.clipTitle ? { clipTitle: item.clipTitle } : {})}
+        {...(item?.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
+        {...(item?.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
+        handleRemovePress={() => this._handleRemoveHistoryItemPress(item)}
+        onPress={() => {
+          if (!isEditing) {
+            this._handlePlayItem(item)
+          }
+        }}
+        podcastImageUrl={item?.podcastImageUrl}
+        {...(item?.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
+        showRemoveButton={isEditing}
+        testID={`${testIDPrefix}_history_item_${index}`}
+        transparent={isTransparent}
+      />
     )
   }
 
@@ -201,7 +203,10 @@ export class HistoryScreen extends React.Component<Props, State> {
     const { isLoading, isLoadingMore, isRemoving, isTransparent } = this.state
 
     const view = (
-      <View style={styles.view} transparent={isTransparent} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.view}
+        transparent={isTransparent}
+        testID={`${testIDPrefix}_view`}>
         {!isLoading && (
           <FlatList
             data={historyItems}

@@ -7,16 +7,17 @@ import {
   NavDismissIcon,
   NavHeaderButtonText,
   ScrollView,
+  SwitchWithText,
   Text,
   TextInput,
   TextLink,
   View
 } from '../components'
 import { translate } from '../lib/i18n'
-import { createEmailLinkUrl, testProps } from '../lib/utility'
+import { createEmailLinkUrl } from '../lib/utility'
 import { PV } from '../resources'
 import { getAddByRSSPodcastLocally } from '../services/parser'
-import { addAddByRSSPodcast } from '../state/actions/parser'
+import { addAddByRSSPodcast, addAddByRSSPodcastWithCredentials } from '../state/actions/parser'
 
 type Props = {
   navigation: any
@@ -24,7 +25,10 @@ type Props = {
 
 type State = {
   isLoading?: boolean
+  password: string
+  showUsernameAndPassword?: boolean
   url?: string
+  username: string
 }
 
 const testIDPrefix = 'add_podcast_by_rss_screen'
@@ -32,7 +36,10 @@ const testIDPrefix = 'add_podcast_by_rss_screen'
 export class AddPodcastByRSSScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = {}
+    this.state = {
+      password: '',
+      username: ''
+    }
   }
 
   static navigationOptions = ({ navigation }) => ({
@@ -40,6 +47,8 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
     headerRight: () => (
       <NavHeaderButtonText
+        accessibilityHint={translate('ARIA HINT - subscribe to this custom RSS feed')}
+        accessibilityLabel={translate('Save')}
         disabled={navigation.getParam('_savePodcastByRSSUrlIsLoading')}
         handlePress={navigation.getParam('_handleSavePodcastByRSSURL')}
         testID={`${testIDPrefix}_save`}
@@ -62,8 +71,13 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
     this.setState({ url: value })
   }
 
+  _handleToggleUsernameAndPassword = () => {
+    const { showUsernameAndPassword } = this.state
+    this.setState({ showUsernameAndPassword: !showUsernameAndPassword })
+  }
+
   _handleSavePodcastByRSSURL = () => {
-    const { isLoading, url } = this.state
+    const { isLoading, password, showUsernameAndPassword, url, username } = this.state
     if (isLoading) {
       return
     } else if (url) {
@@ -71,7 +85,13 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
       this.setState({ isLoading: true }, () => {
         (async () => {
           try {
-            const addByRSSSucceeded = await addAddByRSSPodcast(url)
+            let addByRSSSucceeded = false
+            if (showUsernameAndPassword) {
+              const credentials = `${username}:${password}`
+              addByRSSSucceeded = await addAddByRSSPodcastWithCredentials(url, credentials)
+            } else {
+              addByRSSSucceeded = await addAddByRSSPodcast(url)
+            }
             this.setState({ isLoading: false })
   
             if (addByRSSSucceeded) {
@@ -97,14 +117,19 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoading, url } = this.state
+    const { isLoading, password, showUsernameAndPassword, url, username } = this.state
 
     return (
-      <View style={styles.content} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.content}
+        testID={`${testIDPrefix}_view`}>
         {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
         {!isLoading && (
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <TextInput
+              // eslint-disable-next-line max-len
+              accessibilityHint={translate('ARIA HINT - Type or paste your RSS feed URL here When finished press the Save button above')}
+              accessibilityLabel={translate('RSS feed link')}
               autoCapitalize='none'
               autoCompleteType='off'
               autoCorrect={false}
@@ -117,10 +142,35 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
               underlineColorAndroid='transparent'
               value={url}
             />
+            <SwitchWithText
+              accessibilityHint={translate('ARIA HINT - type a username and password for this feed')}
+              accessibilityLabel={translate('Include username and password')}
+              inputAutoCorrect={false}
+              inputEditable
+              inputEyebrowTitle={translate('Username')}
+              inputHandleTextChange={(text?: string) => this.setState({ username: text || '' })}
+              inputPlaceholder={translate('Username')}
+              inputShow={!!showUsernameAndPassword}
+              inputText={username}
+              input2AutoCorrect={false}
+              input2Editable
+              input2EyebrowTitle={translate('Password')}
+              input2HandleTextChange={(text?: string) => this.setState({ password: text || '' })}
+              input2Placeholder={translate('Password')}
+              input2Show={!!showUsernameAndPassword}
+              input2Text={password}
+              onValueChange={this._handleToggleUsernameAndPassword}
+              subText={!!showUsernameAndPassword ? translate('If this is a password protected feed') : ''}
+              subTextAccessible
+              text={translate('Include username and password')}
+              testID={`${testIDPrefix}_include_username_and_password`}
+              value={!!showUsernameAndPassword}
+              wrapperStyle={styles.switchWrapper}
+            />
             <Divider style={styles.divider} />
             <Text 
               fontSizeLargestScale={PV.Fonts.largeSizes.sm} 
-              style={[styles.text, {fontWeight: PV.Fonts.weights.bold, marginBottom: 60}]}
+              style={[styles.text, {fontWeight: PV.Fonts.weights.bold, marginBottom: 24}]}
             >
               {translate('AddPodcastByRSSScreenText1')}
             </Text>
@@ -129,12 +179,12 @@ export class AddPodcastByRSSScreen extends React.Component<Props, State> {
             </Text>
             {!!Config.CURATOR_EMAIL && (
               <TextLink
+                accessibilityHint={translate('ARIA HINT - open your email client to request a podcast by email')}
                 fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                 onPress={this._navToRequestPodcastEmail}
                 style={styles.textLink}
-                {...testProps(`${testIDPrefix}_request_podcast`)}>
-                {translate('Request Podcast')}
-              </TextLink>
+                testID={`${testIDPrefix}_request_podcast`}
+                text={translate('Request Podcast')} />
             )}
           </ScrollView>
         )}
@@ -148,7 +198,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   divider: {
-    marginVertical: 8
+    marginBottom: 24,
+    marginTop: 24
   },
   scrollViewContent: {
     paddingHorizontal: 12,
@@ -160,9 +211,12 @@ const styles = StyleSheet.create({
     backgroundColor: PV.Colors.grayLight,
     marginVertical: 30
   },
+  switchWrapper: {
+    marginTop: 8
+  },
   text: {
     fontSize: PV.Fonts.sizes.lg,
-    marginVertical: 12,
+    marginBottom: 12,
     textAlign: 'left'
   },
   textInput: {
