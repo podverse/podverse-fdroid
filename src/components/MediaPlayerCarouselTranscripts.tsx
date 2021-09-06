@@ -6,7 +6,7 @@ import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
 import { getPlaybackSpeed, PVTrackPlayer, setPlaybackPosition } from '../services/player'
 import { PVSearchBar } from './PVSearchBar'
-import { FlatList, TableSectionSelectors, Text, View } from './'
+import { AutoScrollToggle, FlatList, TableSectionSelectors, Text, View } from './'
 
 type Props = {
   navigation?: any
@@ -23,9 +23,9 @@ type State = {
 const getCellID = (item: TranscriptRow) => `transcript-cell-${item.line}`
 
 export class MediaPlayerCarouselTranscripts extends React.PureComponent<Props, State> {
-  listRef: any | null = null
-  interval: ReturnType<typeof setInterval> | null = null
   currentSpeaker?: string
+  interval: ReturnType<typeof setInterval> | null = null
+  listRef: any | null = null
 
   constructor() {
     super()
@@ -66,8 +66,15 @@ export class MediaPlayerCarouselTranscripts extends React.PureComponent<Props, S
       ? { color: PV.Colors.orange }
       : {}
 
+    const accessibilityLabel =
+      `${this.currentSpeaker ? `${this.currentSpeaker}, ` : ''} ${text}, ${startTimeHHMMSS}`
+
     return (
-      <TouchableOpacity activeOpacity={0.7} onPress={() => setPlaybackPosition(startTime)}>
+      <TouchableOpacity
+        accessible
+        accessibilityLabel={accessibilityLabel}
+        activeOpacity={0.7}
+        onPress={() => setPlaybackPosition(startTime)}>
         {!!this.currentSpeaker && (
           <Text isSecondary style={styles.speaker} testID={`${cellID}-${this.currentSpeaker}`}>
             {this.currentSpeaker}
@@ -135,32 +142,49 @@ export class MediaPlayerCarouselTranscripts extends React.PureComponent<Props, S
 
   render() {
     const { width } = this.props
-    let data: never[] | [] = this.global.parsedTranscript
+    const { autoScrollOn } = this.state
+    const { screenReaderEnabled } = this.global
+
+    let data: never[] | [] = this.global.parsedTranscript || []
     if (this.state.searchText) {
-      data = this.state.searchResults
+      data = this.state.searchResults || []
     }
 
     return (
       <View style={{ width }}>
         <TableSectionSelectors
-          customButtons={
-            <TouchableOpacity activeOpacity={0.7} onPress={this.toggleAutoscroll}>
-              <Text style={[styles.autoScrollerText]} testID='transcript-autoscroll'>
-                {this.state.autoScrollOn ? translate('Autoscroll On') : translate('Autoscroll Off')}
-              </Text>
-            </TouchableOpacity>
-          }
+          customButtons={!screenReaderEnabled ? (
+            <AutoScrollToggle
+              autoScrollOn={autoScrollOn}
+              toggleAutoscroll={this.toggleAutoscroll}
+            />
+          ) : null}
           disableFilter
           hideDropdown
           includePadding
           selectedFilterLabel={translate('Transcript')}
         />
         <PVSearchBar
-          testID='transcript_search_bar'
-          value={this.state.searchText}
+          accessibilityHint={
+            translate('ARIA HINT - Type to show only the transcript text that includes this search term')}
+          accessibilityLabel={translate('Transcript search input')}
+          containerStyle={{
+            backgroundColor: PV.Colors.velvet,
+            marginBottom: 10,
+            marginHorizontal: 12
+          }}
+          handleClear={() => {
+            this.setState({
+              searchText: '',
+              searchResults: []
+            })
+          }}
           onChangeText={(searchText: string) => {
-            if (searchText?.length === 0) {
-              this.setState({ searchResults: [] })
+            if (!searchText || searchText?.length === 0) {
+              this.setState({
+                searchText: '',
+                searchResults: []
+              })
             } else {
               const searchResults = this.global.parsedTranscript.filter((item: Record<string, any>) => {
                 return item?.text?.toLowerCase().includes(searchText?.toLowerCase())
@@ -182,30 +206,21 @@ export class MediaPlayerCarouselTranscripts extends React.PureComponent<Props, S
               searchResults: []
             })
           }}
-          handleClear={() => {
-            this.setState({
-              searchText: '',
-              searchResults: []
-            })
-          }}
-          containerStyle={{
-            backgroundColor: PV.Colors.velvet,
-            marginBottom: 10,
-            marginHorizontal: 12
-          }}
+          testID='transcript_search_bar'
+          value={this.state.searchText}
         />
         <FlatList
           data={data}
           dataTotalCount={data.length}
           disableLeftSwipe
-          keyExtractor={(item: TranscriptRow) => getCellID(item)}
-          renderItem={this.renderItem}
-          listRef={(ref: any) => {
-            this.listRef = ref
-          }}
           getItemLayout={(_: any, index: number) => {
             return { length: 80, offset: 80 * index, index }
           }}
+          keyExtractor={(item: TranscriptRow) => getCellID(item)}
+          listRef={(ref: any) => {
+            this.listRef = ref
+          }}
+          renderItem={this.renderItem}
           testID='transcript-flat-list'
           transparent
         />
@@ -254,15 +269,5 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     paddingHorizontal: 12
-  },
-  autoScrollerText: {
-    borderRadius: 16,
-    backgroundColor: PV.Colors.velvet,
-    borderColor: PV.Colors.brandBlueLight,
-    borderWidth: 2,
-    fontSize: PV.Fonts.sizes.lg,
-    fontWeight: PV.Fonts.weights.bold,
-    paddingVertical: 5,
-    paddingHorizontal: 10
   }
 })

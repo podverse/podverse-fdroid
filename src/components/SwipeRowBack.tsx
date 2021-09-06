@@ -2,10 +2,10 @@ import React from 'react'
 import { StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { useGlobal } from 'reactn'
 import { PV } from '../resources'
-import { testProps } from '../lib/utility'
 import { ActivityIndicator } from '.'
 
 type Props = {
+  accessibilityLabel?: string
   isLoading?: boolean
   onPress: any
   styles?: any
@@ -19,13 +19,24 @@ export const SwipeRowBack = (props: Props) => {
 
   return (
     <TouchableOpacity
+      accessible={false}
+      importantForAccessibility='no'
       onPress={onPress}
       style={[styles, s.swipeRowBack, globalTheme.swipeRowBack]}
-      {...testProps(`${testID}_swipe_row_back`)}>
+      testID={`${testID}_swipe_row_back`.prependTestId()}>
       {isLoading ? (
-          <ActivityIndicator size='large' testID={testID} />
+          <ActivityIndicator
+            accessible={false}
+            importantForAccessibility='no'
+            size='large'
+            testID={testID} />
       ) : (
-        <Text style={s.textWrapper}>{text}</Text>
+        <Text
+          accessible={false}
+          importantForAccessibility='no'
+          style={s.textWrapper}>
+          {text}
+        </Text>
       )}
     </TouchableOpacity>
   )

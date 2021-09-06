@@ -2,7 +2,6 @@ import { StyleSheet, SafeAreaView, Image } from 'react-native'
 import React, { getGlobal } from 'reactn'
 import { Button, NavDismissIcon, ScrollView, Text } from '../components'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 
 type Props = any
@@ -28,7 +27,9 @@ export class ValueTagPreviewScreen extends React.Component<Props> {
 
   render() {
     return (
-      <SafeAreaView style={styles.content} {...testProps(`${testIDPrefix}_view`)}>
+      <SafeAreaView
+        style={styles.content}
+        testID={`${testIDPrefix}_view`.prependTestId()}>
         <Text
           fontSizeLargestScale={PV.Fonts.largeSizes.xl}
           style={styles.title}>

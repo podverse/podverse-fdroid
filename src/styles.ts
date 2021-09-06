@@ -220,6 +220,9 @@ export const darkTheme = StyleSheet.create({
     borderBottomColor: PV.Colors.grayDarker, // override native style,
     marginBottom: 24
   },
+  textNowPlaying: {
+    color: PV.Colors.orange
+  },
   textSecondary: {
     color: PV.Colors.grayLightest
   },
@@ -458,6 +461,9 @@ export const lightTheme = StyleSheet.create({
     borderTopColor: PV.Colors.grayLighter, // override native styles
     borderBottomColor: PV.Colors.grayLighter // override native style
   },
+  textNowPlaying: {
+    color: PV.Colors.orange
+  },
   textSecondary: {
     color: PV.Colors.grayDarkest
   },
@@ -494,6 +500,13 @@ export const tabbar = StyleSheet.create({
   }
 })
 
+export const images = StyleSheet.create({
+  medium: {
+    height: Platform.OS === 'ios' ? 64 : 74,
+    width: Platform.OS === 'ios' ? 64 : 74
+  }
+})
+
 export const button = StyleSheet.create({
   iconOnlyLarge: {
     flex: 0,
@@ -505,8 +518,8 @@ export const button = StyleSheet.create({
   },
   iconOnlyMedium: {
     flex: 0,
-    height: 64,
-    lineHeight: 64,
+    height: images.medium.height,
+    lineHeight: images.medium.height,
     textAlign: 'center',
     width: 44,
     zIndex: 1000000

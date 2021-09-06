@@ -64,20 +64,29 @@ export const EpisodeTableHeader = (props: Props) => {
             </View>
           ) : (
             <View style={styles.innerWrapper}>
-              <FastImage source={imageUrl} styles={styles.image} />
+              <FastImage fallback source={imageUrl} styles={styles.image} />
               <View style={styles.textWrapper}>
                 <Text
+                  accessibilityHint={translate('ARIA HINT - This is the podcast title')}
+                  accessibilityLabel={podcastTitle.trim()}
                   fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                   isSecondary
                   style={styles.podcastTitle}
                   testID={`${testID}_podcast_title`}>
                   {podcastTitle.trim()}
                 </Text>
-                <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.title} testID={`${testID}_title`}>
+                <Text
+                  accessibilityHint={translate('ARIA HINT - This is the episode title')}
+                  accessibilityLabel={episodeTitle.trim()}
+                  fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                  style={styles.title}
+                  testID={`${testID}_title`}>
                   {episodeTitle.trim()}
                 </Text>
                 <View style={styles.textWrapperBottomRow}>
                   <Text
+                    accessibilityHint={translate('ARIA HINT - This is the episode publication date')}
+                    accessibilityLabel={readableDate(pubDate)}
                     fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                     isSecondary
                     style={styles.pubDate}
@@ -89,8 +98,9 @@ export const EpisodeTableHeader = (props: Props) => {
               </View>
               <TimeRemainingWidget
                 episodeDownloading={episodeDownloading}
-                item={episode}
                 handleMorePress={handleMorePress}
+                item={episode}
+                itemType='episode'
                 mediaFileDuration={mediaFileDuration}
                 style={{ marginVertical: 20 }}
                 testID={testID}
@@ -116,8 +126,8 @@ const styles = StyleSheet.create({
   },
   innerWrapper: {},
   image: {
-    height: 110,
-    width: 110
+    height: 200,
+    width: 200
   },
   notFoundText: {
     fontSize: PV.Fonts.sizes.xl,

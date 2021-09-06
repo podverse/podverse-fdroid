@@ -4,7 +4,6 @@ import { CheckBox } from 'react-native-elements'
 import React from 'reactn'
 import { Button, Text } from '../components'
 import { translate } from '../lib/i18n'
-import { testProps } from '../lib/utility'
 import { PV } from '../resources'
 
 type Props = any
@@ -40,7 +39,9 @@ export class ValueTagConsentScreen extends React.Component<Props, State> {
 
   render() {
     return (
-      <SafeAreaView style={styles.content} {...testProps(`${testIDPrefix}_view`)}>
+      <SafeAreaView
+        style={styles.content}
+        testID={`${testIDPrefix}_view`.prependTestId()}>
         <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.title}>
         {translate("value_tag_consent_title")}
         </Text>
@@ -65,7 +66,7 @@ export class ValueTagConsentScreen extends React.Component<Props, State> {
             this.setState({ checkboxSelected: !this.state.checkboxSelected })
           }}
           size={50}
-          {...(testProps(`${testIDPrefix}_accept_check_box`))}
+          testID={`${testIDPrefix}_accept_check_box`.prependTestId()}
           title={translate("value_tag_consent_checkbox_text")}
           textStyle={{ color: PV.Colors.white, fontSize: PV.Fonts.sizes.lg }}
         />

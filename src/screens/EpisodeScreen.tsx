@@ -9,13 +9,15 @@ import {
   NavSearchIcon,
   NavShareIcon,
   ScrollView,
-  Text
+  Text,
+  View
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
 import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
-import { replaceLinebreaksWithBrTags, testProps } from '../lib/utility'
+import { replaceLinebreaksWithBrTags } from '../lib/utility'
 import { PV } from '../resources'
+import { getEpisode } from '../services/episode'
 import { getMediaRefs } from '../services/mediaRef'
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import { retriveNowPlayingItemChapters } from '../state/actions/playerChapters'
@@ -49,6 +51,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
     const episode = this.props.navigation.getParam('episode')
     const episodeId = episode?.id || this.props.navigation.getParam('episodeId')
     const includeGoToPodcast = this.props.navigation.getParam('includeGoToPodcast')
+    const id = episode?.id || episodeId
 
     if (episode && !episode.podcast) {
       episode.podcast = {
@@ -56,11 +59,11 @@ export class EpisodeScreen extends React.Component<Props, State> {
       }
     }
 
-    if (episode?.id) {
+    if (id) {
       this.props.navigation.setParams({
-        episodeId: episode.id,
-        episodeTitle: episode.title,
-        podcastTitle: episode.podcast?.title || ''
+        episodeId: id,
+        episodeTitle: episode?.title || '',
+        podcastTitle: episode?.podcast?.title || ''
       })
     }
 
@@ -68,7 +71,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
       episode,
       episodeId,
       includeGoToPodcast,
-      isLoading: false,
+      isLoading: !episode,
       showActionSheet: false,
       hasInternetConnection: false,
       clips: [],
@@ -108,14 +111,21 @@ export class EpisodeScreen extends React.Component<Props, State> {
   }
 
   async _initializePageData() {
+    const { episodeId } = this.state
+    let { episode } = this.state
     const hasInternetConnection = await hasValidNetworkConnection()
+    
     if (!hasInternetConnection) {
+      this.setState({ hasInternetConnection })
+    } else if (!episode && episodeId) {
+      episode = await getEpisode(episodeId)
       this.setState({
-        hasInternetConnection
+        episode,
+        isLoading: false
       })
-    } else {
-      const { episode } = this.state
-
+    }
+    
+    if (episode?.id) {
       const [clips, totalClips] = await getMediaRefs({
         episodeId: episode.id,
         includeEpisode: false,
@@ -186,7 +196,9 @@ export class EpisodeScreen extends React.Component<Props, State> {
       : {}
 
     return (
-      <ScrollView style={styles.view} {...testProps('episode_screen_view')}>
+      <ScrollView
+        style={styles.view}
+        testID='episode_screen_view'>
         <EpisodeTableHeader
           episode={episode}
           episodeDownloaded={episodeDownloaded}
@@ -199,62 +211,80 @@ export class EpisodeScreen extends React.Component<Props, State> {
           testID={testIDPrefix}
           userPlaybackPosition={userPlaybackPosition}
         />
-        {showClipsCell && (
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.showNotesCell}
-            onPress={() => {
-              this.props.navigation.navigate(PV.RouteNames.EpisodeMediaRefScreen, {
-                episode,
-                viewType: PV.Filters._clipsKey,
-                title: 'Clips',
-                initialData: clips,
-                totalItems: totalClips
-              })
-            }}>
-            <>
-              <Text style={styles.showNotesCellText} testID={testIDPrefix}>
-                {translate('Clips')}
-              </Text>
-              <Icon name='arrow-right' size={15} />
-            </>
-          </TouchableOpacity>
-        )}
-        {showChaptersCell && (
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.showNotesCell}
-            onPress={() => {
-              this.props.navigation.navigate(PV.RouteNames.EpisodeMediaRefScreen, {
-                episode,
-                viewType: PV.Filters._chaptersKey,
-                title: 'Chapters',
-                initialData: chapters,
-                totalItems: totalChapters
-              })
-            }}>
-            <>
-              <Text style={styles.showNotesCellText} testID={testIDPrefix}>
-                {translate('Chapters')}
-              </Text>
-              <Icon name='arrow-right' size={15} />
-            </>
-          </TouchableOpacity>
-        )}
-        <HTMLScrollView
-          disableScrolling
-          fontSizeLargestScale={PV.Fonts.largeSizes.md}
-          html={episode?.description || ''}
-          style={extraHtmlScrollViewPadding}
-        />
+        {
+          !isLoading && (
+            <View>
+              {showClipsCell && (
+                <TouchableOpacity
+                  accessibilityHint={translate('ARIA HINT - show clips from this episode')}
+                  accessibilityLabel={translate('Clips')}
+                  accessibilityRole='button'
+                  activeOpacity={1}
+                  style={styles.showNotesCell}
+                  onPress={() => {
+                    this.props.navigation.navigate(PV.RouteNames.EpisodeMediaRefScreen, {
+                      episode,
+                      viewType: PV.Filters._clipsKey,
+                      title: 'Clips',
+                      initialData: clips,
+                      totalItems: totalClips
+                    })
+                  }}>
+                  <>
+                    <Text style={styles.showNotesCellText} testID={testIDPrefix}>
+                      {translate('Clips')}
+                    </Text>
+                    <Icon name='arrow-right' size={15} />
+                  </>
+                </TouchableOpacity>
+              )}
+              {showChaptersCell && (
+                <TouchableOpacity
+                  accessibilityHint={translate('ARIA HINT - show the chapters for this episode')}
+                  accessibilityLabel={translate('Chapters')}
+                  accessibilityRole='button'
+                  activeOpacity={1}
+                  style={styles.showNotesCell}
+                  onPress={() => {
+                    this.props.navigation.navigate(PV.RouteNames.EpisodeMediaRefScreen, {
+                      episode,
+                      viewType: PV.Filters._chaptersKey,
+                      title: 'Chapters',
+                      initialData: chapters,
+                      totalItems: totalChapters
+                    })
+                  }}>
+                  <>
+                    <Text style={styles.showNotesCellText} testID={testIDPrefix}>
+                      {translate('Chapters')}
+                    </Text>
+                    <Icon name='arrow-right' size={15} />
+                  </>
+                </TouchableOpacity>
+              )}
+              <HTMLScrollView
+                disableScrolling
+                fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                html={episode?.description || ''}
+                sectionTitle={translate('Episode Summary')}
+                style={extraHtmlScrollViewPadding}
+              />
+            </View>
+          )
+        }
         <ActionSheet
           handleCancelPress={this._handleCancelPress}
           items={() =>
-            PV.ActionSheet.media.moreButtons(selectedItem, navigation, {
-              handleDismiss: this._handleCancelPress,
-              handleDownload: this._handleDownloadPressed,
-              includeGoToPodcast
-            })
+            PV.ActionSheet.media.moreButtons(
+              selectedItem,
+              navigation,
+              {
+                handleDismiss: this._handleCancelPress,
+                handleDownload: this._handleDownloadPressed,
+                includeGoToPodcast
+              },
+              'episode'
+            )
           }
           showModal={showActionSheet}
           testID={testIDPrefix}
@@ -270,12 +300,6 @@ const styles = StyleSheet.create({
   },
   htmlScrollView: {
     marginVertical: 12
-  },
-  showNotesView: {
-    margin: 8
-  },
-  showNotesViewText: {
-    fontSize: PV.Fonts.sizes.lg
   },
   showNotesCell: {
     padding: 15,

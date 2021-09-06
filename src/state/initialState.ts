@@ -24,7 +24,7 @@ const initialTheme: InitialState = {
   overlayAlert: {
     shouldShowAlert: false
   },
-  parsedTranscript: [],
+  parsedTranscript: null,
   player: {
     currentChapter: null,
     currentChapters: [],
@@ -73,15 +73,18 @@ const initialTheme: InitialState = {
     isLoading: false,
     isLoadingMore: false,
     isQuerying: false,
+    mediaRefIdToDelete: '',
     queryFrom: PV.Filters._fromThisEpisodeKey,
     queryPage: 1,
     querySort: PV.Filters._topPastWeek,
     selectedFromLabel: '',
+    showDeleteConfirmDialog: false,
     showFullClipInfo: false,
     showHeaderActionSheet: false,
     showMoreActionSheet: false,
     showNoInternetConnectionMessage: false,
-    showShareActionSheet: false
+    showShareActionSheet: false,
+    viewType: null
   },
   screenPlaylist: {
     flatListData: [],
@@ -130,7 +133,8 @@ const initialTheme: InitialState = {
     startTime: undefined,
     endTime: null,
     clipTitle: undefined
-  }
+  },
+  screenReaderEnabled: false
 }
 
 export default initialTheme

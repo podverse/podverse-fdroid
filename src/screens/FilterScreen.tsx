@@ -1,10 +1,9 @@
-import { StyleSheet, View as RNView } from 'react-native'
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
+import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
 import React from 'reactn'
 import { FlatList, Icon, NavHeaderButtonText, Text, View } from '../components'
 import { generateSections } from '../lib/filters'
 import { translate } from '../lib/i18n'
-import { safeKeyExtractor, testProps } from '../lib/utility'
+import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import { getDefaultCategory } from '../services/category'
 
@@ -51,7 +50,12 @@ export class FilterScreen extends React.Component<Props, State> {
       title: filterScreenTitle || '',
       headerLeft: () => null,
       headerRight: () => (
-        <NavHeaderButtonText handlePress={navigation.dismiss} testID={testIDPrefix} text={translate('Done')} />
+        <NavHeaderButtonText
+          accessibilityHint={translate('ARIA HINT - dismiss this screen')}
+          accessibilityLabel={translate('Done')}
+          handlePress={navigation.dismiss}
+          testID={testIDPrefix}
+          text={translate('Done')} />
       )
     }
   }
@@ -213,8 +217,13 @@ export class FilterScreen extends React.Component<Props, State> {
     const isSubCategory = item.parentId
     const itemTextStyle = isSubCategory ? [styles.itemSubText] : [styles.itemText]
 
+    const accessibilityHint = `${isActive ? translate('ARIA HINT - Currently selected filter') : ''}`
+
     return (
       <TouchableWithoutFeedback
+        accessibilityHint={accessibilityHint}
+        accessibilityLabel={item.labelShort || item.label || item.title}
+        importantForAccessibility='yes'
         onPress={async () => {
           const { categoryValueOverride, handleSelect } = await this.getSelectHandler(section, item)
           const newState = (await this.getNewLocalState(section, item)) as any
@@ -223,9 +232,10 @@ export class FilterScreen extends React.Component<Props, State> {
             handleSelect(categoryValueOverride || value)
           })
         }}
-        {...testProps(`${testIDPrefix}_${value}`)}>
+        testID={`${testIDPrefix}_${value}`.prependTestId()}>
         <View style={styles.itemWrapper}>
           <Text
+            importantForAccessibility='no-hide-descendants'
             style={[itemTextStyle, isActive ? { fontWeight: PV.Fonts.weights.extraBold, color: PV.Colors.white } : {}]}>
             {item.labelShort || item.label || item.title}
           </Text>
@@ -252,7 +262,12 @@ export class FilterScreen extends React.Component<Props, State> {
           keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.value || item?.id)}
           renderSectionHeader={({ section }) => (
               <View style={styles.sectionItemWrapper}>
-                <Text style={styles.sectionItemText}>{section.title}</Text>
+                <Text
+                  accessible
+                  accessibilityHint={section.accessibilityHint}
+                  accessibilityLabel={section.title}
+                  accessibilityRole={section.accessibilityRole}
+                  style={styles.sectionItemText}>{section.title}</Text>
               </View>
             )}
           renderItem={this.renderItem}

@@ -19,7 +19,7 @@ import { getDownloadedPodcasts } from '../lib/downloadedPodcast'
 import { getDefaultSortForFilter, getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
-import { getAppUserAgent, safeKeyExtractor, setAppUserAgent, setCategoryQueryProperty, testProps } from '../lib/utility'
+import { getAppUserAgent, safeKeyExtractor, setAppUserAgent, setCategoryQueryProperty } from '../lib/utility'
 import { PV } from '../resources'
 import { assignCategoryQueryToState, assignCategoryToStateForSortSelect, getCategoryLabel } from '../services/category'
 import { getEpisode } from '../services/episode'
@@ -41,6 +41,7 @@ import {
 } from '../state/actions/player'
 import { combineWithAddByRSSPodcasts,
   getSubscribedPodcasts, removeAddByRSSPodcast, toggleSubscribeToPodcast } from '../state/actions/podcast'
+import { updateScreenReaderEnabledState } from '../state/actions/screenReader'
 import { initializeSettings } from '../state/actions/settings'
 import { initializeValueProcessor } from '../state/actions/valueTag'
 import { core, darkTheme } from '../styles'
@@ -113,6 +114,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.on(PV.Events.LNPAY_WALLET_INFO_SHOULD_UPDATE, updateWalletInfo)
     PVEventEmitter.on(PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW, this._handleNavigateToAddPodcastByRSSAuthScreen)
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
+    updateScreenReaderEnabledState()
 
     try {
       const appHasLaunched = await AsyncStorage.getItem(PV.Keys.APP_HAS_LAUNCHED)
@@ -156,7 +160,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _handleAppStateChange = (nextAppState: any) => {
     (async () => {
-      updateUserPlaybackPosition()
+      await updateUserPlaybackPosition()
 
       if (nextAppState === 'active' && !isInitialLoad) {
         const { nowPlayingItem: lastItem } = this.global.player
@@ -189,6 +193,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
           updateTrackPlayerCapabilities()
         }
       }
+
+      updateScreenReaderEnabledState()
     })()
   }
 
@@ -502,22 +508,22 @@ export class PodcastsScreen extends React.Component<Props, State> {
   _ItemSeparatorComponent = () => <Divider style={{ marginHorizontal: 10 }} />
 
   _renderPodcastItem = ({ item, index }) => (
-      <PodcastTableCell
-        id={item?.id}
-        lastEpisodePubDate={item.lastEpisodePubDate}
-        onPress={() =>
-          this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
-            podcast: item,
-            addByRSSPodcastFeedUrl: item.addByRSSPodcastFeedUrl
-          })
-        }
-        podcastImageUrl={item.shrunkImageUrl || item.imageUrl}
-        {...(item.title ? { podcastTitle: item.title } : {})}
-        showAutoDownload
-        showDownloadCount
-        testID={`${testIDPrefix}_podcast_item_${index}`}
-      />
-    )
+    <PodcastTableCell
+      id={item?.id}
+      lastEpisodePubDate={item.lastEpisodePubDate}
+      onPress={() =>
+        this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
+          podcast: item,
+          addByRSSPodcastFeedUrl: item.addByRSSPodcastFeedUrl
+        })
+      }
+      podcastImageUrl={item.shrunkImageUrl || item.imageUrl}
+      {...(item.title ? { podcastTitle: item.title } : {})}
+      showAutoDownload
+      showDownloadCount
+      testID={`${testIDPrefix}_podcast_item_${index}`}
+    />
+  )
 
   _renderHiddenItem = ({ item, index }, rowMap) => {
     const { queryFrom } = this.state
@@ -676,7 +682,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
         : translate('Search')
 
     return (
-      <View style={styles.view} {...testProps(`${testIDPrefix}_view`)}>
+      <View
+        style={styles.view}
+        testID={`${testIDPrefix}_view`}>
         <RNView style={{ flex: 1 }}>
           <PlayerEvents />
           <TableSectionSelectors
@@ -713,9 +721,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
                   ? this._ListHeaderComponent
                   : null
               }
+              noResultsTopActionTextAccessibilityHint={translate('ARIA HINT - go to the search screen')}
               noResultsTopActionText={noSubscribedPodcasts ? defaultNoSubscribedPodcastsMessage : ''}
               noResultsMessage={
-                noSubscribedPodcasts ? translate("You don't have any podcasts yet") : translate('No podcasts found')
+                // eslint-disable-next-line max-len
+                noSubscribedPodcasts ? translate("You are not subscribed to any podcasts yet") : translate('No podcasts found')
               }
               onEndReached={this._onEndReached}
               onRefresh={queryFrom === PV.Filters._subscribedKey ? this._onRefresh : null}
@@ -725,18 +735,18 @@ export class PodcastsScreen extends React.Component<Props, State> {
             />
           )}
         </RNView>
-        <Dialog.Container visible={showDataSettingsConfirmDialog}>
+        <Dialog.Container accessible visible={showDataSettingsConfirmDialog}>
           <Dialog.Title>Data Settings</Dialog.Title>
           <Dialog.Description>Do you want to allow downloading episodes with your data plan?</Dialog.Description>
           <Dialog.Button
             label={translate('No Wifi Only')}
             onPress={this._handleDataSettingsWifiOnly}
-            {...testProps('alert_no_wifi_only')}
+            testID={'alert_no_wifi_only'.prependTestId()}
           />
           <Dialog.Button
             label={translate('Yes Allow Data')}
             onPress={this._handleDataSettingsAllowData}
-            {...testProps('alert_yes_allow_data')}
+            testID={'alert_yes_allow_data'.prependTestId()}
           />
         </Dialog.Container>
       </View>
