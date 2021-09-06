@@ -576,9 +576,9 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.2.0-qa.1
+  - versionName: 3.2.0
     versionCode: 16
-    commit: 3.2.0-qa.1
+    commit: 3.2.0
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
