@@ -38,7 +38,7 @@ Builds:
       - node_modules/react-native/android
       - node_modules/react-native-gesture-handler/android/lib/build.gradle
       - node_modules/react-native-localize/android/build.gradle
-      - node_modules/react-native-reanimated/android
+      - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
       - node_modules/react-native-secure-key-store/example/android/build.gradle
@@ -412,9 +412,9 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.1.5-qa
+  - versionName: 3.1.5
     versionCode: 13
-    commit: 3.1.5-qa
+    commit: 3.1.5
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
@@ -453,9 +453,9 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.1.10-qa.1
+  - versionName: 3.1.10
     versionCode: 14
-    commit: 3.1.10-qa.1
+    commit: 3.1.10
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
@@ -490,13 +490,13 @@ Builds:
       - node_modules/react-native-track-player/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
-      - node_modules/@react-native-community/async-storage
+      - node_modules/@react-native-community/async-storage/android/build.gradle
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
 
-  - versionName: 3.1.11-qa.1
+  - versionName: 3.1.11
     versionCode: 15
-    commit: 3.1.11-qa.1
+    commit: 3.1.11
     subdir: android/app
     sudo:
       - apt-get update || apt-get update
@@ -522,7 +522,7 @@ Builds:
       - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
       - node_modules/react-native-localize/android/build.gradle
-      - node_modules/react-native-reanimated/android/
+      - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
       - node_modules/react-native-secure-key-store/example/android/build.gradle
@@ -543,16 +543,18 @@ Builds:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
       - tar xJf node.tar.xz
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
-      - apt-get update || apt-get update
-      - apt-get install -y -t stretch-backports npm
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.2.0
     init:
-      - echo "Using node version - "
-      - node -v
       - npm install
       - npm install --save-dev jetifier
       - npm run jetify
-    gradle:
-      - yes
+    prebuild:
+      - cd $$react-native-reanimated$$
+      - echo -e "android { ndkVersion '23.0.7599858' }" >> build.gradle
+      - yarn add react-native@0.64.2
     rm:
       - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
       - node_modules/bplist-parser
@@ -567,7 +569,6 @@ Builds:
       - node_modules/jsc-android
       - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
-      - node_modules/react-native-document-picker
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-reanimated/android
       - node_modules/react-native-safe-area-context/android/build.gradle
@@ -578,9 +579,14 @@ Builds:
       - node_modules/react-native-track-player/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
-      - node_modules/@react-native-community/async-storage/android/build.gradle
+      - node_modules/@react-native-community/async-storage
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
+    build:
+      - pushd $$react-native-reanimated$$
+      - FOR_HERMES=True gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-64-hermes.aar
 
 AutoUpdateMode: None
 UpdateCheckMode: None
