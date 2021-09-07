@@ -547,6 +547,8 @@ Builds:
       - npm install
       - npm install --save-dev jetifier
       - npm run jetify
+      - pwd
+      - ls
     gradle:
       - yes
     srclibs:
