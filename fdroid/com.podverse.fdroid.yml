@@ -543,12 +543,6 @@ Builds:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
       - tar xJf node.tar.xz
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
-    init:
-      - npm install
-      - npm install --save-dev jetifier
-      - npm run jetify
-      - pwd
-      - ls
     gradle:
       - yes
     srclibs:
@@ -562,6 +556,10 @@ Builds:
       - node_modules/react-native/template
       - functions
     prebuild:
+      - cd ../..
+      - npm install
+      - npm install --save-dev jetifier
+      - npm run jetify
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '23.0.7599858' }" >> build.gradle
       - yarn add react-native@0.64.2
