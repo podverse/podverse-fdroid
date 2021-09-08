@@ -559,16 +559,17 @@ Builds:
       - cd ../..
       - npm install
       - npm install --save-dev jetifier
-      - npm run jetify
       - cd $$react-native-reanimated$$
-      - echo -e "android { ndkVersion '23.0.7599858' }" >> build.gradle
-      - yarn add react-native@0.64.2
+      - echo -e "android { ndkVersion '23.0.7599858' \n compileSdkVersion 30 }" >> build.gradle
+      - npm run jetify
+      - npm install react-native@0.64.2
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
       - node_modules/jsc-android
       - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
+      - node_modules/react-native-document-picker/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
       - node_modules/react-native-reanimated/android
       - node_modules/react-native-safe-area-context/android/build.gradle
