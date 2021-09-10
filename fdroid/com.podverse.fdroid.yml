@@ -557,6 +557,9 @@ Builds:
       - echo "*********** prebuild path is ***********"
       - pwd
       - ls
+      - ls ../../../..
+      - echo "srclibs below"
+      - ls ../../../srclibs
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd ../..
