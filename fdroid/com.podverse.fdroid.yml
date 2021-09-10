@@ -546,7 +546,6 @@ Builds:
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
       - npm -g install yarn
     init:
-      - cd ../..
       - yarn install
       - yarn add jetifier --dev
       - cd $$react-native-reanimated$$
