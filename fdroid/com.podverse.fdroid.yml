@@ -558,6 +558,7 @@ Builds:
       - npm install react-native@0.64.2
       - cd ../..
       - yarn jetify
+      - echo "goodbye world"
     gradle:
       - yes
     srclibs:
