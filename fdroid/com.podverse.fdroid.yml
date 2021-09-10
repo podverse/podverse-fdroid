@@ -539,22 +539,16 @@ Builds:
     versionCode: 16
     commit: 3.2.0-qa.1
     subdir: android/app
-    # sudo:
-      #- curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
-      #- echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz" | sha256sum -c -
-      #- tar xJf node.tar.xz
-      #- cp -a node-v14.17.6-linux-x64/. /usr/local/
-      # - npm -g install yarn
+    sudo:
+      - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz" | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v14.17.6-linux-x64/. /usr/local/
+      - npm -g install yarn
     init:
-      - cd ../..
-      - npm install
-    #   - yarn install
-    #   - yarn add jetifier --dev
-    #   - cd ../../node_modules/react-native-reanimated
-    #   - echo -e "android { ndkVersion '21.4.7075529' \n compileSdkVersion 30 }" >> build.gradle
-    #   - npm install react-native@0.64.2
-    #   - cd ../..
-    #   - yarn jetify
+      - echo "*** init path is ***"
+      - pwd
+      - ls
     gradle:
       - yes
     srclibs:
@@ -562,15 +556,17 @@ Builds:
     prebuild:
       - echo "*********** prebuild path is ***********"
       - pwd
-      - cd android/app
+      - ls
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd ../..
-      # - yarn install
-      # - yarn add jetifier --dev
+      - yarn install
+      - yarn add jetifier --dev
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
-      - npm install react-native@0.64.2
+      - yarn add react-native@0.64.2
+      - cd ../..
+      - yarn jetify
     rm:
       - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
       - node_modules/bplist-parser
