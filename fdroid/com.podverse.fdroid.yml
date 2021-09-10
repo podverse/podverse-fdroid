@@ -546,12 +546,12 @@ Builds:
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
       - npm -g install yarn
     init:
+      - yarn install
       - echo "hello world"
       - pwd
       - ls
       - ls ../..
       - ls ../../node_modules/react-native-reanimated
-      - yarn install
       - yarn add jetifier --dev
       - cd ../../node_modules/react-native-reanimated
       - echo -e "android { ndkVersion '23.0.7599858' \n compileSdkVersion 30 }" >> build.gradle
