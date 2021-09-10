@@ -546,12 +546,8 @@ Builds:
       #- cp -a node-v14.17.6-linux-x64/. /usr/local/
       # - npm -g install yarn
     init:
-      - echo "*********** init path is ***********"
-      - pwd
       - cd ../..
       - npm install
-      - npm install jetifier --save-dev
-      - npm run jetify
     #   - yarn install
     #   - yarn add jetifier --dev
     #   - cd ../../node_modules/react-native-reanimated
@@ -603,7 +599,6 @@ Builds:
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
     build:
-      - echo "*********** build path is ***********"
       - pwd
       - pushd $$react-native-reanimated$$
       - FOR_HERMES=True gradle :assembleRelease
