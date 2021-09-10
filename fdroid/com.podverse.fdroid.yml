@@ -551,7 +551,7 @@ Builds:
       - ls
       - ls ../../../..
       - echo "srclibs below"
-      - ls ../../../srclibs
+      - ls ../../../../srclibs
     gradle:
       - yes
     srclibs:
