@@ -550,6 +550,7 @@ Builds:
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - yarn install
       - yarn add jetifier --dev
+      - yarn jetify
     gradle:
       - yes
     srclibs:
@@ -558,8 +559,6 @@ Builds:
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
       - yarn add react-native@0.64.2
-      - cd ../..
-      - yarn jetify
     rm:
       - node_modules/bplist-parser
       - node_modules/jetifier/lib/*.jar
