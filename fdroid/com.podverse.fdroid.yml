@@ -560,13 +560,11 @@ Builds:
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
       - echo "what directory is this"
       - pwd
-      - ls
-      - "echo -e 'task wrapper(type: Wrapper) { gradleVersion = \"6.7.1\" }' >> build.gradle"
-      - cat build.gradle
-      - echo "cat reanimated"
-      - cat ../../react-native-reanimated/asdf/build.gradle
-      - "echo -e 'task wrapper(type: Wrapper) { gradleVersion = \"6.7.1\" }' >> ../../react-native-reanimated/android/build.gradle"
-      - cat ../../react-native-reanimated/asdf/build.gradle
+      - mkdir ./gradle
+      - mkdir ./gradle/wrapper
+      - echo -e "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\ndistributionUrl=https\://services.gradle.org/distributions/gradle-6.7.1-bin.zip" > ./gradle/wrapper/gradle-wrapper.properties
+      - echo "gradle wrapper properties"
+      - cat ./gradle/wrapper/gradle-wrapper.properties
       - yarn add react-native@0.64.2
     rm:
       - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
