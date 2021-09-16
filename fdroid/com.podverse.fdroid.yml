@@ -558,7 +558,7 @@ Builds:
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
-      - echo -e 'task wrapper(type: Wrapper) { gradleVersion = \"6.7.1\" }' >> ../build.gradle
+      - "echo -e 'task wrapper(type: Wrapper) { gradleVersion = \"6.7.1\" }' >> ../build.gradle"
       - yarn add react-native@0.64.2
     rm:
       - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
