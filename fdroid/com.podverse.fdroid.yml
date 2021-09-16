@@ -545,11 +545,7 @@ Builds:
       - tar xJf node.tar.xz
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
       - npm -g install yarn
-    gradle:
-      - yes
-    srclibs:
-      - react-native-reanimated@2.2.0
-    prebuild:
+    init:
       - echo "*********** prebuild path is ***********"
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
@@ -560,6 +556,10 @@ Builds:
       - yarn add react-native@0.64.2
       - cd ../..
       - yarn jetify
+    gradle:
+      - yes
+    srclibs:
+      - react-native-reanimated@2.2.0
     rm:
       - node_modules/bplist-parser
       - node_modules/jetifier/lib/*.jar
