@@ -567,6 +567,8 @@ Builds:
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
+      - mkdir ./gradle
+      - mkdir ./gradle/wrapper
       - echo -e "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\ndistributionUrl=https\://services.gradle.org/distributions/gradle-6.7.1-bin.zip"
         > ./gradle/wrapper/gradle-wrapper.properties
       - yarn add react-native@0.64.2
