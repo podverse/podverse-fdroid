@@ -562,7 +562,6 @@ Builds:
       - cd ../..
       - yarn jetify
     rm:
-      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
       - node_modules/bplist-parser
       - node_modules/jetifier/lib/*.jar
       - node_modules/npm/node_modules/term-size/vendor
