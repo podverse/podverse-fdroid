@@ -562,6 +562,7 @@ Builds:
       - pwd
       - ls
       - "echo -e 'task wrapper(type: Wrapper) { gradleVersion = \"6.7.1\" }' >> build.gradle"
+      - cat build.gradle
       - yarn add react-native@0.64.2
     rm:
       - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
