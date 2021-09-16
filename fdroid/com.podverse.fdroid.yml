@@ -541,7 +541,8 @@ Builds:
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
-      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz" | sha256sum -c -
+      - echo "3bbe4faf356738d88b45be222bf5e858330541ff16bd0d4cfad36540c331461b node.tar.xz"
+        | sha256sum -c -
       - tar xJf node.tar.xz
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
       - npm -g install yarn
@@ -566,7 +567,8 @@ Builds:
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
-      - echo -e "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\ndistributionUrl=https\://services.gradle.org/distributions/gradle-6.7.1-bin.zip" > ./gradle/wrapper/gradle-wrapper.properties
+      - echo -e "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\ndistributionUrl=https\://services.gradle.org/distributions/gradle-6.7.1-bin.zip"
+        > ./gradle/wrapper/gradle-wrapper.properties
       - yarn add react-native@0.64.2
     scanignore:
       - android/build.gradle
