@@ -546,8 +546,6 @@ Builds:
       - cp -a node-v14.17.6-linux-x64/. /usr/local/
       - npm -g install yarn
     init:
-      - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
-      - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - yarn install
       - yarn add jetifier --dev
       - yarn jetify
@@ -556,6 +554,8 @@ Builds:
     srclibs:
       - react-native-reanimated@2.2.0
     prebuild:
+      - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
+      - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd $$react-native-reanimated$$
       - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
       - yarn add react-native@0.64.2
@@ -593,6 +593,7 @@ Builds:
       - FOR_HERMES=True gradle :assembleRelease
       - popd
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-64-hermes.aar
+    ndk: r21e
 
 AutoUpdateMode: None
 UpdateCheckMode: None
