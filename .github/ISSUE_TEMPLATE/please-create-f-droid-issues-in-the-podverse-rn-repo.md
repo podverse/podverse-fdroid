@@ -1,6 +1,6 @@
 ---
 name: Please create F-Droid issues in the podverse-rn repo
-about: Thank you :)
+about: podverse-rn is the upstream branch for podverse-fdroid
 title: ''
 labels: ''
 assignees: ''
