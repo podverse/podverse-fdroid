@@ -1,4 +1,4 @@
-# ATTN: Make changes to the podverse-rn repo instead of this repo!
+# ATTN: Make changes to the podverse-rn repo instead of this repo
 
 The podverse-fdroid repo is downstream from the podverse-rn repo. Both repos are identical, except podverse-fdroid has a small amount of changes specific to it, such as the Podverse F-Droid build config and assets, our Azure F-Droid build pipeline, the removal of Matomo tracking code, and the removal of other libraries.
 
