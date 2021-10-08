@@ -1,4 +1,10 @@
-# Podverse
+# ATTN: Make changes to the podverse-rn repo instead of this repo!
+
+The podverse-fdroid repo is downstream from the podverse-rn repo. Both repos are identical, except podverse-fdroid has a small amount of changes specific to it, such as the Podverse F-Droid build config and assets, our Azure F-Droid build pipeline, the removal of Matomo tracking code, and the removal of other libraries.
+
+If you'd like to add features or a bug fix to the Podverse mobile app, please make those changes in [podverse-rn](https://github.com/podverse/podverse-rn) instead of podverse-fdroid, _unless_ you're absolutely sure these changes should only apply to the podverse-fdroid build.
+
+# Podverse F-Droid
 
 Podverse is an open source podcast manager for iOS, Android, and web. Check us out at [podverse.fm](https://podverse.fm/)!
 
