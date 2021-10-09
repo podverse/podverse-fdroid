@@ -566,12 +566,13 @@ Builds:
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd $$react-native-reanimated$$
-      - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
+      # - echo -e "android { ndkVersion '21.4.7075529' }" >> build.gradle
       # - mkdir ./gradle
       # - mkdir ./gradle/wrapper
       #- echo -e "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\ndistributionUrl=https\://services.gradle.org/distributions/gradle-6.7.1-bin.zip"
       #  > ./gradle/wrapper/gradle-wrapper.properties
-      - yarn add react-native@0.64.2
+      # - yarn add react-native@0.64.2
+      - yarn install
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
@@ -597,7 +598,7 @@ Builds:
       - pushd $$react-native-reanimated$$
       - FOR_HERMES=True gradle :assembleRelease
       - popd
-      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-64-hermes.aar
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-65-hermes.aar
     ndk: r21e
 
 AutoUpdateMode: None
