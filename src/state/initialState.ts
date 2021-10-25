@@ -21,24 +21,33 @@ const initialTheme: InitialState = {
   customWebDomainEnabled: false,
   errorReportingEnabled: false,
   offlineModeEnabled: false,
+  jumpBackwardsTime: PV.Player.jumpBackSeconds.toString(),
+  jumpForwardsTime: PV.Player.jumpSeconds.toString(),
+  addCurrentItemNextInQueue: true,
   overlayAlert: {
     shouldShowAlert: false
   },
   parsedTranscript: null,
+  currentChapter: null,
+  currentChapters: [],
+  currentChaptersStartTimePositions: [],
   player: {
-    currentChapter: null,
-    currentChapters: [],
     hasErrored: false,
-    isPlaying: false,
     nowPlayingItem: null,
     playbackRate: 1,
     shouldContinuouslyPlay: false,
     showMakeClip: false,
     showMiniPlayer: false,
+    playbackState: null,
     sleepTimer: {
       defaultTimeRemaining: PV.Player.defaultSleepTimerInSeconds,
       isActive: false,
       timeRemaining: PV.Player.defaultSleepTimerInSeconds
+    },
+    videoInfo: {
+      videoDuration: 0,
+      videoIsLoaded: false,
+      videoPosition: 0
     }
   },
   playlists: {

@@ -4,6 +4,7 @@ import { Alert, AppState, Linking, Platform, StyleSheet, View as RNView } from '
 import Config from 'react-native-config'
 import Dialog from 'react-native-dialog'
 import React from 'reactn'
+import { convertToNowPlayingItem } from 'podverse-shared'
 import {
   ActivityIndicator,
   Divider,
@@ -21,11 +22,15 @@ import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { getAppUserAgent, safeKeyExtractor, setAppUserAgent, setCategoryQueryProperty } from '../lib/utility'
 import { PV } from '../resources'
+import { handleAutoDownloadEpisodes } from '../services/autoDownloads'
 import { assignCategoryQueryToState, assignCategoryToStateForSortSelect, getCategoryLabel } from '../services/category'
 import { getEpisode } from '../services/episode'
 import PVEventEmitter from '../services/eventEmitter'
-import { checkIdlePlayerState, updateTrackPlayerCapabilities,
-  updateUserPlaybackPosition } from '../services/player'
+import { getMediaRef } from '../services/mediaRef'
+import { getNowPlayingItem } from '../services/userNowPlayingItem'
+import { parseAllAddByRSSPodcasts } from '../services/parser'
+import { playerUpdateUserPlaybackPosition } from '../services/player'
+import { audioUpdateTrackPlayerCapabilities } from '../services/playerAudio'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getNowPlayingItemLocally } from '../services/userNowPlayingItem'
 import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
@@ -33,18 +38,19 @@ import { initDownloads, removeDownloadedPodcast } from '../state/actions/downloa
 import { updateWalletInfo } from '../state/actions/lnpay'
 import {
   initializePlaybackSpeed,
-  initializePlayerQueue,
+  initializePlayer,
   initPlayerState,
-  showMiniPlayer,
-  updatePlaybackState,
-  updatePlayerState
+  playerLoadNowPlayingItem,
+  playerUpdatePlaybackState,
+  playerUpdatePlayerState,
+  showMiniPlayer
 } from '../state/actions/player'
 import { combineWithAddByRSSPodcasts,
   getSubscribedPodcasts, removeAddByRSSPodcast, toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { updateScreenReaderEnabledState } from '../state/actions/screenReader'
 import { initializeSettings } from '../state/actions/settings'
 import { initializeValueProcessor } from '../state/actions/valueTag'
-import { core, darkTheme } from '../styles'
+import { core } from '../styles'
 
 type Props = {
   navigation?: any
@@ -114,6 +120,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.on(PV.Events.LNPAY_WALLET_INFO_SHOULD_UPDATE, updateWalletInfo)
     PVEventEmitter.on(PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW, this._handleNavigateToAddPodcastByRSSAuthScreen)
+    PVEventEmitter.on(PV.Events.NAV_TO_MEMBERSHIP_SCREEN, this._handleNavigateToMembershipScreen)
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
 
     updateScreenReaderEnabledState()
@@ -126,6 +133,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         await AsyncStorage.setItem(PV.Keys.DOWNLOADED_EPISODE_LIMIT_GLOBAL_COUNT, '5')
         await AsyncStorage.setItem(PV.Keys.CENSOR_NSFW_TEXT, 'TRUE')
         await AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, '2.5')
+        await AsyncStorage.setItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE, 'TRUE')
 
         if (!Config.DISABLE_CRASH_LOGS) {
           await AsyncStorage.setItem(PV.Keys.ERROR_REPORTING_ENABLED, 'TRUE')
@@ -156,41 +164,43 @@ export class PodcastsScreen extends React.Component<Props, State> {
     PVEventEmitter.removeListener(PV.Events.LNPAY_WALLET_INFO_SHOULD_UPDATE, updateWalletInfo)
     PVEventEmitter.removeListener(
       PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW, this._handleNavigateToAddPodcastByRSSAuthScreen)
+    PVEventEmitter.removeListener(PV.Events.NAV_TO_MEMBERSHIP_SCREEN, this._handleNavigateToMembershipScreen)
   }
 
   _handleAppStateChange = (nextAppState: any) => {
     (async () => {
-      await updateUserPlaybackPosition()
+      await playerUpdateUserPlaybackPosition()
 
       if (nextAppState === 'active' && !isInitialLoad) {
         const { nowPlayingItem: lastItem } = this.global.player
         const currentItem = await getNowPlayingItemLocally()
   
         if (!lastItem || (lastItem && currentItem && currentItem.episodeId !== lastItem.episodeId)) {
-          updatePlayerState(currentItem)
+          playerUpdatePlayerState(currentItem)
           showMiniPlayer()
         }
   
-        await updatePlaybackState()
-  
+        await playerUpdatePlaybackState()
+
+        // NOTE UPDATE: I don't think this is working...commenting out for now.
         // NOTE: On iOS, when returning to the app from the background while the player was paused,
         // sometimes the player will be in an idle state, requiring the user to press play twice to
-        // reload the item in the player and begin playing. By calling initializePlayerQueue once whenever
+        // reload the item in the player and begin playing. By calling audioInitializePlayerQueue once whenever
         // the idle playback-state event is called, it automatically reloads the item.
         // I don't think this issue is happening on Android, so we're not using this workaround on Android.
-        const isIdle = await checkIdlePlayerState()
-        if (Platform.OS === 'ios' && isIdle) {
-          await initializePlayerQueue()
-        }
+        // const isIdle = await playerCheckIdlePlayerState()
+        // if (Platform.OS === 'ios' && isIdle) {
+        //   await audioInitializePlayerQueue()
+        // }
       }
   
       if (nextAppState === 'background' || nextAppState === 'inactive') {
-        // NOTE: On iOS TrackPlayer.updateOptions must be called every time the app
+        // NOTE: On iOS PVAudioPlayer.updateOptions must be called every time the app
         // goes into the background to prevent the remote controls from disappearing
         // on the lock screen.
         // Source: https://github.com/react-native-kit/react-native-track-player/issues/921#issuecomment-686806847
         if (Platform.OS === 'ios') {
-          updateTrackPlayerCapabilities()
+          audioUpdateTrackPlayerCapabilities()
         }
       }
 
@@ -209,9 +219,14 @@ export class PodcastsScreen extends React.Component<Props, State> {
     this.props.navigation.navigate(PV.RouteNames.AddPodcastByRSSAuthScreen, { feedUrl })
   }
 
+  _handleNavigateToMembershipScreen = () => {
+    this.props.navigation.navigate(PV.RouteNames.MembershipScreen)
+  }
+
   // On some Android devices, the .goBack method appears to not work reliably
   // unless there is some delay between screen changes. Wrapping each .goBack method
   // in a delay to make this happen.
+  // Go back to the root screen to make sure componentDidMount is called.
   _goBackWithDelay = async () => {
     const { navigation } = this.props
     return new Promise((resolve) => {
@@ -237,10 +252,34 @@ export class PodcastsScreen extends React.Component<Props, State> {
     })
   }
 
+  _handleDeepLinkClip = async (mediaRefId: string) => {
+    if (mediaRefId) {
+      try {
+        const currentItem = await getNowPlayingItem()
+        if (!currentItem || (mediaRefId && mediaRefId !== currentItem.mediaRefId)) {
+          const mediaRef = await getMediaRef(mediaRefId)
+          if (mediaRef) {
+            const newItem = convertToNowPlayingItem(mediaRef, null, null)
+            const shouldPlay = true
+            const forceUpdateOrderDate = false
+            const setCurrentItemNextInQueue = true
+            await playerLoadNowPlayingItem(
+              newItem,
+              shouldPlay,
+              forceUpdateOrderDate,
+              setCurrentItemNextInQueue
+            )
+          }
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
+
   _handleOpenURL = async (url: string) => {
     const { navigation } = this.props
     const { navigate } = navigation
-    const isDarkMode = this.global.globalTheme === darkTheme
 
     try {
       if (url) {
@@ -249,16 +288,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
         const path = splitPath[0] ? splitPath[0] : ''
         const id = splitPath[1] ? splitPath[1] : ''
 
-        // Go back to the root screen in order to make sure
-        // componentDidMount is called on all screens
-        // so initialize methods are run.
         await this._goBackWithDelay()
 
         if (path === PV.DeepLinks.Clip.pathPrefix) {
-          await navigate(PV.RouteNames.PlayerScreen, {
-            mediaRefId: id,
-            isDarkMode
-          })
+          await this._handleDeepLinkClip(id)
         } else if (path === PV.DeepLinks.Episode.pathPrefix) {
           const episode = await getEpisode(id)
           if (episode) {
@@ -305,6 +338,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _initializeScreenData = async () => {
+    const { navigation } = this.props
     await initPlayerState(this.global)
     await initializeSettings()
 
@@ -312,7 +346,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
     await getAuthenticatedUserInfoLocally()
     await combineWithAddByRSSPodcasts()
-    this.handleSelectFilterItem(PV.Filters._subscribedKey)
+
+    const preventIsLoading = false
+    const preventAutoDownloading = true
+    this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
 
     // Set the appUserAgent one time on initialization, then retrieve from a constant
     // using the getAppUserAgent method, or from the global state (for synchronous access).
@@ -324,17 +361,18 @@ export class PodcastsScreen extends React.Component<Props, State> {
         (async () => {
           try {
             const isLoggedIn = await getAuthUserInfo()
-            if (isLoggedIn) await askToSyncWithNowPlayingItem()
+            if (isLoggedIn) await askToSyncWithNowPlayingItem(navigation)
           } catch (error) {
             console.log('initializeScreenData getAuthUserInfo', error)
             // If getAuthUserInfo fails, continue with the networkless version of the app
           }
           
           const preventIsLoading = true
-          this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading)
+          const preventAutoDownloading = false
+          this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
       
           await initDownloads()
-          await initializePlayerQueue()
+          await initializePlayer()
           await initializePlaybackSpeed()
           initializeValueProcessor()
         })()
@@ -342,7 +380,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
     )
   }
 
-  handleSelectFilterItem = async (selectedKey: string, preventIsLoading?: boolean) => {
+  handleSelectFilterItem = async (selectedKey: string, preventIsLoading?: boolean,
+      preventAutoDownloading?: boolean) => {
     if (!selectedKey) {
       return
     }
@@ -376,7 +415,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
       },
       () => {
         (async () => {
-          const newState = await this._queryData(selectedKey, this.state)
+          const nextState = null
+          const options = {}
+          const newState = await this._queryData(selectedKey, this.state, nextState, options, preventAutoDownloading)
           this.setState(newState)
         })()
       }
@@ -753,8 +794,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
     )
   }
 
-  _querySubscribedPodcasts = async () => {
+  _querySubscribedPodcasts = async (preventAutoDownloading?: boolean) => {
     await getSubscribedPodcasts()
+    await parseAllAddByRSSPodcasts()
+    await combineWithAddByRSSPodcasts()
+    if (!preventAutoDownloading) {
+      await handleAutoDownloadEpisodes()
+    }
   }
 
   _queryAllPodcasts = async (sort: string | null, page = 1) => {
@@ -782,7 +828,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
     filterKey: any,
     prevState: State,
     nextState?: any,
-    queryOptions: { isCategorySub?: boolean; searchTitle?: string } = {}
+    queryOptions: { isCategorySub?: boolean; searchTitle?: string } = {},
+    preventAutoDownloading?: boolean
   ) => {
     let newState = {
       isLoading: false,
@@ -806,7 +853,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
       if (filterKey === PV.Filters._subscribedKey) {
         await getAuthUserInfo() // get the latest subscribedPodcastIds first
-        await this._querySubscribedPodcasts()
+        await this._querySubscribedPodcasts(preventAutoDownloading)
       } else if (filterKey === PV.Filters._downloadedKey) {
         const podcasts = await getDownloadedPodcasts()
         newState.endOfResultsReached = true

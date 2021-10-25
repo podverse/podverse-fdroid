@@ -1,4 +1,4 @@
-import { convertNowPlayingItemToMediaRef, convertToNowPlayingItem } from 'podverse-shared'
+import { convertNowPlayingItemToMediaRef } from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
 import { Config } from 'react-native-config'
 import Share from 'react-native-share'
@@ -27,12 +27,9 @@ import {
 import { PV } from '../resources'
 import { getEpisode } from '../services/episode'
 import PVEventEmitter from '../services/eventEmitter'
-import { getMediaRef } from '../services/mediaRef'
-import { PVTrackPlayer, updateUserPlaybackPosition } from '../services/player'
-import { addQueueItemNext } from '../services/queue'
-import { getNowPlayingItem } from '../services/userNowPlayingItem'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { playerGetPosition, playerUpdateUserPlaybackPosition } from '../services/player'
 import { loadChaptersForEpisode } from '../state/actions/playerChapters'
+import { checkIfVideoFileType } from '../state/actions/playerVideo'
 import { getHistoryItems } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
 
@@ -102,17 +99,22 @@ export class PlayerScreen extends React.Component<Props> {
               <NavShareIcon globalTheme={globalTheme} handlePress={_showShareActionSheet} />
             </RNView>
           )}
-          <NavQueueIcon globalTheme={globalTheme} isTransparent navigation={navigation} showBackButton />
+          {
+            !checkIfVideoFileType(nowPlayingItem) && (
+              <NavQueueIcon
+                globalTheme={globalTheme}
+                isTransparent
+                navigation={navigation}
+                showBackButton />
+            )
+          }
         </RNView>
       )
     }
   }
 
   async componentDidMount() {
-    const { navigation } = this.props
-    const mediaRefId = navigation.getParam('mediaRefId')
-
-    if (mediaRefId) this._initializeScreenData()
+    PVEventEmitter.on(PV.Events.PLAYER_VALUE_ENABLED_ITEM_LOADED, this._handleRefreshNavigationHeader)
     
     this.props.navigation.setParams({
       _getEpisodeId: this._getEpisodeId,
@@ -132,13 +134,23 @@ export class PlayerScreen extends React.Component<Props> {
   }
 
   async componentWillUnmount() {
+    PVEventEmitter.removeListener(PV.Events.PLAYER_VALUE_ENABLED_ITEM_LOADED, this._handleRefreshNavigationHeader)
+
     try {
       clearTempMediaRef()
-      await updateUserPlaybackPosition()
+      const skipSetNowPlaying = false
+      const shouldAwait = true
+
+      await playerUpdateUserPlaybackPosition(skipSetNowPlaying, shouldAwait)
       await getHistoryItems(1, [])
     } catch (e) {
-      console.log('PlayerScreen componentWillUnmount', e)
+      console.log('PlayerScreen componentWillUnmount error', e)
     }
+  }
+
+  _handleRefreshNavigationHeader = () => {
+    console.log('_handleRefreshNavigationHeader')
+    this.props.navigation.setParams()
   }
 
   _handleNewEpisodeLoaded = () => {
@@ -171,50 +183,6 @@ export class PlayerScreen extends React.Component<Props> {
     loadChaptersForEpisode(episode)
   }
 
-  _initializeScreenData = () => {
-    setGlobal(
-      {
-        screenPlayer: {
-          ...this.global.screenPlayer,
-          endOfResultsReached: false,
-          flatListData: [],
-          flatListDataTotalCount: null,
-          isLoading: true,
-          queryPage: 1
-        }
-      },
-      async () => {
-        const { navigation } = this.props
-        const mediaRefId = navigation.getParam('mediaRefId')
-
-        try {
-          const currentItem = await getNowPlayingItem()
-
-          if (!currentItem || (mediaRefId && mediaRefId !== currentItem.mediaRefId)) {
-            const mediaRef = await getMediaRef(mediaRefId)
-            if (mediaRef) {
-              if (currentItem) {
-                await addQueueItemNext(currentItem)
-              }
-              const newItem = convertToNowPlayingItem(mediaRef, null, null)
-              const shouldPlay = true
-              await loadItemAndPlayTrack(newItem, shouldPlay)
-            }
-          }
-        } catch (error) {
-          console.log(error)
-        }
-
-        setGlobal({
-          screenPlayer: {
-            ...this.global.screenPlayer,
-            isLoading: false
-          }
-        })
-      }
-    )
-  }
-
   _getEpisodeId = () => {
     const { nowPlayingItem } = this.global.player
     return nowPlayingItem && nowPlayingItem.episodeId
@@ -226,7 +194,7 @@ export class PlayerScreen extends React.Component<Props> {
   }
 
   _getInitialProgressValue = async () => {
-    const initialProgressValue = await PVTrackPlayer.getTrackPosition()
+    const initialProgressValue = await playerGetPosition()
     if (initialProgressValue || initialProgressValue === 0) {
       return Math.floor(initialProgressValue)
     } else {
@@ -254,7 +222,8 @@ export class PlayerScreen extends React.Component<Props> {
 
   _handleShare = async (podcastId?: string, episodeId?: string, mediaRefId?: string,
     mediaRefIsOfficialChapter?: boolean) => {
-    const { nowPlayingItem } = this.global.player
+    let { nowPlayingItem } = this.global.player
+    nowPlayingItem = nowPlayingItem || {}
     let url = ''
     let title = ''
 
@@ -292,8 +261,8 @@ export class PlayerScreen extends React.Component<Props> {
 
   render() {
     const { navigation } = this.props
-    const { player, screenPlayer } = this.global
-    const { currentChapter, episode, nowPlayingItem } = player
+    const { currentChapter, player, screenPlayer } = this.global
+    const { episode, nowPlayingItem } = player
     const { showShareActionSheet } = screenPlayer
     let { mediaRef } = player
 

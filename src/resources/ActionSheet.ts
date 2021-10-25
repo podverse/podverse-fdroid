@@ -5,12 +5,13 @@ import Config from 'react-native-config'
 import Share from 'react-native-share'
 import { getGlobal } from 'reactn'
 import { translate } from '../lib/i18n'
-import { navigateToEpisodeScreenWithItem, navigateToPodcastScreenWithItem } from '../lib/navigate'
+import { navigateToEpisodeScreenWithItem,
+  navigateToEpisodeScreenWithItemInCurrentStack, navigateToPodcastScreenWithItem } from '../lib/navigate'
 import { safelyUnwrapNestedVariable } from '../lib/utility'
 import { IActionSheet } from '../resources/Interfaces'
-import { PVTrackPlayer } from '../services/player'
+import { playerGetPosition } from '../services/player'
 import { removeDownloadedPodcastEpisode } from '../state/actions/downloads'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { addQueueItemLast, addQueueItemNext } from '../state/actions/queue'
 import { PV } from './PV'
 
@@ -22,13 +23,15 @@ const mediaMoreButtons = (
     handleDownload: any
     handleDeleteClip: any
     includeGoToPodcast?: boolean
-    includeGoToEpisode?: boolean | string
+    includeGoToEpisodeInEpisodesStack?: boolean | string
+    includeGoToEpisodeInCurrentStack?: boolean
   },
   itemType: 'podcast' | 'episode' | 'clip' | 'chapter' | 'playlist' | 'profile'
 ) => {
   if (!item || !item.episodeId) return
 
-  const { handleDismiss, handleDownload, handleDeleteClip, includeGoToPodcast, includeGoToEpisode } = config || {}
+  const { handleDismiss, handleDownload, handleDeleteClip, includeGoToPodcast, includeGoToEpisodeInEpisodesStack,
+    includeGoToEpisodeInCurrentStack } = config || {}
   const globalState = getGlobal()
   const isDownloading = globalState.downloadsActive && globalState.downloadsActive[item.episodeId]
   const downloadingText = isDownloading ? translate('Downloading Episode') : translate('Download')
@@ -50,11 +53,18 @@ const mediaMoreButtons = (
           const isDarkMode = globalState.globalTheme === darkTheme
           await handleDismiss()
           const shouldPlay = false
-          await loadItemAndPlayTrack(item, shouldPlay)
+          const forceUpdateOrderDate = false
+          const setCurrentItemNextInQueue = true
+          await playerLoadNowPlayingItem(
+            item,
+            shouldPlay,
+            forceUpdateOrderDate,
+            setCurrentItemNextInQueue
+          )
           await navigation.navigate(PV.RouteNames.PlayerScreen, { isDarkMode })
           setTimeout(() => {
             (async () => {
-              const initialProgressValue = await PVTrackPlayer.getTrackPosition()
+              const initialProgressValue = await playerGetPosition()
               navigation.navigate(PV.RouteNames.MakeClipScreen, {
                 initialProgressValue,
                 initialPrivacy: item.isPublic,
@@ -80,14 +90,20 @@ const mediaMoreButtons = (
 
   if (isDownloaded) {
     buttons.push({
-      accessibilityHint: translate('ARIA HINT - play'),
       accessibilityLabel: translate('Play'),
       key: PV.Keys.play,
       text: translate('Play'),
       onPress: async () => {
         await handleDismiss()
         const shouldPlay = true
-        await loadItemAndPlayTrack(item, shouldPlay)
+        const forceUpdateOrderDate = false
+        const setCurrentItemNextInQueue = true
+        await playerLoadNowPlayingItem(
+          item,
+          shouldPlay,
+          forceUpdateOrderDate,
+          setCurrentItemNextInQueue
+        )
       }
     })
   } else {
@@ -106,7 +122,14 @@ const mediaMoreButtons = (
 
         await handleDismiss()
         const shouldPlay = true
-        await loadItemAndPlayTrack(item, shouldPlay)
+        const forceUpdateOrderDate = false
+        const setCurrentItemNextInQueue = true
+        await playerLoadNowPlayingItem(
+          item,
+          shouldPlay,
+          forceUpdateOrderDate,
+          setCurrentItemNextInQueue
+        )
       }
     })
 
@@ -126,7 +149,7 @@ const mediaMoreButtons = (
             navigation.navigate(PV.RouteNames.DownloadsScreen)
           } else {
             await handleDismiss()
-            handleDownload()
+            handleDownload(item)
           }
         }
       })
@@ -256,14 +279,18 @@ const mediaMoreButtons = (
     })
   }
 
-  if (includeGoToEpisode) {
+  if (includeGoToEpisodeInEpisodesStack || includeGoToEpisodeInCurrentStack) {
     buttons.push({
       accessibilityLabel: translate('Go to Episode'),
       key: PV.Keys.go_to_episode,
       text: translate('Go to Episode'),
       onPress: async () => {
         await handleDismiss()
-        navigateToEpisodeScreenWithItem(navigation, item)
+        if (includeGoToEpisodeInEpisodesStack) {
+          navigateToEpisodeScreenWithItem(navigation, item)
+        } else if (includeGoToEpisodeInCurrentStack) {
+          navigateToEpisodeScreenWithItemInCurrentStack(navigation, item, includeGoToPodcast)
+        }
       }
     })
   }

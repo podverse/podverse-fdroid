@@ -57,7 +57,7 @@ export class AuthScreen extends React.Component<Props, State> {
     this.setState({ isLoadingLogin: true }, () => {
       (async () => {
         try {
-          await loginUser(credentials)
+          await loginUser(credentials, navigation)
           if (navigation.getParam('isOnboarding', false)) {
             navigation.navigate(PV.RouteNames.MainApp)
           } else {
@@ -168,7 +168,7 @@ export class AuthScreen extends React.Component<Props, State> {
         </Text>,
         <Text
           accessible
-          accessibilityHint={translate('ARIA HINT - sign up for a premium account')}
+          accessibilityHint={translate('ARIA HINT - sign up for a premium membership')}
           accessibilityLabel={translate('Sign Up')}
           accessibilityRole='button'
           fontSizeLargestScale={PV.Fonts.largeSizes.md}

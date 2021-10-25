@@ -41,6 +41,14 @@ import {
   QueueScreen,
   SearchScreen,
   SettingsScreen,
+  SettingsScreenAccount,
+  SettingsScreenAdvanced,
+  SettingsScreenVisualDesign,
+  SettingsScreenDownloads,
+  SettingsScreenHistory,
+  SettingsScreenPlayer,
+  SettingsScreenQueue,
+  SettingsScreenTracking,
   SleepTimerScreen,
   StartPodcastFromTimeScreen,
   TermsOfServiceScreen,
@@ -107,7 +115,7 @@ const PodcastsNavigator = createStackNavigator(
         <Image source={PV.Tabs.Podcasts.icon} style={{ tintColor }} resizeMode={'contain'} />
       ),
       tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.Podcasts.title} />,
-      testID: 'tab_podcasts_screen'.prependTestId()
+      tabBarTestID: 'tab_podcasts_screen'.prependTestId()
     }
   }
 )
@@ -128,7 +136,7 @@ const EpisodesNavigator = createStackNavigator(
       ),
       tabBarAccessibilityLabel: translate('Episodes'),
       tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.Episodes.title} />,
-      testID: 'tab_episodes_screen'.prependTestId()
+      tabBarTestID: 'tab_episodes_screen'.prependTestId()
     },
   }
 )
@@ -144,7 +152,7 @@ const ClipsNavigator = createStackNavigator(
       tabBarIcon: ({ tintColor }: { tintColor: any }) =>
         <Image source={PV.Tabs.Clips.icon} style={{ tintColor }} resizeMode={'contain'} />,
       tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.Clips.title} />,
-      testID: 'tab_clips_screen'.prependTestId()
+      tabBarTestID: 'tab_clips_screen'.prependTestId()
     }
   }
 )
@@ -171,6 +179,14 @@ const MoreNavigator = createStackNavigator(
   {
     [PV.RouteNames.MoreScreen]: MoreScreen,
     [PV.RouteNames.SettingsScreen]: SettingsScreen,
+    [PV.RouteNames.SettingsScreenAccount]: SettingsScreenAccount,
+    [PV.RouteNames.SettingsScreenAdvanced]: SettingsScreenAdvanced,
+    [PV.RouteNames.SettingsScreenVisualDesign]: SettingsScreenVisualDesign,
+    [PV.RouteNames.SettingsScreenDownloads]: SettingsScreenDownloads,
+    [PV.RouteNames.SettingsScreenHistory]: SettingsScreenHistory,
+    [PV.RouteNames.SettingsScreenPlayer]: SettingsScreenPlayer,
+    [PV.RouteNames.SettingsScreenQueue]: SettingsScreenQueue,
+    [PV.RouteNames.SettingsScreenTracking]: SettingsScreenTracking,
     [PV.RouteNames.MembershipScreen]: MembershipScreen,
     [PV.RouteNames.AboutScreen]: AboutScreen,
     [PV.RouteNames.TermsOfServiceScreen]: TermsOfServiceScreen,
@@ -191,7 +207,7 @@ const MoreNavigator = createStackNavigator(
         )
       },
       tabBarLabel: (props) => <TabBarLabel {...props} title={translate('More')} />,
-      testID: 'tab_more_screen'.prependTestId()
+      tabBarTestID: 'tab_more_screen'.prependTestId()
     }
   }
 )
@@ -237,7 +253,7 @@ const MyLibraryNavigator = createStackNavigator(
         )
       },
       tabBarLabel: (props) => <TabBarLabel {...props} title='My Library' />,
-      testID: 'tab_my_library_screen'.prependTestId()
+      tabBarTestID: 'tab_my_library_screen'.prependTestId()
     }
   }
 )
@@ -282,7 +298,7 @@ const PlayerNavigator = createStackNavigator(
       screen: PlayerScreen,
       path: PV.DeepLinks.Clip.path
     },
-    [PV.RouteNames.MakeClipScreen]: { screen: MakeClipScreen, navigationOptions: { gesturesEnabled: false } },
+    [PV.RouteNames.MakeClipScreen]: { screen: MakeClipScreen, navigationOptions: { gestureEnabled: false } },
     [PV.RouteNames.QueueScreen]: QueueScreen,
     [PV.RouteNames.PlayerFAQScreen]: FAQScreen,
     [PV.RouteNames.PlayerMyProfileScreen]: ProfileScreen,
@@ -441,4 +457,4 @@ class AppNavigator extends Component<Props, State> {
 const App = createAppContainer(AppNavigator)
 const prefix = PV.DeepLinks.prefix
 
-export default () => <App uriPrefix={prefix} />
+export default () => <App uriPrefix={prefix} theme="dark"/>
