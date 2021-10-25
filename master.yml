@@ -54,7 +54,7 @@ steps:
 - task: CmdLine@2
   displayName: Clone frdoiddata
   inputs:
-    script: 'git clone https://gitlab.com/podverse/fdroiddata.git' 
+    script: 'git clone https://gitlab.com/fdroid/fdroiddata.git' 
     workingDirectory: $(Agent.BuildDirectory)
 
 - task: CmdLine@2
