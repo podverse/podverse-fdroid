@@ -5,7 +5,6 @@ import React from 'reactn'
 import { ScrollView, SwitchWithText, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import {
   saveCustomAPIDomain,
   saveCustomWebDomain,
@@ -29,10 +28,6 @@ export class SettingsScreenAdvanced extends React.Component<Props> {
   static navigationOptions = () => ({
     title: translate('Advanced')
   })
-
-  componentDidMount() {
-    trackPageView('/settings-advanced', 'Settings Screen Advanced')
-  }
 
   _handleCustomAPIDomainToggle = () => {
     const { customAPIDomainEnabled } = this.global

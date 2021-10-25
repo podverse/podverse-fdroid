@@ -7,7 +7,6 @@ import {
   ScrollView
 } from '../components'
 import { translate } from '../lib/i18n'
-import { trackPageView } from '../services/tracking'
 import { clearHistoryItems } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
 
@@ -32,10 +31,6 @@ export class SettingsScreenHistory extends React.Component<Props, State> {
   static navigationOptions = () => ({
     title: translate('History')
   })
-
-  componentDidMount() {
-    trackPageView('/settings-history', 'Settings Screen History')
-  }
 
   _handleClearHistory = () => {
     Alert.alert(translate('Clear History'), translate('Are you sure you want to clear your history'), [

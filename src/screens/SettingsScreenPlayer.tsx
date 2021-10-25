@@ -12,7 +12,6 @@ import {
 } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { handleFinishSettingPlayerTime, setPlayerJumpBackwards, setPlayerJumpForwards } from '../state/actions/settings'
 import { core, darkTheme, hidePickerIconOnAndroidTransparent } from '../styles'
 
@@ -52,8 +51,6 @@ export class SettingsScreenPlayer extends React.Component<Props, State> {
         maximumSpeedOptionSelected: maximumSpeedOptionSelected || maximumSpeedSelectOptions[1]
       }
     )
-
-    trackPageView('/settings-player', 'Settings Screen Player')
   }
 
   _setMaximumSpeed = (value: string) => {

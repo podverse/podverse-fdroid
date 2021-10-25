@@ -10,7 +10,6 @@ import {
 } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { setAddCurrentItemNextInQueue } from '../state/actions/settings'
 import { core } from '../styles'
 
@@ -45,8 +44,6 @@ export class SettingsScreenQueue extends React.Component<Props, State> {
         addCurrentItemNextInQueue: !!addCurrentItemNextInQueue
       }
     )
-
-    trackPageView('/settings-queue', 'Settings Screen Queue')
   }
 
   _toggleAddCurrentItemNextInQueue = async () => {

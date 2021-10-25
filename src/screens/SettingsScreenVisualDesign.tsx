@@ -10,7 +10,6 @@ import {
 } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { setCensorNSFWText } from '../state/actions/settings'
 import { core, darkTheme, lightTheme } from '../styles'
 
@@ -29,10 +28,6 @@ export class SettingsScreenVisualDesign extends React.Component<Props> {
   static navigationOptions = () => ({
     title: translate('Visual Design')
   })
-
-  componentDidMount() {
-    trackPageView('/settings-visual-design', 'Settings Screen Visual Design')
-  }
 
   _handleToggleNSFWText = async () => {
     const censorNSFWText = await AsyncStorage.getItem(PV.Keys.CENSOR_NSFW_TEXT)

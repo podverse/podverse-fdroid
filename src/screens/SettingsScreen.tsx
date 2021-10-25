@@ -145,18 +145,6 @@ export class SettingsScreen extends React.Component<Props, State> {
             </Text>
           </TableCell>
           <TableCell
-            accessibilityLabel={translate('Tracking')}
-            includeDivider
-            onPress={() => navigation.navigate(PV.RouteNames.SettingsScreenTracking)}
-            testIDPrefix={`${testIDPrefix}_tracking`}
-            testIDSuffix=''>
-            <Text
-              fontSizeLargestScale={PV.Fonts.largeSizes.md}
-              style={[table.cellText, globalTheme.tableCellTextPrimary]}>
-              {translate('Tracking')}
-            </Text>
-          </TableCell>
-          <TableCell
             accessibilityLabel={translate('Visual Design')}
             includeDivider
             onPress={() => navigation.navigate(PV.RouteNames.SettingsScreenVisualDesign)}

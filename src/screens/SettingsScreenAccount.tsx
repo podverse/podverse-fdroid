@@ -8,7 +8,6 @@ import {
 } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { deleteLoggedInUser } from '../services/user'
 import { logoutUser } from '../state/actions/auth'
 import { core } from '../styles'
@@ -38,10 +37,6 @@ export class SettingsScreenAccount extends React.Component<Props, State> {
   static navigationOptions = () => ({
     title: translate('Account')
   })
-
-  componentDidMount() {
-    trackPageView('/settings-account', 'Settings Screen Account')
-  }
 
   _handleToggleDeleteAccountDialog = () => {
     this.setState({

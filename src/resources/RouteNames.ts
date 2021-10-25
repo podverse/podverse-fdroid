@@ -50,7 +50,6 @@ export const RouteNames = {
   SettingsScreenHistory: 'SettingsScreenHistory',
   SettingsScreenPlayer: 'SettingsScreenPlayer',
   SettingsScreenQueue: 'SettingsScreenQueue',
-  SettingsScreenTracking: 'SettingsScreenTracking',
   SleepTimerScreen: 'SleepTimerScreen',
   StartPodcastFromTimeScreen: 'StartPodcastFromTimeScreen',
   TabNavigator: 'TabNavigator',

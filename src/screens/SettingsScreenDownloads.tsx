@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import AsyncStorage from '@react-native-community/async-storage'
 import NetInfo from '@react-native-community/netinfo'
-import { Alert, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import Dialog from 'react-native-dialog'
 import React from 'reactn'
 import {
@@ -22,7 +22,6 @@ import { removeAllDownloadedPodcasts } from '../lib/downloadedPodcast'
 import { refreshDownloads } from '../lib/downloader'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import * as DownloadState from '../state/actions/downloads'
 import { core } from '../styles'
 
@@ -69,8 +68,6 @@ export class SettingsScreenDownloads extends React.Component<Props, State> {
         downloadingWifiOnly: !!downloadingWifiOnly
       }
     )
-
-    trackPageView('/settings-downloads', 'Settings Screen Downloads')
   }
 
   _toggleDownloadingWifiOnly = async () => {

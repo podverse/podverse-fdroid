@@ -5,7 +5,6 @@ import {
   audioLoadNowPlayingItem,
   audioPlayNextFromQueue as audioPlayNextFromQueueService
 } from '../../services/playerAudio'
-import { trackPlayerScreenPageView } from '../../services/tracking'
 import { showMiniPlayer } from './player'
 import { checkIfVideoFileType } from './playerVideo'
 import { getQueueItems } from './queue'
@@ -30,8 +29,6 @@ export const audioInitializePlayerQueue = async (item: NowPlayingItem) => {
 }
 
 export const audioPlayNextFromQueue = async () => {
-  const item = await audioPlayNextFromQueueService()
+  await audioPlayNextFromQueueService()
   await getQueueItems()
-
-  if (item) trackPlayerScreenPageView(item)
 }

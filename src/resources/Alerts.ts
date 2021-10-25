@@ -14,7 +14,7 @@ const _sendVerificationEmailMessage = translate(
 const _cancelText = translate('Cancel')
 
 export const Alerts = {
-  ASK_TO_SYNC_WITH_LAST_HISTORY_ITEM: (item: NowPlayingItem, navigation: any) => {
+  ASK_TO_SYNC_WITH_LAST_HISTORY_ITEM: (item: NowPlayingItem) => {
     const title = item.clipId ? item.clipTitle : item.episodeTitle
     const type = item.clipId ? translate('Clip') : translate('Episode')
 
