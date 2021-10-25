@@ -64,7 +64,7 @@ export class Login extends React.Component<Props, State> {
         contentContainerStyle={styles.scrollViewContent}
         style={styles.scrollView}>
         <TextInput
-          accessibilityHint={translate('ARIA HINT - Type your premium account email address')}
+          accessibilityHint={translate('ARIA HINT - Type your premium membership email address')}
           autoCapitalize='none'
           autoCompleteType='email'
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
@@ -84,11 +84,11 @@ export class Login extends React.Component<Props, State> {
           autoCapitalize='none'
           autoCompleteType='password'
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
-          onChangeText={this.passwordChanged}
-          placeholder={translate('Password')}
           inputRef={(input) => {
             this.secondTextInput = input
           }}
+          onChangeText={this.passwordChanged}
+          placeholder={translate('Password')}
           returnKeyType='done'
           secureTextEntry
           testID={`${testIDPrefix}_password`}

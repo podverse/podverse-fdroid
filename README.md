@@ -1,4 +1,19 @@
-# Podverse
+# ATTN: Make changes to the podverse-rn repo instead of this repo
+
+The podverse-fdroid repo is downstream from the podverse-rn repo. Both repos are identical, except podverse-fdroid has a small amount of changes specific to it, such as the Podverse F-Droid build config and assets, our Azure F-Droid build pipeline, the removal of Matomo tracking code, and the removal of other libraries.
+
+If you'd like to add features or a bug fix to the Podverse mobile app, please make those changes in [podverse-rn](https://github.com/podverse/podverse-rn) instead of podverse-fdroid, _unless_ you're absolutely sure these changes should only apply to the podverse-fdroid build.
+
+# Podverse F-Droid
+
+## Contributing
+
+Instruction for contributing to the **Podverse Mobile App** can be found here:
+
+[Contribute](https://github.com/podverse/podverse-rn/blob/master/Contributing.md)
+
+---
+## About
 
 Podverse is an open source podcast manager for iOS, Android, and web. Check us out at [podverse.fm](https://podverse.fm/)!
 
@@ -42,4 +57,3 @@ AGPLv3 is the open source license under which all Podverse software is provided.
 Podverse software is open source so anyone can launch their own podcast app as affordably as possible. If a podcast network wants to create their own podcast app, they can use Podverse software and do it for a tiny fraction of the cost of hiring programmers to build a podcast app from scratch.
 
 Our goal is to help level the playing field between the corporate world and independent media, so independent media has the same technological advantages as large corporations, and open source software is essential to that mission.
-

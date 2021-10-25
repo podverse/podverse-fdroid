@@ -23,8 +23,8 @@ import {
 import { PV } from '../resources'
 import { checkIfShouldUseServerData } from '../services/auth'
 import PVEventEmitter from '../services/eventEmitter'
-import { movePlayerItemToNewPosition, syncPlayerWithQueue } from '../services/player'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { audioMovePlayerItemToNewPosition, audioSyncPlayerWithQueue } from '../services/playerAudio'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { addQueueItemToServer, getQueueItems, removeQueueItem, setAllQueueItemsLocally } from '../state/actions/queue'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
@@ -217,7 +217,14 @@ export class QueueScreen extends React.Component<Props, State> {
   _handlePlayItem = async (item: NowPlayingItem) => {
     try {
       const shouldPlay = true
-      await loadItemAndPlayTrack(item, shouldPlay)
+      const forceUpdateOrderDate = false
+      const setCurrentItemNextInQueue = true
+      await playerLoadNowPlayingItem(
+        item,
+        shouldPlay,
+        forceUpdateOrderDate,
+        setCurrentItemNextInQueue
+      )
       await getQueueItems()
       this.setState({ isLoading: false })
     } catch (error) {
@@ -230,7 +237,7 @@ export class QueueScreen extends React.Component<Props, State> {
     if (queueItems && queueItems[rowIndex]) {
       const item = queueItems[rowIndex]
       await removeQueueItem(item)
-      await syncPlayerWithQueue()
+      await audioSyncPlayerWithQueue()
       this._handlePlayItem(item)
     }
   }
@@ -293,7 +300,7 @@ export class QueueScreen extends React.Component<Props, State> {
       (async () => {
         try {
           await removeQueueItem(item)
-          await syncPlayerWithQueue()
+          await audioSyncPlayerWithQueue()
         } catch (error) {
           //
         }
@@ -331,7 +338,7 @@ export class QueueScreen extends React.Component<Props, State> {
       }
 
       if (item && previousQueueItems.length >= to) {
-        await movePlayerItemToNewPosition(item.clipId || item.episodeId, to)
+        await audioMovePlayerItemToNewPosition(item.clipId || item.episodeId, to)
       }
     } catch (error) {
       console.log('QueueScreen - _onReleaseRow - ', error)
@@ -354,8 +361,9 @@ export class QueueScreen extends React.Component<Props, State> {
   }
 
   render() {
-    const { historyItems, historyItemsCount, queueItems } = this.global.session.userInfo
-    const { currentChapter, nowPlayingItem } = this.global.player
+    const { currentChapter, player, session } = this.global
+    const { historyItems, historyItemsCount, queueItems } = session.userInfo
+    const { nowPlayingItem } = player
     const { isEditing, isLoading, isLoadingMore, isRemoving, isTransparent, viewType } = this.state
     const view = (
       <View

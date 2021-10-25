@@ -1,7 +1,7 @@
-import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import React, { useGlobal } from 'reactn'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { translate } from '../lib/i18n'
-import { readableDate } from '../lib/utility'
+import { getTimeLabelText, readableDate } from '../lib/utility'
 import { PV } from '../resources'
 import { TimeRemainingWidget } from './TimeRemainingWidget'
 import { ActivityIndicator, FastImage, IndicatorDownload, Text } from './'
@@ -13,6 +13,7 @@ type Props = {
   handleMorePress?: any
   isLoading?: boolean
   mediaFileDuration?: number
+  navigation: any
   testID: string
   userPlaybackPosition?: number
 }
@@ -25,9 +26,15 @@ export const EpisodeTableHeader = (props: Props) => {
     handleMorePress,
     isLoading,
     mediaFileDuration,
+    navigation,
     testID,
     userPlaybackPosition
   } = props
+
+  const [screenReaderEnabled] = useGlobal('screenReaderEnabled')
+  const [session] = useGlobal('session')
+  const { userInfo } = session
+  const { historyItemsIndex } = userInfo
 
   const isNotFound = !isLoading && !episode
 
@@ -37,17 +44,36 @@ export const EpisodeTableHeader = (props: Props) => {
     episode?.podcast_shrunkImageUrl ||
     episode?.podcast?.imageUrl
 
-  const pubDate = episode && episode.pubDate
+  const duration = episode?.duration || 0
+
+  const pubDate = episode?.pubDate
   const isDownloaded = episodeDownloaded
 
-  let episodeTitle = episode?.title
-  if (!episodeTitle) episodeTitle = translate('Untitled Episode')
+  const id = episode?.id
+  const episodeCompleted = historyItemsIndex && historyItemsIndex.episodes && id
+    && historyItemsIndex.episodes[id] && historyItemsIndex.episodes[id].completed
 
-  const podcastTitle = episode?.podcast?.title
-  if (!podcastTitle) episodeTitle = translate('Untitled Podcast')
+  let episodeTitleText = episode?.title?.trim()
+  if (!episodeTitleText) episodeTitleText = translate('Untitled Episode')
+
+  let podcastTitleText = episode?.podcast?.title?.trim()
+  if (!podcastTitleText) podcastTitleText = translate('Untitled Podcast')
+
+  const pubDateText = readableDate(pubDate)
+  const timeLabel = getTimeLabelText(mediaFileDuration, duration, userPlaybackPosition, episodeCompleted)
+  const timeLabelText = timeLabel ? timeLabel : translate('Unplayed episode')
+
+  const accessibilityLabel =
+    `${podcastTitleText}, ${episodeTitleText}, ${pubDateText}, ${timeLabelText}`
 
   return (
-    <View style={styles.view}>
+    <Pressable
+      accessible={screenReaderEnabled}
+      accessibilityHint={translate('ARIA HINT - tap to show options for this episode')}
+      accessibilityLabel={accessibilityLabel}
+      importantForAccessibility={screenReaderEnabled ? 'yes' : 'no-hide-descendants'}
+      onPress={screenReaderEnabled ? handleMorePress : null}
+      style={styles.view}>
       {isLoading ? (
         <ActivityIndicator fillSpace testID={testID} />
       ) : (
@@ -68,49 +94,52 @@ export const EpisodeTableHeader = (props: Props) => {
               <View style={styles.textWrapper}>
                 <Text
                   accessibilityHint={translate('ARIA HINT - This is the podcast title')}
-                  accessibilityLabel={podcastTitle.trim()}
+                  accessibilityLabel={podcastTitleText}
                   fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                   isSecondary
                   style={styles.podcastTitle}
                   testID={`${testID}_podcast_title`}>
-                  {podcastTitle.trim()}
+                  {podcastTitleText}
                 </Text>
                 <Text
                   accessibilityHint={translate('ARIA HINT - This is the episode title')}
-                  accessibilityLabel={episodeTitle.trim()}
+                  accessibilityLabel={episodeTitleText}
                   fontSizeLargestScale={PV.Fonts.largeSizes.md}
                   style={styles.title}
                   testID={`${testID}_title`}>
-                  {episodeTitle.trim()}
+                  {episodeTitleText}
                 </Text>
                 <View style={styles.textWrapperBottomRow}>
                   <Text
                     accessibilityHint={translate('ARIA HINT - This is the episode publication date')}
-                    accessibilityLabel={readableDate(pubDate)}
+                    accessibilityLabel={pubDateText}
                     fontSizeLargestScale={PV.Fonts.largeSizes.sm}
                     isSecondary
                     style={styles.pubDate}
                     testID={`${testID}_pub_date`}>
-                    {readableDate(pubDate)}
+                    {pubDateText}
                   </Text>
                   {isDownloaded && <IndicatorDownload />}
                 </View>
               </View>
               <TimeRemainingWidget
+                episodeCompleted={episodeCompleted}
                 episodeDownloading={episodeDownloading}
                 handleMorePress={handleMorePress}
                 item={episode}
                 itemType='episode'
                 mediaFileDuration={mediaFileDuration}
+                navigation={navigation}
                 style={{ marginVertical: 20 }}
                 testID={testID}
+                timeLabel={timeLabel}
                 userPlaybackPosition={userPlaybackPosition}
               />
             </View>
           )}
         </View>
       )}
-    </View>
+    </Pressable>
   )
 }
 

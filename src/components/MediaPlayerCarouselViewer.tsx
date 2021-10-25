@@ -1,11 +1,11 @@
-import { Alert, Linking, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View as RNView } from 'react-native'
-
+import { Alert, Dimensions, Linking, StyleSheet, TouchableOpacity,
+  TouchableWithoutFeedback, View as RNView } from 'react-native'
 import React from 'reactn'
 import { translate } from '../lib/i18n'
 import { readableClipTime } from '../lib/utility'
 import { PV } from '../resources'
-import { loadChapterPlaybackInfo } from '../state/actions/playerChapters'
-import { ActivityIndicator, FastImage, ScrollView, Text, TextTicker } from './'
+import { checkIfVideoFileType } from '../state/actions/playerVideo'
+import { ActivityIndicator, FastImage, PVVideo, ScrollView, Text, TextTicker } from './'
 
 type Props = {
   handlePressClipInfo: any
@@ -15,20 +15,12 @@ type Props = {
 
 const testIDPrefix = 'media_player_carousel_viewer'
 
+const screenHeight = Dimensions.get('screen').width
+
 export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
-  chapterInterval: NodeJS.Timeout
   constructor(props) {
     super(props)
     this.state = {}
-  }
-
-  componentDidMount() {
-    loadChapterPlaybackInfo()
-    this.chapterInterval = setInterval(loadChapterPlaybackInfo, 4000)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.chapterInterval)
   }
 
   handleChapterLinkPress = (url: string) => {
@@ -39,9 +31,8 @@ export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
   }
 
   render() {
-    const { handlePressClipInfo, width } = this.props
-    const { player, screenPlayer, screenReaderEnabled } = this.global
-    const { currentChapter } = player
+    const { handlePressClipInfo, navigation, width } = this.props
+    const { currentChapter, player, screenPlayer, screenReaderEnabled } = this.global
     const { isLoading } = screenPlayer
     
     // nowPlayingItem will be undefined when loading from a deep link
@@ -97,13 +88,21 @@ export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
       </Text>
     )
 
+    const outerWrapperStyle = screenReaderEnabled
+      ? [styles.outerWrapper, { paddingBottom: 10, paddingHorizontal: 10 }, { width }]
+      : [styles.outerWrapper, { padding: 10 }, { width }]
+
+    const imageWrapperStyle = screenHeight < PV.Dimensions.smallScreen.height
+      ? [styles.carouselImageWrapper, { width: width * 0.9 }, { height: '50%' }]
+      : [styles.carouselImageWrapper, { width: width * 0.9 }]
+
     return (
       <ScrollView
         scrollEnabled={false}
-        contentContainerStyle={[styles.outerWrapper, { width }]}>
+        contentContainerStyle={outerWrapperStyle}>
         <RNView
           accessible
-          accessibilityHint={translate('ARIA HINT - This is the now playing episode in a carousel')}
+          accessibilityHint={translate('ARIA HINT - This is the now playing episode')}
           accessibilityLabel={textTopWrapperAccessibilityLabel}
           style={styles.carouselTextTopWrapper}>
           {isLoading ? (
@@ -135,14 +134,23 @@ export class MediaPlayerCarouselViewer extends React.PureComponent<Props> {
             )
           )}
         </RNView>
-        <RNView style={[styles.carouselImageWrapper, { width: width * 0.9 }]}>
-          <TouchableOpacity
-            accessible={false}
-            activeOpacity={1}
-            {...(clipUrl ? { onPress: () => this.handleChapterLinkPress(clipUrl) } : {})}
-            style={styles.imageContainer}>
-            <FastImage key={imageUrl} source={imageUrl} styles={imageStyles} />
-          </TouchableOpacity>
+        <RNView style={imageWrapperStyle}>
+          {
+            checkIfVideoFileType(nowPlayingItem) && (
+              <PVVideo navigation={navigation} />
+            )
+          }
+          {
+            !checkIfVideoFileType(nowPlayingItem) && (
+              <TouchableOpacity
+                accessible={false}
+                activeOpacity={1}
+                {...(clipUrl ? { onPress: () => this.handleChapterLinkPress(clipUrl) } : {})}
+                style={styles.imageContainer}>
+                <FastImage key={imageUrl} source={imageUrl} styles={imageStyles} />
+              </TouchableOpacity>
+            )
+          }
         </RNView>
         {!!clipId && (
           <RNView style={styles.carouselChapterWrapper}>
@@ -180,7 +188,6 @@ const styles = StyleSheet.create({
   outerWrapper: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
     flex: 1
   },
   carouselTextTopWrapper: {

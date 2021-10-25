@@ -11,7 +11,7 @@ import com.facebook.soloader.SoLoader;
 
 import java.util.List;
 
-
+import org.wonday.orientation.OrientationActivityLifecycle;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -45,5 +45,6 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
+    registerActivityLifecycleCallbacks(OrientationActivityLifecycle.getInstance());
   }
 }

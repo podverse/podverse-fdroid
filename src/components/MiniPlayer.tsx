@@ -1,12 +1,13 @@
 import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
-import { State as RNTPState } from 'react-native-track-player'
 import React from 'reactn'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { checkIfStateIsBuffering } from '../services/player'
-import { togglePlay } from '../state/actions/player'
+import PVEventEmitter from '../services/eventEmitter'
+import { playerCheckIfStateIsBuffering, playerCheckIfStateIsPlaying } from '../services/player'
+import { playerTogglePlay } from '../state/actions/player'
+import { checkIfVideoFileType } from '../state/actions/playerVideo'
 import { darkTheme, iconStyles, playerStyles } from '../styles'
-import { ActivityIndicator, FastImage, Icon, Text, TextTicker } from './'
+import { ActivityIndicator, FastImage, Icon, PVVideo, Text, TextTicker } from './'
 
 type Props = {
   navigation: any
@@ -18,9 +19,12 @@ export class MiniPlayer extends React.PureComponent<Props> {
   render() {
     const { navigation } = this.props
     const { globalTheme, player, screenPlayer, screenReaderEnabled } = this.global
-    const { nowPlayingItem, playbackState } = player
+    const { playbackState } = player
     const { hasErrored } = screenPlayer
     const isDarkMode = globalTheme === darkTheme
+    
+    let { nowPlayingItem } = player
+    nowPlayingItem = nowPlayingItem || {}
 
     let playButtonAdjust = { paddingLeft: 2, paddingTop: 2 } as any
     let playButtonIcon = (
@@ -29,25 +33,25 @@ export class MiniPlayer extends React.PureComponent<Props> {
         accessibilityLabel={translate('Play')}
         accessibilityRole='button'
         name='play'
-        onPress={() => togglePlay(this.global)}
+        onPress={() => playerTogglePlay()}
         size={20}
         testID={`${testIDPrefix}_play_button`}
         wrapperStyle={[playerStyles.icon, playButtonAdjust]} />
     )
-    if (playbackState === RNTPState.Playing) {
+    if (playerCheckIfStateIsPlaying(playbackState)) {
       playButtonIcon = (
         <Icon
           accessibilityHint={translate('ARIA HINT - pause playback')}
           accessibilityLabel={translate('Pause')}
           accessibilityRole='button'
           name='pause'
-          onPress={() => togglePlay(this.global)}
+          onPress={() => playerTogglePlay()}
           size={20}
           testID={`${testIDPrefix}_pause_button`}
           wrapperStyle={[playerStyles.icon, playButtonAdjust]} />
       )
       playButtonAdjust = {}
-    } else if (checkIfStateIsBuffering(playbackState)) {
+    } else if (playerCheckIfStateIsBuffering(playbackState)) {
       playButtonIcon = <ActivityIndicator testID={testIDPrefix} />
       playButtonAdjust = { paddingLeft: 2, paddingTop: 2 }
     }
@@ -67,28 +71,77 @@ export class MiniPlayer extends React.PureComponent<Props> {
       </Text>
     )
 
+    // const { clipEndTime, clipStartTime, clipTitle } = nowPlayingItem
+    // const useTo = false
+    // const finalClipTitle = `${clipTitle} ${readableClipTime(clipStartTime, clipEndTime, useTo)}`
+    // const clipTitleComponent = (
+    //   <Text
+    //     accessible={false}
+    //     importantForAccessibility='no'
+    //     isSecondary
+    //     numberOfLines={1}
+    //     style={[styles.clipTitle, globalTheme.playerText]}
+    //     testID={`${testIDPrefix}_clip_title`}>
+    //     {finalClipTitle}
+    //   </Text>
+    // )
+
+    // const clipTitleWrapperStyle = [styles.clipTitleWrapper, globalTheme.player]
+
     return (
       <View>
+        {/* {
+          screenReaderEnabled ? (
+            <View style={clipTitleWrapperStyle}>
+              <TextTicker
+                accessible={false}
+                allowFontScaling={false}
+                bounce
+                importantForAccessibility='no-hide-descendants'
+                loop
+                styles={styles.clipTitle}
+                textLength={nowPlayingItem?.clipTitle?.length}>
+                {clipTitleComponent}
+              </TextTicker>
+            </View>
+          ) : (
+            <View style={clipTitleWrapperStyle}>
+              {clipTitleComponent}
+            </View>
+          )
+        } */}
         {nowPlayingItem && (
           <View style={[styles.playerInnerWrapper, globalTheme.player]}>
             <TouchableWithoutFeedback
               accessibilityLabel={nowPlayingAccessibilityLabel}
               accessibilityHint={translate('ARIA HINT - open the full player screen')}
-              onPress={() =>
+              onPress={() => {
+                PVEventEmitter.emit(PV.Events.PLAYER_VIDEO_DESTROY_PRIOR_PLAYERS)
                 navigation.navigate(PV.RouteNames.PlayerScreen, {
                   nowPlayingItem,
                   addByRSSPodcastFeedUrl: nowPlayingItem.addByRSSPodcastFeedUrl,
                   isDarkMode
                 })
-              }
+              }}
               testID={testIDPrefix.prependTestId()}>
               <View style={[styles.player, globalTheme.player]}>
-                <FastImage
-                  isSmall
-                  resizeMode='contain'
-                  source={nowPlayingItem.episodeImageUrl || nowPlayingItem.podcastImageUrl}
-                  styles={styles.image}
-                />
+                {
+                  checkIfVideoFileType(nowPlayingItem) && (
+                    <View style={styles.image}>
+                      <PVVideo isMiniPlayer navigation={navigation} />
+                    </View>
+                  )
+                }
+                {
+                  !checkIfVideoFileType(nowPlayingItem) && (
+                    <FastImage
+                      isSmall
+                      resizeMode='contain'
+                      source={nowPlayingItem.episodeImageUrl || nowPlayingItem.podcastImageUrl}
+                      styles={styles.image}
+                    />
+                  )
+                }
                 <View style={styles.textWrapper}>
                   <Text
                     allowFontScaling={false}
@@ -134,12 +187,21 @@ export class MiniPlayer extends React.PureComponent<Props> {
 }
 
 const styles = StyleSheet.create({
+  clipTitle: {
+    fontSize: PV.Fonts.sizes.xl,
+    // fontWeight: PV.Fonts.weights.semibold,
+  },
+  clipTitleWrapper: {
+    borderTopWidth: 1,
+    flex: 0,
+    paddingHorizontal: 8,
+    paddingVertical: 6
+  },
   episodeTitle: {
     alignItems: 'center',
     flex: 0,
     fontSize: PV.Fonts.sizes.xl,
-    fontWeight: PV.Fonts.weights.semibold,
-    marginBottom: 2
+    fontWeight: PV.Fonts.weights.semibold
   },
   image: {
     height: 60,
@@ -157,13 +219,14 @@ const styles = StyleSheet.create({
   },
   podcastTitle: {
     fontSize: PV.Fonts.sizes.xl,
-    fontWeight: PV.Fonts.weights.semibold,
-    marginTop: 2
+    fontWeight: PV.Fonts.weights.semibold
   },
   textWrapper: {
     flex: 1,
     justifyContent: 'space-around',
     marginLeft: 10,
-    marginRight: 2
+    marginRight: 2,
+    marginBottom: 4,
+    marginTop: 3
   }
 })

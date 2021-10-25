@@ -140,6 +140,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
         <ClipTableCell
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
           item={item}
+          navigation={navigation}
           showEpisodeInfo
           showPodcastInfo
           testID={`${testIDPrefix}_clip_item_${index}`}
@@ -159,6 +160,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
           }
           item={item}
           mediaFileDuration={mediaFileDuration}
+          navigation={navigation}
           showPodcastInfo
           testID={`${testIDPrefix}_episode_item_${index}`}
           userPlaybackPosition={userPlaybackPosition}
@@ -272,7 +274,7 @@ export class PlaylistScreen extends React.Component<Props, State> {
                 handleDismiss: this._handleCancelPress,
                 handleDownload: this._handleDownloadPressed,
                 includeGoToPodcast: true,
-                includeGoToEpisode: true
+                includeGoToEpisodeInEpisodesStack: true
               },
               !!selectedItem?.startTime ? 'clip' : 'episode'
             )
