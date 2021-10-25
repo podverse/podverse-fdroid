@@ -10,7 +10,7 @@ import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
 import { deleteMediaRef, getMediaRefs } from '../services/mediaRef'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { ActionSheet, ActivityIndicator, ClipTableCell, Divider, FlatList,
   ScrollView, TableSectionSelectors } from './'
 
@@ -142,7 +142,14 @@ export class MediaPlayerCarouselClips extends React.PureComponent<Props> {
 
   _handleNavigationPress = (selectedItem: any) => {
     const shouldPlay = true
-    loadItemAndPlayTrack(selectedItem, shouldPlay)
+    const forceUpdateOrderDate = false
+    const setCurrentItemNextInQueue = false
+    playerLoadNowPlayingItem(
+      selectedItem,
+      shouldPlay,
+      forceUpdateOrderDate,
+      setCurrentItemNextInQueue
+    )
   }
 
   _handleMorePress = (selectedItem: any) => {
@@ -240,6 +247,7 @@ export class MediaPlayerCarouselClips extends React.PureComponent<Props> {
   }
 
   _renderItem = ({ item, index }) => {
+    const { navigation } = this.props
     const { player, screenPlayer } = this.global
     const { episode } = player
     const podcast = episode?.podcast || {}
@@ -258,6 +266,7 @@ export class MediaPlayerCarouselClips extends React.PureComponent<Props> {
         item={item}
         handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, podcast))}
         hideImage
+        navigation={navigation}
         showEpisodeInfo={queryFrom !== PV.Filters._fromThisEpisodeKey}
         showPodcastInfo={false}
         testID={`${testID}_item_${index}`}

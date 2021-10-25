@@ -112,10 +112,11 @@ export const convertSecToHHMMSS = (sec: number) => {
 
 export const convertSecToHhoursMMinutes = (sec: number) => {
   let totalSec = Math.floor(sec)
+
   const hours = Math.floor(totalSec / 3600)
   totalSec %= 3600
-  const minutes = Math.floor(totalSec / 60)
 
+  const minutes = Math.floor(totalSec / 60)
   let result = `${minutes} min`
 
   if (hours >= 1) {
@@ -611,7 +612,7 @@ export const numberWithCommas = (x?: number) => {
 
 export const safeKeyExtractor = (listName: string, index: number, id?: string) => {
   if (id) {
-    return id
+    return id + index
   } else {
     return `${listName}_${index}`
   }
@@ -619,4 +620,56 @@ export const safeKeyExtractor = (listName: string, index: number, id?: string) =
 
 export const checkIfNowPlayingItem = (item?: any, nowPlayingItem?: any) => {
   return item && nowPlayingItem && (nowPlayingItem.clipId === item.id || nowPlayingItem.episodeId === item.id)
+}
+
+export const getAuthorityFeedUrlFromArray = (feedUrlObjects: any[]) => {
+  const obj = feedUrlObjects.find((feedUrlObject) => feedUrlObject.isAuthority)
+  return obj?.url || null
+}
+
+export const getUsernameAndPasswordFromCredentials = (credentials: string) => {
+  let username = ''
+  let password = ''
+
+  if (credentials) {
+    const splitCredentials = credentials.split(':')
+    username = splitCredentials[0] || ''
+    password = splitCredentials[1] || ''
+  }
+
+  return {
+    username,
+    password
+  }
+}
+
+export const getTimeLabelText = (mediaFileDuration?: number, episodeDuration?: number,
+  userPlaybackPosition?: number, completed?: boolean, clipTime?: string) => {
+  const hasStartedItem = !!mediaFileDuration
+  const totalTime = mediaFileDuration || episodeDuration || 0
+  const playedTime = userPlaybackPosition || 0
+
+  let timeLabel = ''
+  if (totalTime) {
+    timeLabel = convertSecToHhoursMMinutes(totalTime)
+    if (hasStartedItem && playedTime > 0) {
+      timeLabel = convertSecToHhoursMMinutes(totalTime - playedTime) + ' left'
+    }
+  }
+
+  if (clipTime) {
+    timeLabel = clipTime
+  }
+
+  return timeLabel
+}
+
+export const getMediaRefStartPosition = (clipStartTime?: number | null, sliderWidth?: number, duration?: number) => {
+  let clipStartTimePosition = 0
+
+  if (duration && clipStartTime && sliderWidth) {
+    clipStartTimePosition = sliderWidth * (clipStartTime / duration)
+  }
+
+  return clipStartTimePosition
 }

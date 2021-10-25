@@ -1,7 +1,12 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import Config from 'react-native-config'
-import { setGlobal } from 'reactn'
+import { getGlobal, setGlobal } from 'reactn'
 import { PV } from '../../resources'
+import {
+  setPlayerJumpBackwards as setPlayerJumpBackwardsService,
+  setPlayerJumpForwards as setPlayerJumpForwardsService,
+  playerUpdateTrackPlayerCapabilities
+} from '../../services/player'
 import { removeLNPayWallet } from './lnpay'
 
 export const initializeSettings = async () => {
@@ -14,6 +19,9 @@ export const initializeSettings = async () => {
   const errorReportingEnabled = await AsyncStorage.getItem(PV.Keys.ERROR_REPORTING_ENABLED)
   const urlsAPI = await PV.URLs.api()
   const urlsWeb = await PV.URLs.web()
+  const jumpBackwardsTime = await AsyncStorage.getItem(PV.Keys.PLAYER_JUMP_BACKWARDS) || PV.Player.jumpBackSeconds
+  const jumpForwardsTime = await AsyncStorage.getItem(PV.Keys.PLAYER_JUMP_FORWARDS) || PV.Player.jumpSeconds
+  const addCurrentItemNextInQueue = await AsyncStorage.getItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE)
 
   if (!Config.ENABLE_VALUE_TAG_TRANSACTIONS) {
     try {
@@ -31,8 +39,14 @@ export const initializeSettings = async () => {
     customWebDomainEnabled: customWebDomainEnabled === 'TRUE',
     errorReportingEnabled,
     offlineModeEnabled,
+    jumpBackwardsTime,
+    jumpForwardsTime,
     urlsAPI,
-    urlsWeb
+    urlsWeb,
+    addCurrentItemNextInQueue: !!addCurrentItemNextInQueue
+  }, () => {
+    // Call handleFinishSettingPlayerTime in case a custom jump time is available.
+    handleFinishSettingPlayerTime()
   })
 }
 
@@ -104,4 +118,36 @@ export const setOfflineModeEnabled = (value: boolean) => {
       ? await AsyncStorage.setItem(PV.Keys.OFFLINE_MODE_ENABLED, 'TRUE')
       : await AsyncStorage.removeItem(PV.Keys.OFFLINE_MODE_ENABLED)
   })
+}
+
+export const setPlayerJumpBackwards = (val?: string) => {
+  const newValue = setPlayerJumpBackwardsService(val)
+  setGlobal({ jumpBackwardsTime: newValue })
+}
+
+export const setPlayerJumpForwards = (val?: string) => {
+  const newValue = setPlayerJumpForwardsService(val)
+  setGlobal({ jumpForwardsTime: newValue })
+}
+
+export const handleFinishSettingPlayerTime = () => {
+  const { jumpBackwardsTime, jumpForwardsTime } = getGlobal()
+  const newJumpBackwardsTime = jumpBackwardsTime === '' ? PV.Player.jumpBackSeconds : jumpBackwardsTime
+  const newJumpForwardsTime = jumpForwardsTime === '' ? PV.Player.jumpSeconds : jumpForwardsTime
+  setGlobal({
+    jumpBackwardsTime: newJumpBackwardsTime,
+    jumpForwardsTime: newJumpForwardsTime
+  }, () => {
+    playerUpdateTrackPlayerCapabilities()
+  })
+}
+
+export const setAddCurrentItemNextInQueue = async (val: boolean) => {
+  if (val) {
+    await AsyncStorage.setItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE, 'TRUE')
+    setGlobal({ addCurrentItemNextInQueue: !!val })
+  } else {
+    await AsyncStorage.removeItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE)
+    setGlobal({ addCurrentItemNextInQueue: false })
+  }
 }

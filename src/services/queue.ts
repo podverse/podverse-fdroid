@@ -2,20 +2,20 @@ import AsyncStorage from '@react-native-community/async-storage'
 import { NowPlayingItem } from 'podverse-shared'
 import { PV } from '../resources'
 import { checkIfShouldUseServerData, getBearerToken } from './auth'
-import { syncPlayerWithQueue } from './player'
+import { playerSyncPlayerWithQueue } from './player'
 import { request } from './request'
 
 export const addQueueItemLast = async (item: NowPlayingItem) => {
   const useServerData = await checkIfShouldUseServerData()
   const results = useServerData ? await addQueueItemLastOnServer(item) : await addQueueItemLastLocally(item)
-  await syncPlayerWithQueue()
+  await playerSyncPlayerWithQueue()
   return results
 }
 
 export const addQueueItemNext = async (item: NowPlayingItem) => {
   const useServerData = await checkIfShouldUseServerData()
   const results = useServerData ? await addQueueItemNextOnServer(item) : await addQueueItemNextLocally(item)
-  await syncPlayerWithQueue()
+  await playerSyncPlayerWithQueue()
   return results
 }
 
@@ -57,7 +57,7 @@ export const removeQueueItem = async (item: NowPlayingItem) => {
 
 export const setAllQueueItems = async (items: NowPlayingItem[]) => {
   await setAllQueueItemsLocally(items)
-  await syncPlayerWithQueue()
+  await playerSyncPlayerWithQueue()
   return items
 }
 
@@ -114,7 +114,7 @@ export const addQueueItemToServer = async (item: NowPlayingItem, newPosition: nu
     await setAllQueueItemsLocally(userQueueItems)
   }
 
-  await syncPlayerWithQueue()
+  await playerSyncPlayerWithQueue()
 
   return userQueueItems
 }
@@ -166,12 +166,25 @@ export const getQueueItemsLocally = async () => {
 
 const getQueueItemsFromServer = async () => {
   const bearerToken = await getBearerToken()
-  const response = await request({
-    endpoint: '/user-queue-item',
-    method: 'GET',
-    headers: { Authorization: bearerToken },
-    opts: { credentials: 'include' }
-  })
+
+  /* If user membership is expired, we don't want the 401 error to crash the app,
+     so return an empty response body instead. */
+  let response = {
+    data: {
+      userQueueItems: []
+    }
+  }
+
+  try {
+    response = await request({
+      endpoint: '/user-queue-item',
+      method: 'GET',
+      headers: { Authorization: bearerToken },
+      opts: { credentials: 'include' }
+    })
+  } catch (error) {
+    console.log('getQueueItemsFromServer error', error)
+  }
 
   const userQueueItems = response && response.data && response.data.userQueueItems
   await setAllQueueItemsLocally(userQueueItems)

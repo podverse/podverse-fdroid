@@ -204,6 +204,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
   })
 
   _renderItem = ({ item }) => {
+    const { navigation } = this.props
     const { viewType } = this.state
     const episode = this.props.navigation.getParam('episode') || {}
     item.episode = episode
@@ -213,6 +214,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
         handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, episode, episode.podcast))}
         item={item}
         isChapter={viewType === PV.Filters._chaptersKey}
+        navigation={navigation}
         showEpisodeInfo={false}
         showPodcastInfo={false}
       />

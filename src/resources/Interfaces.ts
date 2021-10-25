@@ -96,22 +96,35 @@ export interface InitialState {
   urlsAPI?: any
   urlsWeb?: any
   offlineModeEnabled?: any
+  jumpBackwardsTime: string
+  jumpForwardsTime: string
+  addCurrentItemNextInQueue: boolean
   overlayAlert: {
     shouldShowAlert: boolean
   }
   parsedTranscript: TranscriptRow[] | null
+  currentChapter: any
+  currentChapters: any
+  currentChaptersStartTimePositions: any
   player: {
     backupDuration?: number
-    currentChapter: any
-    currentChapters: any
     hasErrored: boolean
-    isPlaying: boolean
     nowPlayingItem: any
     playbackRate: number
     showMakeClip: boolean
     showMiniPlayer: boolean
     shouldContinuouslyPlay: boolean
-    sleepTimer: any
+    playbackState: any
+    sleepTimer: {
+      defaultTimeRemaining: number
+      isActive: boolean
+      timeRemaining: number
+    }
+    videoInfo: {
+      videoDuration: number
+      videoIsLoaded: boolean
+      videoPosition: number
+    }
   }
   playlists: {
     myPlaylists: []

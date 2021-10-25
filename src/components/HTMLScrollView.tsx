@@ -8,7 +8,7 @@ import {
   removeHTMLAttributesFromString
 } from '../lib/utility'
 import { PV } from '../resources'
-import { setPlaybackPosition } from '../services/player'
+import { playerHandleSeekTo } from '../services/player'
 import { TableSectionSelectors } from './TableSectionSelectors'
 
 type Props = {
@@ -65,7 +65,7 @@ export const HTMLScrollView = (props: Props) => {
             onPress: (event: any, href: string, attributes: any) => {
               const startTime = parseInt(attributes && attributes['data-start-time'], 10)
               if ((startTime || startTime === 0)) {
-                setPlaybackPosition(startTime)
+                playerHandleSeekTo(startTime)
               } else if (href) {
                 Linking.openURL(href)
               }
@@ -136,9 +136,18 @@ const customHTMLTagStyles = {
     fontSize: PV.Fonts.sizes.lg,
     color: PV.Colors.skyLight
   },
+  ol: {
+    marginBottom: 8,
+    marginLeft: 0,
+    marginRight: 0,
+    marginTop: 0,
+    paddingLeft: 0,
+    listStyleType: 'none',
+    color: PV.Colors.white
+  },
   ul: {
-    marginBottom: 0,
-    marginLeft: -16,
+    marginBottom: 8,
+    marginLeft: 0,
     marginRight: 0,
     marginTop: 0,
     paddingLeft: 0,

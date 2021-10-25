@@ -8,7 +8,7 @@ import { PV } from '../resources'
 import { retrieveLatestChaptersForEpisodeId } from '../services/episode'
 import PVEventEmitter from '../services/eventEmitter'
 import { getPlaybackSpeed } from '../services/player'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { ActionSheet, ActivityIndicator, AutoScrollToggle, ClipTableCell, Divider, FlatList,
   ScrollView, TableSectionSelectors } from './'
 
@@ -19,7 +19,7 @@ type Props = {
 }
 
 type State = {
-  activeTranscriptRowIndex: number | null
+  activeChapterRowIndex: number | null
   autoScrollOn: boolean
 }
 
@@ -38,7 +38,7 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
     this.itemHeights = []
 
     this.state = {
-      activeTranscriptRowIndex: null,
+      activeChapterRowIndex: null,
       autoScrollOn: false
     }
   }
@@ -55,13 +55,29 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
 
   _handleNavigationPress = (selectedItem: any) => {
     const shouldPlay = true
-    loadItemAndPlayTrack(selectedItem, shouldPlay)
+    const forceUpdateOrderDate = false
+    const setCurrentItemNextInQueue = false
+    playerLoadNowPlayingItem(
+      selectedItem,
+      shouldPlay,
+      forceUpdateOrderDate,
+      setCurrentItemNextInQueue
+    )
+  }
+
+  disableAutoscroll = () => {
+    if (this.interval) {
+      this.setState({
+        activeChapterRowIndex: null,
+        autoScrollOn: false
+      }, this.clearAutoScrollInterval)
+    }
   }
 
   toggleAutoscroll = () => {
     if (this.interval) {
       this.setState({
-        activeTranscriptRowIndex: null,
+        activeChapterRowIndex: null,
         autoScrollOn: false
       }, this.clearAutoScrollInterval)
     } else {
@@ -83,7 +99,7 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
 
     this.setState({ autoScrollOn: true })
       this.interval = setInterval(() => {
-        const { currentChapter, currentChapters } = this.global.player
+        const { currentChapter, currentChapters } = this.global
         const itemHeightsReady = currentChapters.length === this.itemHeights.length
 
         if (currentChapter && itemHeightsReady) {
@@ -97,7 +113,7 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
           if (index !== -1) {
             const indexBefore = index > 0 ? index - 1 : 0
             this.listRef.scrollToIndex({ index: indexBefore, animated: false })
-            this.setState({ activeTranscriptRowIndex: index })
+            this.setState({ activeChapterRowIndex: index })
           }
         }
       }, intervalTime)
@@ -133,8 +149,9 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
     })
 
   _renderItem = ({ item, index }) => {
-    const { player } = this.global
-    const { currentChapter, episode } = player
+    const { navigation } = this.props
+    const { currentChapter, player } = this.global
+    const { episode } = player
     const podcast = episode?.podcast || {}
     const testID = getTestID()
 
@@ -151,7 +168,8 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
         isNowPlayingItem={currentChapter && currentChapter.id === item.id}
         item={item}
         itemType='chapter'
-        loadTimeStampOnPlay
+        loadChapterOnPlay
+        navigation={navigation}
         onLayout={(item: any) => this.itemHeights[index] = item.nativeEvent.layout.height}
         showPodcastInfo={false}
         testID={`${testID}_item_${index}`}
@@ -169,8 +187,7 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
   array is populated.
 */
   _getItemLayout = (data, index) => {
-    const { player } = this.global
-    const { currentChapters } = player
+    const { currentChapters } = this.global
 
     let length = 80
     let offset = 80
@@ -188,8 +205,7 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
   render() {
     const { navigation, width } = this.props
     const { autoScrollOn } = this.state
-    const { offlineModeEnabled, player, screenPlayer, screenReaderEnabled } = this.global
-    const { currentChapters } = player
+    const { currentChapters, offlineModeEnabled, screenPlayer, screenReaderEnabled } = this.global
     const {
       isLoading,
       isLoadingMore,
@@ -232,9 +248,9 @@ export class MediaPlayerCarouselChapters extends React.PureComponent<Props, Stat
             listRef={(ref: any) => {
               this.listRef = ref
             }}
-            
             noResultsMessage={noResultsMessage}
             noResultsSubMessage={noResultsSubMessage}
+            onScrollBeginDrag={this.disableAutoscroll}
             renderItem={this._renderItem}
             showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
             transparent

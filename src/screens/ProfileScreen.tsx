@@ -34,7 +34,7 @@ import {
   getUserPlaylists
 } from '../services/user'
 import { getAuthUserInfo } from '../state/actions/auth'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { getPublicUser, toggleSubscribeToUser } from '../state/actions/user'
 import { core } from '../styles'
 
@@ -404,12 +404,20 @@ export class ProfileScreen extends React.Component<Props, State> {
     })
   }
 
-  _handleNavigationPress = (selectedItem: any) => {
+  _handleNavigationPress = async (selectedItem: any) => {
     const shouldPlay = true
-    loadItemAndPlayTrack(selectedItem, shouldPlay)
+    const forceUpdateOrderDate = false
+    const setCurrentItemNextInQueue = true
+    await playerLoadNowPlayingItem(
+      selectedItem,
+      shouldPlay,
+      forceUpdateOrderDate,
+      setCurrentItemNextInQueue
+    )
   }
 
   _renderItem = ({ item, index }) => {
+    const { navigation } = this.props
     const { viewType } = this.state
 
     if (viewType === PV.Filters._podcastsKey) {
@@ -429,6 +437,7 @@ export class ProfileScreen extends React.Component<Props, State> {
       return episode?.id && episode?.podcast ? (
         <ClipTableCell
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
+          navigation={navigation}
           showEpisodeInfo
           showPodcastInfo
           testID={`${testIDPrefix}_clip_item_${index}`}
@@ -568,7 +577,7 @@ export class ProfileScreen extends React.Component<Props, State> {
                       handleDownload: this._handleDownloadPressed,
                       handleDeleteClip: this._showDeleteConfirmDialog,
                       includeGoToPodcast: true,
-                      includeGoToEpisode: true
+                      includeGoToEpisodeInEpisodesStack: true
                     },
                     itemType
                   )

@@ -28,15 +28,15 @@ type Props = {
 }
 
 type State = {
+  chapters: any[]
+  clips: any[]
   episode?: any
   episodeId?: any
+  hasInternetConnection: boolean
   includeGoToPodcast: boolean
   isLoading: boolean
   selectedItem?: any
   showActionSheet: boolean
-  hasInternetConnection: boolean
-  clips: any[]
-  chapters: any[]
   totalClips: number
   totalChapters: number
 }
@@ -51,6 +51,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
     const episode = this.props.navigation.getParam('episode')
     const episodeId = episode?.id || this.props.navigation.getParam('episodeId')
     const includeGoToPodcast = this.props.navigation.getParam('includeGoToPodcast')
+    const hasInternetConnection = this.props.navigation.getParam('hasInternetConnection')
     const id = episode?.id || episodeId
 
     if (episode && !episode.podcast) {
@@ -70,10 +71,10 @@ export class EpisodeScreen extends React.Component<Props, State> {
     this.state = {
       episode,
       episodeId,
+      hasInternetConnection: !!hasInternetConnection,
       includeGoToPodcast,
       isLoading: !episode,
       showActionSheet: false,
-      hasInternetConnection: false,
       clips: [],
       chapters: [],
       totalChapters: 0,
@@ -116,15 +117,22 @@ export class EpisodeScreen extends React.Component<Props, State> {
     const hasInternetConnection = await hasValidNetworkConnection()
     
     if (!hasInternetConnection) {
-      this.setState({ hasInternetConnection })
+      this.setState({ hasInternetConnection: !hasInternetConnection })
     } else if (!episode && episodeId) {
       episode = await getEpisode(episodeId)
       this.setState({
         episode,
         isLoading: false
       })
+    } else {
+      /*
+        Always get the full episode since the episode.description passed from
+        the previous screen's list view will be limited to 2500 characters.
+      */
+      episode = await getEpisode(episodeId)
+      this.setState({ episode })
     }
-    
+
     if (episode?.id) {
       const [clips, totalClips] = await getMediaRefs({
         episodeId: episode.id,
@@ -140,9 +148,11 @@ export class EpisodeScreen extends React.Component<Props, State> {
         clips,
         totalClips,
         totalChapters: chapters && chapters.length,
-        hasInternetConnection
+        hasInternetConnection: !!hasInternetConnection
       })
     }
+
+
   }
 
   _handleCancelPress = () => new Promise((resolve) => {
@@ -187,7 +197,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
     const episodeDownloading = episode && !!downloadsActive[episode.id]
 
     const showClipsCell = hasInternetConnection && totalClips > 0
-    const showChaptersCell = hasInternetConnection && totalChapters > 0
+    const showChaptersCell = hasInternetConnection && !!episode?.chaptersUrl
 
     const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(episodeId)
 
@@ -208,6 +218,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
           }
           isLoading={isLoading}
           mediaFileDuration={mediaFileDuration}
+          navigation={navigation}
           testID={testIDPrefix}
           userPlaybackPosition={userPlaybackPosition}
         />

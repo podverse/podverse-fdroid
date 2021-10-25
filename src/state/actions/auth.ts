@@ -12,12 +12,12 @@ import {
   signUp
 } from '../../services/auth'
 import { getWalletInfo } from '../../services/lnpay'
-import { setAddByRSSPodcastFeedUrlsLocally } from '../../services/parser'
+import { parseAllAddByRSSPodcasts, setAddByRSSPodcastFeedUrlsLocally } from '../../services/parser'
 import { setAllQueueItemsLocally } from '../../services/queue'
 import { setAllHistoryItemsLocally } from '../../services/userHistoryItem'
 import { getNowPlayingItemLocally, getNowPlayingItemOnServer } from '../../services/userNowPlayingItem'
 import { getLNWallet } from './lnpay'
-import { getSubscribedPodcasts } from './podcast'
+import { combineWithAddByRSSPodcasts, getSubscribedPodcasts } from './podcast'
 import { DEFAULT_BOOST_PAYMENT, DEFAULT_STREAMING_PAYMENT } from './valueTag'
 
 export type Credentials = {
@@ -120,7 +120,7 @@ export const getAuthenticatedUserInfoLocally = async () => {
   return isLoggedIn
 }
 
-export const askToSyncWithNowPlayingItem = async () => {
+export const askToSyncWithNowPlayingItem = async (navigation: any) => {
   const localNowPlayingItem = await getNowPlayingItemLocally()
   const serverNowPlayingItem = await getNowPlayingItemOnServer()
 
@@ -130,7 +130,10 @@ export const askToSyncWithNowPlayingItem = async () => {
       (localNowPlayingItem.clipId && localNowPlayingItem.clipId !== serverNowPlayingItem.clipId) ||
       (!localNowPlayingItem.clipId && localNowPlayingItem.episodeId !== serverNowPlayingItem.episodeId))
     ) {
-      const askToSyncWithLastHistoryItem = PV.Alerts.ASK_TO_SYNC_WITH_LAST_HISTORY_ITEM(serverNowPlayingItem)
+      const askToSyncWithLastHistoryItem = PV.Alerts.ASK_TO_SYNC_WITH_LAST_HISTORY_ITEM(
+        serverNowPlayingItem,
+        navigation
+      )
       Alert.alert(
         askToSyncWithLastHistoryItem.title,
         askToSyncWithLastHistoryItem.message,
@@ -159,7 +162,7 @@ const syncItemsWithLocalStorage = async (userInfo: any) => {
   }
 }
 
-export const loginUser = async (credentials: Credentials) => {
+export const loginUser = async (credentials: Credentials, navigation: any) => {
   try {
     const userInfo = await login(credentials.email, credentials.password)
     const globalState = getGlobal()
@@ -171,12 +174,17 @@ export const loginUser = async (credentials: Credentials) => {
         isLoggedIn: true,
         valueTagSettings
       }
-    }, () => {
-      getSubscribedPodcasts()
+    }, async () => {
+      try {
+        await syncItemsWithLocalStorage(userInfo)
+        await getSubscribedPodcasts()
+        await askToSyncWithNowPlayingItem(navigation)
+        await parseAllAddByRSSPodcasts()
+        await combineWithAddByRSSPodcasts()
+      } catch (error) {
+        console.log('loginUser setGlobal callback error:', error)
+      }
     })
-
-    await syncItemsWithLocalStorage(userInfo)
-    await askToSyncWithNowPlayingItem()
 
     return userInfo
   } catch (error) {
@@ -197,9 +205,15 @@ export const logoutUser = async () => {
 export const signUpUser = async (credentials: Credentials) => {
   const globalState = getGlobal()
   const subscribedPodcastIds = safelyUnwrapNestedVariable(() => globalState.session.userInfo.subscribedPodcastIds, [])
+  const addByRSSPodcastFeedUrls =
+    safelyUnwrapNestedVariable(() => globalState.session.userInfo.addByRSSPodcastFeedUrls, [])
 
   if (subscribedPodcastIds.length > 0) {
     credentials.subscribedPodcastIds = subscribedPodcastIds
+  }
+
+  if (addByRSSPodcastFeedUrls.length > 0) {
+    credentials.addByRSSPodcastFeedUrls = addByRSSPodcastFeedUrls
   }
 
   await signUp(credentials)
