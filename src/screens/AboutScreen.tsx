@@ -1,10 +1,17 @@
-import { Alert, Linking, StyleSheet, View as RNView } from 'react-native'
+import { TouchableWithoutFeedback, Alert, Linking, StyleSheet, View as RNView } from 'react-native'
 import Config from 'react-native-config'
 import React from 'reactn'
-import { Divider, Icon, ScrollView, Text, View } from '../components'
+import { Divider, FastImage, Icon, ScrollView, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { button } from '../styles'
+const contributorsList = require('../resources/Contributors.json');
+const maintainersList = require('../resources/Maintainers.json');
+
+type Contributor = {
+  name: string;
+  link: string;
+};
 
 type Props = any
 
@@ -38,11 +45,40 @@ export class AboutScreen extends React.Component<Props> {
           <Text
             accessibilityRole='header'
             fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
-            {translate('Team')}
+            {translate('Maintainers')}
           </Text>
-          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
-            {'Mitch Downey\n\nCreon Creonopoulos\n\nGary Johnson\n\nKyle Downey'}
+          {maintainersList.map((contributor: Contributor, index: number) => {
+            const style = contributor.link ? [styles.text, styles.link] : styles.text
+            return (
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                key={`maintainers_${index}`}
+                onPress={() => this.handleFollowLink(contributor.link)}
+                style={style}
+              >
+                {contributor.name}
+              </Text>
+            );
+          })}
+          <Divider style={styles.divider} />
+          <Text
+            accessibilityRole='header'
+            fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
+            {translate('Contributors')}
           </Text>
+          {contributorsList.map((contributor: Contributor, index: number) => {
+            const style = contributor.link ? [styles.text, styles.link] : styles.text
+            return (
+              <Text
+                fontSizeLargestScale={PV.Fonts.largeSizes.md}
+                key={`contributors_${index}`}
+                style={style}
+                onPress={() => this.handleFollowLink(contributor.link)}
+              >
+                {contributor.name}
+              </Text>
+            );
+          })}
           <Divider style={styles.divider} />
           <Text
             fontSizeLargestScale={PV.Fonts.largeSizes.md}
@@ -92,6 +128,16 @@ export class AboutScreen extends React.Component<Props> {
               style={[button.iconOnlySmall, styles.icon]}
             />
           </RNView>
+          <TouchableWithoutFeedback
+            onPress={() => this.handleFollowLink(PV.URLs.social.podcastIndex)}
+          >
+            <RNView style={styles.footerWrapper}>
+              <FastImage
+                source={'https://podverse.fm/images/podcastindex-namespace-final.svg'}
+                styles={styles.footerImage}
+              />
+            </RNView>
+          </TouchableWithoutFeedback>
         </ScrollView>
       </View>
     )
@@ -99,6 +145,17 @@ export class AboutScreen extends React.Component<Props> {
 }
 
 const styles = StyleSheet.create({
+  footerWrapper: {
+    marginTop: 26,
+    flex: 1,
+    alignSelf: 'center',
+    width: 240,
+  },
+  footerImage: {
+    height: 38,
+    marginBottom: 24,
+    resizeMode: 'contain',
+  },
   content: {
     flex: 1
   },

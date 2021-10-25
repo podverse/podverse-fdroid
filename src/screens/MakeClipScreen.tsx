@@ -2,16 +2,15 @@ import AsyncStorage from '@react-native-community/async-storage'
 import {
   Alert,
   Modal,
-  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View as RNView,
   Image,
-  ImageSourcePropType
+  ImageSourcePropType,
+  Dimensions
 } from 'react-native'
 import Share from 'react-native-share'
-import { State as RNTPState } from 'react-native-track-player'
 import React from 'reactn'
 import { clearTempMediaRef, saveTempMediaRef } from '../state/actions/mediaRef'
 import {
@@ -19,7 +18,9 @@ import {
   DropdownButtonSelect,
   Icon,
   NavHeaderButtonText,
+  OpaqueBackground,
   PlayerProgressBar,
+  PVVideo,
   Text,
   TextInput,
   TimeInput,
@@ -30,14 +31,16 @@ import { alertIfNoNetworkConnection } from '../lib/network'
 import { PV } from '../resources'
 import { createMediaRef, updateMediaRef } from '../services/mediaRef'
 import {
-  checkIfStateIsBuffering,
+  playerCheckIfStateIsBuffering,
+  playerCheckIfStateIsPlaying,
+  playerGetPosition,
   playerJumpBackward,
   playerJumpForward,
   playerPreviewEndTime,
-  playerPreviewStartTime,
-  PVTrackPlayer
+  playerPreviewStartTime
 } from '../services/player'
-import { setNowPlayingItem, setPlaybackSpeed, togglePlay } from '../state/actions/player'
+import { playerTogglePlay, playerSetNowPlayingItem, playerSetPlaybackSpeed } from '../state/actions/player'
+import { checkIfVideoFileType } from '../state/actions/playerVideo'
 import { core, darkTheme, iconStyles, playerStyles } from '../styles'
 
 type Props = {
@@ -58,6 +61,9 @@ type State = {
 }
 
 const testIDPrefix = 'make_clip_screen'
+
+const screenHeight = Dimensions.get('screen').width
+const screenWidth = Dimensions.get('screen').width
 
 export class MakeClipScreen extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -112,7 +118,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
     const { player } = this.global
     const { nowPlayingItem } = player
     navigation.setParams({ _saveMediaRef: this._saveMediaRef })
-    const currentPosition = await PVTrackPlayer.getTrackPosition()
+    const currentPosition = await playerGetPosition()
     const isEditing = this.props.navigation.getParam('isEditing')
 
     // Prevent the temporary progressValue from sticking in the progress bar
@@ -197,12 +203,12 @@ export class MakeClipScreen extends React.Component<Props, State> {
   }
 
   _setStartTime = async () => {
-    const currentPosition = await PVTrackPlayer.getTrackPosition()
+    const currentPosition = await playerGetPosition()
     this.setState({ startTime: Math.floor(currentPosition) })
   }
 
   _setEndTime = async () => {
-    const currentPosition = await PVTrackPlayer.getTrackPosition()
+    const currentPosition = await playerGetPosition()
     if (currentPosition && currentPosition > 0) {
       this.setState({ endTime: Math.floor(currentPosition) })
     }
@@ -220,7 +226,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
       newSpeed = speeds[index + 1]
     }
 
-    await setPlaybackSpeed(newSpeed)
+    await playerSetPlaybackSpeed(newSpeed)
   }
 
   _clearEndTime = () => {
@@ -302,8 +308,8 @@ export class MakeClipScreen extends React.Component<Props, State> {
               clipStartTime: mediaRef.startTime,
               clipTitle: mediaRef.title
             }
-            const position = await PVTrackPlayer.getTrackPosition()
-            await setNowPlayingItem(newItem, position || 0)
+            const position = await playerGetPosition()
+            await playerSetNowPlayingItem(newItem, position || 0)
           }
 
           this.setState({ isSaving: false, shouldClearClipInfo:true }, () => {
@@ -323,7 +329,8 @@ export class MakeClipScreen extends React.Component<Props, State> {
                   onPress: async () => {
                     // the url must be read from global again to ensure the correct state is used
                     const url = this.global.urlsWeb.clip + mediaRef.id
-                    const { nowPlayingItem = {} } = this.global.player
+                    let { nowPlayingItem } = this.global.player
+                    nowPlayingItem = nowPlayingItem || {}
                     const title = `${data.title || translate('Untitled Clip')} – ${nowPlayingItem.podcastTitle} – ${
                       nowPlayingItem.episodeTitle
                     }${translate('clip created using brandName')}`
@@ -358,13 +365,15 @@ export class MakeClipScreen extends React.Component<Props, State> {
   }
 
   _playerJumpBackward = async () => {
-    const progressValue = await playerJumpBackward(PV.Player.jumpBackSeconds)
+    const { jumpBackwardsTime } = this.global
+    const progressValue = await playerJumpBackward(jumpBackwardsTime)
     this.setState({ progressValue })
     setTimeout(() => this.setState({ progressValue: null }), 250)
   }
 
   _playerJumpForward = async () => {
-    const progressValue = await playerJumpForward(PV.Player.jumpSeconds)
+    const { jumpForwardsTime } = this.global
+    const progressValue = await playerJumpForward(jumpForwardsTime)
     this.setState({ progressValue })
     setTimeout(() => this.setState({ progressValue: null }), 250)
   }
@@ -401,8 +410,8 @@ export class MakeClipScreen extends React.Component<Props, State> {
 
   render() {
     const { navigation } = this.props
-    const { globalTheme, player } = this.global
-    const { backupDuration, playbackRate, playbackState } = player
+    const { globalTheme, jumpBackwardsTime, jumpForwardsTime, player } = this.global
+    const { backupDuration, nowPlayingItem, playbackRate, playbackState } = player
     const hasErrored = playbackState === PV.Player.errorState
     const {
       endTime,
@@ -429,12 +438,12 @@ export class MakeClipScreen extends React.Component<Props, State> {
         />
       )
       playButtonAdjust = { paddingBottom: 8 } as any
-    } else if (playbackState === RNTPState.Playing) {
+    } else if (playerCheckIfStateIsPlaying(playbackState)) {
       playButtonIcon = <Icon name='pause' size={20} testID={`${testIDPrefix}_pause_button`} />
       playButtonAdjust = {}
       playButtonAccessibilityHint = translate('ARIA HINT - pause playback')
       playButtonAccessibilityLabel = translate('Pause')
-    } else if (checkIfStateIsBuffering(playbackState)) {
+    } else if (playerCheckIfStateIsBuffering(playbackState)) {
       playButtonIcon = <ActivityIndicator testID={testIDPrefix} />
       playButtonAdjust = { paddingLeft: 2, paddingTop: 2 }
       playButtonAccessibilityHint = ''
@@ -442,16 +451,22 @@ export class MakeClipScreen extends React.Component<Props, State> {
     }
 
     const jumpBackAccessibilityLabel =
-      `${translate(`Jump back`)} ${PV.Player.jumpBackSeconds} ${translate('seconds')}`
+      `${translate(`Jump back`)} ${jumpBackwardsTime} ${translate('seconds')}`
     const jumpForwardAccessibilityLabel =
-      `${translate(`Jump forward`)} ${PV.Player.jumpSeconds} ${translate('seconds')}`
+      `${translate(`Jump forward`)} ${jumpForwardsTime} ${translate('seconds')}`
     const miniJumpBackAccessibilityLabel =
       `${translate(`Jump back`)} ${PV.Player.miniJumpSeconds} ${translate('seconds')}`
     const miniJumpForwardAccessibilityLabel =
       `${translate(`Jump forward`)} ${PV.Player.miniJumpSeconds} ${translate('seconds')}`
 
+    const outerWrapperStyle = [styles.outerWrapper, { padding: 10 }, { width: screenWidth }]
+
+    const imageWrapperStyle = screenHeight < PV.Dimensions.smallScreen.height
+      ? [styles.carouselImageWrapper, { width: screenWidth * 0.9 }, { height: '100%' }]
+      : [styles.carouselImageWrapper, { width: screenWidth * 0.9 }]
+
     return (
-      <SafeAreaView style={styles.viewContainer}>
+      <OpaqueBackground>
         <View style={styles.view} transparent testID='make_clip_screen_view'>
           <View style={styles.contentContainer}>
             <View style={styles.wrapperTop} transparent>
@@ -482,7 +497,20 @@ export class MakeClipScreen extends React.Component<Props, State> {
               value={isPublicItemSelected.value}
               wrapperStyle={styles.dropdownButtonSelectWrapper}
             />
-            <View style={styles.fillerView} transparent />
+            {
+              checkIfVideoFileType(nowPlayingItem) && (
+                <RNView style={outerWrapperStyle}>
+                  <RNView style={imageWrapperStyle}>
+                    <PVVideo disableFullscreen navigation={navigation} />
+                  </RNView>
+                </RNView>
+              )
+            }
+            {
+              !checkIfVideoFileType(nowPlayingItem) && (
+                <View style={styles.fillerView} transparent />
+              )
+            }
             <View style={styles.wrapperBottom} transparent>
               <View style={styles.wrapperBottomInside} transparent>
                 <TimeInput
@@ -583,7 +611,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                     <TouchableOpacity
                       accessibilityHint={playButtonAccessibilityHint}
                       accessibilityLabel={playButtonAccessibilityLabel}
-                      onPress={() => togglePlay()}
+                      onPress={() => playerTogglePlay()}
                       testID={`${testIDPrefix}_toggle_play`.prependTestId()}>
                       <View
                         importantForAccessibility='no-hide-descendants'
@@ -610,7 +638,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       testID={`${testIDPrefix}_jump_forward`.prependTestId()}>
                       {this._renderPlayerControlIcon(PV.Images.JUMP_AHEAD)}
                       <View style={styles.skipTimeTextWrapper} transparent>
-                        <Text style={styles.skipTimeText}>{PV.Player.jumpSeconds}</Text>
+                        <Text style={styles.skipTimeText}>{jumpForwardsTime}</Text>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -741,7 +769,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
             </RNView>
           </Modal>
         )}
-      </SafeAreaView>
+      </OpaqueBackground>
     )
   }
 }
@@ -776,7 +804,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    marginTop: 56
   },
   dropdownButtonSelectWrapper: {
     marginTop: 16
@@ -799,6 +826,15 @@ const styles = StyleSheet.create({
   playerControlsBottomRowText: {
     fontSize: PV.Fonts.sizes.md,
     fontWeight: PV.Fonts.weights.bold
+  },
+  outerWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1
+  },
+  carouselImageWrapper: {
+    alignItems: 'center',
+    height: '100%'
   },
   clearEndTimeText: {
     color: PV.Colors.skyLight,

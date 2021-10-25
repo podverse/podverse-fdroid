@@ -23,7 +23,7 @@ import { PV } from '../resources'
 import { assignCategoryQueryToState, assignCategoryToStateForSortSelect, getCategoryLabel } from '../services/category'
 import { deleteMediaRef, getMediaRefs } from '../services/mediaRef'
 import { getLoggedInUserMediaRefs } from '../services/user'
-import { loadItemAndPlayTrack } from '../state/actions/player'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { core } from '../styles'
 
 type Props = {
@@ -252,10 +252,12 @@ export class ClipsScreen extends React.Component<Props, State> {
   }
 
   _renderClipItem = ({ item, index }) => {
+    const { navigation } = this.props
     return item?.episode?.id ? (
         <ClipTableCell
           item={item}
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, item.episode.podcast))}
+          navigation={navigation}
           showEpisodeInfo
           showPodcastInfo
           testID={`${testIDPrefix}_clip_item_${index}`}
@@ -367,9 +369,16 @@ export class ClipsScreen extends React.Component<Props, State> {
     })
   }
 
-  _handleNavigationPress = (selectedItem: any) => {
+  _handleNavigationPress = async (selectedItem: any) => {
     const shouldPlay = true
-    loadItemAndPlayTrack(selectedItem, shouldPlay)
+    const forceUpdateOrderDate = false
+    const setCurrentItemNextInQueue = true
+    await playerLoadNowPlayingItem(
+      selectedItem,
+      shouldPlay,
+      forceUpdateOrderDate,
+      setCurrentItemNextInQueue
+    )
   }
 
   render() {
@@ -458,7 +467,8 @@ export class ClipsScreen extends React.Component<Props, State> {
                 handleDismiss: this._handleCancelPress,
                 handleDownload: this._handleDownloadPressed,
                 handleDeleteClip: this._handleDeleteClip,
-                includeGoToEpisode: true
+                includeGoToPodcast: true,
+                includeGoToEpisodeInEpisodesStack: true
               },
               'clip'
             )

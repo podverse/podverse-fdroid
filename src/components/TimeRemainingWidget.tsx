@@ -1,26 +1,29 @@
 import { convertToNowPlayingItem } from 'podverse-shared'
 import React, { useState } from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
-import { State as RNTPState } from 'react-native-track-player'
 import { useGlobal } from 'reactn'
-import { translate } from '../lib/i18n'
-import { checkIfNowPlayingItem, convertSecToHhoursMMinutes } from '../lib/utility'
+import { checkIfNowPlayingItem } from '../lib/utility'
 import { PV } from '../resources'
-import { handlePlay, PVTrackPlayer, setPlaybackPosition } from '../services/player'
-import { loadItemAndPlayTrack, togglePlay } from '../state/actions/player'
+import PVEventEmitter from '../services/eventEmitter'
+import { playerHandlePlayWithUpdate, playerCheckIfStateIsPlaying,
+  playerHandleSeekTo, playerGetState} from '../services/player'
+  import { setNowPlayingItem } from '../services/userNowPlayingItem'
+import { playerLoadNowPlayingItem, playerTogglePlay, playerUpdatePlayerState } from '../state/actions/player'
 import { Icon, MoreButton, Text, View } from './'
 
 type Props = {
   clipTime?: string
+  episodeCompleted?: boolean
   episodeDownloading?: boolean
   handleMorePress?: any
   isChapter?: boolean
   item: any
-  itemType: 'episode' | 'clip'
-  loadTimeStampOnPlay?: boolean
+  itemType: 'episode' | 'clip' | 'chapter'
+  loadChapterOnPlay?: boolean
   mediaFileDuration?: number | undefined
   style?: any
   testID: string
+  timeLabel?: string
   transparent?: boolean
   userPlaybackPosition?: number | undefined
 }
@@ -69,85 +72,80 @@ const MiniProgressBar = (props: BarProps) => {
 }
 
 export const TimeRemainingWidget = (props: Props) => {
-  const { clipTime, episodeDownloading, handleMorePress, isChapter, item, itemType,
-    loadTimeStampOnPlay, mediaFileDuration, style, testID, transparent, userPlaybackPosition } = props
+  const { episodeCompleted, episodeDownloading, handleMorePress, item, itemType,
+    loadChapterOnPlay, mediaFileDuration, style, testID, timeLabel, transparent,
+    userPlaybackPosition } = props
   const { episode = {}, podcast = {} } = item
-  const playingItem = convertToNowPlayingItem(item, episode, podcast, userPlaybackPosition)
+  const convertedItem = convertToNowPlayingItem(item, episode, podcast, userPlaybackPosition)
   const [player] = useGlobal('player')
   const { nowPlayingItem, playbackState } = player
 
   const hasStartedItem = !!mediaFileDuration
-  const totalTime = mediaFileDuration || playingItem.episodeDuration || 0
+  const totalTime = mediaFileDuration || convertedItem.episodeDuration || 0
   const playedTime = userPlaybackPosition || 0
 
-  let timeLabel = ''
-  if (totalTime) {
-    timeLabel = convertSecToHhoursMMinutes(totalTime)
-    if (hasStartedItem) {
-      timeLabel = convertSecToHhoursMMinutes(totalTime - playedTime) + ' left'
-    }
-  }
-
-  if (clipTime) {
-    timeLabel = clipTime
-  }
-
   const handleChapterLoad = async () => {
-    await setPlaybackPosition(item.startTime)
-    const currentState = await PVTrackPlayer.getState()
-    const isPlaying = currentState === RNTPState.Playing
+    await playerHandleSeekTo(item.startTime)
+    const playbackState = await playerGetState()
+    const isPlaying = playerCheckIfStateIsPlaying(playbackState)
     if (!isPlaying) {
-      handlePlay()
+      playerHandlePlayWithUpdate()
     }
+  }
+
+  const handleClipFromSameEpisodeLoaded = () => {
+    playerUpdatePlayerState(convertedItem, async () => {
+      if (convertedItem.clipStartTime || convertedItem.clipStartTime === 0) {
+        await playerHandleSeekTo(convertedItem.clipStartTime)
+        const playbackState = await playerGetState()
+        const isPlaying = playerCheckIfStateIsPlaying(playbackState)
+        if (!isPlaying) {
+          playerHandlePlayWithUpdate()
+        }
+        setNowPlayingItem(convertedItem, convertedItem.clipStartTime)
+        PVEventEmitter.emit(PV.Events.PLAYER_START_CLIP_TIMER)
+      }
+    })
+
   }
 
   const playItem = async () => {
     const isNowPlayingItem = checkIfNowPlayingItem(item, nowPlayingItem)
-    if (loadTimeStampOnPlay) {
+    if (loadChapterOnPlay) {
       await handleChapterLoad()
+    } else if (
+      nowPlayingItem
+      && !isNowPlayingItem
+      && convertedItem.clipId
+      && convertedItem.episodeId === nowPlayingItem.episodeId
+    ) {
+      handleClipFromSameEpisodeLoaded()
+    } else if (isNowPlayingItem) {
+      playerTogglePlay()
     } else {
-      if (isNowPlayingItem) {
-        togglePlay()
-      } else {
-        loadItemAndPlayTrack(playingItem, true)
-      }
+      const forceUpdateOrderDate = false
+      const shouldPlay = true
+      const setCurrentItemNextInQueue = true
+      playerLoadNowPlayingItem(
+        convertedItem,
+        shouldPlay,
+        forceUpdateOrderDate,
+        setCurrentItemNextInQueue
+      )
     }
   }
 
   const isInvalidDuration = totalTime <= 0
-  const isPlaying = playbackState === RNTPState.Playing
+  const isPlaying = playerCheckIfStateIsPlaying(playbackState)
   const isNowPlayingItem = isPlaying && checkIfNowPlayingItem(item, nowPlayingItem)
 
   const iconStyle = isNowPlayingItem ? styles.playButton : [styles.playButton, { paddingLeft: 2 }]
 
-  const timeViewAccessibilityHint = !clipTime
-    ? translate('ARIA HINT - This is the time remaining for this episode')
-    : ''
-
-  let playButtonAccessibilityHint = ''
-  if (!clipTime) {
-    playButtonAccessibilityHint = isNowPlayingItem
-      ? translate('ARIA HINT - pause this episode')
-      : translate('ARIA HINT - tap to play this episode')
-  } else if (clipTime && isChapter) {
-    playButtonAccessibilityHint = isNowPlayingItem
-      ? translate('ARIA HINT - pause this chapter')
-      : translate('ARIA HINT - play this chapter')
-  } else if (clipTime) {
-    playButtonAccessibilityHint = isNowPlayingItem
-      ? translate('ARIA HINT - pause this clip')
-      : translate('ARIA HINT - play this clip')
-  }
-
   return (
     <View style={[styles.container, style]} transparent={transparent}>
       <TouchableOpacity
-        accessibilityHint={playButtonAccessibilityHint}
-        accessibilityLabel={isNowPlayingItem
-          ? translate('Pause')
-          : translate('Play')
-        }
-        accessibilityRole='button'
+        accessible={false}
+        importantForAccessibility='no-hide-descendants'
         onPress={playItem}
         style={iconStyle}
         testID={`${testID}_time_remaining_widget_toggle_play`.prependTestId()}>
@@ -156,26 +154,33 @@ export const TimeRemainingWidget = (props: Props) => {
           : <Icon name={'play'} size={13} />
         }
       </TouchableOpacity>
-      {hasStartedItem && !isInvalidDuration && (
+      {(hasStartedItem && !isInvalidDuration && playedTime > 0) && (
         <MiniProgressBar item={isNowPlayingItem} playedTime={playedTime || 0} totalTime={totalTime} />
       )}
       <View
-        accessible={!clipTime}
-        accessibilityHint={timeViewAccessibilityHint}
-        accessibilityLabel={timeLabel
-          ? timeLabel
-          : translate('Unplayed episode')
-        }
-        importantForAccessibility={!clipTime ? 'yes' : 'no'}
+        accessible={false}
+        importantForAccessibility='no-hide-descendants'
         style={{ flexDirection: 'row', flex: 1, alignItems: 'center', height: '100%' }}>
-        <Text
-          accessible={!clipTime}
-          fontSizeLargerScale={PV.Fonts.largeSizes.md}
-          fontSizeLargestScale={PV.Fonts.largeSizes.sm}
-          importantForAccessibility={!clipTime ? 'yes' : 'no'}
-          style={styles.text}>
-          {timeLabel}
-        </Text>
+        {
+          !!timeLabel && (
+            <Text
+              accessible={false}
+              fontSizeLargerScale={PV.Fonts.largeSizes.md}
+              fontSizeLargestScale={PV.Fonts.largeSizes.sm}
+              importantForAccessibility='no-hide-descendants'
+              style={styles.text}>
+              {timeLabel}
+            </Text>
+          )
+        }
+        {!!episodeCompleted && (
+          <View style={styles.icon}>
+            <Icon
+              name={'check'}
+              size={22}
+              style={styles.iconCompleted} />
+          </View>
+        )}
       </View>
       {!!handleMorePress && (
         <MoreButton
@@ -194,9 +199,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly'
   },
-  text: {
-    color: PV.Colors.skyLight,
-    fontSize: PV.Fonts.sizes.sm
+  icon: {
+    marginLeft: 8
+  },
+  iconCompleted: {
+    color: PV.Colors.green
   },
   playButton: {
     borderColor: PV.Colors.skyLight,
@@ -208,5 +215,10 @@ const styles = StyleSheet.create({
     width: 40,
     marginRight: 10,
     backgroundColor: PV.Colors.brandBlueDark + '44'
+  },
+  text: {
+    color: PV.Colors.skyLight,
+    fontSize: PV.Fonts.sizes.sm,
+    marginRight: 8
   }
 })
