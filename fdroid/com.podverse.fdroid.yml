@@ -579,8 +579,10 @@ Builds:
       - node_modules/jsc-android
       - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
+      - node_modules/react-native/ReactAndroid/build.gradle
       - node_modules/react-native-document-picker/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-orientation-locker/example/android/
       - node_modules/react-native-reanimated/android
       - node_modules/react-native-reanimated/libSo
       - node_modules/react-native-safe-area-context/android/build.gradle
@@ -589,6 +591,7 @@ Builds:
       - node_modules/react-native-share/android/build.gradle
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
+      - node_modules/react-native-track-player/android/build/kotlin/compileDebugKotlin
       - node_modules/react-native-vector-icons/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
       - node_modules/shaka-player/third_party/closure/compiler.jar
