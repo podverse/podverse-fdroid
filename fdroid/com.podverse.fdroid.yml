@@ -604,7 +604,7 @@ Builds:
       - FOR_HERMES=True gradle :assembleRelease
       - popd
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
-    ndk: r23
+    ndk: r21e
 
 AutoUpdateMode: None
 UpdateCheckMode: None
