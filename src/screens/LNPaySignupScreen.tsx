@@ -1,4 +1,4 @@
-import { Linking, StyleSheet, Alert, Keyboard } from 'react-native'
+import { Linking, StyleSheet, Alert, Keyboard, EmitterSubscription } from 'react-native'
 import React from 'reactn'
 import { createWallet, getWallet } from '../services/lnpay'
 import { Button, Divider,  Text, TextInput, View, ScrollView } from '../components'
@@ -19,6 +19,8 @@ type State = {
 
 export class LNPaySignupScreen extends React.Component<Props, State> {
   scrollViewRef: typeof ScrollView | null = null
+  keyboardDidShow: EmitterSubscription
+  keyboardDidHide: EmitterSubscription
 
   constructor() {
     super()
@@ -37,21 +39,17 @@ export class LNPaySignupScreen extends React.Component<Props, State> {
   })
 
   componentDidMount() {
-    Keyboard.addListener("keyboardDidShow", () => {
+    this.keyboardDidShow = Keyboard.addListener("keyboardDidShow", () => {
       this.setState({isKeyboardShowing: true})
     })
-    Keyboard.addListener("keyboardDidHide", () => {
+    this.keyboardDidHide = Keyboard.addListener("keyboardDidHide", () => {
       this.setState({isKeyboardShowing: false})
     })
   }
 
   componentWillUnmount() {
-    Keyboard.removeListener("keyboardDidShow", () => {
-      this.setState({isKeyboardShowing: true})
-    })
-    Keyboard.removeListener("keyboardDidHide", () => {
-      this.setState({isKeyboardShowing: false})
-    })
+    this.keyboardDidHide.remove()
+    this.keyboardDidShow.remove()
   }
 
   _attemptCreateWallet = async () => {
