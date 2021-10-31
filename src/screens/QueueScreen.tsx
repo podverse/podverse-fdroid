@@ -511,7 +511,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     height: 2
   },
-  headerNowPlayingItemWrapper: {},
+  headerNowPlayingItemWrapper: {
+    flex: 0
+  },
   navHeaderSpacer: {
     width: 36
   },
