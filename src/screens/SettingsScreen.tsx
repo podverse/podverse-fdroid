@@ -14,7 +14,7 @@ import {
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { setOfflineModeEnabled } from '../state/actions/settings'
-import { core } from '../styles'
+import { core, table } from '../styles'
 
 type Props = {
   navigation: any

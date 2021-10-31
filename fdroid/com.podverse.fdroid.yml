@@ -671,9 +671,9 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
     ndk: r23
 
-  - versionName: 3.3.2-beta.1
+  - versionName: 3.3.2-beta.2
     versionCode: 18
-    commit: 3.3.2-beta.1
+    commit: 3.3.2-beta.2
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -739,5 +739,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 3.3.2-beta.1
+CurrentVersion: 3.3.2-beta.2
 CurrentVersionCode: 18
