@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableWithoutFeedback, View as RNView } from 'react-native'
+import { Pressable, StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 import { translate } from '../lib/i18n'
 import { readableClipTime, readableDate } from '../lib/utility'
@@ -33,7 +33,6 @@ export class QueueTableCell extends React.PureComponent<Props> {
     const {
       clipEndTime,
       clipStartTime,
-      clipTitle = translate('Untitled Clip'),
       drag,
       episodePubDate = '',
       episodeTitle = translate('Untitled Episode'),
@@ -50,6 +49,8 @@ export class QueueTableCell extends React.PureComponent<Props> {
       testID,
       transparent
     } = this.props
+
+    const clipTitle = this.props.clipTitle || episodeTitle || translate('Untitled Clip')
 
     const viewStyle = isActive
       ? [styles.wrapper, styles.wrapperActive, hideDivider ? { borderBottomWidth: 0 } : {}]
@@ -69,7 +70,7 @@ export class QueueTableCell extends React.PureComponent<Props> {
         transparent={transparent}
         testID={testID}>
         <RNView style={styles.wrapperTop}>
-          <TouchableWithoutFeedback
+          <Pressable
             accessibilityHint={isNowPlayingItem
               ? translate('ARIA HINT - This is the now playing episode')
               : !isClip
@@ -79,7 +80,8 @@ export class QueueTableCell extends React.PureComponent<Props> {
             accessibilityLabel={accessibilityLabel}
             accessibilityRole='none'
             onLongPress={drag}
-            onPress={onPress}>
+            onPress={onPress}
+            style={{ flex: 1 }}>
             <RNView style={styles.wrapperTappableInner}>
               <FastImage isSmall key={podcastImageUrl} source={podcastImageUrl} styles={styles.image} />
               <RNView style={styles.textWrapper}>
@@ -115,7 +117,7 @@ export class QueueTableCell extends React.PureComponent<Props> {
               </RNView>
               {!!showMoveButton && <Icon isSecondary name='arrows-alt-v' size={28} style={button.iconOnlyMedium} />}
             </RNView>
-          </TouchableWithoutFeedback>
+          </Pressable>
           {!!showRemoveButton && !!handleRemovePress && (
             <Icon
               accessibilityHint={translate('ARIA HINT - remove this item')}
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   wrapperTappableInner: {
-    flex: 1,
+    flex: 0,
     flexDirection: 'row'
   },
   wrapperTop: {

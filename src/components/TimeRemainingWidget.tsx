@@ -1,6 +1,6 @@
 import { convertToNowPlayingItem } from 'podverse-shared'
 import React, { useState } from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { useGlobal } from 'reactn'
 import { checkIfNowPlayingItem } from '../lib/utility'
 import { PV } from '../resources'
@@ -9,7 +9,7 @@ import { playerHandlePlayWithUpdate, playerCheckIfStateIsPlaying,
   playerHandleSeekTo, playerGetState} from '../services/player'
   import { setNowPlayingItem } from '../services/userNowPlayingItem'
 import { playerLoadNowPlayingItem, playerTogglePlay, playerUpdatePlayerState } from '../state/actions/player'
-import { Icon, MoreButton, Text, View } from './'
+import { Icon, MoreButton, PressableWithOpacity, Text, View } from './'
 
 type Props = {
   clipTime?: string
@@ -143,7 +143,7 @@ export const TimeRemainingWidget = (props: Props) => {
 
   return (
     <View style={[styles.container, style]} transparent={transparent}>
-      <TouchableOpacity
+      <PressableWithOpacity
         accessible={false}
         importantForAccessibility='no-hide-descendants'
         onPress={playItem}
@@ -153,7 +153,7 @@ export const TimeRemainingWidget = (props: Props) => {
           ? <Icon name={'pause'} size={13} />
           : <Icon name={'play'} size={13} />
         }
-      </TouchableOpacity>
+      </PressableWithOpacity>
       {(hasStartedItem && !isInvalidDuration && playedTime > 0) && (
         <MiniProgressBar item={isNowPlayingItem} playedTime={playedTime || 0} totalTime={totalTime} />
       )}

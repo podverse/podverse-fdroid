@@ -292,7 +292,7 @@ export class MediaPlayerCarouselClips extends React.PureComponent<Props> {
       querySort,
       selectedFromLabel = translate('Episode Clips'),
       selectedItem,
-      selectedSortLabel = translate('top - week'),
+      selectedSortLabel = translate('top – week'),
       showDeleteConfirmDialog,
       showMoreActionSheet,
       showNoInternetConnectionMessage
@@ -396,8 +396,7 @@ export class MediaPlayerCarouselClips extends React.PureComponent<Props> {
         ...(queryFrom === PV.Filters._fromThisPodcastKey && nowPlayingItem
           ? { podcastId: nowPlayingItem.podcastId }
           : {}),
-        includeEpisode: queryFrom === PV.Filters._fromThisPodcastKey,
-        allowUntitled: true
+        includeEpisode: queryFrom === PV.Filters._fromThisPodcastKey
       })
 
       return results
