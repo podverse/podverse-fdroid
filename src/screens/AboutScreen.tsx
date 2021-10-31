@@ -1,4 +1,4 @@
-import { TouchableWithoutFeedback, Alert, Linking, StyleSheet, View as RNView } from 'react-native'
+import { Alert, Linking, Pressable, StyleSheet, View as RNView } from 'react-native'
 import Config from 'react-native-config'
 import React from 'reactn'
 import { Divider, FastImage, Icon, ScrollView, Text, View } from '../components'
@@ -128,7 +128,7 @@ export class AboutScreen extends React.Component<Props> {
               style={[button.iconOnlySmall, styles.icon]}
             />
           </RNView>
-          <TouchableWithoutFeedback
+          <Pressable
             onPress={() => this.handleFollowLink(PV.URLs.social.podcastIndex)}
           >
             <RNView style={styles.footerWrapper}>
@@ -137,7 +137,7 @@ export class AboutScreen extends React.Component<Props> {
                 styles={styles.footerImage}
               />
             </RNView>
-          </TouchableWithoutFeedback>
+          </Pressable>
         </ScrollView>
       </View>
     )

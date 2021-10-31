@@ -53,7 +53,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
       querySort: PV.Filters._chronologicalKey,
       selectedFilterLabel: translate('From this episode'),
       selectedItem: null,
-      selectedSortLabel: translate('top - week'),
+      selectedSortLabel: translate('top – week'),
       showActionSheet: false,
       viewType
     }
@@ -87,8 +87,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
         const results = await getMediaRefs({
           sort: querySort,
           page: queryOptions.queryPage,
-          episodeId: episode.id,
-          allowUntitled: true
+          episodeId: episode.id
         })
 
         newState.flatListData = [...flatListData, ...results[0]]
@@ -99,8 +98,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
         const results = await getMediaRefs({
           sort: filterKey,
           page: 1,
-          episodeId: episode.id,
-          allowUntitled: true
+          episodeId: episode.id
         })
 
         newState.flatListData = [...flatListData, ...results[0]]
