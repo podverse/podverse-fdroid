@@ -1,6 +1,6 @@
 import { PV } from '../resources'
 import { InitialState } from '../resources/Interfaces'
-import { DEFAULT_BOOST_PAYMENT, DEFAULT_STREAMING_PAYMENT } from './actions/lnpay'
+import { DEFAULT_BOOST_PAYMENT, DEFAULT_STREAMING_PAYMENT } from './actions/valueTag'
 
 const initialTheme: InitialState = {
   globalTheme: {},
@@ -33,6 +33,7 @@ const initialTheme: InitialState = {
   currentChaptersStartTimePositions: [],
   player: {
     hasErrored: false,
+    episode: null,
     nowPlayingItem: null,
     playbackRate: 1,
     shouldContinuouslyPlay: false,
@@ -106,6 +107,9 @@ const initialTheme: InitialState = {
       email: '',
       freeTrialExpiration: '',
       historyItems: [],
+      historyItemsCount: 0,
+      historyItemsIndex: null,
+      historyQueryPage: 1,
       id: '',
       membershipExpiration: '',
       name: '',
