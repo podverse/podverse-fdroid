@@ -63,7 +63,7 @@ export interface UserInfo {
   freeTrialExpiration?: string
   historyItems?: []
   historyItemsCount: number
-  historyItemsIndex: any
+  historyItemsIndex: Record<string, any> | null
   historyQueryPage: number
   id?: string
   membershipExpiration?: string | null
@@ -110,6 +110,7 @@ export interface InitialState {
     backupDuration?: number
     hasErrored: boolean
     nowPlayingItem: any
+    episode: any | null
     playbackRate: number
     showMakeClip: boolean
     showMiniPlayer: boolean
@@ -200,6 +201,12 @@ export interface InitialState {
   subscribedPodcastsTotalCount: number
   userAgent?: string
   bannerInfo: BannerInfo
+  tempMediaRefInfo: {
+    startTime?: number,
+    endTime?: number | null,
+    clipTitle?: string
+  }
+  screenReaderEnabled: boolean
 }
 
 export interface BannerInfoError {
