@@ -93,6 +93,12 @@ steps:
     workingDirectory: $(Agent.BuildDirectory)/fdroiddata
 
 - task: CmdLine@2
+  displayName: Print the rewritten Metadata file
+  inputs:
+    script: 'less com.podverse.fdroid'
+    workingDirectory: $(Agent.BuildDirectory)/fdroiddata
+
+- task: CmdLine@2
   displayName: Lint podverse fdroid config file
   inputs:
     script: '$(Agent.BuildDirectory)/fdroidserver/fdroid lint com.podverse.fdroid'
