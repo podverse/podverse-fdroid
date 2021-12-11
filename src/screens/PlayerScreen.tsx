@@ -21,6 +21,7 @@ import { translate } from '../lib/i18n'
 import { hasValidNetworkConnection } from '../lib/network'
 import {
   overrideImageUrlWithChapterImageUrl,
+  prefixClipLabel,
   replaceLinebreaksWithBrTags,
   safelyUnwrapNestedVariable
 } from '../lib/utility'
@@ -164,7 +165,7 @@ export class PlayerScreen extends React.Component<Props> {
     const episode = safelyUnwrapNestedVariable(() => this.global.player.episode, {})
     const podcast = safelyUnwrapNestedVariable(() => this.global.player.episode.podcast, {})
 
-    if (hasInternetConnection && episode?.id && !podcast.addByRSSPodcastFeedUrl) {
+    if (hasInternetConnection && episode?.id && !podcast?.addByRSSPodcastFeedUrl) {
       try {
         const fullEpisode = await getEpisode(episode.id)
         if (fullEpisode && fullEpisode.description) {
@@ -229,20 +230,20 @@ export class PlayerScreen extends React.Component<Props> {
 
     if (podcastId) {
       url = this.global.urlsWeb.podcast + podcastId
-      title = `${nowPlayingItem.podcastTitle}${translate('shared using brandName')}`
+      title = `${nowPlayingItem?.podcastTitle}${translate('shared using brandName')}`
     } else if (episodeId) {
       url = this.global.urlsWeb.episode + episodeId
-      title = `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} ${translate('shared using brandName')}`
+      title = `${nowPlayingItem?.podcastTitle} – ${nowPlayingItem?.episodeTitle} ${translate('shared using brandName')}`
     } else if (mediaRefIsOfficialChapter) {
       url = this.global.urlsWeb.clip + mediaRefId
-      title = `${nowPlayingItem.clipTitle ? nowPlayingItem.clipTitle + ' – ' : translate('Untitled Chapter – ')}`
-      title += `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} ${translate(
+      title = `${nowPlayingItem.clipTitle ? nowPlayingItem?.clipTitle + ' – ' : translate('Untitled Chapter – ')}`
+      title += `${nowPlayingItem?.podcastTitle} – ${nowPlayingItem?.episodeTitle} ${translate(
         'chapter shared using brandName'
       )}`
     } else {
       url = this.global.urlsWeb.clip + mediaRefId
-      title = `${nowPlayingItem.clipTitle ? `${nowPlayingItem.clipTitle} – ` : ''}`
-      title += `${nowPlayingItem.podcastTitle} – ${nowPlayingItem.episodeTitle} ${translate(
+      title = nowPlayingItem.clipTitle ? nowPlayingItem.clipTitle : prefixClipLabel(nowPlayingItem?.episodeTitle)
+      title += ` – ${nowPlayingItem?.podcastTitle} – ${nowPlayingItem?.episodeTitle} ${translate(
         'clip shared using brandName'
       )}`
     }

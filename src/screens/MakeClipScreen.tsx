@@ -157,9 +157,9 @@ export class MakeClipScreen extends React.Component<Props, State> {
             title = tempMediaRefInfo.clipTitle
           }
         } else {
-          startTime = nowPlayingItem.clipStartTime
-          endTime = nowPlayingItem.clipEndTime
-          title = nowPlayingItem.clipTitle
+          startTime = nowPlayingItem?.clipStartTime
+          endTime = nowPlayingItem?.clipEndTime
+          title = nowPlayingItem?.clipTitle
         }
 
         this.setState({
@@ -331,8 +331,8 @@ export class MakeClipScreen extends React.Component<Props, State> {
                     const url = this.global.urlsWeb.clip + mediaRef.id
                     let { nowPlayingItem } = this.global.player
                     nowPlayingItem = nowPlayingItem || {}
-                    const title = `${data.title || translate('Untitled Clip')} – ${nowPlayingItem.podcastTitle} – ${
-                      nowPlayingItem.episodeTitle
+                    const title = `${data.title || translate('Untitled Clip')} – ${nowPlayingItem?.podcastTitle} – ${
+                      nowPlayingItem?.episodeTitle
                     }${translate('clip created using brandName')}`
                     try {
                       await Share.open({
