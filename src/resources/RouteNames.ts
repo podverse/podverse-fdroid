@@ -57,5 +57,5 @@ export const RouteNames = {
   ValueTagConsentScreen: 'ValueTagConsentScreen',
   ValueTagPreviewScreen: 'ValueTagPreviewScreen',
   ValueTagSetupScreen: 'ValueTagSetupScreen',
-  WebPageScreen: 'WebPageScreen',
+  WebPageScreen: 'WebPageScreen'
 }

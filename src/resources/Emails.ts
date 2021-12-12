@@ -2,7 +2,6 @@
 import Config from 'react-native-config'
 // import { getBuildNumber, getVersion } from 'react-native-device-info'
 
-
 export const Emails = {
   CONTACT_US: {
     email: Config.CONTACT_US_EMAIL,
@@ -18,8 +17,8 @@ export const Emails = {
     email: Config.CURATOR_EMAIL,
     subject: 'Podverse - Request Podcast',
     body:
-      'Please provide the title of the podcast. ' + 
+      'Please provide the title of the podcast. ' +
       'If there are multiple podcasts with the same title, ' +
       'please provide the name of the host or a link to the podcast you are looking for.'
-  },
+  }
 }

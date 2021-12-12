@@ -63,14 +63,12 @@ export class PlayerScreen extends React.Component<Props> {
 
     const { episodeFunding, episodeValue, podcastFunding, podcastValue } = nowPlayingItem
 
-    const showFundingIcon = podcastFunding?.length > 0
-      || episodeFunding?.length > 0
-      || (
-        Config.ENABLE_VALUE_TAG_TRANSACTIONS
-        && podcastValueFinal?.length > 0
-        || episodeValue?.length > 0
-        || podcastValue?.length > 0
-      )
+    const showFundingIcon =
+      podcastFunding?.length > 0 ||
+      episodeFunding?.length > 0 ||
+      (Config.ENABLE_VALUE_TAG_TRANSACTIONS && podcastValueFinal?.length > 0) ||
+        episodeValue?.length > 0 ||
+        podcastValue?.length > 0
 
     return {
       title: '',
@@ -81,9 +79,7 @@ export class PlayerScreen extends React.Component<Props> {
       ),
       headerRight: () => (
         <RNView style={core.row}>
-          {!!showFundingIcon &&
-            <NavFundingIcon globalTheme={globalTheme} navigation={navigation} />
-          }
+          {!!showFundingIcon && <NavFundingIcon globalTheme={globalTheme} navigation={navigation} />}
           {!addByRSSPodcastFeedUrl && (
             <RNView style={core.row}>
               <NavMakeClipIcon
@@ -100,15 +96,9 @@ export class PlayerScreen extends React.Component<Props> {
               <NavShareIcon globalTheme={globalTheme} handlePress={_showShareActionSheet} />
             </RNView>
           )}
-          {
-            !checkIfVideoFileType(nowPlayingItem) && (
-              <NavQueueIcon
-                globalTheme={globalTheme}
-                isTransparent
-                navigation={navigation}
-                showBackButton />
-            )
-          }
+          {!checkIfVideoFileType(nowPlayingItem) && (
+            <NavQueueIcon globalTheme={globalTheme} isTransparent navigation={navigation} showBackButton />
+          )}
         </RNView>
       )
     }
@@ -116,7 +106,7 @@ export class PlayerScreen extends React.Component<Props> {
 
   async componentDidMount() {
     PVEventEmitter.on(PV.Events.PLAYER_VALUE_ENABLED_ITEM_LOADED, this._handleRefreshNavigationHeader)
-    
+
     this.props.navigation.setParams({
       _getEpisodeId: this._getEpisodeId,
       _getInitialProgressValue: this._getInitialProgressValue,
@@ -221,8 +211,12 @@ export class PlayerScreen extends React.Component<Props> {
     })
   }
 
-  _handleShare = async (podcastId?: string, episodeId?: string, mediaRefId?: string,
-    mediaRefIsOfficialChapter?: boolean) => {
+  _handleShare = async (
+    podcastId?: string,
+    episodeId?: string,
+    mediaRefId?: string,
+    mediaRefIsOfficialChapter?: boolean
+  ) => {
     let { nowPlayingItem } = this.global.player
     nowPlayingItem = nowPlayingItem || {}
     let url = ''
@@ -287,16 +281,18 @@ export class PlayerScreen extends React.Component<Props> {
     return (
       <React.Fragment>
         <OpaqueBackground imageUrl={imageUrl}>
-          <View
-            style={styles.view}
-            transparent
-            testID='player_screen_view'>
+          <View style={styles.view} transparent testID='player_screen_view'>
             <MediaPlayerCarousel hasChapters={hasChapters} navigation={navigation} />
             <PlayerControls navigation={navigation} />
             <ActionSheet
               handleCancelPress={this._dismissShareActionSheet}
-              items={shareActionSheetButtons(podcastId, episodeId, mediaRefId,
-                mediaRefIsOfficialChapter, this._handleShare)}
+              items={shareActionSheetButtons(
+                podcastId,
+                episodeId,
+                mediaRefId,
+                mediaRefIsOfficialChapter,
+                this._handleShare
+              )}
               message={translate('What link do you want to share?')}
               showModal={showShareActionSheet}
               testID={`${testIDPrefix}_share`}
@@ -309,8 +305,13 @@ export class PlayerScreen extends React.Component<Props> {
   }
 }
 
-const shareActionSheetButtons = (podcastId: string, episodeId: string, mediaRefId: string,
-  mediaRefIsOfficialChapter: boolean, handleShare: any) => {
+const shareActionSheetButtons = (
+  podcastId: string,
+  episodeId: string,
+  mediaRefId: string,
+  mediaRefIsOfficialChapter: boolean,
+  handleShare: any
+) => {
   const items = [
     {
       accessibilityHint: translate('ARIA HINT - share this podcast'),

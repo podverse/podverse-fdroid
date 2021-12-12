@@ -20,8 +20,8 @@ export class FAQScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-      title: 'FAQ'
-    })
+    title: 'FAQ'
+  })
 
   componentDidMount() {
     setTimeout(() => {
@@ -33,9 +33,7 @@ export class FAQScreen extends React.Component<Props, State> {
     const { isLoading } = this.state
 
     return (
-      <View
-        style={styles.view}
-        testID={`${testIDPrefix}_view`}>
+      <View style={styles.view} testID={`${testIDPrefix}_view`}>
         {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
         <WebViewStaticHTML html={html} isLoading={isLoading} />
       </View>

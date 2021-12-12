@@ -44,8 +44,12 @@ import {
   playerUpdatePlayerState,
   showMiniPlayer
 } from '../state/actions/player'
-import { combineWithAddByRSSPodcasts,
-  getSubscribedPodcasts, removeAddByRSSPodcast, toggleSubscribeToPodcast } from '../state/actions/podcast'
+import {
+  combineWithAddByRSSPodcasts,
+  getSubscribedPodcasts,
+  removeAddByRSSPodcast,
+  toggleSubscribeToPodcast
+} from '../state/actions/podcast'
 import { updateScreenReaderEnabledState } from '../state/actions/screenReader'
 import { initializeSettings } from '../state/actions/settings'
 import { initializeValueProcessor } from '../state/actions/valueTag'
@@ -110,8 +114,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-      title: translate('Podcasts')
-    })
+    title: translate('Podcasts')
+  })
 
   async componentDidMount() {
     Linking.addEventListener('url', this._handleOpenURLEvent)
@@ -162,7 +166,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.removeListener(PV.Events.LNPAY_WALLET_INFO_SHOULD_UPDATE, updateWalletInfo)
     PVEventEmitter.removeListener(
-      PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW, this._handleNavigateToAddPodcastByRSSAuthScreen)
+      PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW,
+      this._handleNavigateToAddPodcastByRSSAuthScreen
+    )
     PVEventEmitter.removeListener(PV.Events.NAV_TO_MEMBERSHIP_SCREEN, this._handleNavigateToMembershipScreen)
   }
 
@@ -178,7 +184,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           playerUpdatePlayerState(currentItem)
           showMiniPlayer()
         }
-  
+
         await playerUpdatePlaybackState()
 
         // NOTE UPDATE: I don't think this is working...commenting out for now.
@@ -192,7 +198,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         //   await audioInitializePlayerQueue()
         // }
       }
-  
+
       if (nextAppState === 'background' || nextAppState === 'inactive') {
         // NOTE: On iOS PVAudioPlayer.updateOptions must be called every time the app
         // goes into the background to prevent the remote controls from disappearing
@@ -262,12 +268,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
             const shouldPlay = true
             const forceUpdateOrderDate = false
             const setCurrentItemNextInQueue = true
-            await playerLoadNowPlayingItem(
-              newItem,
-              shouldPlay,
-              forceUpdateOrderDate,
-              setCurrentItemNextInQueue
-            )
+            await playerLoadNowPlayingItem(newItem, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
           }
         }
       } catch (error) {
@@ -355,32 +356,33 @@ export class PodcastsScreen extends React.Component<Props, State> {
     setAppUserAgent()
     const userAgent = getAppUserAgent()
     this.setGlobal({ userAgent })
-    this.setState({ isLoading: false },
-      () => {
-        (async () => {
-          try {
-            const isLoggedIn = await getAuthUserInfo()
-            if (isLoggedIn) await askToSyncWithNowPlayingItem(navigation)
-          } catch (error) {
-            console.log('initializeScreenData getAuthUserInfo', error)
-            // If getAuthUserInfo fails, continue with the networkless version of the app
-          }
-          
-          const preventIsLoading = true
-          const preventAutoDownloading = false
-          this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
-      
-          await initDownloads()
-          await initializePlayer()
-          await initializePlaybackSpeed()
-          initializeValueProcessor()
-        })()
-      }
-    )
+    this.setState({ isLoading: false }, () => {
+      (async () => {
+        try {
+          const isLoggedIn = await getAuthUserInfo()
+          if (isLoggedIn) await askToSyncWithNowPlayingItem(navigation)
+        } catch (error) {
+          console.log('initializeScreenData getAuthUserInfo', error)
+          // If getAuthUserInfo fails, continue with the networkless version of the app
+        }
+
+        const preventIsLoading = true
+        const preventAutoDownloading = false
+        this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
+
+        await initDownloads()
+        await initializePlayer()
+        await initializePlaybackSpeed()
+        initializeValueProcessor()
+      })()
+    })
   }
 
-  handleSelectFilterItem = async (selectedKey: string, preventIsLoading?: boolean,
-      preventAutoDownloading?: boolean) => {
+  handleSelectFilterItem = async (
+    selectedKey: string,
+    preventIsLoading?: boolean,
+    preventAutoDownloading?: boolean
+  ) => {
     if (!selectedKey) {
       return
     }
@@ -592,7 +594,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       (async () => {
         try {
           const { flatListData } = this.state
-  
+
           if (queryFrom === PV.Filters._subscribedKey) {
             addByRSSPodcastFeedUrl
               ? await removeAddByRSSPodcast(addByRSSPodcastFeedUrl)
@@ -602,10 +604,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
             await removeDownloadedPodcast(selectedId || addByRSSPodcastFeedUrl)
           }
           const newFlatListData = flatListData.filter((x) => x.id !== selectedId)
-  
+
           const row = rowMap[selectedId] || rowMap[addByRSSPodcastFeedUrl]
           row.closeRow()
-  
+
           this.setState({
             flatListData: newFlatListData,
             flatListDataTotalCount: newFlatListData.length,
@@ -722,9 +724,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         : translate('Search')
 
     return (
-      <View
-        style={styles.view}
-        testID={`${testIDPrefix}_view`}>
+      <View style={styles.view} testID={`${testIDPrefix}_view`}>
         <RNView style={{ flex: 1 }}>
           <PlayerEvents />
           <TableSectionSelectors
@@ -765,7 +765,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
               noResultsTopActionText={noSubscribedPodcasts ? defaultNoSubscribedPodcastsMessage : ''}
               noResultsMessage={
                 // eslint-disable-next-line max-len
-                noSubscribedPodcasts ? translate("You are not subscribed to any podcasts yet") : translate('No podcasts found')
+                noSubscribedPodcasts
+                  ? translate('You are not subscribed to any podcasts yet')
+                  : translate('No podcasts found')
               }
               onEndReached={this._onEndReached}
               onRefresh={queryFrom === PV.Filters._subscribedKey ? this._onRefresh : null}
@@ -899,7 +901,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     }
 
     newState.flatListData = this.cleanFlatListData(newState.flatListData)
-    
+
     this.shouldLoad = true
 
     return newState

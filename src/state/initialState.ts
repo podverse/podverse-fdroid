@@ -140,7 +140,7 @@ const initialTheme: InitialState = {
   userAgent: '',
   bannerInfo: {
     show: false,
-    description: '',
+    description: ''
   },
   tempMediaRefInfo: {
     startTime: undefined,

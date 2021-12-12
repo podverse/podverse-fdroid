@@ -5,13 +5,13 @@ import { Divider, FastImage, Icon, ScrollView, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { button } from '../styles'
-const contributorsList = require('../resources/Contributors.json');
-const maintainersList = require('../resources/Maintainers.json');
+const contributorsList = require('../resources/Contributors.json')
+const maintainersList = require('../resources/Maintainers.json')
 
 type Contributor = {
-  name: string;
-  link: string;
-};
+  name: string
+  link: string
+}
 
 type Props = any
 
@@ -29,9 +29,7 @@ export class AboutScreen extends React.Component<Props> {
 
   render() {
     return (
-      <View
-        style={styles.content}
-        testID='about_screen_view'>
+      <View style={styles.content} testID='about_screen_view'>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
             {'Podverse is an open source podcast manager for iOS, Android, and web.'}
@@ -42,9 +40,7 @@ export class AboutScreen extends React.Component<Props> {
               ' Sign up today and get 1 year of Premium for free!'}
           </Text>
           <Divider style={styles.divider} />
-          <Text
-            accessibilityRole='header'
-            fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
+          <Text accessibilityRole='header' fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
             {translate('Maintainers')}
           </Text>
           {maintainersList.map((contributor: Contributor, index: number) => {
@@ -54,16 +50,13 @@ export class AboutScreen extends React.Component<Props> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 key={`maintainers_${index}`}
                 onPress={() => this.handleFollowLink(contributor.link)}
-                style={style}
-              >
+                style={style}>
                 {contributor.name}
               </Text>
-            );
+            )
           })}
           <Divider style={styles.divider} />
-          <Text
-            accessibilityRole='header'
-            fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
+          <Text accessibilityRole='header' fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.sectionTitle}>
             {translate('Contributors')}
           </Text>
           {contributorsList.map((contributor: Contributor, index: number) => {
@@ -73,11 +66,10 @@ export class AboutScreen extends React.Component<Props> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 key={`contributors_${index}`}
                 style={style}
-                onPress={() => this.handleFollowLink(contributor.link)}
-              >
+                onPress={() => this.handleFollowLink(contributor.link)}>
                 {contributor.name}
               </Text>
-            );
+            )
           })}
           <Divider style={styles.divider} />
           <Text
@@ -128,9 +120,7 @@ export class AboutScreen extends React.Component<Props> {
               style={[button.iconOnlySmall, styles.icon]}
             />
           </RNView>
-          <Pressable
-            onPress={() => this.handleFollowLink(PV.URLs.social.podcastIndex)}
-          >
+          <Pressable onPress={() => this.handleFollowLink(PV.URLs.social.podcastIndex)}>
             <RNView style={styles.footerWrapper}>
               <FastImage
                 source={'https://podverse.fm/images/podcastindex-namespace-final.svg'}
@@ -149,12 +139,12 @@ const styles = StyleSheet.create({
     marginTop: 26,
     flex: 1,
     alignSelf: 'center',
-    width: 240,
+    width: 240
   },
   footerImage: {
     height: 38,
     marginBottom: 24,
-    resizeMode: 'contain',
+    resizeMode: 'contain'
   },
   content: {
     flex: 1

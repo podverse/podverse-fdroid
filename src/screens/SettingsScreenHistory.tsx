@@ -1,11 +1,7 @@
 /* eslint-disable max-len */
 import { Alert, StyleSheet } from 'react-native'
 import React from 'reactn'
-import {
-  ActivityIndicator,
-  Button,
-  ScrollView
-} from '../components'
+import { ActivityIndicator, Button, ScrollView } from '../components'
 import { translate } from '../lib/i18n'
 import { clearHistoryItems } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
@@ -21,7 +17,6 @@ type State = {
 const testIDPrefix = 'settings_screen_history'
 
 export class SettingsScreenHistory extends React.Component<Props, State> {
-
   constructor(props: Props) {
     super(props)
 
