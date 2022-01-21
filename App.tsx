@@ -73,7 +73,7 @@ class App extends Component<Props, State> {
     (async () => {
       // isInternetReachable will be false
 
-      await this.checkAppVersion()
+      // await this.checkAppVersion() not available on f-droid
       this.setState({ appReady: true })
       // Don't continue handleNetworkChange when internet is first reachable on initial app launch
       if (ignoreHandleNetworkChange) {
