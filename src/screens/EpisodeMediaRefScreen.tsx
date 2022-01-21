@@ -41,7 +41,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
     const existingData = props.navigation.getParam('initialData') || []
 
     this.shouldLoad = true
-    
+
     this.state = {
       endOfResultsReached: false,
       flatListData: existingData,
@@ -60,8 +60,8 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = ({ navigation }) => ({
-      title: navigation.getParam('title') || ''
-    })
+    title: navigation.getParam('title') || ''
+  })
 
   _queryData = async (
     filterKey: string | null,
@@ -109,7 +109,6 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
       newState.queryPage = queryOptions.queryPage || 1
 
       this.shouldLoad = true
-
     } catch (error) {
       this.shouldLoad = true
     }
@@ -197,9 +196,10 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
     })
   }
 
-  _handleCancelPress = () => new Promise((resolve) => {
-    this.setState({ showActionSheet: false }, resolve)
-  })
+  _handleCancelPress = () =>
+    new Promise((resolve) => {
+      this.setState({ showActionSheet: false }, resolve)
+    })
 
   _renderItem = ({ item }) => {
     const { navigation } = this.props
@@ -221,8 +221,7 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
 
   render() {
     const { navigation } = this.props
-    const { flatListData, flatListDataTotalCount, isLoadingMore, selectedItem,
-      showActionSheet, viewType } = this.state
+    const { flatListData, flatListDataTotalCount, isLoadingMore, selectedItem, showActionSheet, viewType } = this.state
 
     return (
       <View style={styles.view}>

@@ -8,7 +8,7 @@ import RNFS from 'react-native-fs'
 import { Divider, TableSectionSelectors, Text, View, ActivityIndicator, TableCell } from '../components'
 import { translate } from '../lib/i18n'
 import { exportSubscribedPodcastsAsOPML } from '../lib/opmlExport'
-import { createEmailLinkUrl, getMembershipStatus, parseOpmlFile } from '../lib/utility'
+import { getMembershipStatus, parseOpmlFile } from '../lib/utility'
 import { PV } from '../resources'
 import { logoutUser } from '../state/actions/auth'
 import { core, getMembershipTextStyle, table } from '../styles'
@@ -58,11 +58,17 @@ export class MoreScreen extends React.Component<Props, State> {
         routeName: PV.RouteNames.MembershipScreen
       },
       {
-        title: translate('Contact Us'),
-        key: _contactKey
+        title: translate('Contact'),
+        key: _contactKey,
+        routeName: PV.RouteNames.ContactScreen
       },
       {
-        title: translate('About brandName'),
+        title: translate('Support'),
+        key: _supportKey,
+        routeName: PV.RouteNames.SupportScreen
+      },
+      {
+        title: translate('About'),
         key: _aboutKey,
         routeName: PV.RouteNames.AboutScreen
       },
@@ -89,11 +95,11 @@ export class MoreScreen extends React.Component<Props, State> {
 
   _handleValueTagSetupPressed = async () => {
     const consentGivenString = await AsyncStorage.getItem(PV.Keys.USER_CONSENT_VALUE_TAG_TERMS)
-    if(consentGivenString && JSON.parse(consentGivenString) === true) {
+    if (consentGivenString && JSON.parse(consentGivenString) === true) {
       this.props.navigation.navigate(PV.RouteNames.ValueTagSetupScreen)
     } else {
       this.props.navigation.navigate(PV.RouteNames.ValueTagPreviewScreen)
-    }  
+    }
   }
 
   _importOpml = async () => {
@@ -101,12 +107,12 @@ export class MoreScreen extends React.Component<Props, State> {
       const res = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.allFiles]
       })
-      
+
       if (!res) {
         throw new Error('Something went wrong with the import process.')
       } else {
         const contents = await RNFS.readFile(res.uri, 'utf8')
-  
+
         this.setState({ isLoading: true }, () => {
           parseString(contents, async (err: any, result: any) => {
             try {
@@ -115,10 +121,10 @@ export class MoreScreen extends React.Component<Props, State> {
               } else if (!result?.opml?.body[0]?.outline) {
                 throw new Error('OPML file is not in the correct format')
               }
-  
+
               const rssArr = parseOpmlFile(result, true)
               await addAddByRSSPodcasts(rssArr)
-  
+
               this.setState({ isLoading: false }, () => {
                 this.props.navigation.navigate(PV.RouteNames.PodcastsScreen)
               })
@@ -141,9 +147,7 @@ export class MoreScreen extends React.Component<Props, State> {
 
   _onPress = (item: any) => {
     const { navigation } = this.props
-    if (item.key === _contactKey) {
-      Linking.openURL(createEmailLinkUrl(PV.Emails.CONTACT_US))
-    } else if (item.key === _logoutKey) {
+    if (item.key === _logoutKey) {
       logoutUser()
     } else if (item.key === _bitcoinWalletKey) {
       this._handleValueTagSetupPressed()
@@ -166,22 +170,18 @@ export class MoreScreen extends React.Component<Props, State> {
     const membershipTextStyle = getMembershipTextStyle(globalTheme, membershipStatus)
     const otherOptions = this._moreOtherOptions(membershipStatus)
 
-    const membershipAccessibilityLabel =
-      `${translate('Membership')}${isLoggedIn ? ' - ' : ''} ${membershipStatus ? membershipStatus : ''}`
+    const membershipAccessibilityLabel = `${translate('Membership')}${isLoggedIn ? ' - ' : ''} ${
+      membershipStatus ? membershipStatus : ''
+    }`
 
     return (
-      <View
-        style={core.backgroundView}
-        testID={`${testIDPrefix}_view`}>
+      <View style={core.backgroundView} testID={`${testIDPrefix}_view`}>
         <SectionList
           ItemSeparatorComponent={() => <Divider />}
           renderItem={({ item }) => {
             return (
               <TableCell
-                accessibilityLabel={item.key === _membershipKey
-                  ? membershipAccessibilityLabel
-                  : item.title
-                }
+                accessibilityLabel={item.key === _membershipKey ? membershipAccessibilityLabel : item.title}
                 onPress={() => this._onPress(item)}
                 testIDPrefix={`${testIDPrefix}_${item.key}`}
                 testIDSuffix=''>
@@ -190,7 +190,8 @@ export class MoreScreen extends React.Component<Props, State> {
                     <Text
                       fontSizeLargestScale={PV.Fonts.largeSizes.md}
                       style={[table.cellText, globalTheme.tableCellTextPrimary]}>
-                      {translate('Membership')}{isLoggedIn ? ' - ' : ''}
+                      {translate('Membership')}
+                      {isLoggedIn ? ' - ' : ''}
                     </Text>
                     {isLoggedIn && (
                       <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={[table.cellText, membershipTextStyle]}>
@@ -222,12 +223,7 @@ export class MoreScreen extends React.Component<Props, State> {
           ]}
           stickySectionHeadersEnabled={false}
         />
-        {this.state.isLoading && (
-          <ActivityIndicator
-            isOverlay
-            testID={testIDPrefix}
-            transparent={false} />
-        )}
+        {this.state.isLoading && <ActivityIndicator isOverlay testID={testIDPrefix} transparent={false} />}
       </View>
     )
   }
@@ -242,11 +238,17 @@ const _logoutKey = 'Logout'
 const _membershipKey = 'Membership'
 const _privacyPolicyKey = 'PrivacyPolicy'
 const _settingsKey = 'Settings'
+const _supportKey = 'Support'
 const _termsOfServiceKey = 'TermsOfService'
 const _importOpml = 'ImportOpml'
 const _exportOpml = 'ExportOpml'
 
 const allMoreFeatures = [
+  {
+    title: translate('Login'),
+    key: _loginKey,
+    routeName: PV.RouteNames.AuthNavigator
+  },
   {
     title: translate('Add Custom RSS Feed'),
     key: _addPodcastByRSSKey,
@@ -272,10 +274,5 @@ const allMoreFeatures = [
   {
     title: translate('Log out'),
     key: _logoutKey
-  },
-  {
-    title: translate('Login'),
-    key: _loginKey,
-    routeName: PV.RouteNames.AuthNavigator
   }
 ]

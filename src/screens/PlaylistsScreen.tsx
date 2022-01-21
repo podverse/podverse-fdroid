@@ -1,7 +1,15 @@
 import { StyleSheet } from 'react-native'
 import React from 'reactn'
-import { ActivityIndicator, Divider, FlatList, MessageWithAction, PlaylistTableCell,
-  SwipeRowBack, TableSectionSelectors, View } from '../components'
+import {
+  ActivityIndicator,
+  Divider,
+  FlatList,
+  MessageWithAction,
+  PlaylistTableCell,
+  SwipeRowBack,
+  TableSectionSelectors,
+  View
+} from '../components'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { safeKeyExtractor } from '../lib/utility'
@@ -36,8 +44,8 @@ export class PlaylistsScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-      title: translate('Playlists')
-    })
+    title: translate('Playlists')
+  })
 
   async componentDidMount() {
     const { navigation } = this.props
@@ -121,14 +129,13 @@ export class PlaylistsScreen extends React.Component<Props, State> {
     const sectionKey = section.value
     const buttonText =
       section.value === PV.Filters._sectionMyPlaylistsKey ? translate('Delete') : translate('Unsubscribe')
-      
-    const onPress = section.value === PV.Filters._sectionMyPlaylistsKey
-      ? this._handleHiddenItemPressDelete
-      : this._handleHiddenItemPressUnsubscribe
 
-    const testIDSuffix = section.value === PV.Filters._sectionMyPlaylistsKey
-      ? 'delete'
-      : 'unsubscribe'
+    const onPress =
+      section.value === PV.Filters._sectionMyPlaylistsKey
+        ? this._handleHiddenItemPressDelete
+        : this._handleHiddenItemPressUnsubscribe
+
+    const testIDSuffix = section.value === PV.Filters._sectionMyPlaylistsKey ? 'delete' : 'unsubscribe'
 
     return (
       <SwipeRowBack
@@ -184,9 +191,7 @@ export class PlaylistsScreen extends React.Component<Props, State> {
     const showOfflineMessage = offlineModeEnabled
 
     return (
-      <View
-        style={styles.view}
-        testID={`${testIDPrefix}_view`}>
+      <View style={styles.view} testID={`${testIDPrefix}_view`}>
         <View style={styles.view}>
           {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
           {!isLoading && this.global.session.isLoggedIn && (

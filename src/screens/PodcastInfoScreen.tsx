@@ -18,10 +18,7 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
     super(props)
 
     const podcast = this.props.navigation.getParam('podcast')
-    const podcastId =
-      (podcast?.id) ||
-      (podcast?.addByRSSPodcastFeedUrl) ||
-      this.props.navigation.getParam('podcastId')
+    const podcastId = podcast?.id || podcast?.addByRSSPodcastFeedUrl || this.props.navigation.getParam('podcastId')
 
     this.state = {
       podcast,
@@ -44,9 +41,7 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
   render() {
     const { podcast } = this.state
     return (
-      <View
-        style={styles.content}
-        testID={`${testIDPrefix}_view`}>
+      <View style={styles.content} testID={`${testIDPrefix}_view`}>
         <PodcastTableHeader
           podcastImageUrl={podcast && (podcast.shrunkImageUrl || podcast.imageUrl)}
           podcastTitle={podcast && podcast.title}
@@ -55,7 +50,8 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
         <HTMLScrollView
           fontSizeLargestScale={PV.Fonts.largeSizes.md}
           html={podcast.description ? `<body>${podcast.description}</body>` : ''}
-          sectionTitle={translate('About')} />
+          sectionTitle={translate('About')}
+        />
       </View>
     )
   }

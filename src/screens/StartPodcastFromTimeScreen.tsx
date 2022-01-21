@@ -23,9 +23,7 @@ export class StartPodcastFromTimeScreen extends React.Component<Props, State> {
     super(props)
 
     const podcast = this.props.navigation.getParam('podcast')
-    const podcastId =
-      (podcast?.id) ||
-      (podcast?.addByRSSPodcastFeedUrl)
+    const podcastId = podcast?.id || podcast?.addByRSSPodcastFeedUrl
 
     const startPodcastFromTime = this.props.navigation.getParam('startPodcastFromTime')
     this.props.navigation.setParams({ handleDismiss: this.handleDismiss })
@@ -74,7 +72,8 @@ export class StartPodcastFromTimeScreen extends React.Component<Props, State> {
           <TimePicker
             currentTime={startPodcastFromTime}
             handleUpdateSleepTimer={this._updateStartPodcastFromTime}
-            isActive />
+            isActive
+          />
           <Button
             accessibilityHint={translate('ARIA HINT - dismiss this screen')}
             accessibilityLabel={translate('Done')}

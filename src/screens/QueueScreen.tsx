@@ -1,6 +1,7 @@
 import { NowPlayingItem } from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
 import React, { getGlobal } from 'reactn'
+import { getHistoryItemsIndex } from '../services/userHistoryItem'
 import {
   ActivityIndicator,
   Divider,
@@ -16,10 +17,7 @@ import {
   View
 } from '../components'
 import { translate } from '../lib/i18n'
-import {
-  overrideImageUrlWithChapterImageUrl,
-  safeKeyExtractor
-} from '../lib/utility'
+import { overrideImageUrlWithChapterImageUrl, safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import { checkIfShouldUseServerData } from '../services/auth'
 import PVEventEmitter from '../services/eventEmitter'
@@ -93,8 +91,7 @@ export class QueueScreen extends React.Component<Props, State> {
           {navigation.getParam('viewType') === _historyKey ? (
             <RNView>
               {!navigation.getParam('isEditing') ? (
-                <RNView
-                  style={styles.headerButtonWrapper}>
+                <RNView style={styles.headerButtonWrapper}>
                   <NavHeaderButtonText
                     accessibilityHint={translate('ARIA HINT - tap to start removing items from your history')}
                     accessibilityLabel={translate('Remove')}
@@ -106,8 +103,7 @@ export class QueueScreen extends React.Component<Props, State> {
                   />
                 </RNView>
               ) : (
-                <RNView
-                  style={styles.headerButtonWrapper}>
+                <RNView style={styles.headerButtonWrapper}>
                   <NavHeaderButtonText
                     accessibilityHint={translate('ARIA HINT - tap to stop removing items from your history')}
                     accessibilityLabel={translate('Done')}
@@ -219,12 +215,17 @@ export class QueueScreen extends React.Component<Props, State> {
       const shouldPlay = true
       const forceUpdateOrderDate = false
       const setCurrentItemNextInQueue = true
-      await playerLoadNowPlayingItem(
-        item,
-        shouldPlay,
-        forceUpdateOrderDate,
-        setCurrentItemNextInQueue
-      )
+      if(!item?.clipId) {
+        const {episodes} = await getHistoryItemsIndex()
+        if(episodes) {
+          const foundEpisode = item?.episodeId ? episodes[item.episodeId] : null
+          if(foundEpisode) {
+            item.userPlaybackPosition = foundEpisode.userPlaybackPosition
+          }
+        }
+      }
+
+      await playerLoadNowPlayingItem(item, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
       await getQueueItems()
       this.setState({ isLoading: false })
     } catch (error) {
@@ -254,8 +255,8 @@ export class QueueScreen extends React.Component<Props, State> {
           {...(item.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
           {...(item.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
           handleRemovePress={() => {
-            this._handleRemoveHistoryItemPress(item)}
-          }
+            this._handleRemoveHistoryItemPress(item)
+          }}
           onPress={() => {
             if (!isEditing) {
               this._handlePlayItem(item)
@@ -322,7 +323,7 @@ export class QueueScreen extends React.Component<Props, State> {
     })
   }
 
-  _onDragEnd = async ({ data, from, to } : { data: NowPlayingItem[], from: number, to: number }) => {
+  _onDragEnd = async ({ data, from, to }: { data: NowPlayingItem[]; from: number; to: number }) => {
     try {
       const { queueItems: previousQueueItems = [] } = this.global.session.userInfo
       const item = previousQueueItems[from] as any
@@ -330,7 +331,7 @@ export class QueueScreen extends React.Component<Props, State> {
       await setAllQueueItemsLocally(data)
 
       const offset = to < from ? -1 : 0
-      to = ((to + 1) * 1000) + offset
+      to = (to + 1) * 1000 + offset
 
       const useServerData = await checkIfShouldUseServerData()
       if (useServerData && to > -1) {
@@ -366,10 +367,7 @@ export class QueueScreen extends React.Component<Props, State> {
     const { nowPlayingItem } = player
     const { isEditing, isLoading, isLoadingMore, isRemoving, isTransparent, viewType } = this.state
     const view = (
-      <View
-        style={styles.view}
-        transparent={isTransparent}
-        testID={`${testIDPrefix}_view`}>
+      <View style={styles.view} transparent={isTransparent} testID={`${testIDPrefix}_view`}>
         {!isLoading && viewType === _queueKey && ((queueItems && queueItems.length > 0) || nowPlayingItem) && (
           <View transparent={isTransparent}>
             {!!nowPlayingItem && (
@@ -430,7 +428,8 @@ export class QueueScreen extends React.Component<Props, State> {
             extraData={historyItems}
             isLoadingMore={isLoadingMore}
             keyExtractor={(item: any, index: number) =>
-                safeKeyExtractor(testIDPrefix, index, item?.clipId || item?.episodeId)}
+              safeKeyExtractor(testIDPrefix, index, item?.clipId || item?.episodeId)
+            }
             noResultsMessage={translate('No history items found')}
             onEndReached={this._onEndReached}
             renderItem={this._renderHistoryItem}
@@ -438,10 +437,7 @@ export class QueueScreen extends React.Component<Props, State> {
           />
         )}
         {(isLoading || isRemoving) && (
-          <ActivityIndicator
-            isOverlay={isRemoving}
-            styles={styles.activityIndicator}
-            testID={testIDPrefix} />
+          <ActivityIndicator isOverlay={isRemoving} styles={styles.activityIndicator} testID={testIDPrefix} />
         )}
       </View>
     )

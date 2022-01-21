@@ -3,7 +3,7 @@ import React from 'reactn'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { getFlatCategoryItems } from '../services/category'
-import { DropdownButton, Text } from './'
+import { DropdownButton, Icon, Text } from './'
 
 type Props = {
   accessible?: boolean
@@ -14,6 +14,7 @@ type Props = {
   handleSelectCategorySubItem?: any
   handleSelectFilterItem?: any
   handleSelectFromItem?: any
+  handleSelectMediaTypeItem?: any
   handleSelectSortItem?: any
   hideDropdown?: boolean
   disableFilter?: boolean
@@ -26,6 +27,7 @@ type Props = {
   selectedFilterItemKey?: string | null
   selectedFilterLabel?: string | null
   selectedFromItemKey?: string | null
+  selectedMediaTypeItemKey?: string | null
   selectedSortItemKey?: string | null
   selectedSortLabel?: string | null
   testID?: string
@@ -62,6 +64,7 @@ export class TableSectionSelectors extends React.Component<Props, State> {
       handleSelectCategorySubItem,
       handleSelectFilterItem,
       handleSelectFromItem,
+      handleSelectMediaTypeItem,
       handleSelectSortItem,
       hideDropdown,
       includePadding,
@@ -71,7 +74,7 @@ export class TableSectionSelectors extends React.Component<Props, State> {
       selectedFilterItemKey,
       selectedFilterLabel,
       selectedFilterAccessibilityHint,
-      selectedFromItemKey,
+      selectedMediaTypeItemKey,
       selectedSortItemKey,
       selectedSortLabel,
       testID,
@@ -88,9 +91,10 @@ export class TableSectionSelectors extends React.Component<Props, State> {
           {!!selectedFilterLabel && (
             <Text
               accessible={accessible}
-              accessibilityHint={selectedFilterAccessibilityHint
-                ? selectedFilterAccessibilityHint
-                : !disableFilter
+              accessibilityHint={
+                selectedFilterAccessibilityHint
+                  ? selectedFilterAccessibilityHint
+                  : !disableFilter
                   ? translate('ARIA HINT - This is the selected filter for this screen')
                   : ''
               }
@@ -103,46 +107,63 @@ export class TableSectionSelectors extends React.Component<Props, State> {
               {selectedFilterLabel}
             </Text>
           )}
+          {
+            PV.Filters._mediaTypeVideoOnly === selectedMediaTypeItemKey && (
+              <Icon
+                accessible={false}
+                color={PV.Colors.white}
+                name='video'
+                size={21}
+                style={styles.selectedFilterLabelIcon}
+                testID={`${testID}_video_only`}
+              />
+            )
+          }
         </View>
         {customButtons}
-        {
-          !hideDropdown &&
-            <DropdownButton
-              accessible={!!accessible && !disableFilter}
-              // eslint-disable-next-line max-len
-              accessibilityHint={translate('ARIA HINT - This is the selected sorting filter for this screen select a different filter')}
-              accessibilityLabel={selectedSortLabel}
-              disableFilter={!!disableFilter}
-              importantForAccessibility={!!accessible && !disableFilter ? 'yes' : 'no'}
-              onPress={() => {
-                this.props.navigation.navigate(PV.RouteNames.FilterScreen, {
-                  addByRSSPodcastFeedUrl,
-                  filterScreenTitle,
-                  flatCategoryItems,
-                  handleSelectCategoryItem,
-                  handleSelectCategorySubItem,
-                  handleSelectFilterItem,
-                  handleSelectFromItem,
-                  handleSelectSortItem,
-                  screenName,
-                  selectedCategoryItemKey,
-                  selectedCategorySubItemKey,
-                  selectedSortItemKey,
-                  selectedFilterItemKey,
-                  selectedFromItemKey
-                })
-              }}
-              sortLabel={selectedSortLabel}
-              testID={testID}
-              transparent={transparentDropdownButton}
-            />
-        }
+        {!hideDropdown && (
+          <DropdownButton
+            accessible={!!accessible && !disableFilter}
+            // eslint-disable-next-line max-len
+            accessibilityHint={translate(
+              'ARIA HINT - This is the selected sorting filter for this screen select a different filter'
+            )}
+            accessibilityLabel={selectedSortLabel}
+            disableFilter={!!disableFilter}
+            importantForAccessibility={!!accessible && !disableFilter ? 'yes' : 'no'}
+            onPress={() => {
+              this.props.navigation.navigate(PV.RouteNames.FilterScreen, {
+                addByRSSPodcastFeedUrl,
+                filterScreenTitle,
+                flatCategoryItems,
+                handleSelectCategoryItem,
+                handleSelectCategorySubItem,
+                handleSelectFilterItem,
+                handleSelectFromItem,
+                handleSelectMediaTypeItem,
+                handleSelectSortItem,
+                screenName,
+                selectedCategoryItemKey,
+                selectedCategorySubItemKey,
+                selectedSortItemKey,
+                selectedFilterItemKey,
+                selectedMediaTypeItemKey
+              })
+            }}
+            sortLabel={selectedSortLabel}
+            testID={testID}
+            transparent={transparentDropdownButton}
+          />
+        )}
       </View>
     )
   }
 }
 
 const styles = {
+  selectedFilterLabelIcon: {
+    marginLeft: 8
+  },
   tableSectionHeaderWrapper: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -165,5 +186,8 @@ const styles = {
     fontSize: PV.Fonts.sizes.sm,
     marginTop: 2
   },
-  tableSectionHeaderTitleWrapper: {}
+  tableSectionHeaderTitleWrapper: {
+    alignItems: 'center',
+    flexDirection: 'row'
+  }
 }

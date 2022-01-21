@@ -33,6 +33,8 @@ export const URLs = {
     reddit: Config.URL_SOCIAL_REDDIT || '',
     twitter: Config.URL_SOCIAL_TWITTER || '',
     podcastIndex: Config.URL_PODCAST_INDEX || '',
+    discord: Config.URL_SOCIAL_DISCORD || '',
+    mastodonAccount: Config.URL_SOCIAL_MASTODON_ACCOUNT || ''
   },
   web: async () => {
     const isEnabled = await AsyncStorage.getItem(PV.Keys.CUSTOM_WEB_DOMAIN_ENABLED)
