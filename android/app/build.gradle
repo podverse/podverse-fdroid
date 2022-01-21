@@ -135,7 +135,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 21
-        versionName "4.1.0"
+        versionName "4.2.1"
         ndkVersion rootProject.ext.ndkVersion
         multiDexEnabled true
     }
