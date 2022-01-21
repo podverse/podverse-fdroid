@@ -96,7 +96,10 @@ export class AuthScreen extends React.Component<Props, State> {
           )
         } catch (error) {
           Alert.alert(
-            PV.Alerts.SOMETHING_WENT_WRONG.title, PV.Alerts.SOMETHING_WENT_WRONG.message, PV.Alerts.BUTTONS.OK)
+            PV.Alerts.SOMETHING_WENT_WRONG.title,
+            PV.Alerts.SOMETHING_WENT_WRONG.message,
+            PV.Alerts.BUTTONS.OK
+          )
         }
         this.setState({ isLoadingResetPassword: false })
         navigation.goBack(null)
@@ -214,10 +217,7 @@ export class AuthScreen extends React.Component<Props, State> {
           {screenType !== _signup && <Image source={PV.Images.BANNER} style={styles.banner} resizeMode='contain' />}
           <View style={styles.contentView}>
             {screenType === _login && (
-              <Login
-                bottomButtons={bottomButtons}
-                isLoading={isLoadingLogin}
-                onLoginPressed={this.attemptLogin} />
+              <Login bottomButtons={bottomButtons} isLoading={isLoadingLogin} onLoginPressed={this.attemptLogin} />
             )}
             {screenType === _resetPassword && (
               <ResetPassword
@@ -227,11 +227,7 @@ export class AuthScreen extends React.Component<Props, State> {
               />
             )}
             {screenType === _signup && (
-              <SignUp
-                bottomButtons={bottomButtons}
-                isLoading={isLoadingSignUp}
-                onSignUpPressed={this.attemptSignUp}
-              />
+              <SignUp bottomButtons={bottomButtons} isLoading={isLoadingSignUp} onSignUpPressed={this.attemptSignUp} />
             )}
           </View>
         </ScrollView>

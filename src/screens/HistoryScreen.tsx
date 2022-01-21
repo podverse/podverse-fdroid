@@ -133,18 +133,13 @@ export class HistoryScreen extends React.Component<Props, State> {
       const shouldPlay = true
       const forceUpdateOrderDate = false
       const setCurrentItemNextInQueue = true
-      await playerLoadNowPlayingItem(
-        item,
-        shouldPlay,
-        forceUpdateOrderDate,
-        setCurrentItemNextInQueue
-      )
+      await playerLoadNowPlayingItem(item, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
     } catch (error) {
       // Error Loading and playing item
     }
   }
 
-  _renderHistoryItem = ({ item = {}, index }: {item: NowPlayingItem, index: number}) => {
+  _renderHistoryItem = ({ item = {}, index }: { item: NowPlayingItem; index: number }) => {
     const { isEditing, isTransparent } = this.state
 
     return (
@@ -211,10 +206,7 @@ export class HistoryScreen extends React.Component<Props, State> {
     const { isLoading, isLoadingMore, isRemoving, isTransparent } = this.state
 
     const view = (
-      <View
-        style={styles.view}
-        transparent={isTransparent}
-        testID={`${testIDPrefix}_view`}>
+      <View style={styles.view} transparent={isTransparent} testID={`${testIDPrefix}_view`}>
         {!isLoading && (
           <FlatList
             data={historyItems}
@@ -230,10 +222,7 @@ export class HistoryScreen extends React.Component<Props, State> {
           />
         )}
         {(isLoading || isRemoving) && (
-          <ActivityIndicator
-            isOverlay={isRemoving}
-            styles={styles.activityIndicator}
-            testID={testIDPrefix} />
+          <ActivityIndicator isOverlay={isRemoving} styles={styles.activityIndicator} testID={testIDPrefix} />
         )}
       </View>
     )

@@ -134,9 +134,8 @@ android {
         applicationId "com.podverse.fdroid"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20
-        versionName "4.0.0"
-        ndkVersion rootProject.ext.ndkVersion
+        versionCode 21
+        versionName "4.2.1"
         ndkVersion rootProject.ext.ndkVersion
         multiDexEnabled true
     }

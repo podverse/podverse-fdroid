@@ -3,14 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage'
 import { StyleSheet } from 'react-native'
 import Config from 'react-native-config'
 import React from 'reactn'
-import {
-  Divider,
-  ScrollView,
-  SwitchWithText,
-  TableCell,
-  Text,
-  View
-} from '../components'
+import { Divider, ScrollView, SwitchWithText, TableCell, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { setOfflineModeEnabled } from '../state/actions/settings'
@@ -28,7 +21,6 @@ type State = {
 const testIDPrefix = 'settings_screen'
 
 export class SettingsScreen extends React.Component<Props, State> {
-
   constructor(props: Props) {
     super(props)
     const { offlineModeEnabled } = this.global
@@ -58,10 +50,7 @@ export class SettingsScreen extends React.Component<Props, State> {
   render() {
     const { navigation } = this.props
     const { offlineModeEnabled } = this.state
-    const {
-      globalTheme,
-      session
-    } = this.global
+    const { globalTheme, session } = this.global
     const { isLoggedIn } = session
 
     return (

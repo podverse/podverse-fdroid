@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import NetInfo, { NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo'
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo'
 import React, { Component } from 'react'
 import { Image, LogBox, Platform, StatusBar, View } from 'react-native'
 import Config from 'react-native-config'
@@ -18,6 +18,7 @@ import { downloadCategoriesList } from './src/services/category'
 import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
+import { hasValidDownloadingConnection } from './src/lib/network'
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', "Require cycle"])
 
@@ -60,7 +61,6 @@ class App extends Component<Props, State> {
       globalTheme = lightTheme
     }
 
-    // await this.checkAppVersion()
     this.setupGlobalState(globalTheme)
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
   }
@@ -69,28 +69,22 @@ class App extends Component<Props, State> {
     this.unsubscribeNetListener && this.unsubscribeNetListener()
   }
 
-  handleNetworkChange = (state: NetInfoState) => {
+  handleNetworkChange = () => {
     (async () => {
       // isInternetReachable will be false
-      if (!state.isInternetReachable) {
-        return
-      }
-  
+
+      // await this.checkAppVersion() not available on f-droid
+      this.setState({ appReady: true })
       // Don't continue handleNetworkChange when internet is first reachable on initial app launch
       if (ignoreHandleNetworkChange) {
         ignoreHandleNetworkChange = false
         return
       }
   
-      if (state.type === 'wifi') {
+      if (await hasValidDownloadingConnection()) {
         refreshDownloads()
-      } else if (state.type === 'cellular') {
-        const downloadingWifiOnly = await AsyncStorage.getItem(PV.Keys.DOWNLOADING_WIFI_ONLY)
-        if (downloadingWifiOnly) {
-          pauseDownloadingEpisodesAll()
-        } else {
-          refreshDownloads()
-        }
+      } else {
+        pauseDownloadingEpisodesAll()
       }
     })()
   }
@@ -105,9 +99,6 @@ class App extends Component<Props, State> {
         globalTheme: theme,
         fontScaleMode,
         fontScale
-      },
-      () => {
-        this.setState({ appReady: true })
       }
     )
   }

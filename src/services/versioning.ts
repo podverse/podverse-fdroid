@@ -6,17 +6,17 @@
 //   try {
 //     const isConnected = await hasValidNetworkConnection()
 
-//     if (!isConnected) {
-//       console.log('No connection. Skipping version check')
-//       return true
-//     }
-//     const response = await request({
-//       endpoint: '/meta/min-mobile-version',
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       }
-//     })
+    // if (!isConnected) {
+    //   return true
+    // }
+
+    // const response = await request({
+    //   endpoint: '/meta/min-mobile-version',
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // })
 
 //     const data = (response && response.data) || {}
 //     const { version } = data

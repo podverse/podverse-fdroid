@@ -16,7 +16,6 @@ type State = {
 const testIDPrefix = 'email_verification_screen'
 
 export class EmailVerificationScreen extends React.Component<Props, State> {
-
   constructor(props: Props) {
     super(props)
 
@@ -28,8 +27,8 @@ export class EmailVerificationScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = () => ({
-      title: translate('Verify Your Email')
-    })
+    title: translate('Verify Your Email')
+  })
 
   _navToLogin = async () => {
     const { navigation } = this.props
@@ -55,7 +54,9 @@ export class EmailVerificationScreen extends React.Component<Props, State> {
         bottomActionText={translate('Login')}
         isLoading={isResendingEmail}
         // eslint-disable-next-line max-len
-        message={`${translate('Please verify your email address to login')} ${translate('You should receive an email shortly The email may go to your Spam folder')}`}
+        message={`${translate('Please verify your email address to login')} ${translate(
+          'You should receive an email shortly The email may go to your Spam folder'
+        )}`}
         testID={testIDPrefix}
         topActionHandler={this._sendVerificationEmail}
         topActionText={translate('Resend Verification Email')}

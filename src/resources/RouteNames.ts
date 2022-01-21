@@ -5,6 +5,7 @@ export const RouteNames = {
   AuthNavigator: 'AuthNavigator',
   AuthScreen: 'AuthScreen',
   ClipsScreen: 'ClipsScreen',
+  ContactScreen: 'ContactScreen',
   DownloadsScreen: 'DownloadsListScreen',
   EditPlaylistScreen: 'EditPlaylistScreen',
   EditProfileScreen: 'EditProfileScreen',
@@ -52,10 +53,11 @@ export const RouteNames = {
   SettingsScreenQueue: 'SettingsScreenQueue',
   SleepTimerScreen: 'SleepTimerScreen',
   StartPodcastFromTimeScreen: 'StartPodcastFromTimeScreen',
+  SupportScreen: 'SupportScreen',
   TabNavigator: 'TabNavigator',
   TermsOfServiceScreen: 'TermsOfServiceScreen',
   ValueTagConsentScreen: 'ValueTagConsentScreen',
   ValueTagPreviewScreen: 'ValueTagPreviewScreen',
   ValueTagSetupScreen: 'ValueTagSetupScreen',
-  WebPageScreen: 'WebPageScreen',
+  WebPageScreen: 'WebPageScreen'
 }

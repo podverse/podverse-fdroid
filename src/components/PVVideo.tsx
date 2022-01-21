@@ -2,16 +2,29 @@ import { Modal, StyleSheet } from 'react-native'
 import React from 'reactn'
 import Orientation from 'react-native-orientation-locker'
 import Video from 'react-native-video-controls'
+import { convertUrlToSecureHTTPS, encodeSpacesInString } from '../lib/utility'
 import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
 import { syncNowPlayingItemWithTrack } from '../services/playerBackgroundTimer'
-import { getClipHasEnded, getPlaybackSpeed, playerCheckIfStateIsPlaying,
-  playerHandleResumeAfterClipHasEnded, playerUpdateUserPlaybackPosition } from '../services/player'
+import {
+  getClipHasEnded,
+  getPlaybackSpeed,
+  playerCheckIfStateIsPlaying,
+  playerHandleResumeAfterClipHasEnded,
+  playerUpdateUserPlaybackPosition
+} from '../services/player'
 import { addOrUpdateHistoryItem } from '../services/userHistoryItem'
 import { getNowPlayingItemFromLocalStorage } from '../services/userNowPlayingItem'
-import { videoCheckIfStateIsPlaying, videoGetDownloadedFileInfo, videoGetState,
-  videoGetTrackPosition, videoResetHistoryItem, videoStateUpdateDuration, videoStateUpdatePosition,
-  videoUpdatePlaybackState } from '../state/actions/playerVideo'
+import {
+  videoCheckIfStateIsPlaying,
+  videoGetDownloadedFileInfo,
+  videoGetState,
+  videoGetTrackPosition,
+  videoResetHistoryItem,
+  videoStateUpdateDuration,
+  videoStateUpdatePosition,
+  videoUpdatePlaybackState
+} from '../state/actions/playerVideo'
 
 type Props = {
   disableFullscreen?: boolean
@@ -29,11 +42,13 @@ type State = {
   transitionPlaybackState?: any // remember what the playback state was between navigations
   uri?: string
 }
+
+let lastNowPlayingItemUri = ''
 export class PVVideo extends React.PureComponent<Props, State> {
   videoRef: any | null = null
   willFocusListener: any
 
-  constructor(props:Props) {
+  constructor(props: Props) {
     super(props)
 
     this.state = {
@@ -51,11 +66,11 @@ export class PVVideo extends React.PureComponent<Props, State> {
     PVEventEmitter.on(PV.Events.PLAYER_VIDEO_NEW_EPISODE_ITEM_LOADED, this._handleNewEpisodeItemShouldLoad)
     PVEventEmitter.on(PV.Events.PLAYER_VIDEO_PLAYBACK_STATE_CHANGED, this._handlePlaybackStateChange)
     PVEventEmitter.on(PV.Events.PLAYER_VIDEO_SEEK_TO, this._handleSeekTo)
-    
+
     if (isMiniPlayer) {
       const { player } = this.global
       let { nowPlayingItem } = player
-        // nowPlayingItem will be undefined when loading from a deep link
+      // nowPlayingItem will be undefined when loading from a deep link
       nowPlayingItem = nowPlayingItem || {}
       if (nowPlayingItem.clipId) {
         this._handleNewClipItemShouldLoad()
@@ -90,38 +105,44 @@ export class PVVideo extends React.PureComponent<Props, State> {
     const transitionPlaybackState = playbackState
     this.setState({ transitionPlaybackState }, () => {
       videoUpdatePlaybackState(PV.Player.videoInfo.videoPlaybackState.paused, () => {
-        this.setState({
-          destroyPlayer: false,
-          isReadyToPlay: false
-        }, () => {
-          (async () => {
-            try {
-              const { player } = this.global
-              let { nowPlayingItem } = player
+        this.setState(
+          {
+            destroyPlayer: false,
+            isReadyToPlay: false
+          },
+          () => {
+            (async () => {
+              try {
+                const { player } = this.global
+                let { nowPlayingItem } = player
                 // nowPlayingItem will be undefined when loading from a deep link
-              nowPlayingItem = nowPlayingItem || {}
-              let uri = nowPlayingItem.episodeMediaUrl
-        
-              const { Authorization, filePath, isDownloadedFile } = await videoGetDownloadedFileInfo(nowPlayingItem)
-        
-              if (isDownloadedFile && filePath) {
-                uri = filePath
-              }
+                nowPlayingItem = nowPlayingItem || {}
+                let uri = nowPlayingItem.episodeMediaUrl
 
-              this.setState({
-                Authorization,
-                isDownloadedFile,
-                uri
-              }, () => {
-                if (setClipTime && nowPlayingItem.clipId) {
-                  syncNowPlayingItemWithTrack()
+                const { Authorization, filePath, isDownloadedFile } = await videoGetDownloadedFileInfo(nowPlayingItem)
+
+                if (isDownloadedFile && filePath) {
+                  uri = filePath
                 }
-              })
-            } catch (error) {
-              console.log('PVVideo _handleNewItemShouldLoad error', error)
-            }
-          })()
-        })
+
+                this.setState(
+                  {
+                    Authorization,
+                    isDownloadedFile,
+                    uri
+                  },
+                  () => {
+                    if (setClipTime && nowPlayingItem.clipId) {
+                      syncNowPlayingItemWithTrack()
+                    }
+                  }
+                )
+              } catch (error) {
+                console.log('PVVideo _handleNewItemShouldLoad error', error)
+              }
+            })()
+          }
+        )
       })
     })
   }
@@ -140,8 +161,9 @@ export class PVVideo extends React.PureComponent<Props, State> {
     })
   }
 
-  /* If there is still a videoPosition in globalState, use that instead of
-     digging it out of the local storage. This is needed to handle going in
+  /* If there is still a videoPosition in globalState AND the current episodeMediaUrl
+     is the same as the last episodeMediaUrl, use the video position from globalState
+     instead of digging it out of the local storage. This is needed to handle going in
      and out of fullscreen mode immediately. */
   _setupNowPlayingItemPlayer = async () => {
     const { player } = this.global
@@ -149,13 +171,13 @@ export class PVVideo extends React.PureComponent<Props, State> {
     const { videoPosition: lastVideoPosition } = videoInfo
     const handlePlayAfterSeek = true
 
-    if (lastVideoPosition) {
+    if (nowPlayingItem.episodeMediaUrl === lastNowPlayingItemUri && lastVideoPosition) {
       this._handleSeekTo(lastVideoPosition, handlePlayAfterSeek)
     } else {
       const nowPlayingItemFromHistory = await getNowPlayingItemFromLocalStorage(
         nowPlayingItem.clipId || nowPlayingItem.episodeId
       )
-        
+
       this._handleSeekTo(
         nowPlayingItemFromHistory
           ? nowPlayingItemFromHistory.userPlaybackPosition
@@ -163,6 +185,9 @@ export class PVVideo extends React.PureComponent<Props, State> {
         handlePlayAfterSeek
       )
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    lastNowPlayingItemUri = nowPlayingItem.episodeMediaUrl
   }
 
   _handleDestroyPlayer = () => {
@@ -218,7 +243,6 @@ export class PVVideo extends React.PureComponent<Props, State> {
     playerUpdateUserPlaybackPosition()
   }
 
-
   _handleResumeAfterClipHasEnded = async () => {
     let shouldContinue = true
     const { nowPlayingItem } = this.global.player
@@ -258,14 +282,17 @@ export class PVVideo extends React.PureComponent<Props, State> {
           // Wait a second to give it time to seek before initial play
           setTimeout(() => {
             (() => {
-              this.setState({
-                disableOnProgress: false,
-                isReadyToPlay: true
-              }, () => {
-                if (handlePlayAfterSeek) {
-                  this._handlePlayIfShouldResumePlay()
+              this.setState(
+                {
+                  disableOnProgress: false,
+                  isReadyToPlay: true
+                },
+                () => {
+                  if (handlePlayAfterSeek) {
+                    this._handlePlayIfShouldResumePlay()
+                  }
                 }
-              })
+              )
             })()
           }, 1000)
         })
@@ -282,12 +309,14 @@ export class PVVideo extends React.PureComponent<Props, State> {
     const { Authorization, destroyPlayer, isFullscreen, isReadyToPlay, uri } = this.state
     const { player, userAgent } = this.global
     const { playbackState } = player
-    
+
     // nowPlayingItem will be undefined when loading from a deep link
     let { nowPlayingItem } = player
     nowPlayingItem = nowPlayingItem || {}
 
-    const pvVideo = uri ? (
+    const finalUri = encodeSpacesInString(convertUrlToSecureHTTPS(uri || '').trim())
+
+    const pvVideo = finalUri ? (
       <Video
         disableBack={!isFullscreen || isMiniPlayer}
         disablePlayPause={!isFullscreen || isMiniPlayer}
@@ -301,8 +330,8 @@ export class PVVideo extends React.PureComponent<Props, State> {
           this._handlePause()
         }}
         onEnterFullscreen={this._enableFullscreen}
-        // onError={() => {
-        //   console.log('PVVideo onError')
+        // onError={(error) => {
+        //   console.log('PVVideo onError', error)
         // }}
         onLoad={(payload: any) => {
           const { duration } = payload
@@ -347,7 +376,7 @@ export class PVVideo extends React.PureComponent<Props, State> {
         rate={1}
         ref={(ref: Video) => (this.videoRef = ref)}
         source={{
-          uri,
+          uri: finalUri,
           headers: {
             'User-Agent': userAgent,
             ...(Authorization ? { Authorization } : {})
@@ -359,20 +388,16 @@ export class PVVideo extends React.PureComponent<Props, State> {
 
     return (
       <>
-        {
-          !destroyPlayer && isFullscreen && (
-            <Modal
-              supportedOrientations={['portrait', 'landscape']}
-              style={{ height: 200, width: 200, position: 'relative' }}
-              transparent={false}
-              visible>
-              {pvVideo}
-            </Modal>
-          )
-        }
-        {
-          !destroyPlayer && !isFullscreen && pvVideo
-        }
+        {!destroyPlayer && isFullscreen && (
+          <Modal
+            supportedOrientations={['portrait', 'landscape']}
+            style={{ height: 200, width: 200, position: 'relative' }}
+            transparent={false}
+            visible>
+            {pvVideo}
+          </Modal>
+        )}
+        {!destroyPlayer && !isFullscreen && pvVideo}
       </>
     )
   }
