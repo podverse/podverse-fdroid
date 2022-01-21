@@ -6,7 +6,6 @@ import { Divider, ScrollView, Text, TextLink, View } from '../components'
 import { translate } from '../lib/i18n'
 import { createEmailLinkUrl } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { core } from '../styles'
 
 type Props = {
@@ -19,10 +18,6 @@ export class SupportScreen extends React.Component<Props> {
   static navigationOptions = () => ({
     title: translate('Support')
   })
-
-  componentDidMount() {
-    trackPageView('/support', 'Support Screen')
-  }
 
   handleFollowLink = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [

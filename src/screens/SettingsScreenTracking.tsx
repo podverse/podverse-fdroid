@@ -6,7 +6,6 @@ import Config from 'react-native-config'
 import { Divider, ScrollView, SwitchWithText, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { setErrorReportingEnabled } from '../state/actions/settings'
 import { core } from '../styles'
 
@@ -24,10 +23,6 @@ export class SettingsScreenTracking extends React.Component<Props> {
   static navigationOptions = () => ({
     title: translate('Tracking')
   })
-
-  componentDidMount() {
-    trackPageView('/settings-tracking', 'Settings Screen Tracking')
-  }
 
   _handleToggleErrorReporting = async () => {
     const errorReportingEnabled = await AsyncStorage.getItem(PV.Keys.ERROR_REPORTING_ENABLED)

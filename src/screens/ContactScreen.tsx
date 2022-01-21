@@ -5,7 +5,6 @@ import { Divider, TableCell, TableSectionSelectors, Text, View } from '../compon
 import { translate } from '../lib/i18n'
 import { createEmailLinkUrl } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { core, table } from '../styles'
 
 type Props = {
@@ -50,10 +49,6 @@ export class ContactScreen extends React.Component<Props> {
   static navigationOptions = () => ({
     title: translate('Contact')
   })
-
-  componentDidMount() {
-    trackPageView('/contact', 'Contact Screen')
-  }
 
   _onPress = (item: any) => {
     if (item.key === _bugReportKey) {
