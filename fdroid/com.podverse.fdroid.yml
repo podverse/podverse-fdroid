@@ -692,16 +692,7 @@ Builds:
       - cd $$react-native-reanimated$$
       - yarn install
     scandelete:
-      - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
-      - node_modules/jetifier/lib/*.jar
-      - node_modules/npm/node_modules/term-size/vendor
-      - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
-      - node_modules/react-native/template
-      - node_modules/react-native-track-player/android/build/kotlin/compileDebugKotlin/build-history.bin
-      - node_modules/react-native-track-player/android/build/kotlin/compileDebugKotlin/last-build.bin
-      - node_modules/shaka-player/third_party/closure/compiler.jar
-      - node_modules/term-size/vendor/windows/term-size.exe
-      - node_modules/term-size/vendor/macos/term-size
+      - node_modules
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
