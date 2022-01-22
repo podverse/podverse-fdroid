@@ -691,8 +691,6 @@ Builds:
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
       - cd $$react-native-reanimated$$
       - yarn install
-    scandelete:
-      - node_modules
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
@@ -715,6 +713,8 @@ Builds:
       - node_modules/@react-native-community/async-storage/android/build.gradle
       - node_modules/@react-native-community/masked-view/android/build.gradle
       - node_modules/@react-native-community/netinfo/android/build.gradle
+    scandelete:
+      - node_modules
     build:
       - pushd $$react-native-reanimated$$
       - FOR_HERMES=True gradle :assembleRelease
