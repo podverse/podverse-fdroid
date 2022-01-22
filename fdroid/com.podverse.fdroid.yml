@@ -693,11 +693,22 @@ Builds:
       - yarn install
     scandelete:
       - node_modules/@react-native-community/cli-platform-android/node_modules/jetifier/lib
-      - node_modules/bplist-parser
       - node_modules/jetifier/lib/*.jar
       - node_modules/npm/node_modules/term-size/vendor
       - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
       - node_modules/react-native/template
+      - node_modules/react-native-reanimated/android/react-native-reanimated-63-hermes.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-63-jsc.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-64-jsc.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-65-jsc.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-64-hermes.aar
+      - node_modules/react-native-reanimated/android/react-native-reanimated-65-hermes.aar
+      - node_modules/react-native-reanimated/libSo/fbjni/jni/x86_64/libfbjni.so
+      - node_modules/react-native-reanimated/libSo/fbjni/jni/armeabi-v7a/libfbjni.so
+      - node_modules/react-native-reanimated/libSo/fbjni/jni/x86/libfbjni.so
+      - node_modules/react-native-reanimated/libSo/fbjni/jni/arm64-v8a/libfbjni.so
       - node_modules/react-native-track-player/android/build/kotlin/compileDebugKotlin/build-history.bin
       - node_modules/react-native-track-player/android/build/kotlin/compileDebugKotlin/last-build.bin
       - node_modules/shaka-player/third_party/closure/compiler.jar
