@@ -698,7 +698,6 @@ Builds:
       - node_modules/react-native/ReactAndroid/src/main/third-party/java/buck-android-support/buck-android-support.jar
       - node_modules/react-native/template
       - node_modules/react-native-reanimated/android/react-native-reanimated-63-hermes.aar
-      - node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
       - node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
       - node_modules/react-native-reanimated/android/react-native-reanimated-63-jsc.aar
       - node_modules/react-native-reanimated/android/react-native-reanimated-64-jsc.aar
