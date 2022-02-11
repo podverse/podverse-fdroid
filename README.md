@@ -1,4 +1,4 @@
-# ATTN: Make changes to the podverse-rn repo instead of this repo
+# Attention: Send PRs to the [podverse-rn repo](https://github.com/podverse/podverse-rn) instead of this one :)
 
 The podverse-fdroid repo is downstream from the podverse-rn repo. Both repos are identical, except podverse-fdroid has a small amount of changes specific to it, such as the Podverse F-Droid build config and assets, our Azure F-Droid build pipeline, the removal of Matomo tracking code, and the removal of other libraries.
 
@@ -47,7 +47,6 @@ Sign up and try it gratis for three months 🥳
 
 ### Translations on Hosted Weblate
 
-Available on the [App Store](https://apps.apple.com/us/app/podverse/id1390888454), the [Google Play Store](https://play.google.com/store/apps/details?id=com.podverse) and [F-Droid](https://f-droid.org/packages/com.podverse.fdroid/).
 <a href="https://hosted.weblate.org/engage/podverse/">
 <img src="https://hosted.weblate.org/widgets/podverse/-/podverse-rn/horizontal-auto.svg" alt="Oversettelsesstatus" />
 </a>
@@ -58,9 +57,10 @@ Available on the [App Store](https://apps.apple.com/us/app/podverse/id1390888454
 - Gary Johnson
 - [Kyle Downey](https://github.com/KyleFDowney)
 
-## Answers:
+## FAQ:
 
 ### Why do some clips start at the wrong time?
+
 Most podcast apps today limit clips to be less than a minute, but Podverse allows creating and sharing clips of any length. \
 The current approach has the drawback of not supporting clips from podcasts that insert dynamic ads.
 
