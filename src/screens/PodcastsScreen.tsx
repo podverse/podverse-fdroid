@@ -33,7 +33,7 @@ import { playerUpdateUserPlaybackPosition } from '../services/player'
 import { audioUpdateTrackPlayerCapabilities } from '../services/playerAudio'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
-import { initDownloads, removeDownloadedPodcast } from '../state/actions/downloads'
+import { initDownloads, removeDownloadedPodcast, updateDownloadedPodcasts } from '../state/actions/downloads'
 import { updateWalletInfo } from '../state/actions/lnpay'
 import {
   initializePlaybackSpeed,
@@ -123,9 +123,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
   async componentDidMount() {
     const { navigation } = this.props
     Linking.getInitialURL().then((initialUrl) => {
-      if(initialUrl) {
-        this._handleOpenURLEvent({url:initialUrl})
-      }
+      // settimeout here gives a chance to the rest of 
+      // the app to have finished loading and navigate correctly
+      setTimeout(() => {
+        if(initialUrl) {
+          this._handleOpenURLEvent({url:initialUrl})
+        }
+      }, 300);
     })
     Linking.addEventListener('url', this._handleOpenURLEvent)
     AppState.addEventListener('change', this._handleAppStateChange)
@@ -208,18 +212,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
           showMiniPlayer()
         }
 
+        updateDownloadedPodcasts()
         await playerUpdatePlaybackState()
-
-        // NOTE UPDATE: I don't think this is working...commenting out for now.
-        // NOTE: On iOS, when returning to the app from the background while the player was paused,
-        // sometimes the player will be in an idle state, requiring the user to press play twice to
-        // reload the item in the player and begin playing. By calling audioInitializePlayerQueue once whenever
-        // the idle playback-state event is called, it automatically reloads the item.
-        // I don't think this issue is happening on Android, so we're not using this workaround on Android.
-        // const isIdle = await playerCheckIdlePlayerState()
-        // if (Platform.OS === 'ios' && isIdle) {
-        //   await audioInitializePlayerQueue()
-        // }
       }
 
       if (nextAppState === 'background' || nextAppState === 'inactive') {
@@ -924,9 +918,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
         newState.flatListData = [...flatListData, ...results[0]]
         newState.endOfResultsReached = results[0].length < 20
         newState.flatListDataTotalCount = results[1]
-      } else if (PV.FilterOptions.screenFilters.PodcastsScreen.sort.some((option) => option === filterKey)) {
+      } else if (
+        PV.FilterOptions.screenFilters.PodcastsScreen.sort.some((option) => option === filterKey)
+        || PV.FilterOptions.screenFilters.PodcastsScreen.subscribedSort.some((option) => option === filterKey)
+      ) {
         newState.showNoInternetConnectionMessage = !hasInternetConnection
-
         const results = await getPodcasts({
           ...setCategoryQueryProperty(queryFrom, selectedCategory, selectedCategorySub),
           sort: filterKey,
