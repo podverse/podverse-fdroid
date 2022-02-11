@@ -722,9 +722,9 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
     ndk: r23b
 
-  - versionName: 4.2.4-qa.1
+  - versionName: 4.2.4-beta.1
     versionCode: 22
-    commit: 4.2.4-qa.1
+    commit: 4.2.4-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
