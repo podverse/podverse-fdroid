@@ -38,7 +38,6 @@ Builds:
       - node_modules/react-native/android
       - node_modules/react-native-gesture-handler/android/lib/build.gradle
       - node_modules/react-native-localize/android/build.gradle
-      - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
       - node_modules/react-native-secure-key-store/example/android/build.gradle
@@ -686,7 +685,6 @@ Builds:
       - react-native-reanimated@2.2.3
     rm:
       - functions
-      - node_modules/linkifyjs/dist/linkifyjs.zip
     prebuild:
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
@@ -720,6 +718,10 @@ Builds:
       - FOR_HERMES=True gradle :assembleRelease
       - popd
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
+      - pushd $$react-native-reanimated$$
+      - gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
     ndk: r23b
 
   - versionName: 4.2.4
@@ -743,7 +745,6 @@ Builds:
       - react-native-reanimated@2.2.3
     rm:
       - functions
-      - node_modules/linkifyjs/dist/linkifyjs.zip
     prebuild:
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
@@ -777,6 +778,10 @@ Builds:
       - FOR_HERMES=True gradle :assembleRelease
       - popd
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
+      - pushd $$react-native-reanimated$$
+      - gradle :assembleRelease
+      - popd
+      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
     ndk: r23b
 
 AutoUpdateMode: Version
