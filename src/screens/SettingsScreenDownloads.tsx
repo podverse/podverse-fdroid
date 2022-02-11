@@ -23,7 +23,7 @@ import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import * as DownloadState from '../state/actions/downloads'
 import { core } from '../styles'
-import { networkSupported } from '../lib/network'
+import { cellNetworkSupported } from '../lib/network'
 
 type Props = {
   navigation: any
@@ -75,7 +75,7 @@ export class SettingsScreenDownloads extends React.Component<Props, State> {
     const newValue = downloadingWifiOnly !== 'TRUE'
 
     const state = await NetInfo.fetch()
-    if (!newValue && networkSupported(state)) {
+    if (!newValue && cellNetworkSupported(state)) {
       refreshDownloads()
     }
 
