@@ -3414,9 +3414,9 @@ error-ex@^1.2.0, error-ex@^1.3.1:
     is-arrayish "^0.2.1"
 
 error-stack-parser@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/error-stack-parser/-/error-stack-parser-2.0.6.tgz#5a99a707bd7a4c58a797902d48d82803ede6aad8"
-  integrity sha512-d51brTeqC+BHlwF0BhPtcYgF5nlzf9ZZ0ZIUQNZpc9ZB9qw5IJ2diTrBY9jlCJkTLITYPjmiX6OWCwH+fuyNgQ==
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/error-stack-parser/-/error-stack-parser-2.0.7.tgz#b0c6e2ce27d0495cf78ad98715e0cad1219abb57"
+  integrity sha512-chLOW0ZGRf4s8raLrDxa5sdkvPec5YdvwbFnqJme4rk0rFajP8mPtrDL1+I+CwrQDCjswDA5sREX7jYQDQs9vA==
   dependencies:
     stackframe "^1.1.1"
 
@@ -7877,9 +7877,9 @@ react-native-config@1.4.3:
   integrity sha512-KcrlImtkrANeYMT5VM3NaXO5+nyxZkY42CVW8FCHThVqLa5xkNwQJSn8RXu+pNn5WpUatxYgUTP5ZqUpA4/ZKQ==
 
 react-native-dialog@*:
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.2.0.tgz#16a8221140895daad996fd0e39132e1a24b00ab8"
-  integrity sha512-VXdfo+bAi9ER7+w4aKOWypw8K97C2orvnfnxX4Lup/U8iQB/635V00hgfHEE3s0XScQHftXxm34Fa4iIIjojQA==
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.2.1.tgz#21e12c8bf70df390963c1c4e697ce8d16055d4a4"
+  integrity sha512-UNnGFTpH0cX16cJZLFq9/TAZH1+B2vzJrQL1mUaSqZjV+sFTpUB1WvghJZxPwi52v587kJpfKN7oPfWaXAu+YQ==
 
 react-native-dialog@8.2.0:
   version "8.2.0"

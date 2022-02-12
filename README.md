@@ -57,10 +57,9 @@ Sign up and try it gratis for three months 🥳
 - Gary Johnson
 - [Kyle Downey](https://github.com/KyleFDowney)
 
-## FAQ:
+## Answers:
 
 ### Why do some clips start at the wrong time?
-
 Most podcast apps today limit clips to be less than a minute, but Podverse allows creating and sharing clips of any length. \
 The current approach has the drawback of not supporting clips from podcasts that insert dynamic ads.
 
