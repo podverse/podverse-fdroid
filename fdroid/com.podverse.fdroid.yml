@@ -745,6 +745,7 @@ Builds:
       - react-native-reanimated@2.2.3
     rm:
       - functions
+      - node_modules/linkifyjs/dist/linkifyjs.zip
     prebuild:
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
@@ -754,7 +755,6 @@ Builds:
       - android/build.gradle
       - node_modules/hermes-engine
       - node_modules/jsc-android
-      - node_modules/linkifyjs/dist/linkifyjs.zip
       - node_modules/react-native/android
       - node_modules/react-native/ReactAndroid/build.gradle
       - node_modules/react-native-document-picker/android/build.gradle
