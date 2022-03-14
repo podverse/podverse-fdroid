@@ -79,7 +79,8 @@ const defaultNavigationOptions = ({ navigation }) => {
 
 const AuthNavigator = createStackNavigator(
   {
-    [PV.RouteNames.AuthScreen]: AuthScreen
+    [PV.RouteNames.AuthScreen]: AuthScreen,
+    [PV.RouteNames.ResetPasswordScreen]: ResetPasswordScreen
   },
   {
     defaultNavigationOptions

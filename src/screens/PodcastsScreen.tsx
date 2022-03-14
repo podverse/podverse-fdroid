@@ -3,6 +3,7 @@ import debounce from 'lodash/debounce'
 import { Alert, AppState, Linking, Platform, StyleSheet, View as RNView } from 'react-native'
 import Config from 'react-native-config'
 import Dialog from 'react-native-dialog'
+import { endConnection as iapEndConnection, initConnection as iapInitConnection } from 'react-native-iap'
 import React from 'reactn'
 import { convertToNowPlayingItem } from 'podverse-shared'
 import {
@@ -86,8 +87,8 @@ let isInitialLoad = true
 
 export class PodcastsScreen extends React.Component<Props, State> {
   shouldLoad: boolean
-  _unsubscribe: any | null 
-  
+  _unsubscribe: any | null
+
   constructor(props: Props) {
     super(props)
 
@@ -122,14 +123,17 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   async componentDidMount() {
     const { navigation } = this.props
+
+    iapInitConnection()
+
     Linking.getInitialURL().then((initialUrl) => {
-      // settimeout here gives a chance to the rest of 
+      // settimeout here gives a chance to the rest of
       // the app to have finished loading and navigate correctly
       setTimeout(() => {
-        if(initialUrl) {
-          this._handleOpenURLEvent({url:initialUrl})
+        if (initialUrl) {
+          this._handleOpenURLEvent({ url: initialUrl })
         }
-      }, 300);
+      }, 300)
     })
     Linking.addEventListener('url', this._handleOpenURLEvent)
     AppState.addEventListener('change', this._handleAppStateChange)
@@ -149,7 +153,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
         await AsyncStorage.setItem(PV.Keys.DOWNLOADED_EPISODE_LIMIT_GLOBAL_COUNT, '5')
         await AsyncStorage.setItem(PV.Keys.CENSOR_NSFW_TEXT, 'TRUE')
         await AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, '2.5')
-        await AsyncStorage.setItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE, 'TRUE')
 
         if (!Config.DISABLE_CRASH_LOGS) {
           await AsyncStorage.setItem(PV.Keys.ERROR_REPORTING_ENABLED, 'TRUE')
@@ -174,10 +177,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     this._unsubscribe = navigation.addListener('willFocus', () => {
       this._setDownloadedDataIfOffline()
-    });
+    })
   }
 
   componentWillUnmount() {
+    iapEndConnection()
     AppState.removeEventListener('change', this._handleAppStateChange)
     Linking.removeEventListener('url', this._handleOpenURLEvent)
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -192,7 +196,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _setDownloadedDataIfOffline = async () => {
     const isConnected = await hasValidNetworkConnection()
-    if(!isConnected) {
+    if (!isConnected) {
       const preventIsLoading = false
       const preventAutoDownloading = true
       this.handleSelectFilterItem(PV.Filters._downloadedKey, preventIsLoading, preventAutoDownloading)
@@ -206,7 +210,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       if (nextAppState === 'active' && !isInitialLoad) {
         const { nowPlayingItem: lastItem } = this.global.player
         const currentItem = await getNowPlayingItemLocally()
-  
+
         if (!lastItem || (lastItem && currentItem && currentItem.episodeId !== lastItem.episodeId)) {
           playerUpdatePlayerState(currentItem)
           showMiniPlayer()
@@ -309,9 +313,19 @@ export class PodcastsScreen extends React.Component<Props, State> {
         const splitPath = route.split('/')
         const path = splitPath[1] ? splitPath[1] : ''
         const id = splitPath[2] ? splitPath[2] : ''
+        const urlParamsString = splitPath[splitPath.length - 1].split('?')[1]
+        const urlParams = {}
+        if (urlParamsString) {
+          const urlParamsArr = urlParamsString.split('&')
+          if (urlParamsArr.length) {
+            urlParamsArr.forEach((param) => {
+              const [key, value] = param.split('=')
+              urlParams[key] = value
+            })
+          }
+        }
 
         await this._goBackWithDelay()
-
         if (path === PV.DeepLinks.Clip.pathPrefix) {
           await this._handleDeepLinkClip(id)
         } else if (path === PV.DeepLinks.Episode.pathPrefix) {
@@ -340,6 +354,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
           await navigate(PV.RouteNames.ProfilesScreen, {
             navToProfileWithId: id
           })
+        } else if (path.startsWith(PV.DeepLinks.Account.resetPassword)) {
+          navigate(PV.RouteNames.ResetPasswordScreen, {
+            resetToken: urlParams.token
+          })
         } else {
           await navigate(PV.RouteNames.PodcastsScreen)
         }
@@ -351,13 +369,15 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
   _initializeScreenData = async () => {
     const { navigation } = this.props
+    const { queryMediaType, searchBarText } = this.state
+    const hasVideo = queryMediaType === PV.Filters._mediaTypeVideoOnly
     await initPlayerState(this.global)
     await initializeSettings()
 
     // Load the AsyncStorage authenticatedUser and subscribed podcasts immediately,
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
     await getAuthenticatedUserInfoLocally()
-    await combineWithAddByRSSPodcasts()
+    await combineWithAddByRSSPodcasts(searchBarText, hasVideo)
 
     const preventIsLoading = false
     const preventAutoDownloading = true
@@ -402,7 +422,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: true,
+        isLoading: false,
+        isLoadingMore: true,
         queryMediaType: selectedKey,
         queryPage: 1
       },
@@ -441,7 +462,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: !preventIsLoading,
+        isLoading: false,
+        isLoadingMore: true,
         queryFrom: selectedKey,
         queryPage: 1,
         querySort: sort,
@@ -474,7 +496,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: true,
+        isLoading: false,
+        isLoadingMore: true,
         queryPage: 1,
         querySort: selectedKey,
         selectedSortLabel
@@ -506,7 +529,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
     this.setState(
       {
         endOfResultsReached: false,
-        isLoading: true,
+        isLoading: false,
+        isLoadingMore: true,
         ...((isCategorySub ? { selectedCategorySub: selectedKey } : { selectedCategory: selectedKey }) as any),
         flatListData: [],
         flatListDataTotalCount: null,
@@ -540,8 +564,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
             (async () => {
               const nextPage = queryPage + 1
               const newState = await this._queryData(queryFrom, this.state, {
-                queryPage: nextPage,
-                searchTitle: this.state.searchBarText
+                queryPage: nextPage
               })
               this.setState(newState)
             })()
@@ -573,11 +596,15 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const { searchBarText } = this.state
 
     return (
-      <View style={core.ListHeaderComponent}>
+      <View style={core.ListHeaderComponent} testID={`${testIDPrefix}_filter_wrapper`}>
         <SearchBar
-          inputContainerStyle={core.searchBar}
+          handleClear={this._handleSearchBarClear}
+          hideIcon
+          icon='filter'
+          noContainerPadding
           onChangeText={this._handleSearchBarTextChange}
-          onClear={this._handleSearchBarClear}
+          placeholder={translate('Search')}
+          testID={`${testIDPrefix}_filter_bar`}
           value={searchBarText}
         />
       </View>
@@ -658,11 +685,17 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _handleSearchBarClear = () => {
-    this.setState({
-      flatListData: [],
-      flatListDataTotalCount: null,
-      searchBarText: ''
-    })
+    this.setState(
+      {
+        endOfResultsReached: false,
+        flatListData: [],
+        flatListDataTotalCount: null,
+        isLoadingMore: true
+      },
+      () => {
+        this._handleSearchBarTextChange('')
+      }
+    )
   }
 
   _handleSearchBarTextChange = (text: string) => {
@@ -670,7 +703,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     this.setState(
       {
-        isLoadingMore: true,
         searchBarText: text
       },
       () => {
@@ -684,15 +716,14 @@ export class PodcastsScreen extends React.Component<Props, State> {
       {
         flatListData: [],
         flatListDataTotalCount: null,
+        isLoadingMore: true,
         queryPage: 1
       },
       () => {
         (async () => {
           prevState.flatListData = []
           prevState.flatListDataTotalCount = null
-          const state = await this._queryData(queryFrom, prevState, newState, {
-            searchTitle: queryOptions.searchTitle
-          })
+          const state = await this._queryData(queryFrom, prevState, newState)
           this.setState(state)
         })()
       }
@@ -742,9 +773,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
     if (queryFrom === PV.Filters._subscribedKey) {
       flatListData = subscribedPodcasts
       flatListDataTotalCount = subscribedPodcastsTotalCount
-    } else if (queryFrom === PV.Filters._downloadedKey) {
-      flatListData = this.global.downloadedPodcasts
-      flatListDataTotalCount = this.global.downloadedPodcasts && this.global.downloadedPodcasts.length
     } else {
       flatListData = this.state.flatListData
       flatListDataTotalCount = this.state.flatListDataTotalCount
@@ -760,6 +788,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
       Config.DEFAULT_ACTION_NO_SUBSCRIBED_PODCASTS === PV.Keys.DEFAULT_ACTION_BUTTON_SCAN_QR_CODE
         ? translate('Scan QR Code')
         : translate('Search')
+
+    const isCategoryScreen = queryFrom === PV.Filters._categoryKey
 
     return (
       <View style={styles.view} testID={`${testIDPrefix}_view`}>
@@ -787,6 +817,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
           {!isLoading && queryFrom && (
             <FlatList
+              {...(isCategoryScreen ? {} : { contentOffset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset() })}
               data={flatListData}
               dataTotalCount={flatListDataTotalCount}
               disableLeftSwipe={queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey}
@@ -796,11 +827,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
               isLoadingMore={isLoadingMore}
               isRefreshing={isRefreshing}
               ItemSeparatorComponent={this._ItemSeparatorComponent}
-              ListHeaderComponent={
-                queryFrom !== PV.Filters._subscribedKey && queryFrom !== PV.Filters._downloadedKey
-                  ? this._ListHeaderComponent
-                  : null
-              }
+              {...(isCategoryScreen ? {} : { ListHeaderComponent: this._ListHeaderComponent })}
               noResultsTopActionTextAccessibilityHint={translate('ARIA HINT - go to the search screen')}
               noResultsTopActionText={noSubscribedPodcasts ? defaultNoSubscribedPodcastsMessage : ''}
               noResultsMessage={
@@ -836,11 +863,20 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _querySubscribedPodcasts = async (preventAutoDownloading?: boolean) => {
-    const { queryMediaType } = this.state
+    const { queryMediaType, searchBarText } = this.state
     const hasVideo = queryMediaType === PV.Filters._mediaTypeVideoOnly
     await getSubscribedPodcasts(hasVideo)
-    await parseAllAddByRSSPodcasts()
-    await combineWithAddByRSSPodcasts()
+
+    if (!searchBarText) await parseAllAddByRSSPodcasts()
+
+    /* Don't wait for queryData or combineWithAddByRSSPodcasts to finish
+       to set isLoadingMore to false because subscribed podcasts are updated
+       elsewhere on global state before queryData finishes and updates
+       this screen's local state. */
+    this.setState({ isLoadingMore: false })
+
+    await combineWithAddByRSSPodcasts(searchBarText, hasVideo)
+
     if (!preventAutoDownloading) {
       await handleAutoDownloadEpisodes()
     }
@@ -858,12 +894,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _queryPodcastsByCategory = async (categoryId?: string | null, sort?: string | null, page = 1) => {
-    const { queryMediaType, searchBarText: searchTitle } = this.state
+    const { queryMediaType } = this.state
     const results = await getPodcasts({
       categories: categoryId,
       sort,
       page,
-      ...(searchTitle ? { searchTitle } : {}),
       ...(queryMediaType === PV.Filters._mediaTypeVideoOnly ? { hasVideo: true } : {})
     })
     return results
@@ -873,7 +908,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     filterKey: any,
     prevState: State,
     nextState?: any,
-    queryOptions: { isCategorySub?: boolean; searchTitle?: string } = {},
+    queryOptions: { isCategorySub?: boolean } = {},
     preventAutoDownloading?: boolean
   ) => {
     let newState = {
@@ -895,21 +930,24 @@ export class PodcastsScreen extends React.Component<Props, State> {
         selectedCategorySub
       } = prevState
 
+      const hasVideo = queryMediaType === PV.Filters._mediaTypeVideoOnly
+
       const hasInternetConnection = await hasValidNetworkConnection()
       const isMediaTypeSelected = PV.FilterOptions.mediaTypeItems.some((option) => option.value === filterKey)
-      const isSubscribedSelected = filterKey === PV.Filters._subscribedKey
-        || (isMediaTypeSelected && queryFrom === PV.Filters._subscribedKey)
-      const isDownloadedSelected = filterKey === PV.Filters._downloadedKey
-        || (isMediaTypeSelected && queryFrom === PV.Filters._downloadedKey)
-      const isAllPodcastsSelected = filterKey === PV.Filters._allPodcastsKey
-        || (isMediaTypeSelected && queryFrom === PV.Filters._allPodcastsKey)
+      const isSubscribedSelected =
+        filterKey === PV.Filters._subscribedKey || (isMediaTypeSelected && queryFrom === PV.Filters._subscribedKey)
+      const isDownloadedSelected =
+        filterKey === PV.Filters._downloadedKey || (isMediaTypeSelected && queryFrom === PV.Filters._downloadedKey)
+      const isAllPodcastsSelected =
+        filterKey === PV.Filters._allPodcastsKey || (isMediaTypeSelected && queryFrom === PV.Filters._allPodcastsKey)
       newState.queryMediaType = isMediaTypeSelected ? filterKey : prevState.queryMediaType
 
       if (isSubscribedSelected) {
         await getAuthUserInfo() // get the latest subscribedPodcastIds first
         await this._querySubscribedPodcasts(preventAutoDownloading)
       } else if (isDownloadedSelected) {
-        const podcasts = await getDownloadedPodcasts()
+        const podcasts = await getDownloadedPodcasts(searchTitle, hasVideo)
+        newState.flatListData = [...podcasts]
         newState.endOfResultsReached = true
         newState.flatListDataTotalCount = podcasts.length
       } else if (isAllPodcastsSelected) {
@@ -919,8 +957,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
         newState.endOfResultsReached = results[0].length < 20
         newState.flatListDataTotalCount = results[1]
       } else if (
-        PV.FilterOptions.screenFilters.PodcastsScreen.sort.some((option) => option === filterKey)
-        || PV.FilterOptions.screenFilters.PodcastsScreen.subscribedSort.some((option) => option === filterKey)
+        PV.FilterOptions.screenFilters.PodcastsScreen.sort.some((option) => option === filterKey) ||
+        PV.FilterOptions.screenFilters.PodcastsScreen.subscribedSort.some((option) => option === filterKey)
       ) {
         newState.showNoInternetConnectionMessage = !hasInternetConnection
         const results = await getPodcasts({
@@ -956,7 +994,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     } catch (error) {
       console.log('PodcastsScreen _queryData error', error)
     }
-    
+
     newState.flatListData = this.cleanFlatListData(newState.flatListData)
 
     this.shouldLoad = true

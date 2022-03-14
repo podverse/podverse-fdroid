@@ -254,8 +254,9 @@ export class FilterScreen extends React.Component<Props, State> {
         isActive = true
       }
     } else {
-      isActive = [selectedFilterItemKey, selectedFromItemKey,
-        selectedMediaTypeItemKey, selectedSortItemKey].includes(value)
+      isActive = [selectedFilterItemKey, selectedFromItemKey, selectedMediaTypeItemKey, selectedSortItemKey].includes(
+        value
+      )
     }
 
     const isSubCategory = item.parentId
@@ -269,7 +270,7 @@ export class FilterScreen extends React.Component<Props, State> {
         accessibilityLabel={item.labelShort || item.label || item.title}
         importantForAccessibility='yes'
         onPress={async () => {
-          if(this.state.isOffline) {
+          if (this.state.isOffline) {
             // We don't want filters to be selectable when offline
             return
           }
