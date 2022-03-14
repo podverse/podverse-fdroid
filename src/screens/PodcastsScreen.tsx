@@ -706,12 +706,12 @@ export class PodcastsScreen extends React.Component<Props, State> {
         searchBarText: text
       },
       () => {
-        this._handleSearchBarTextQuery(queryFrom, this.state, {}, { searchTitle: text })
+        this._handleSearchBarTextQuery(queryFrom, this.state, {})
       }
     )
   }
 
-  _handleSearchBarTextQuery = (queryFrom: string | null, prevState: any, newState: any, queryOptions: any) => {
+  _handleSearchBarTextQuery = (queryFrom: string | null, prevState: any, newState: any) => {
     this.setState(
       {
         flatListData: [],
