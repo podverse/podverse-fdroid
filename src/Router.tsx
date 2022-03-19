@@ -40,6 +40,7 @@ import {
   ProfileScreen,
   ProfilesScreen,
   QueueScreen,
+  ResetPasswordScreen,
   SearchScreen,
   SettingsScreen,
   SettingsScreenAccount,
