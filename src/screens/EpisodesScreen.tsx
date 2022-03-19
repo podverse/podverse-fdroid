@@ -36,7 +36,6 @@ type State = {
   endOfResultsReached: boolean
   flatListData: any[]
   flatListDataTotalCount: number | null
-  isLoading: boolean
   isLoadingMore: boolean
   isRefreshing: boolean
   queryFrom: string
@@ -51,6 +50,10 @@ type State = {
   selectedSortLabel?: string | null
   showActionSheet: boolean
   showNoInternetConnectionMessage?: boolean
+  tempQueryEnabled: boolean
+  tempQueryFrom: string
+  tempQueryMediaType: string | null
+  tempQuerySort: string | null
 }
 
 const testIDPrefix = 'episodes_screen'
@@ -72,8 +75,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
       endOfResultsReached: false,
       flatListData: [],
       flatListDataTotalCount: null,
-      isLoading: true,
-      isLoadingMore: false,
+      isLoadingMore: true,
       isRefreshing: false,
       queryFrom: hasSubscribedPodcasts ? PV.Filters._subscribedKey : Config.DEFAULT_QUERY_EPISODES_SCREEN,
       queryMediaType: PV.Filters._mediaTypeAllContent,
@@ -84,7 +86,11 @@ export class EpisodesScreen extends React.Component<Props, State> {
       selectedCategorySub: null,
       selectedFilterLabel: hasSubscribedPodcasts ? translate('Subscribed') : translate('All Podcasts'),
       selectedSortLabel: hasSubscribedPodcasts ? translate('recent') : translate('top – week'),
-      showActionSheet: false
+      showActionSheet: false,
+      tempQueryEnabled: false,
+      tempQueryFrom: hasSubscribedPodcasts ? PV.Filters._subscribedKey : Config.DEFAULT_QUERY_EPISODES_SCREEN,
+      tempQueryMediaType: PV.Filters._mediaTypeAllContent,
+      tempQuerySort: hasSubscribedPodcasts ? PV.Filters._mostRecentKey : PV.Filters._topPastWeek
     }
 
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
@@ -133,7 +139,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: false,
         isLoadingMore: true,
         queryMediaType: selectedKey,
         queryPage: 1
@@ -147,7 +152,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
     )
   }
 
-  handleSelectFilterItem = async (selectedKey: string) => {
+  handleSelectFilterItem = async (selectedKey: string, keepSearchTitle?: boolean) => {
     if (!selectedKey) {
       return
     }
@@ -167,11 +172,11 @@ export class EpisodesScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: false,
+        isLoadingMore: true,
         queryFrom: selectedKey,
         queryPage: 1,
         querySort: sort,
-        searchBarText: '',
+        searchBarText: keepSearchTitle ? this.state.searchBarText : '',
         selectedFilterLabel,
         selectedSortLabel
       },
@@ -196,7 +201,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoading: false,
         isLoadingMore: true,
         queryPage: 1,
         querySort: selectedKey,
@@ -229,7 +233,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
     this.setState(
       {
         endOfResultsReached: false,
-        isLoading: false,
         isLoadingMore: true,
         ...((isCategorySub ? { selectedCategorySub: selectedKey } : { selectedCategory: selectedKey }) as any),
         flatListData: [],
@@ -300,7 +303,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
           icon='filter'
           noContainerPadding
           onChangeText={this._handleSearchBarTextChange}
-          placeholder={translate('Search')}
+          placeholder={translate('Search episodes')}
           testID={`${testIDPrefix}_filter_bar`}
           value={searchBarText}
         />
@@ -375,7 +378,8 @@ export class EpisodesScreen extends React.Component<Props, State> {
       {
         endOfResultsReached: false,
         flatListData: [],
-        flatListDataTotalCount: null
+        flatListDataTotalCount: null,
+        isLoadingMore: true
       },
       () => {
         this._handleSearchBarTextChange('')
@@ -384,27 +388,50 @@ export class EpisodesScreen extends React.Component<Props, State> {
   }
 
   _handleSearchBarTextChange = (text: string) => {
-    const { queryFrom } = this.state
-
-    this.setState({
-      isLoadingMore: true,
-      searchBarText: text
-    })
-    this._handleSearchBarTextQuery(queryFrom)
-  }
-
-  _handleSearchBarTextQuery = (queryFrom: string | null) => {
     this.setState(
       {
-        flatListData: [],
-        flatListDataTotalCount: null,
-        queryPage: 1
+        searchBarText: text
       },
       () => {
-        (async () => {
-          const state = await this._queryData(queryFrom)
-          this.setState(state)
-        })()
+        this._handleSearchBarTextQuery()
+      }
+    )
+  }
+
+  _handleSearchBarTextQuery = () => {
+    const { queryFrom, queryMediaType, querySort, searchBarText, tempQueryEnabled } = this.state
+    if (!searchBarText) {
+      this._handleRestoreSavedQuery()
+    } else {
+      const tempQueryObj: any = !tempQueryEnabled
+        ? {
+            tempQueryEnabled: true,
+            tempQueryFrom: queryFrom,
+            tempQueryMediaType: queryMediaType,
+            tempQuerySort: querySort
+          }
+        : {}
+      this.setState(tempQueryObj, () => {
+        const queryFrom = PV.Filters._allPodcastsKey
+        const keepSearchTitle = true
+        this.handleSelectFilterItem(queryFrom, keepSearchTitle)
+      })
+    }
+  }
+
+  _handleRestoreSavedQuery = () => {
+    const { tempQueryFrom, tempQueryMediaType, tempQuerySort } = this.state
+    this.setState(
+      {
+        queryFrom: tempQueryFrom,
+        queryMediaType: tempQueryMediaType,
+        querySort: tempQuerySort,
+        tempQueryEnabled: false
+      },
+      () => {
+        const restoredQueryFrom = tempQueryFrom || PV.Filters._subscribedKey
+        const keepSearchTitle = false
+        this.handleSelectFilterItem(restoredQueryFrom, keepSearchTitle)
       }
     )
   }
@@ -451,7 +478,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
     const defaultNoSubscribedPodcastsMessage =
       Config.DEFAULT_ACTION_NO_SUBSCRIBED_PODCASTS === PV.Keys.DEFAULT_ACTION_BUTTON_SCAN_QR_CODE
         ? translate('Scan QR Code')
-        : translate('Search')
+        : ''
 
     const isCategoryScreen = queryFrom === PV.Filters._categoryKey
 
@@ -479,8 +506,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
         {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
         {!isLoading && queryFrom && (
           <FlatList
-            {...(isCategoryScreen ? {} : { contentOffset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset() })}
-            contentOffset={PV.FlatList.ListHeaderHiddenSearchBar.contentOffset()}
             data={flatListData}
             dataTotalCount={flatListDataTotalCount}
             disableLeftSwipe={queryFrom !== PV.Filters._downloadedKey}
@@ -497,7 +522,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
                 ? translate('You are not subscribed to any podcasts yet')
                 : translate('No episodes found')
             }
-            noResultsTopActionText={noSubscribedPodcasts ? defaultNoSubscribedPodcastsMessage : ''}
             onEndReached={this._onEndReached}
             onRefresh={this._onRefresh}
             renderItem={this._renderEpisodeItem}
@@ -534,7 +558,6 @@ export class EpisodesScreen extends React.Component<Props, State> {
     } = {}
   ) => {
     let newState = {
-      isLoading: false,
       isLoadingMore: false,
       isRefreshing: false,
       showNoInternetConnectionMessage: false

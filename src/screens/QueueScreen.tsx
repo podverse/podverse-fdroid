@@ -141,7 +141,7 @@ export class QueueScreen extends React.Component<Props, State> {
               )}
             </RNView>
           )}
-          {navigation.getParam('showMoreNavButton') && <NavSearchIcon navigation={navigation} />}
+          {/* {navigation.getParam('showMoreNavButton') && <NavSearchIcon navigation={navigation} />} */}
         </RNView>
       )
     }
