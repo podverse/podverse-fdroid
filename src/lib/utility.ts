@@ -567,7 +567,7 @@ export const convertUrlToSecureHTTPS = (originalUrl: string) => {
 }
 
 export const encodeSpacesInString = (str: string) => {
-  return str.replace(/ /g,"%20")
+  return str.replace(/ /g, '%20')
 }
 
 export const getUniqueArrayByKey = (arr: any[], key: string) => {
@@ -697,4 +697,10 @@ export const prefixClipLabel = (episodeTitle?: string) => {
     title = translate('Untitled Clip')
   }
   return title
+}
+
+export const checkIfContainsStringMatch = (matchStr: string, currentStr: string) => {
+  const lowercaseString = matchStr.toLowerCase()
+  const regex = new RegExp(`${lowercaseString}|${lowercaseString}.|.${lowercaseString}.|.${lowercaseString}`)
+  return regex.test(currentStr.toLowerCase())
 }

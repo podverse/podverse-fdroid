@@ -65,7 +65,7 @@ export class SearchScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = ({ navigation }) => ({
-    title: translate('Search'),
+    title: translate('Find'),
     headerLeft: () => <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />,
     headerRight: () => null
   })
@@ -240,11 +240,9 @@ export class SearchScreen extends React.Component<Props, State> {
           placeholder={
             searchType === _podcastByTitle ? translate('search by podcast title') : translate('search by podcast host')
           }
-          subText={searchType === _podcastByTitle ? translate('use double quotes for exact matches') : null}
           testID={testIDPrefix}
           value={searchBarText}
         />
-        <Divider />
         {!isLoading && flatListData && (
           <FlatList
             data={flatListData}
