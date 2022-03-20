@@ -28,21 +28,6 @@
     "postinstall": "patch-package",
     "version_update": "babel-node ./scripts/update_version.js"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn format && git add . && lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "git add"
-    ],
-    "src/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "git add"
-    ]
-  },
   "dependencies": {
     "@babel/eslint-parser": "^7.15.0",
     "@podverse/podcast-feed-parser": "^1.0.17",
