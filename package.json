@@ -1,6 +1,6 @@
 {
   "name": "podverse",
-  "version": "4.2.4",
+  "version": "4.2.7",
   "private": true,
   "contributors": [
     "Creon Creonopoulos",
@@ -27,21 +27,6 @@
     "test:e2e:ios": "export $(cat .env | xargs) && DEVICE_TYPE=ios BROWSERSTACK_DEVICE='iPhone 12 Pro Max' BROWSERSTACK_OS_VERSION='13.0' node ./functions/tests/e2e/index.js",
     "postinstall": "patch-package",
     "version_update": "babel-node ./scripts/update_version.js"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "git add"
-    ],
-    "src/**/*.{ts,tsx}": [
-      "eslint",
-      "git add"
-    ]
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.15.0",

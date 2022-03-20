@@ -241,6 +241,7 @@ export interface IFilters {
   _subscribedKey: string
   _downloadedKey: string
   _allPodcastsKey: string
+  _customFeedsKey: string
   _categoryKey: string
   _alphabeticalKey: string
   _mostRecentKey: string

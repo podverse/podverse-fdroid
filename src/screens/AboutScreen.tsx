@@ -72,11 +72,12 @@ export class AboutScreen extends React.Component<Props> {
             )
           })}
           <Divider style={styles.divider} />
-          <Text
-            fontSizeLargestScale={PV.Fonts.largeSizes.md}
-            style={styles.text}>
-              {/* eslint-disable-next-line max-len */}
-              {`Version: ${Config.FDROID_VERSION} ${Config.FDROID_BUILD ? `build ${Config.FDROID_BUILD} ` : ''}for ${Config.RELEASE_TYPE || ''}`}</Text>
+          <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.text}>
+            {/* eslint-disable-next-line max-len */}
+            {`Version: ${Config.FDROID_VERSION} ${
+              Config.FDROID_BUILD ? `build ${Config.FDROID_BUILD} ` : ''
+            }for ${Config.RELEASE_TYPE || ''}`}
+          </Text>
           <Divider style={styles.divider} />
           <RNView style={styles.socialLinksWrapper}>
             <Icon

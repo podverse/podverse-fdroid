@@ -41,6 +41,7 @@ export const RouteNames = {
   ProfilesScreen: 'ProfilesScreen',
   ProfileScreen: 'ProfileScreen',
   QueueScreen: 'QueueScreen',
+  ResetPasswordScreen: 'ResetPasswordScreen',
   SearchScreen: 'SearchScreen',
   SearchSearchScreen: 'SearchSearchScreen',
   SettingsScreen: 'SettingsScreen',
