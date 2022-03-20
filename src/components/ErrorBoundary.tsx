@@ -39,7 +39,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
       const errorRequestBody = {
         details: error.message + '\n' + errorInfo.componentStack.slice(0, 500), // Limitting error desc to 500 chars
         platform: Platform.OS,
-        date: new Date().toDateString(),
+        date: new Date().toDateString()
         // app_version: DeviceInfo.getVersion()
       }
 
