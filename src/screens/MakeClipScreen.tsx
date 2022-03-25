@@ -10,6 +10,7 @@ import {
   Dimensions
 } from 'react-native'
 import Share from 'react-native-share'
+import { NavigationStackOptions } from 'react-navigation-stack'
 import React from 'reactn'
 import { clearTempMediaRef, saveTempMediaRef } from '../state/actions/mediaRef'
 import {
@@ -17,7 +18,6 @@ import {
   DropdownButtonSelect,
   Icon,
   NavHeaderButtonText,
-  OpaqueBackground,
   PlayerProgressBar,
   PressableWithOpacity,
   PVVideo,
@@ -92,8 +92,9 @@ export class MakeClipScreen extends React.Component<Props, State> {
     const isLoggedIn = navigation.getParam('isLoggedIn')
     return {
       title: navigation.getParam('isEditing') ? translate('Edit Clip') : translate('Make Clip'),
-      headerTransparent: true,
-      headerStyle: {},
+      headerStyle: {
+        backgroundColor: globalTheme.view.backgroundColor
+      },
       headerTintColor: globalTheme.text.color,
       headerRight: () => (
         <RNView style={styles.navHeaderButtonWrapper}>
@@ -107,7 +108,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
           />
         </RNView>
       )
-    }
+    } as NavigationStackOptions
   }
 
   async componentDidMount() {
@@ -468,7 +469,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
         : [styles.carouselImageWrapper, { width: screenWidth * 0.9 }]
 
     return (
-      <OpaqueBackground>
+      <>
         <View style={styles.view} transparent testID='make_clip_screen_view'>
           <View style={styles.contentContainer}>
             <View style={styles.wrapperTop} transparent>
@@ -766,7 +767,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
             </RNView>
           </Modal>
         )}
-      </OpaqueBackground>
+      </>
     )
   }
 }
