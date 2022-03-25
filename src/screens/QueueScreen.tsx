@@ -1,5 +1,6 @@
 import { NowPlayingItem } from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
+import { NavigationStackOptions } from 'react-navigation-stack'
 import React, { getGlobal } from 'reactn'
 import { getHistoryItemsIndex } from '../services/userHistoryItem'
 import {
@@ -9,8 +10,6 @@ import {
   HeaderTitleSelector,
   MessageWithAction,
   NavHeaderButtonText,
-  NavSearchIcon,
-  OpaqueBackground,
   QueueTableCell,
   SortableList,
   TableSectionSelectors,
@@ -68,13 +67,10 @@ export class QueueScreen extends React.Component<Props, State> {
     const allowViewTypeChange = navigation.getParam('allowViewTypeChange')
 
     return {
-      ...(!isTransparent
-        ? {}
-        : {
-            headerTransparent: true,
-            headerStyle: {},
-            headerTintColor: globalTheme.text.color
-          }),
+      headerStyle: {
+        backgroundColor: globalTheme.view.backgroundColor
+      },
+      headerTintColor: globalTheme.text.color,
       headerTitle: allowViewTypeChange ? (
         <HeaderTitleSelector
           color={textColor}
@@ -144,7 +140,7 @@ export class QueueScreen extends React.Component<Props, State> {
           {/* {navigation.getParam('showMoreNavButton') && <NavSearchIcon navigation={navigation} />} */}
         </RNView>
       )
-    }
+    } as NavigationStackOptions
   }
 
   componentDidMount() {
@@ -362,7 +358,7 @@ export class QueueScreen extends React.Component<Props, State> {
   }
 
   render() {
-    const { currentChapter, player, session } = this.global
+    const { player, session } = this.global
     const { historyItems, historyItemsCount, queueItems } = session.userInfo
     const { nowPlayingItem } = player
     const { isEditing, isLoading, isLoadingMore, isRemoving, isTransparent, viewType } = this.state
@@ -442,13 +438,7 @@ export class QueueScreen extends React.Component<Props, State> {
       </View>
     )
 
-    const imageUrl = overrideImageUrlWithChapterImageUrl(nowPlayingItem, currentChapter)
-
-    if (isTransparent) {
-      return <OpaqueBackground imageUrl={imageUrl}>{view}</OpaqueBackground>
-    } else {
-      return view
-    }
+    return view
   }
 
   _queryHistoryData = async (queryPage = 1) => {
