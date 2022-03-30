@@ -207,6 +207,7 @@ export interface InitialState {
     clipTitle?: string
   }
   screenReaderEnabled: boolean
+  hidePlaybackSpeedButton: boolean
 }
 
 export interface BannerInfoError {
