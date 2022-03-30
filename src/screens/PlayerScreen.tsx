@@ -15,6 +15,7 @@ import {
   NavQueueIcon,
   NavShareIcon,
   PlayerControls,
+  SafeAreaView,
   View
 } from '../components'
 import { translate } from '../lib/i18n'
@@ -284,7 +285,7 @@ export class PlayerScreen extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        <View style={styles.view}>
+        <SafeAreaView style={styles.view}>
           <View style={styles.view} transparent testID='player_screen_view'>
             <MediaPlayerCarousel hasChapters={hasChapters} navigation={navigation} />
             <PlayerControls navigation={navigation} />
@@ -303,7 +304,7 @@ export class PlayerScreen extends React.Component<Props> {
               title={translate('Share')}
             />
           </View>
-        </View>
+        </SafeAreaView>
       </React.Fragment>
     )
   }
@@ -361,8 +362,7 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   view: {
-    flex: 1,
-    height: 30
+    flex: 1
   },
   viewBackdrop: {
     flex: 1
