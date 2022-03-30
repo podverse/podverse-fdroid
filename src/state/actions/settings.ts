@@ -22,7 +22,8 @@ export const initializeSettings = async () => {
     urlsWeb,
     jumpBackwardsTime,
     jumpForwardsTime,
-    addCurrentItemNextInQueue
+    addCurrentItemNextInQueue,
+    hidePlayerPlaybackSpeed
   ] = await Promise.all([
     AsyncStorage.getItem(PV.Keys.CENSOR_NSFW_TEXT),
     AsyncStorage.getItem(PV.Keys.OFFLINE_MODE_ENABLED),
@@ -35,7 +36,8 @@ export const initializeSettings = async () => {
     PV.URLs.web(),
     AsyncStorage.getItem(PV.Keys.PLAYER_JUMP_BACKWARDS),
     AsyncStorage.getItem(PV.Keys.PLAYER_JUMP_FORWARDS),
-    AsyncStorage.getItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE)
+    AsyncStorage.getItem(PV.Keys.PLAYER_ADD_CURRENT_ITEM_NEXT_IN_QUEUE),
+    AsyncStorage.getItem(PV.Keys.PLAYER_HIDE_PLAYBACK_SPEED_BUTTON)
   ])
 
   if (!Config.ENABLE_VALUE_TAG_TRANSACTIONS) {
@@ -58,7 +60,8 @@ export const initializeSettings = async () => {
     jumpForwardsTime: jumpForwardsTime || PV.Player.jumpSeconds,
     urlsAPI,
     urlsWeb,
-    addCurrentItemNextInQueue: !!addCurrentItemNextInQueue
+    addCurrentItemNextInQueue: !!addCurrentItemNextInQueue,
+    hidePlayerPlaybackSpeed: !!hidePlayerPlaybackSpeed
   }, () => {
     // Call handleFinishSettingPlayerTime in case a custom jump time is available.
     handleFinishSettingPlayerTime()
