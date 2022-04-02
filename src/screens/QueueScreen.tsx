@@ -16,7 +16,7 @@ import {
   View
 } from '../components'
 import { translate } from '../lib/i18n'
-import { overrideImageUrlWithChapterImageUrl, safeKeyExtractor } from '../lib/utility'
+import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import { checkIfShouldUseServerData } from '../services/auth'
 import PVEventEmitter from '../services/eventEmitter'
@@ -25,6 +25,7 @@ import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { addQueueItemToServer, getQueueItems, removeQueueItem, setAllQueueItemsLocally } from '../state/actions/queue'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
+import { HistoryIndexListenerScreen } from './HistoryIndexListenerScreen'
 
 type Props = {
   navigation?: any
@@ -36,13 +37,12 @@ type State = {
   isLoading?: boolean
   isLoadingMore?: boolean
   isRemoving?: boolean
-  isTransparent?: boolean
   viewType?: string
 }
 
 const testIDPrefix = 'queue_screen'
 
-export class QueueScreen extends React.Component<Props, State> {
+export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
   shouldLoad: boolean
 
   constructor(props: Props) {
@@ -55,22 +55,20 @@ export class QueueScreen extends React.Component<Props, State> {
       isLoading: true,
       isLoadingMore: false,
       isRemoving: false,
-      isTransparent: !!props.navigation.getParam('isTransparent'),
       viewType: props.navigation.getParam('viewType') || _queueKey
     }
   }
 
   static navigationOptions = ({ navigation }) => {
     const { globalTheme } = getGlobal()
-    const isTransparent = !!navigation.getParam('isTransparent')
-    const textColor = isTransparent ? globalTheme.text.color : ''
+    const textColor = globalTheme.text.color
     const allowViewTypeChange = navigation.getParam('allowViewTypeChange')
 
     return {
       headerStyle: {
         backgroundColor: globalTheme.view.backgroundColor
       },
-      headerTintColor: globalTheme.text.color,
+      headerTintColor: textColor,
       headerTitle: allowViewTypeChange ? (
         <HeaderTitleSelector
           color={textColor}
@@ -144,6 +142,8 @@ export class QueueScreen extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    super.componentDidMount()
+
     const { navigation } = this.props
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -159,6 +159,7 @@ export class QueueScreen extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount()
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.removeListener(PV.Events.QUEUE_HAS_UPDATED, this._getQueueItems)
   }
@@ -240,10 +241,10 @@ export class QueueScreen extends React.Component<Props, State> {
   }
 
   _renderHistoryItem = ({ item = {} as NowPlayingItem, index }) => {
-    const { isEditing, isTransparent } = this.state
+    const { isEditing } = this.state
 
     return (
-      <View transparent={isTransparent}>
+      <View>
         <QueueTableCell
           clipEndTime={item.clipEndTime}
           clipStartTime={item.clipStartTime}
@@ -262,14 +263,13 @@ export class QueueScreen extends React.Component<Props, State> {
           {...(item?.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
           showRemoveButton={isEditing}
           testID={`${testIDPrefix}_history_item_${index}`}
-          transparent={isTransparent}
         />
       </View>
     )
   }
 
   _renderQueueItemRow = ({ item = {} as NowPlayingItem, index, drag, isActive }) => {
-    const { isEditing, isTransparent } = this.state
+    const { isEditing } = this.state
 
     return (
       <QueueTableCell
@@ -287,7 +287,6 @@ export class QueueScreen extends React.Component<Props, State> {
         showMoveButton={!isEditing}
         showRemoveButton={isEditing}
         testID={`${testIDPrefix}_queue_item_${index}`}
-        transparent={isTransparent}
       />
     )
   }
@@ -361,14 +360,14 @@ export class QueueScreen extends React.Component<Props, State> {
     const { player, session } = this.global
     const { historyItems, historyItemsCount, queueItems } = session.userInfo
     const { nowPlayingItem } = player
-    const { isEditing, isLoading, isLoadingMore, isRemoving, isTransparent, viewType } = this.state
+    const { isEditing, isLoading, isLoadingMore, isRemoving, viewType } = this.state
     const view = (
-      <View style={styles.view} transparent={isTransparent} testID={`${testIDPrefix}_view`}>
+      <View style={styles.view} testID={`${testIDPrefix}_view`}>
         {!isLoading && viewType === _queueKey && ((queueItems && queueItems.length > 0) || nowPlayingItem) && (
-          <View transparent={isTransparent}>
+          <View>
             {!!nowPlayingItem && (
-              <View transparent={isTransparent}>
-                <View style={styles.headerNowPlayingItemWrapper} transparent={isTransparent}>
+              <View>
+                <View style={styles.headerNowPlayingItemWrapper}>
                   <TableSectionSelectors
                     disableFilter
                     hideDropdown
@@ -387,7 +386,6 @@ export class QueueScreen extends React.Component<Props, State> {
                     podcastImageUrl={nowPlayingItem?.podcastImageUrl}
                     {...(nowPlayingItem?.podcastTitle ? { podcastTitle: nowPlayingItem.podcastTitle } : {})}
                     testID={`${testIDPrefix}_now_playing_header`}
-                    transparent={isTransparent}
                   />
                 </View>
                 <Divider style={styles.headerNowPlayingItemDivider} />
@@ -412,7 +410,6 @@ export class QueueScreen extends React.Component<Props, State> {
         {!isLoading && viewType === _queueKey && queueItems && queueItems.length < 1 && (
           <MessageWithAction
             message={translate('Your queue is empty')}
-            transparent={isTransparent}
             testID={testIDPrefix}
           />
         )}
@@ -429,7 +426,6 @@ export class QueueScreen extends React.Component<Props, State> {
             noResultsMessage={translate('No history items found')}
             onEndReached={this._onEndReached}
             renderItem={this._renderHistoryItem}
-            transparent={isTransparent}
           />
         )}
         {(isLoading || isRemoving) && (
