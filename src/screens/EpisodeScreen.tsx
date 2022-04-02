@@ -22,6 +22,7 @@ import { getMediaRefs } from '../services/mediaRef'
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import { retriveNowPlayingItemChapters } from '../state/actions/playerChapters'
 import { core } from '../styles'
+import { HistoryIndexListenerScreen } from './HistoryIndexListenerScreen'
 
 type Props = {
   navigation?: any
@@ -43,7 +44,7 @@ type State = {
 
 const testIDPrefix = 'episode_screen'
 
-export class EpisodeScreen extends React.Component<Props, State> {
+export class EpisodeScreen extends HistoryIndexListenerScreen<Props, State> {
   constructor(props: Props) {
     super(props)
 
@@ -107,6 +108,7 @@ export class EpisodeScreen extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    super.componentDidMount()
     this._initializePageData()
   }
 

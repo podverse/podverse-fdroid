@@ -4,11 +4,12 @@ import { NavigationStackOptions } from 'react-navigation-stack'
 import React, { getGlobal } from 'reactn'
 import { ActivityIndicator, FlatList, NavHeaderButtonText, QueueTableCell, View } from '../components'
 import { translate } from '../lib/i18n'
-import { overrideImageUrlWithChapterImageUrl, safeKeyExtractor } from '../lib/utility'
+import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
+import { HistoryIndexListenerScreen } from './HistoryIndexListenerScreen'
 
 type Props = {
   navigation?: any
@@ -27,7 +28,7 @@ type State = {
 
 const testIDPrefix = 'history_screen'
 
-export class HistoryScreen extends React.Component<Props, State> {
+export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
   shouldLoad: boolean
 
   constructor(props: Props) {
@@ -93,6 +94,8 @@ export class HistoryScreen extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
+    super.componentDidMount()
+
     const { navigation } = this.props
 
     navigation.setParams({
