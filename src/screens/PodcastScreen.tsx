@@ -52,6 +52,7 @@ import * as DownloadState from '../state/actions/downloads'
 import { toggleAddByRSSPodcastFeedUrl } from '../state/actions/parser'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { core } from '../styles'
+import { HistoryIndexListenerScreen } from './HistoryIndexListenerScreen'
 
 type Props = {
   navigation?: any
@@ -90,7 +91,7 @@ type RenderItemArg = { item: any; index: number }
 
 const testIDPrefix = 'podcast_screen'
 
-export class PodcastScreen extends React.Component<Props, State> {
+export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   shouldLoad: boolean
   listRef = null
 
@@ -163,6 +164,8 @@ export class PodcastScreen extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
+    super.componentDidMount()
+    
     const { navigation } = this.props
     const { podcastId } = this.state
     let podcast = navigation.getParam('podcast')

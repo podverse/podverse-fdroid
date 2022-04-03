@@ -1,14 +1,19 @@
 import { NowPlayingItem } from 'podverse-shared'
 import { getGlobal, setGlobal } from 'reactn'
+import { checkIfShouldUseServerData } from '../../services/auth'
 import {
   addOrUpdateHistoryItem,
   clearHistoryItems as clearHistoryItemsService,
+  defaultHistoryItemsIndex,
   filterItemFromHistoryItems,
   filterItemFromHistoryItemsIndex,
+  generateHistoryItemsIndex,
   getHistoryItems as getHistoryItemsService,
   getHistoryItemsIndex,
   getHistoryItemsIndexLocally,
-  removeHistoryItem as removeHistoryItemService
+  getHistoryItemsLocally,
+  removeHistoryItem as removeHistoryItemService,
+  setHistoryItemsIndexLocally
 } from '../../services/userHistoryItem'
 
 export const clearHistoryItems = async () => {
@@ -33,10 +38,10 @@ export const clearHistoryItems = async () => {
 
 export const getHistoryItems = async (page: number, existingItems: any[]) => {
   const globalState = getGlobal()
-  const [{ userHistoryItems, userHistoryItemsCount }, historyItemsIndex] = await Promise.all([
-    getHistoryItemsService(page),
-    getHistoryItemsIndexLocally()
-  ])
+
+  const { userHistoryItems, userHistoryItemsCount } = await getHistoryItemsService(page)
+  await updateHistoryItemsIndex()
+  const historyItemsIndex = await getHistoryItemsIndexLocally()
 
   const historyQueryPage = page || 1
 
@@ -64,7 +69,15 @@ export const getHistoryItems = async (page: number, existingItems: any[]) => {
 
 export const updateHistoryItemsIndex = async () => {
   const globalState = getGlobal()
-  const historyItemsIndex = await getHistoryItemsIndex()
+  const useServerData = await checkIfShouldUseServerData()
+  let historyItemsIndex = defaultHistoryItemsIndex
+  if (useServerData) {
+    historyItemsIndex = await getHistoryItemsIndex()
+  } else {
+    const { userHistoryItems: localHistoryItems } = await getHistoryItemsLocally()
+    historyItemsIndex = generateHistoryItemsIndex(localHistoryItems)
+    await setHistoryItemsIndexLocally(historyItemsIndex)
+  }
 
   setGlobal({
     session: {
@@ -123,6 +136,33 @@ export const markAsPlayed = async (item: NowPlayingItem) => {
       skipSetNowPlaying,
       completed
     )
-    await updateHistoryItemsIndex()
+  }
+}
+
+export const toggleMarkAsPlayed = async (item: NowPlayingItem, shouldMarkAsPlayed: boolean) => {
+  const { session } = getGlobal()
+  const { historyItemsIndex } = session.userInfo
+
+  if (item.episodeId) {
+    let playbackPosition = 0
+    let mediaFileDuration = null
+    const historyItem = historyItemsIndex?.episodes[item.episodeId]
+    if (historyItem) {
+      mediaFileDuration = historyItem.mediaFileDuration || 0
+      playbackPosition = historyItem.userPlaybackPosition
+    }
+  
+    const forceUpdateOrderDate = false
+    const skipSetNowPlaying = true
+    const completed = shouldMarkAsPlayed
+
+    await addOrUpdateHistoryItem(
+      item,
+      playbackPosition,
+      mediaFileDuration,
+      forceUpdateOrderDate,
+      skipSetNowPlaying,
+      completed
+    )
   }
 }
