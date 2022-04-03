@@ -27,6 +27,7 @@ import { combineEpisodesWithAddByRSSEpisodesLocally, hasAddByRSSEpisodesLocally 
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import { removeDownloadedPodcastEpisode } from '../state/actions/downloads'
 import { core } from '../styles'
+import { HistoryIndexListenerScreen } from './HistoryIndexListenerScreen'
 
 type Props = {
   navigation?: any
@@ -58,7 +59,7 @@ type State = {
 
 const testIDPrefix = 'episodes_screen'
 
-export class EpisodesScreen extends React.Component<Props, State> {
+export class EpisodesScreen extends HistoryIndexListenerScreen<Props, State> {
   shouldLoad: boolean
   _unsubscribe: any | null
 
@@ -101,12 +102,14 @@ export class EpisodesScreen extends React.Component<Props, State> {
   })
 
   async componentDidMount() {
+    super.componentDidMount()
+
+    PVEventEmitter.on(PV.Events.PODCAST_SUBSCRIBE_TOGGLED, this._handleToggleSubscribeEvent)
+
     const { queryFrom } = this.state
     const hasInternetConnection = await hasValidNetworkConnection()
     const from = hasInternetConnection ? queryFrom : PV.Filters._downloadedKey
     this.handleSelectFilterItem(from)
-
-    PVEventEmitter.on(PV.Events.PODCAST_SUBSCRIBE_TOGGLED, this._handleToggleSubscribeEvent)
 
     this._unsubscribe = this.props.navigation.addListener('willFocus', () => {
       this._setDownloadedDataIfOffline()
@@ -114,6 +117,7 @@ export class EpisodesScreen extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount()
     PVEventEmitter.removeListener(PV.Events.PODCAST_SUBSCRIBE_TOGGLED, this._handleToggleSubscribeEvent)
   }
 
