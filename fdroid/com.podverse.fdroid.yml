@@ -953,9 +953,9 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
     ndk: r23b
 
-  - versionName: 4.3.1-qa.2
+  - versionName: 4.3.1-qa.3
     versionCode: 26
-    commit: 4.3.1-qa.2
+    commit: 4.3.1-qa.3
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -1013,5 +1013,5 @@ Builds:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"(.+)"
-CurrentVersion: 4.3.1-qa.2
+CurrentVersion: 4.3.1-qa.3
 CurrentVersionCode: 26
