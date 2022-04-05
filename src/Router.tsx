@@ -13,6 +13,7 @@ import {
   AuthScreen,
   ClipsScreen,
   ContactScreen,
+  ContactXMPPChatScreen,
   DownloadsScreen,
   EditPlaylistScreen,
   EditProfileScreen,
@@ -191,6 +192,7 @@ const MoreNavigator = createStackNavigator(
     [PV.RouteNames.SettingsScreenQueue]: SettingsScreenQueue,
     [PV.RouteNames.MembershipScreen]: MembershipScreen,
     [PV.RouteNames.ContactScreen]: ContactScreen,
+    [PV.RouteNames.ContactXMPPChatScreen]: ContactXMPPChatScreen,
     [PV.RouteNames.SupportScreen]: SupportScreen,
     [PV.RouteNames.AboutScreen]: AboutScreen,
     [PV.RouteNames.TermsOfServiceScreen]: TermsOfServiceScreen,
@@ -210,7 +212,7 @@ const MoreNavigator = createStackNavigator(
           </View>
         )
       },
-      tabBarLabel: (props) => <TabBarLabel {...props} title={translate('More')} />,
+      tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.More.title} />,
       tabBarTestID: 'tab_more_screen'.prependTestId()
     }
   }
@@ -251,12 +253,12 @@ const MyLibraryNavigator = createStackNavigator(
       tabBarIcon: ({ tintColor }: { tintColor: any }) => {
         return (
           <View>
-            <Image source={PV.Tabs.Queue.icon} style={{ tintColor }} resizeMode={'contain'} />
+            <Image source={PV.Tabs.MyLibrary.icon} style={{ tintColor }} resizeMode={'contain'} />
             <DownloadsActiveBadge />
           </View>
         )
       },
-      tabBarLabel: (props) => <TabBarLabel {...props} title='My Library' />,
+      tabBarLabel: (props) => <TabBarLabel {...props} title={PV.Tabs.MyLibrary.title} />,
       tabBarTestID: 'tab_my_library_screen'.prependTestId()
     }
   }
