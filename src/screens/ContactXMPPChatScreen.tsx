@@ -3,7 +3,6 @@ import React from 'reactn'
 import { ScrollView, Text, TextLink } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 
 type Props = {
   navigation?: any
@@ -15,10 +14,6 @@ export class ContactXMPPChatScreen extends React.Component<Props> {
   static navigationOptions = () => ({
     title: translate('Official chat')
   })
-
-  componentDidMount() {
-    trackPageView('/contact-xmpp-chat-screen', 'Contact XMPP Chat Screen')
-  }
 
   _handleWebClientLinkPress = () => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
