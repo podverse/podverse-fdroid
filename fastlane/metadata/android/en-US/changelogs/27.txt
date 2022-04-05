@@ -1,0 +1,11 @@
+- LOTS of bug fixes.
+- Fixed several different crashes.
+- Fixes for resuming from last playback position.
+- Fixes for syncing history with server.
+- Fixed the "Mark as Played" feature.
+- Added a "Mark as Unplayed" button.
+- Fixes for cross-app comments.
+- Fixes for transcripts.
+- Fixes for offline listening mode.
+- Added XMPP chat information to the More > Contact screen.
+- And I finally figured out how to add release notes for F-Droid releases :)
