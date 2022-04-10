@@ -5,7 +5,7 @@ The podverse-fdroid repo is downstream from the podverse-rn repo. Both repos are
 If you'd like to add features or a bug fix to the Podverse mobile app, please make those changes in [podverse-rn](https://github.com/podverse/podverse-rn) instead of podverse-fdroid, _unless_ you're absolutely sure these changes should only apply to the podverse-fdroid build.
 
 # Podverse F-Droid
-Copylefted libre podcast manager for Android, iOS, and the web. \
+Free and open source podcast manager for Android, iOS, and the web. \
 Check it out at [podverse.fm](https://podverse.fm/)
 
 - Subscribe to podcasts
