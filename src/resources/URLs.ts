@@ -40,8 +40,16 @@ export const URLs = {
     mastodonAccount: Config.URL_SOCIAL_MASTODON_ACCOUNT || ''
   },
   xmpp: {
-    serverDomain: Config.URL_XMPP_SERVER_DOMAIN,
-    serverGroups: Config.URL_XMPP_SERVER_GROUPS,
+    chatRooms: {
+      general: Config.URL_XMPP_CHAT_ROOM_GENERAL,
+      dev: Config.URL_XMPP_CHAT_ROOM_DEV,
+      translations: Config.URL_XMPP_CHAT_ROOM_TRANSLATIONS
+    },
+    libraries: {
+      prosody: 'https://prosody.im/',
+      snikket: 'https://snikket.org/',
+      converse: 'https://conversejs.org/'
+    },
     webClientUrl: Config.URL_XMPP_WEB_CLIENT
   },
   web: async () => {
