@@ -44,7 +44,7 @@ export class SettingsScreenAccount extends React.Component<Props, State> {
 
   _handleDeleteAccountDialogTextChange = (text: string) => {
     this.setState({
-      deleteAccountDialogConfirmed: !!text && text.toUpperCase() === translate('DELETE'),
+      deleteAccountDialogConfirmed: !!text && text.toUpperCase() === translate('DELETE').toUpperCase(),
       deleteAccountDialogText: text
     })
   }
@@ -53,7 +53,7 @@ export class SettingsScreenAccount extends React.Component<Props, State> {
     const { deleteAccountDialogText } = this.state
 
     try {
-      if (deleteAccountDialogText && deleteAccountDialogText.toUpperCase() === translate('DELETE')) {
+      if (deleteAccountDialogText && deleteAccountDialogText.toUpperCase() === translate('DELETE').toUpperCase()) {
         await deleteLoggedInUser()
         await logoutUser()
         this.setState({ showDeleteAccountDialog: false })
