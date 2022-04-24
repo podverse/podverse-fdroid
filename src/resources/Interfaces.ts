@@ -1,5 +1,5 @@
 import { TranscriptRow, ValueTransaction } from 'podverse-shared'
-
+import type { AppModes } from './AppMode'
 export interface GlobalTheme {
   actionSheetButton?: any
   actionSheetButtonCancel?: any
@@ -81,7 +81,8 @@ export interface InitialState {
   fontScaleMode: string | null
   autoDownloadSettings: any
   downloadsActive: any
-  downloadsArray: any[]
+  downloadsArrayInProgress: any[]
+  downloadsArrayFinished: any[]
   downloadedEpisodeIds: any
   downloadedPodcastEpisodeCounts: any
   downloadedEpisodeLimitCount: number
@@ -126,6 +127,7 @@ export interface InitialState {
       videoIsLoaded: boolean
       videoPosition: number
     }
+    hidePlaybackSpeedButton: boolean
   }
   playlists: {
     myPlaylists: []
@@ -200,6 +202,7 @@ export interface InitialState {
   subscribedPodcasts: []
   subscribedPodcastsTotalCount: number
   userAgent?: string
+  appMode: AppModes
   bannerInfo: BannerInfo
   tempMediaRefInfo: {
     startTime?: number
@@ -236,9 +239,6 @@ export interface TempMediaRef {
 }
 
 export interface IFilters {
-  _mediaTypeKey: string
-  _mediaTypeAllContent: string
-  _mediaTypeVideoOnly: string
   _subscribedKey: string
   _downloadedKey: string
   _allPodcastsKey: string
@@ -270,7 +270,6 @@ export interface IFilters {
   _sectionMyPlaylistsKey: string
   _sectionSortKey: string
   _sectionSubscribedPlaylistsKey: string
-  _sectionMediaTypeKey: string
 }
 
 interface IFontLargeSizes {

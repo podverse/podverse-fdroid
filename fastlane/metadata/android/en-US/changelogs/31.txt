@@ -1,0 +1,7 @@
+Major update:
+- Added "video only" mode for podcasts, episodes, and clips. Go to the More screen to try it out!
+- Added screen-reader accessibility for web and mobile.
+- Added "In Progress" and "Finished" sections to the Active Downloads screen.
+- Fixed broken "Delete Account" button.
+- Translation updates.
+- Other bug fixes.

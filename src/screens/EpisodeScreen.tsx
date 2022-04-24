@@ -1,6 +1,6 @@
 import { convertNowPlayingItemToEpisode, convertToNowPlayingItem } from 'podverse-shared'
 import { StyleSheet, View as RNView } from 'react-native'
-import React from 'reactn'
+import React, { getGlobal } from 'reactn'
 import {
   ActionSheet,
   EpisodeTableHeader,
@@ -43,6 +43,17 @@ type State = {
 }
 
 const testIDPrefix = 'episode_screen'
+
+const getScreenTitle = () => {
+  const { appMode } = getGlobal()
+  let screenTitle = translate('Episode')
+
+  if (appMode === PV.AppMode.videos) {
+    screenTitle = translate('Video')
+  }
+
+  return screenTitle
+}
 
 export class EpisodeScreen extends HistoryIndexListenerScreen<Props, State> {
   constructor(props: Props) {
@@ -89,7 +100,7 @@ export class EpisodeScreen extends HistoryIndexListenerScreen<Props, State> {
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
 
     return {
-      title: translate('Episode'),
+      title: getScreenTitle(),
       headerRight: () => (
         <RNView style={core.row}>
           {!addByRSSPodcastFeedUrl && (
