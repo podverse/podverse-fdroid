@@ -7,7 +7,6 @@ import { translate } from '../lib/i18n'
 import PVEventEmitter from '../services/eventEmitter'
 import { PV } from '../resources'
 import { AppModes } from '../resources/AppMode'
-import { trackPageView } from '../services/tracking'
 import { table } from '../styles'
 
 type Props = {
@@ -32,7 +31,6 @@ export class AppModeScreen extends React.Component<Props, State> {
   async componentDidMount() {
     const offlineModeEnabled = await AsyncStorage.getItem(PV.Keys.APP_MODE)
     this.setState({ offlineModeEnabled })
-    trackPageView('/app-mode', 'App Mode Screen')
   }
 
   _handleAppModeOnPress = (selectedKey: AppModes) => {
