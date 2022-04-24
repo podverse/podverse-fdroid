@@ -50,6 +50,7 @@ export class SettingsScreenAccount extends React.Component<Props, State> {
   }
 
   _handleDeleteAccount = async () => {
+    const { navigation } = this.props
     const { deleteAccountDialogText } = this.state
 
     try {
@@ -57,6 +58,8 @@ export class SettingsScreenAccount extends React.Component<Props, State> {
         await deleteLoggedInUser()
         await logoutUser()
         this.setState({ showDeleteAccountDialog: false })
+        navigation.goBack(null)
+        navigation.goBack(null)
       }
     } catch (error) {
       this.setState({ showDeleteAccountDialog: false }, () => {

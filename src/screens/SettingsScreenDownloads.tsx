@@ -259,7 +259,7 @@ export class SettingsScreenDownloads extends React.Component<Props, State> {
 
   _setExtDownloadFileLocation = async () => {
     try {
-      const extPath = RNFS.ExternalStorageDirectoryPath + '/Podverse'
+      const extPath = RNFS.DocumentDirectoryPath
       try {
         const resp = await RNFS.stat(extPath)
         if (!resp.isDirectory()) {
