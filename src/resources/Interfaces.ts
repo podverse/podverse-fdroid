@@ -128,6 +128,7 @@ export interface InitialState {
       videoPosition: number
     }
     hidePlaybackSpeedButton: boolean
+    remoteSkipButtonsAreTimeJumps: boolean
   }
   playlists: {
     myPlaylists: []
@@ -210,7 +211,6 @@ export interface InitialState {
     clipTitle?: string
   }
   screenReaderEnabled: boolean
-  hidePlaybackSpeedButton: boolean
 }
 
 export interface BannerInfoError {
