@@ -135,8 +135,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
-        versionCode 32
-        versionName "4.4.1"
+        versionCode 33
+        versionName "4.4.2"
         multiDexEnabled true
     }
     splits {
