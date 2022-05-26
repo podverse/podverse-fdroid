@@ -1,0 +1,6 @@
+- Add audio livestream playback support.
+- Fix bugs with offline mode.
+- Reorder "My Library" screen.
+- Add feature demo videos to More > Premium/Membership screen.
+- Fix XMPP chat room addresses on More > Contact > XMPP.
+- Translation updates.
