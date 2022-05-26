@@ -17,3 +17,4 @@
   **[] $VALUES;
   public *;
 }
+-keep class com.swmansion.** {*;}
