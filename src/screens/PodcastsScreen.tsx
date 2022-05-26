@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
+import messaging from '@react-native-firebase/messaging'
 import debounce from 'lodash/debounce'
 import { Alert, AppState, Linking, Platform, StyleSheet, View as RNView } from 'react-native'
 import Config from 'react-native-config'
@@ -184,7 +185,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
           AsyncStorage.setItem(PV.Keys.APP_HAS_LAUNCHED, 'true'),
           AsyncStorage.setItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END, 'TRUE'),
           AsyncStorage.setItem(PV.Keys.DOWNLOADED_EPISODE_LIMIT_GLOBAL_COUNT, '5'),
-          AsyncStorage.setItem(PV.Keys.CENSOR_NSFW_TEXT, 'TRUE'),
           AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, '2.5'),
           AsyncStorage.setItem(PV.Keys.APP_MODE, PV.AppMode.podcasts)
         ])
@@ -300,10 +300,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
     this.props.navigation.navigate(PV.RouteNames.MembershipScreen)
   }
 
+  // Go back to the root screen to make sure componentDidMount is called.
   // On some Android devices, the .goBack method appears to not work reliably
   // unless there is some delay between screen changes. Wrapping each .goBack method
   // in a delay to make this happen.
-  // Go back to the root screen to make sure componentDidMount is called.
   _goBackWithDelay = async () => {
     const { navigation } = this.props
     return new Promise((resolve) => {
@@ -696,6 +696,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     <PodcastTableCell
       id={item?.id}
       lastEpisodePubDate={item.lastEpisodePubDate}
+      latestLiveItemStatus={item.latestLiveItemStatus}
       onPress={() =>
         this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
           podcast: item,
@@ -866,7 +867,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       showDataSettingsConfirmDialog,
       showNoInternetConnectionMessage
     } = this.state
-    const { offlineModeEnabled, session, subscribedPodcasts = [], subscribedPodcastsTotalCount = 0 } = this.global
+    const { session, subscribedPodcasts = [], subscribedPodcastsTotalCount = 0 } = this.global
     const { subscribedPodcastIds } = session?.userInfo
 
     let flatListData = []
@@ -881,12 +882,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     const noSubscribedPodcasts =
       queryFrom === PV.Filters._subscribedKey && (!subscribedPodcastIds || subscribedPodcastIds.length === 0)
-
-    const showOfflineMessage =
-      offlineModeEnabled &&
-      queryFrom !== PV.Filters._downloadedKey &&
-      queryFrom !== PV.Filters._subscribedKey &&
-      queryFrom !== PV.Filters._customFeedsKey
 
     const isCategoryScreen = queryFrom === PV.Filters._categoryKey
 
@@ -939,7 +934,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
               onRefresh={this._onRefresh}
               renderHiddenItem={this._renderHiddenItem}
               renderItem={this._renderPodcastItem}
-              showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
+              showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               testID={testIDPrefix}
             />
           )}
