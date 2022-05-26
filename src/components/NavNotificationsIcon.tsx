@@ -1,7 +1,7 @@
 import React from 'reactn'
 import { Alert, Linking } from 'react-native'
 import Config from 'react-native-config'
-import messaging from '@react-native-firebase/messaging'
+// import messaging from '@react-native-firebase/messaging'
 import { darkTheme } from '../styles'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'

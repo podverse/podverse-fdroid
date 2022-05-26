@@ -13,7 +13,7 @@ import {
   EpisodeTableCell,
   FlatList,
   NavShareIcon,
-  NavNotificationsIcon,
+  // NavNotificationsIcon,
   NumberSelectorWithText,
   PodcastTableHeader,
   ScrollView,
@@ -189,14 +189,14 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   static navigationOptions = ({ navigation }) => {
     const podcastId = navigation.getParam('podcastId')
     const podcastTitle = navigation.getParam('podcastTitle')
-    const notificationsEnabled = navigation.getParam('notificationsEnabled')
+    // const notificationsEnabled = navigation.getParam('notificationsEnabled')
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
     
     return {
       title: getScreenTitle(),
       headerRight: () => (
         <RNView style={core.row}>
-          {
+          {/* {
             !addByRSSPodcastFeedUrl && (
               <NavNotificationsIcon
                 podcastId={podcastId}
@@ -206,7 +206,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                 }
               />
             )
-          }
+          } */}
           {!addByRSSPodcastFeedUrl && (
             <NavShareIcon
               endingText={translate('shared using brandName')}

@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import messaging from '@react-native-firebase/messaging'
 import debounce from 'lodash/debounce'
 import { Alert, AppState, Linking, Platform, StyleSheet, View as RNView } from 'react-native'
 import Config from 'react-native-config'
