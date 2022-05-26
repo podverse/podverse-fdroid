@@ -28,11 +28,10 @@ export class PurchasingScreen extends React.Component<Props> {
 
   _handleRetryProcessing = async () => {
     const purchase = this.global.purchase || {}
-    const { productId, transactionId, transactionReceipt } = purchase
     if (Platform.OS === 'android') {
       // removed react-native-iap to comply with F-Droid FOSS policy
     } else if (Platform.OS === 'ios') {
-      await iosHandlePurchaseStatusCheck(productId, transactionId, transactionReceipt)
+      await iosHandlePurchaseStatusCheck(purchase)
     }
   }
 

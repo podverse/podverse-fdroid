@@ -495,8 +495,6 @@ export class ProfileScreen extends React.Component<Props, State> {
       ? translate('Login to view your clips')
       : translate('Login to view your profile')
 
-    const showOfflineMessage = offlineModeEnabled
-
     return (
       <View style={styles.view} testID={`${testIDPrefix}_view`}>
         {isMyProfile && !isLoggedIn && (
@@ -546,7 +544,7 @@ export class ProfileScreen extends React.Component<Props, State> {
                 noResultsMessage={noResultsMessage}
                 onEndReached={this._onEndReached}
                 renderItem={this._renderItem}
-                showNoInternetConnectionMessage={showOfflineMessage || showNoInternetConnectionMessage}
+                showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               />
             )}
             <ActionSheet
