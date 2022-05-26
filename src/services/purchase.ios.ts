@@ -1,4 +1,4 @@
-import { finishTransaction, Purchase } from 'react-native-iap'
+// import { finishTransaction, Purchase } from 'react-native-iap'
 import { updateAppStorePurchaseStatus } from './appStorePurchase'
 
 export const iosHandlePurchaseStatusCheck = async (purchase: Purchase) => {

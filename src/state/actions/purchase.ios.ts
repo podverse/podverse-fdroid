@@ -1,4 +1,4 @@
-import { Purchase } from 'react-native-iap'
+// import { Purchase } from 'react-native-iap'
 import { setGlobal } from 'reactn'
 import { iosHandlePurchaseStatusCheck as iosHandlePurchaseStatusCheckService } from '../../services/purchase.ios'
 import { getAuthUserInfo } from './auth'

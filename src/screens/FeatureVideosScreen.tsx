@@ -3,7 +3,6 @@ import Video from 'react-native-video'
 import React from 'reactn'
 import { translate } from '../lib/i18n'
 import {  NavHeaderButtonText } from '../components'
-import { trackPageView } from '../services/tracking'
 
 type Props = any
 
@@ -31,9 +30,6 @@ export class FeatureVideosScreen extends React.Component<Props, State> {
   }
 
   videoRef: Video
-  componentDidMount() {
-    trackPageView('/featureVideo', 'Feature Video Screen')
-  }
 
   render() {
     return (
