@@ -4,3 +4,4 @@
 - Add feature demo videos to More > Premium/Membership screen.
 - Fix XMPP chat room addresses on More > Contact > XMPP.
 - Translation updates.
+- Other bug fixes.
