@@ -30,7 +30,7 @@ export const getPublicLiveItemsByPodcastId = async (podcastId: string) => {
   }
 }
 
-export const getEpisodesAndLiveItems = async (query: any, podcast: Podcast) => {
+export const getEpisodesAndLiveItems = async (query: any, podcastId: string) => {
   // If a show is currently live, it will appear at the top of the episodes list.
   // TODO: Scheduled live shows should appear in their own section.
   const episodesResponse = await getEpisodes(query)
@@ -38,8 +38,8 @@ export const getEpisodesAndLiveItems = async (query: any, podcast: Podcast) => {
   let combinedEpisodesData = episodesData
   let scheduledLiveItems: LiveItem[] = []
 
-  if (podcast?.hasLiveItem && query.page === 1) {
-    const { currentlyLive, scheduled } = await getPublicLiveItemsByPodcastId(podcast.id)
+  if (query.page === 1) {
+    const { currentlyLive, scheduled } = await getPublicLiveItemsByPodcastId(podcastId)
     combinedEpisodesData = [...currentlyLive, ...episodesData]
     scheduledLiveItems = [...currentlyLive, ...scheduled]
   }

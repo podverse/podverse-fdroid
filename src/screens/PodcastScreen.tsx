@@ -164,7 +164,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
       flatListData: [],
       flatListDataTotalCount: null,
       hasInternetConnection: false,
-      isLoadingMore: false,
+      isLoadingMore: true,
       isRefreshing: false,
       isSubscribing: false,
       limitDownloadedEpisodes: false,
@@ -227,6 +227,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     const { navigation } = this.props
     const { podcastId } = this.state
     let podcast = navigation.getParam('podcast')
+    const forceRequest = navigation.getParam('forceRequest')
     const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.on(PV.Events.PODCAST_START_PODCAST_FROM_TIME_SET, this.refreshStartPodcastFromTime)
@@ -238,7 +239,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     if (addByRSSPodcastFeedUrl) {
       podcast = await getAddByRSSPodcastLocally(addByRSSPodcastFeedUrl)
     } else if (!hasInternetConnection && podcastId) {
-      podcast = await getPodcast(podcastId)
+      podcast = await getPodcast(podcastId, forceRequest)
     }
 
     this.refreshStartPodcastFromTime()
@@ -260,8 +261,9 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   }
 
   async _initializePageData() {
+    const { navigation } = this.props
     const { podcast, viewType } = this.state
-    const podcastId = this.props.navigation.getParam('podcastId') || this.state.podcastId
+    const podcastId = navigation.getParam('podcastId') || this.state.podcastId
     const downloadedEpisodeLimit = await getDownloadedEpisodeLimit(podcastId)
 
     this.setState(
@@ -286,7 +288,8 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
               newState.flatListData = podcast.episodes || []
               newState.flatListDataTotalCount = newState.flatListData.length
             } else {
-              newPodcast = await getPodcast(podcastId)
+              const forceRequest = navigation.getParam('forceRequest')
+              newPodcast = await getPodcast(podcastId, forceRequest)
               if (viewType === PV.Filters._episodesKey) {
                 newState = await this._queryData(PV.Filters._episodesKey)
               } else if (viewType === PV.Filters._clipsKey) {
@@ -1014,6 +1017,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
               <FlatList
                 data={flatListData}
                 dataTotalCount={flatListDataTotalCount}
+                disableNoResultsMessage={isLoadingMore}
                 disableLeftSwipe={viewType !== PV.Filters._downloadedKey}
                 extraData={flatListData}
                 isLoadingMore={isLoadingMore}
@@ -1068,13 +1072,13 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   }
 
   _queryEpisodes = async (sort: string | null, page = 1) => {
-    const { podcast, podcastId, searchBarText: searchTitle } = this.state
+    const { podcastId, searchBarText: searchTitle } = this.state
     const results = await getEpisodesAndLiveItems({
       sort,
       page,
       podcastId,
       ...(searchTitle ? { searchTitle } : {})
-    }, podcast)
+    }, podcastId)
 
     const { combinedEpisodes } = results
     return combinedEpisodes
