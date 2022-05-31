@@ -1413,9 +1413,9 @@ Builds:
       - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
     ndk: r23b
 
-  - versionName: 4.5.3-qa.1
+  - versionName: 4.5.4-qa.1
     versionCode: 34
-    commit: 4.5.3-qa.1
+    commit: 4.5.4-qa.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -1430,15 +1430,11 @@ Builds:
       - yarn jetify
     gradle:
       - yes
-    srclibs:
-      - react-native-reanimated@2.8.0
     rm:
       - functions
     prebuild:
       - echo -e '\norg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=4g' >> ../gradle.properties
       - echo -e "android { packagingOptions { pickFirst 'lib/**/*.so' } }" >> build.gradle
-      - cd $$react-native-reanimated$$
-      - yarn install
     scanignore:
       - android/build.gradle
       - node_modules/hermes-engine
@@ -1447,6 +1443,7 @@ Builds:
       - node_modules/react-native/ReactAndroid/build.gradle
       - node_modules/react-native-document-picker/android/build.gradle
       - node_modules/react-native-localize/android/build.gradle
+      - node_modules/react-native-reanimated/android/build.gradle
       - node_modules/react-native-safe-area-context/android/build.gradle
       - node_modules/react-native-screens/android/build.gradle
       - node_modules/react-native-share/android/build.gradle
@@ -1459,19 +1456,10 @@ Builds:
       - node_modules/@react-native-community/netinfo/android/build.gradle
     scandelete:
       - node_modules
-    build:
-      - pushd $$react-native-reanimated$$
-      - FOR_HERMES=True gradle :assembleRelease
-      - popd
-      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-hermes.aar
-      - pushd $$react-native-reanimated$$
-      - gradle :assembleRelease
-      - popd
-      - mv $$react-native-reanimated$$/build/outputs/aar/android-release.aar ../../node_modules/react-native-reanimated/android/react-native-reanimated-66-jsc.aar
     ndk: r23b
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"(.+)"
-CurrentVersion: 4.5.3-qa.1
+CurrentVersion: 4.5.4-qa.1
 CurrentVersionCode: 34
