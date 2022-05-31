@@ -13,6 +13,7 @@ import {
   EpisodeTableCell,
   FlatList,
   NavShareIcon,
+  // NavNotificationsIcon,
   NumberSelectorWithText,
   PodcastTableHeader,
   ScrollView,
@@ -37,8 +38,8 @@ import {
   safelyUnwrapNestedVariable
 } from '../lib/utility'
 import { PV } from '../resources'
-import { getEpisodes } from '../services/episode'
 import PVEventEmitter from '../services/eventEmitter'
+import { getEpisodesAndLiveItems } from '../services/liveItem'
 import { getMediaRefs } from '../services/mediaRef'
 import {
   getPodcastCredentials,
@@ -49,6 +50,7 @@ import {
 import { getPodcast } from '../services/podcast'
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import * as DownloadState from '../state/actions/downloads'
+import { checkIfNotificationsEnabledForPodcastId } from '../state/actions/notifications'
 import { toggleAddByRSSPodcastFeedUrl } from '../state/actions/parser'
 import { toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { core } from '../styles'
@@ -140,16 +142,21 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     const podcast = this.props.navigation.getParam('podcast')
     const podcastId = podcast?.id || podcast?.addByRSSPodcastFeedUrl || this.props.navigation.getParam('podcastId')
     const viewType = this.props.navigation.getParam('viewType') || PV.Filters._episodesKey
+    const notificationsEnabled = checkIfNotificationsEnabledForPodcastId(podcastId)
 
     if (podcast?.id || podcast?.addByRSSPodcastFeedUrl) {
       this.props.navigation.setParams({
         podcastId,
         podcastTitle: podcast.title,
-        addByRSSPodcastFeedUrl: podcast.addByRSSPodcastFeedUrl
+        addByRSSPodcastFeedUrl: podcast.addByRSSPodcastFeedUrl,
+        notificationsEnabled
+      })
+    } else if (podcastId) {
+      this.props.navigation.setParams({
+        podcastId,
+        notificationsEnabled
       })
     }
-
-
 
     this.state = {
       downloadedEpisodeLimit: null,
@@ -157,7 +164,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
       flatListData: [],
       flatListDataTotalCount: null,
       hasInternetConnection: false,
-      isLoadingMore: false,
+      isLoadingMore: true,
       isRefreshing: false,
       isSubscribing: false,
       limitDownloadedEpisodes: false,
@@ -182,12 +189,24 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   static navigationOptions = ({ navigation }) => {
     const podcastId = navigation.getParam('podcastId')
     const podcastTitle = navigation.getParam('podcastTitle')
+    // const notificationsEnabled = navigation.getParam('notificationsEnabled')
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
-
+    
     return {
       title: getScreenTitle(),
       headerRight: () => (
         <RNView style={core.row}>
+          {/* {
+            !addByRSSPodcastFeedUrl && (
+              <NavNotificationsIcon
+                podcastId={podcastId}
+                isEnabled={notificationsEnabled}
+                onNotificationSelectionChanged={
+                  () => navigation.setParams({ notificationsEnabled: !notificationsEnabled })
+                }
+              />
+            )
+          } */}
           {!addByRSSPodcastFeedUrl && (
             <NavShareIcon
               endingText={translate('shared using brandName')}
@@ -208,6 +227,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     const { navigation } = this.props
     const { podcastId } = this.state
     let podcast = navigation.getParam('podcast')
+    const forceRequest = navigation.getParam('forceRequest')
     const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.on(PV.Events.PODCAST_START_PODCAST_FROM_TIME_SET, this.refreshStartPodcastFromTime)
@@ -219,7 +239,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     if (addByRSSPodcastFeedUrl) {
       podcast = await getAddByRSSPodcastLocally(addByRSSPodcastFeedUrl)
     } else if (!hasInternetConnection && podcastId) {
-      podcast = await getPodcast(podcastId)
+      podcast = await getPodcast(podcastId, forceRequest)
     }
 
     this.refreshStartPodcastFromTime()
@@ -241,8 +261,9 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   }
 
   async _initializePageData() {
+    const { navigation } = this.props
     const { podcast, viewType } = this.state
-    const podcastId = this.props.navigation.getParam('podcastId') || this.state.podcastId
+    const podcastId = navigation.getParam('podcastId') || this.state.podcastId
     const downloadedEpisodeLimit = await getDownloadedEpisodeLimit(podcastId)
 
     this.setState(
@@ -267,7 +288,8 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
               newState.flatListData = podcast.episodes || []
               newState.flatListDataTotalCount = newState.flatListData.length
             } else {
-              newPodcast = await getPodcast(podcastId)
+              const forceRequest = navigation.getParam('forceRequest')
+              newPodcast = await getPodcast(podcastId, forceRequest)
               if (viewType === PV.Filters._episodesKey) {
                 newState = await this._queryData(PV.Filters._episodesKey)
               } else if (viewType === PV.Filters._clipsKey) {
@@ -830,7 +852,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
         const downloadedPodcast = downloadedPodcasts.find(
           (x: any) => (podcast && (x.id && x.id === podcast.id)) || (x.id  && x.id === podcastId)
         )
-        let episodes = downloadedPodcast.episodes || []
+        let episodes = downloadedPodcast?.episodes || []
         if (searchBarText) {
           episodes = episodes.filter(
             (episode: Episode) => episode?.title && checkIfContainsStringMatch(searchBarText, episode.title)
@@ -995,6 +1017,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
               <FlatList
                 data={flatListData}
                 dataTotalCount={flatListDataTotalCount}
+                disableNoResultsMessage={isLoadingMore}
                 disableLeftSwipe={viewType !== PV.Filters._downloadedKey}
                 extraData={flatListData}
                 isLoadingMore={isLoadingMore}
@@ -1006,7 +1029,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                 onEndReached={this._onEndReached}
                 renderItem={this._renderItem}
                 listRef={(ref) => (this.listRef = ref)}
-                showNoInternetConnectionMessage={offlineModeEnabled || showNoInternetConnectionMessage}
+                showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               />
             )}
             <ActionSheet
@@ -1050,14 +1073,15 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
 
   _queryEpisodes = async (sort: string | null, page = 1) => {
     const { podcastId, searchBarText: searchTitle } = this.state
-    const results = await getEpisodes({
+    const results = await getEpisodesAndLiveItems({
       sort,
       page,
       podcastId,
       ...(searchTitle ? { searchTitle } : {})
-    })
+    }, podcastId)
 
-    return results
+    const { combinedEpisodes } = results
+    return combinedEpisodes
   }
 
   _queryClips = async (sort: string | null, page = 1) => {
