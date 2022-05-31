@@ -23,7 +23,8 @@ export const audioInitializePlayerQueue = async (item: NowPlayingItem) => {
   setGlobal({
     screenPlayer: {
       ...globalState.screenPlayer,
-      isLoading: false
+      isLoading: false,
+      liveStreamWasPaused: false
     }
   })
 }

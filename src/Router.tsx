@@ -59,7 +59,8 @@ import {
   ValueTagConsentScreen,
   ValueTagPreviewScreen,
   ValueTagSetupScreen,
-  WebPageScreen
+  WebPageScreen,
+  FeatureVideosScreen
 } from './screens'
 import { darkTheme } from './styles'
 import { PodcastInfoScreen } from './screens/PodcastInfoScreen'
@@ -429,6 +430,13 @@ const ValueTagOnboardingNavigator = createStackNavigator(
   }
 )
 
+const FeatureVideosStack = createStackNavigator({
+  "FeatureVideosScreen":{screen:FeatureVideosScreen}
+}, {
+  defaultNavigationOptions,
+  mode:"modal"
+})
+
 const MainApp = createStackNavigator(
   {
     [PV.RouteNames.TabNavigator]: { screen: TabNavigator, path: '' },
@@ -441,6 +449,8 @@ const MainApp = createStackNavigator(
     StartPodcastFromTimeNavigator,
     WebPageNavigator,
     EmailVerificationNavigator,
+    // ScanQRCodeScreenNavigator,
+    FeatureVideosStack,
     FundingScreenNavigator,
     [PV.RouteNames.AddPodcastByRSSScreen]: {
       screen: AddPodcastByRSSURLNavigator,

@@ -145,11 +145,6 @@ const _profilesKey = 'Profiles'
 
 const allMyLibraryFeatures = [
   {
-    title: translate('Active Downloads'),
-    key: _downloadsKey,
-    routeName: PV.RouteNames.DownloadsScreen
-  },
-  {
     title: translate('Queue'),
     key: _queueKey,
     routeName: PV.RouteNames.QueueScreen
@@ -158,6 +153,11 @@ const allMyLibraryFeatures = [
     title: translate('History'),
     key: _historyKey,
     routeName: PV.RouteNames.HistoryScreen
+  },
+  {
+    title: translate('Active Downloads'),
+    key: _downloadsKey,
+    routeName: PV.RouteNames.DownloadsScreen
   },
   {
     title: translate('My Clips'),
