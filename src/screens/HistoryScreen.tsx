@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, NavHeaderButtonText, QueueTableCell, View 
 import { translate } from '../lib/i18n'
 import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
+import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
 import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
@@ -135,15 +136,20 @@ export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
   _renderHistoryItem = ({ item, index }: { item: NowPlayingItem; index: number }) => {
     const { isEditing, isTransparent } = this.state
     item = item || {}
+    const { episodeDuration, episodeId } = item
+    const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(episodeId)
 
     return (
       <QueueTableCell
         clipEndTime={item?.clipEndTime}
         clipStartTime={item?.clipStartTime}
         {...(item?.clipTitle ? { clipTitle: item.clipTitle } : {})}
+        episodeDuration={episodeDuration}
         {...(item?.episodePubDate ? { episodePubDate: item.episodePubDate } : {})}
         {...(item?.episodeTitle ? { episodeTitle: item.episodeTitle } : {})}
         handleRemovePress={() => this._handleRemoveHistoryItemPress(item)}
+        liveItem={item?.liveItem}
+        mediaFileDuration={mediaFileDuration}
         onPress={() => {
           if (!isEditing) {
             this._handlePlayItem(item)
@@ -154,6 +160,7 @@ export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
         showRemoveButton={isEditing}
         testID={`${testIDPrefix}_history_item_${index}`}
         transparent={isTransparent}
+        userPlaybackPosition={userPlaybackPosition}
       />
     )
   }
