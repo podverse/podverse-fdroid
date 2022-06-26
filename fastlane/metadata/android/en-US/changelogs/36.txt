@@ -1,0 +1,7 @@
+- Added "auto-queue new episodes" feature. Tap the settings icon on a podcast screen to enable auto-queue.
+- Disabled "automatically switch to offline mode" feature.
+- Fixed a bug with playback time and duration not rendering properly on the History screen.
+- Fixed invalid dates rendering for livestreams.
+- Fixed bug with importing some OPML files.
+- Added "sync local podcasts to Premium account" feature after logging in.
+- Fixed a bug with unsubscribing from podcasts.
