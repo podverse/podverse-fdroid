@@ -626,7 +626,15 @@ export const parseOpmlFile = (data: any, topLevel = false): string[] => {
 
   const resultArr = new Array<string>()
   for (const item of outlineArr) {
-    if (item.$?.type?.toLowerCase() === 'rss') {
+    /*
+      Exports from Podkicker don't include the type="rss" attribute,
+      so if an xmlurl or xmlUrl is on item, then assume it is an rss feed url.
+    */
+    if (
+      item.$?.type?.toLowerCase() === 'rss'
+      || item.$?.xmlurl
+      || item.$?.xmlUrl
+    ) {
       const url = item.$?.xmlurl || item.$?.xmlUrl
       const decodedUrl = decodeURIComponent(url)
       if (decodedUrl) {
@@ -746,4 +754,9 @@ export const generateEpisodeAccessibilityText = (
       `${timeLabelText}, ${translate('Unplayed episode')}` : ''} ${translate('Unplayed episode')}`
   }
   return timeLabelText
+}
+
+export const addParameterToURL = (uri: string, param: string) => {
+    uri += (uri.split('?')[1] ? '&' : '?') + param
+    return uri
 }
