@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
+import { checkIfVideoFileOrVideoLiveType } from 'podverse-shared'
 import {
   Alert,
   Modal,
@@ -41,7 +42,6 @@ import {
   playerPreviewStartTime
 } from '../services/player'
 import { playerTogglePlay, playerSetNowPlayingItem, playerSetPlaybackSpeed } from '../state/actions/player'
-import { checkIfVideoFileType } from '../state/actions/playerVideo'
 import { core, darkTheme, iconStyles, playerStyles } from '../styles'
 
 type Props = {
@@ -501,14 +501,15 @@ export class MakeClipScreen extends React.Component<Props, State> {
               value={isPublicItemSelected.value}
               wrapperStyle={styles.dropdownButtonSelectWrapper}
             />
-            {checkIfVideoFileType(nowPlayingItem) && (
+            {checkIfVideoFileOrVideoLiveType(nowPlayingItem?.episodeMediaType) && (
               <RNView style={outerWrapperStyle}>
                 <RNView style={imageWrapperStyle}>
                   <PVVideo disableFullscreen navigation={navigation} />
                 </RNView>
               </RNView>
             )}
-            {!checkIfVideoFileType(nowPlayingItem) && <View style={styles.fillerView} transparent />}
+            {!checkIfVideoFileOrVideoLiveType(
+              nowPlayingItem?.episodeMediaType) && <View style={styles.fillerView} transparent />}
             <View style={styles.wrapperBottom} transparent>
               <View style={styles.wrapperBottomInside} transparent>
                 <TimeInput
