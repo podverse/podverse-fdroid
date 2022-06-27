@@ -1,0 +1,1 @@
+- Add "hide completed episodes" setting. Go to More > Settings > Other to hide completed episodes by default.
