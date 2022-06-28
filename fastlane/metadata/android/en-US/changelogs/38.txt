@@ -1,0 +1,1 @@
+- Fix bug that was causing "custom RSS feeds" to disappear and reappear.
