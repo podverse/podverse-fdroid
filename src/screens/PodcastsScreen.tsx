@@ -181,7 +181,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
     try {
       const appHasLaunched = await AsyncStorage.getItem(PV.Keys.APP_HAS_LAUNCHED)
       if (!appHasLaunched) {
-
         await Promise.all([
           AsyncStorage.setItem(PV.Keys.APP_HAS_LAUNCHED, 'true'),
           AsyncStorage.setItem(PV.Keys.AUTO_DELETE_EPISODE_ON_END, 'TRUE'),
@@ -189,7 +188,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           AsyncStorage.setItem(PV.Keys.PLAYER_MAXIMUM_SPEED, '2.5'),
           AsyncStorage.setItem(PV.Keys.APP_MODE, PV.AppMode.podcasts)
         ])
-        
+
         if (!Config.DISABLE_CRASH_LOGS) {
           await AsyncStorage.setItem(PV.Keys.ERROR_REPORTING_ENABLED, 'TRUE')
         }
@@ -446,7 +445,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
     await getAuthenticatedUserInfoLocally()
     await combineWithAddByRSSPodcasts(searchBarText)
-  
+
     this._handleInitialDefaultQuery()
 
     // Set the appUserAgent one time on initialization, then retrieve from a constant
@@ -486,9 +485,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const preventIsLoading = true
     const preventAutoDownloading = false
     // if (isConnected) {
-      this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
+    this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
     // } else {
-      // this._setDownloadedDataIfOffline()
+    // this._setDownloadedDataIfOffline()
     // }
   }
 
@@ -503,8 +502,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const preventAutoDownloading = true
     const keepSearchTitle = false
     const preventParseCustomRSSFeeds = true
-    await this.handleSelectFilterItem(selectedKey, preventIsLoading, preventAutoDownloading,
-      keepSearchTitle, preventParseCustomRSSFeeds)
+    await this.handleSelectFilterItem(
+      selectedKey,
+      preventIsLoading,
+      preventAutoDownloading,
+      keepSearchTitle,
+      preventParseCustomRSSFeeds
+    )
   }
 
   handleSelectFilterItem = async (
@@ -549,8 +553,14 @@ export class PodcastsScreen extends React.Component<Props, State> {
         (async () => {
           const nextState = null
           const options = {}
-          const newState = await this._queryData(selectedKey, this.state, nextState, 
-            options, preventAutoDownloading, preventParseCustomRSSFeeds)
+          const newState = await this._queryData(
+            selectedKey,
+            this.state,
+            nextState,
+            options,
+            preventAutoDownloading,
+            preventParseCustomRSSFeeds
+          )
           this.setState(newState)
         })()
       }
@@ -964,7 +974,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     if (!preventParseCustomRSSFeeds) {
       if (!searchBarText) await parseAllAddByRSSPodcasts()
-  
+
       await combineWithAddByRSSPodcasts(searchBarText)
     }
 
@@ -1039,14 +1049,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
       const hasVideo = appMode === PV.AppMode.videos
 
       const hasInternetConnection = await hasValidNetworkConnection()
-      const isSubscribedSelected =
-        filterKey === PV.Filters._subscribedKey || queryFrom === PV.Filters._subscribedKey
-      const isCustomFeedsSelected =
-        filterKey === PV.Filters._customFeedsKey || queryFrom === PV.Filters._customFeedsKey
-      const isDownloadedSelected =
-        filterKey === PV.Filters._downloadedKey || queryFrom === PV.Filters._downloadedKey
-      const isAllPodcastsSelected =
-        filterKey === PV.Filters._allPodcastsKey || queryFrom === PV.Filters._allPodcastsKey
+      const isSubscribedSelected = filterKey === PV.Filters._subscribedKey || queryFrom === PV.Filters._subscribedKey
+      const isCustomFeedsSelected = filterKey === PV.Filters._customFeedsKey || queryFrom === PV.Filters._customFeedsKey
+      const isDownloadedSelected = filterKey === PV.Filters._downloadedKey || queryFrom === PV.Filters._downloadedKey
+      const isAllPodcastsSelected = filterKey === PV.Filters._allPodcastsKey || queryFrom === PV.Filters._allPodcastsKey
 
       if (isSubscribedSelected) {
         if (!preventParseCustomRSSFeeds) {

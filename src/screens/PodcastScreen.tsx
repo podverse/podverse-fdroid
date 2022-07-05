@@ -192,7 +192,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     const podcastTitle = navigation.getParam('podcastTitle')
     // const notificationsEnabled = navigation.getParam('notificationsEnabled')
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
-    
+
     return {
       title: getScreenTitle(),
       headerRight: () => (
@@ -224,7 +224,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
 
   async componentDidMount() {
     super.componentDidMount()
-    
+
     const { navigation } = this.props
     const { podcastId } = this.state
     let podcast = navigation.getParam('podcast')
@@ -517,10 +517,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
       const { completed, mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(item?.id)
 
       const { hideCompleted } = this.global
-      const shouldHideCompleted =
-        hideCompleted
-        && viewType === PV.Filters._episodesKey
-        && completed
+      const shouldHideCompleted = hideCompleted && viewType === PV.Filters._episodesKey && completed
 
       return (
         <EpisodeTableCell
@@ -870,7 +867,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
       const { downloadedPodcasts } = this.global
       if (Array.isArray(downloadedPodcasts)) {
         const downloadedPodcast = downloadedPodcasts.find(
-          (x: any) => (podcast && (x.id && x.id === podcast.id)) || (x.id  && x.id === podcastId)
+          (x: any) => (podcast && x.id && x.id === podcast.id) || (x.id && x.id === podcastId)
         )
         let episodes = downloadedPodcast?.episodes || []
         if (searchBarText) {
@@ -878,7 +875,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
             (episode: Episode) => episode?.title && checkIfContainsStringMatch(searchBarText, episode.title)
           )
         }
-  
+
         flatListData = episodes
         flatListDataTotalCount = flatListData.length
       }
@@ -886,8 +883,8 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
 
     const noResultsMessage =
       (viewType === PV.Filters._downloadedKey && translate('No episodes found')) ||
-      ((viewType === PV.Filters._episodesKey
-        || viewType === PV.Filters._showCompletedKey) && translate('No episodes found')) ||
+      ((viewType === PV.Filters._episodesKey || viewType === PV.Filters._showCompletedKey) &&
+        translate('No episodes found')) ||
       (viewType === PV.Filters._clipsKey && translate('No clips found'))
 
     return (
@@ -1104,12 +1101,15 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
 
   _queryEpisodes = async (sort: string | null, page = 1) => {
     const { podcastId, searchBarText: searchTitle } = this.state
-    const results = await getEpisodesAndLiveItems({
-      sort,
-      page,
-      podcastId,
-      ...(searchTitle ? { searchTitle } : {})
-    }, podcastId)
+    const results = await getEpisodesAndLiveItems(
+      {
+        sort,
+        page,
+        podcastId,
+        ...(searchTitle ? { searchTitle } : {})
+      },
+      podcastId
+    )
 
     const { combinedEpisodes } = results
     return combinedEpisodes
@@ -1145,8 +1145,10 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
 
     try {
       if (
-        (filterKey === PV.Filters._episodesKey || filterKey === PV.Filters._showCompletedKey)
-        && podcast && podcast.addByRSSPodcastFeedUrl) {
+        (filterKey === PV.Filters._episodesKey || filterKey === PV.Filters._showCompletedKey) &&
+        podcast &&
+        podcast.addByRSSPodcastFeedUrl
+      ) {
         newState.flatListData = podcast.episodes || []
         newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
         newState.flatListDataTotalCount = newState.flatListData.length

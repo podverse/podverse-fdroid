@@ -89,4 +89,4 @@ export { WebViewStaticHTML } from './WebViewStaticHTML'
 export { TimeRemainingWidget } from './TimeRemainingWidget'
 export { ErrorBoundary } from './ErrorBoundary'
 export { NavNotificationsIcon } from './NavNotificationsIcon'
-export {PVVideoLink} from "./PVVideoLink"
+export { PVVideoLink } from './PVVideoLink'

@@ -35,7 +35,7 @@ export class AboutScreen extends React.Component<Props> {
       { text: 'Yes', onPress: () => Linking.openURL(url) }
     ])
   }
-  
+
   render() {
     return (
       <View style={styles.content} testID='about_screen_view'>
@@ -59,9 +59,11 @@ export class AboutScreen extends React.Component<Props> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 isSecondary={!contributor.link}
                 key={`maintainers_${index}`}
-                {...(contributor.link ? {
-                  onPress: () => this.handleFollowLink(contributor.link)
-                } : {})}
+                {...(contributor.link
+                  ? {
+                      onPress: () => this.handleFollowLink(contributor.link)
+                    }
+                  : {})}
                 style={style}>
                 {contributor.name}
               </Text>
@@ -78,9 +80,11 @@ export class AboutScreen extends React.Component<Props> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 key={`contributors_${index}`}
                 isSecondary={!contributor.link}
-                {...(contributor.link ? {
-                  onPress: () => this.handleFollowLink(contributor.link)
-                } : {})}
+                {...(contributor.link
+                  ? {
+                      onPress: () => this.handleFollowLink(contributor.link)
+                    }
+                  : {})}
                 style={style}>
                 {contributor.name}
               </Text>
