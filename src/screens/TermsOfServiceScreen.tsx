@@ -7,8 +7,7 @@ import { PV } from '../resources'
 
 type Props = any
 
-const termsOfServiceText =
-`${translate('TermsOfServiceScreenText1')}
+const termsOfServiceText = `${translate('TermsOfServiceScreenText1')}
   
 ${translate('TermsOfServiceScreenText2')}
 
