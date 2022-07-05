@@ -1,0 +1,2 @@
+- Fix "downloaded episodes won't play" issue with custom RSS feeds.
+- Add playback position saving on player pause or stop on bluetooth disconnect.
