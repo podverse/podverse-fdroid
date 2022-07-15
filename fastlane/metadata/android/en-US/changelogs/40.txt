@@ -1,0 +1,2 @@
+- Start to add German, Greek, Norwegian, Portuguese, and Russian translations.
+- Updates to Swedish translations.
