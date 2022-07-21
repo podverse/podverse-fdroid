@@ -1,3 +1,3 @@
 - Fix bug with some "add by custom RSS" episodes not downloading.
 - Add "autodownload by default on subscribe to podcast" feature to More > Settings > Downloads.
-- Swedish translations.
+- Add Swedish translations.
