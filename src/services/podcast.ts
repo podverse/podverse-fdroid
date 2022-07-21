@@ -6,6 +6,7 @@ import { hasValidNetworkConnection } from '../lib/network'
 import { getAuthorityFeedUrlFromArray } from '../lib/utility'
 import { PV } from '../resources'
 import { updateAutoQueueSettings } from '../state/actions/autoQueue'
+import { updateAutoDownloadSettings } from '../state/actions/downloads'
 import { checkIfLoggedIn, getBearerToken } from './auth'
 import { handleAutoDownloadEpisodesAddByRSSPodcasts, removeAutoDownloadSetting } from './autoDownloads'
 import { getAddByRSSPodcastsLocally, removeAddByRSSPodcast } from './parser'
@@ -227,6 +228,14 @@ export const toggleSubscribeToPodcast = async (id: string, skipRequestReview = f
     await setDownloadedEpisodeLimit(id)
     const autoQueueOn = false
     updateAutoQueueSettings(id, autoQueueOn)
+  }
+
+  if (!isUnsubscribing) {
+    const autoDownloadByDefault = await AsyncStorage.getItem(PV.Keys.AUTO_DOWNLOAD_BY_DEFAULT)
+    if (!!autoDownloadByDefault) {
+      const autoDownloadOn = true
+      updateAutoDownloadSettings(id, autoDownloadOn)
+    }
   }
 
   return items
