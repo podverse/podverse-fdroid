@@ -1,0 +1,8 @@
+- Add "hide completed episodes" filter.
+- Increase the size and improve the responsiveness of download and delete buttons.
+- Navigate to the podcast or episode on tap of titles on the Player screen.
+- Add full-length episode summary text that was missing for some podcasts. #1110
+- Resize the "Active Downloads" badge to fit large numbers. #1093
+- Alert when attempting to download without Wi-Fi, when Wi-Fi only mode is enabled. #1092
+- Translate dates. #1102
+- Update Turkish translations.
