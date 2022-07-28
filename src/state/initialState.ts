@@ -62,6 +62,7 @@ const initialTheme: InitialState = {
     subscribedPlaylists: []
   },
   podcastValueFinal: null,
+  podcastsGridViewEnabled: false,
   profile: {
     flatListData: [],
     user: null

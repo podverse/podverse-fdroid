@@ -1,0 +1,2 @@
+- Add grid view to podcasts screen!
+- Improve image caching so they load faster and work in offline mode.
