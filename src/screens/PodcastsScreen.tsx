@@ -9,6 +9,7 @@ import { convertToNowPlayingItem } from 'podverse-shared'
 import {
   Divider,
   FlatList,
+  NavPodcastsViewIcon,
   PlayerEvents,
   PodcastTableCell,
   SearchBar,
@@ -147,7 +148,12 @@ export class PodcastsScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }) => {
     const _screenTitle = navigation.getParam('_screenTitle')
     return {
-      title: _screenTitle
+      title: _screenTitle,
+      headerRight: () => (
+        <RNView style={core.row}>
+          <NavPodcastsViewIcon />
+        </RNView>
+      )
     } as NavigationStackOptions
   }
 
@@ -245,14 +251,14 @@ export class PodcastsScreen extends React.Component<Props, State> {
     })
   }
 
-  // _setDownloadedDataIfOffline = async () => {
-  //   const isConnected = await hasValidNetworkConnection()
-  //   if (!isConnected) {
-  //     const preventIsLoading = false
-  //     const preventAutoDownloading = true
-  //     this.handleSelectFilterItem(PV.Filters._downloadedKey, preventIsLoading, preventAutoDownloading)
-  //   }
-  // }
+  _setDownloadedDataIfOffline = async () => {
+    const isConnected = await hasValidNetworkConnection()
+    if (!isConnected) {
+      const preventIsLoading = false
+      const preventAutoDownloading = true
+      this.handleSelectFilterItem(PV.Filters._downloadedKey, preventIsLoading, preventAutoDownloading)
+    }
+  }
 
   _handleAppStateChange = (nextAppState: any) => {
     (async () => {
@@ -477,18 +483,18 @@ export class PodcastsScreen extends React.Component<Props, State> {
       initializePlayerSettings()
     ])
 
-    // this._setDownloadedDataIfOffline()
+    this._setDownloadedDataIfOffline()
   }
 
-  _handleInitialDefaultQuery = () => {
-    // const isConnected = await hasValidNetworkConnection()
+  _handleInitialDefaultQuery = async () => {
+    const isConnected = await hasValidNetworkConnection()
     const preventIsLoading = true
     const preventAutoDownloading = false
-    // if (isConnected) {
+    if (isConnected) {
     this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
-    // } else {
-    // this._setDownloadedDataIfOffline()
-    // }
+    } else {
+    this._setDownloadedDataIfOffline()
+    }
   }
 
   // NOTE: there is a race-condition possibility if you reparse RSS feeds whenever
@@ -708,12 +714,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       id={item?.id}
       lastEpisodePubDate={item.lastEpisodePubDate}
       latestLiveItemStatus={item.latestLiveItemStatus}
-      onPress={() =>
-        this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
-          podcast: item,
-          addByRSSPodcastFeedUrl: item.addByRSSPodcastFeedUrl
-        })
-      }
+      onPress={() => this._onPodcastItemSelected(item)}
       podcastImageUrl={item.shrunkImageUrl || item.imageUrl}
       {...(item.title ? { podcastTitle: item.title } : {})}
       showAutoDownload
@@ -721,6 +722,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
       testID={`${testIDPrefix}_podcast_item_${index}`}
     />
   )
+
+  _onPodcastItemSelected = (item) => {
+    this.props.navigation.navigate(PV.RouteNames.PodcastScreen, {
+      podcast: item,
+      addByRSSPodcastFeedUrl: item.addByRSSPodcastFeedUrl
+    })
+  }
 
   _renderHiddenItem = ({ item, index }, rowMap) => {
     const { queryFrom } = this.state
@@ -878,7 +886,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       showDataSettingsConfirmDialog,
       showNoInternetConnectionMessage
     } = this.state
-    const { session, subscribedPodcasts = [], subscribedPodcastsTotalCount = 0 } = this.global
+    const { session, subscribedPodcasts = [], subscribedPodcastsTotalCount = 0, podcastsGridViewEnabled } = this.global
     const { subscribedPodcastIds } = session?.userInfo
 
     let flatListData = []
@@ -947,6 +955,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
               renderItem={this._renderPodcastItem}
               showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               testID={testIDPrefix}
+              gridView={podcastsGridViewEnabled}
+              onGridItemSelected={this._onPodcastItemSelected}
             />
           )}
         </RNView>
