@@ -1,0 +1,6 @@
+- Add grid view to home screen!
+- Add "new episodes found" badges.
+- Improve image caching so they load faster and work in offline mode.
+- Add new placeholder image for images that fail to load.
+- Update app screenshots and description.
+- Translation updates for English and Norwegian Bokmål.
