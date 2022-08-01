@@ -13,6 +13,8 @@ type State = {
 const testIDPrefix = 'feature_videos_screen'
 
 export class FeatureVideosScreen extends React.Component<Props, State> {
+  videoRef: Video
+
   static navigationOptions = ({ navigation }) => {
     return {
       title: translate('Feature Demo'),
@@ -27,8 +29,6 @@ export class FeatureVideosScreen extends React.Component<Props, State> {
       )
     }
   }
-
-  videoRef: Video
 
   render() {
     return (
