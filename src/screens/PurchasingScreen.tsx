@@ -1,8 +1,8 @@
+import { createEmailLinkUrl } from 'podverse-shared'
 import { Linking, Platform, StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, PressableWithOpacity, SafeAreaView, Text, View } from '../components'
 import { translate } from '../lib/i18n'
-import { createEmailLinkUrl } from '../lib/utility'
 import { PV } from '../resources'
 import { iosHandlePurchaseStatusCheck } from '../state/actions/purchase.ios'
 
