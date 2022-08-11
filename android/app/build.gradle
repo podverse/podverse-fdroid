@@ -136,7 +136,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
         versionCode 46
-        versionName "4.5.18"
+        versionName "4.6.0"
         multiDexEnabled true
     }
     splits {
