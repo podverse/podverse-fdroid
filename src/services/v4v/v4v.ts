@@ -5,6 +5,7 @@ import * as RNKeychain from 'react-native-keychain'
 import { getGlobal } from 'reactn'
 import { translate } from '../../lib/i18n'
 import { createSatoshiStreamStats } from '../../lib/satoshiStream'
+import { credentialsPlaceholderUsername } from '../../lib/secutity'
 import { PV } from '../../resources'
 import { V4VProviderListItem } from '../../resources/V4V'
 import { v4vAddPreviousTransactionError, v4vClearPreviousTransactionErrors,
@@ -33,7 +34,7 @@ export const MINIMUM_APP_STREAMING_PAYMENT = 0
 /* Secure storage helpers */
 
 export const v4vGetProvidersConnected = async () => {
-  let accessData = null
+  let accessData = []
   try {
     const creds = await RNKeychain.getInternetCredentials(PV.Keys.V4V_PROVIDERS_CONNECTED)
     if (creds) {
@@ -48,20 +49,23 @@ export const v4vGetProvidersConnected = async () => {
 
 export const v4vSetProvidersConnected = async (connected: V4VProviderConnectedState[]) => {
   try {
-    await RNKeychain.setInternetCredentials(PV.Keys.V4V_PROVIDERS_CONNECTED, '', JSON.stringify(connected))
+    await RNKeychain.setInternetCredentials(
+      PV.Keys.V4V_PROVIDERS_CONNECTED,
+      credentialsPlaceholderUsername,
+      JSON.stringify(connected)
+    )
   } catch (error) {
     console.log('v4vSetProvidersEnabled error:', error)
   }
 }
 
 export const v4vGetSettings = async () => {
-  let settingsData = null
+  let settingsData = v4vSettingsDefault
   try {
     const creds = await RNKeychain.getInternetCredentials(PV.Keys.V4V_SETTINGS)
     if (creds && creds.password) {
       settingsData = JSON.parse(creds.password)
     } else {
-      settingsData = v4vSettingsDefault
       await v4vSetSettings(settingsData)
     }
   } catch (error) {
@@ -73,7 +77,11 @@ export const v4vGetSettings = async () => {
 
 export const v4vSetSettings = async (settings: V4VSettings) => {
   try {
-    await RNKeychain.setInternetCredentials(PV.Keys.V4V_SETTINGS, '', JSON.stringify(settings))
+    await RNKeychain.setInternetCredentials(
+      PV.Keys.V4V_SETTINGS,
+      credentialsPlaceholderUsername,
+      JSON.stringify(settings)
+    )
   } catch (error) {
     console.log('v4vSetSettings error:', error)
   }
