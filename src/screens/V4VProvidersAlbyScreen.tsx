@@ -13,10 +13,9 @@ import {
 import { PV } from '../resources'
 import { _albyKey } from '../resources/V4V'
 import PVEventEmitter from '../services/eventEmitter'
+import { v4vAlbyGetAccessToken } from '../services/v4v/providers/alby'
 import { v4vGetConnectedProvider } from '../state/actions/v4v/v4v'
-import {
-  v4vAlbyGetAccountInfo
-} from '../state/actions/v4v/providers/alby'
+import { v4vAlbyGetAccountInfo } from '../state/actions/v4v/providers/alby'
 
 type Props = {
   navigation: any
@@ -34,7 +33,7 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
     super(props)
 
     const isLoadingWaitForEvent = !!this.props.navigation.getParam('isLoadingWaitForEvent')
-    
+
     this.state = {
       isLoading: true,
       isLoadingWaitForEvent
@@ -62,7 +61,12 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
   _handleInitialize = async () => {
     const callback = () => this.setState({ isLoading: false, isLoadingWaitForEvent: false })
     try {
-      await v4vAlbyGetAccountInfo(callback)
+      const access_token = await v4vAlbyGetAccessToken()
+      if (access_token) {
+        await v4vAlbyGetAccountInfo(callback)
+      } else {
+        callback()
+      }
     } catch (error) {
       console.log('_handleInitialize error', error)
       callback()
@@ -76,7 +80,7 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
   _disconnectWalletCallback = () => {
     this.setState({ isLoading: false, isLoadingWaitForEvent: false })
   }
-  
+
   render() {
     const { navigation } = this.props
     const { isLoading, isLoadingWaitForEvent } = this.state
@@ -130,7 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 36
   },
   scrollView: {
-    flex: 1,
+    flex: 1
   },
   scrollviewContent: {
     paddingHorizontal: 20,
@@ -155,4 +159,3 @@ const styles = StyleSheet.create({
     marginBottom: 20
   }
 })
-

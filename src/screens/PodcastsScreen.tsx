@@ -59,7 +59,11 @@ import {
 } from '../state/actions/podcast'
 import { updateScreenReaderEnabledState } from '../state/actions/screenReader'
 import { initializeSettings } from '../state/actions/settings'
-import { v4vInitializeConnectedProviders, v4vInitializeSenderInfo, v4vInitializeSettings } from '../state/actions/v4v/v4v'
+import {
+  v4vInitializeConnectedProviders,
+  v4vInitializeSenderInfo,
+  v4vInitializeSettings
+} from '../state/actions/v4v/v4v'
 import { core } from '../styles'
 
 type Props = {
@@ -437,7 +441,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         else if (v4vAlbyCheckConnectDeepLink(domain) && urlParams?.code) {
           await v4vAlbyHandleConnect(navigation, urlParams.code)
         }
-        
+
         // ELSE:
         else {
           await navigate(PV.RouteNames.PodcastsScreen)
