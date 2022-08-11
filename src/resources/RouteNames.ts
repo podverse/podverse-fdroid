@@ -19,7 +19,6 @@ export const RouteNames = {
   FilterScreen: 'FilterScreen',
   FundingScreen: 'FundingScreen',
   HistoryScreen: 'HistoryScreen',
-  LNPaySignupScreen: 'LNPaySignupScreen',
   MainApp: 'MainApp',
   MakeClipScreen: 'MakeClipScreen',
   MembershipScreen: 'MembershipScreen',
@@ -59,8 +58,11 @@ export const RouteNames = {
   SupportScreen: 'SupportScreen',
   TabNavigator: 'TabNavigator',
   TermsOfServiceScreen: 'TermsOfServiceScreen',
-  ValueTagConsentScreen: 'ValueTagConsentScreen',
-  ValueTagPreviewScreen: 'ValueTagPreviewScreen',
-  ValueTagSetupScreen: 'ValueTagSetupScreen',
+  V4VBoostagramScreen: 'V4VBoostagramScreen',
+  V4VConsentScreen: 'V4VConsentScreen',
+  V4VPreviewScreen: 'V4VPreviewScreen',
+  V4VProvidersScreen: 'V4VProvidersScreen',
+  V4VProvidersAlbyScreen: 'V4VProvidersAlbyScreen',
+  V4VProvidersAlbyLoginScreen: 'V4VProvidersAlbyLoginScreen',
   WebPageScreen: 'WebPageScreen'
 }

@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import { StyleSheet, SafeAreaView, ScrollView } from 'react-native'
+import { StyleSheet, SafeAreaView, ScrollView, Alert, Linking } from 'react-native'
 import { CheckBox } from 'react-native-elements'
 import React from 'reactn'
 import { Button, Text } from '../components'
-import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 
 type Props = any
@@ -13,7 +12,7 @@ type State = {
 
 const testIDPrefix = 'value_tag_consent_screen'
 
-export class ValueTagConsentScreen extends React.Component<Props, State> {
+export class V4VConsentScreen extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
@@ -28,9 +27,16 @@ export class ValueTagConsentScreen extends React.Component<Props, State> {
     }
   }
 
+  _handleSourceCodePress = () => {
+    Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
+      { text: 'Cancel' },
+      { text: 'Yes', onPress: () => Linking.openURL(PV.URLs.appRepo) }
+    ])
+  }
+
   _acceptAgreement = async () => {
     await AsyncStorage.setItem(PV.Keys.USER_CONSENT_VALUE_TAG_TERMS, 'true')
-    this.props.navigation.navigate(PV.RouteNames.ValueTagSetupScreen)
+    this.props.navigation.navigate(PV.RouteNames.V4VProvidersScreen)
   }
 
   _declineAgreement() {
@@ -38,16 +44,34 @@ export class ValueTagConsentScreen extends React.Component<Props, State> {
   }
 
   render() {
+    const { fontScaleMode } = this.global
+
+    const switchOptionTextStyle =
+      PV.Fonts.fontScale.largest === fontScaleMode
+        ? [styles.switchOptionText, { fontSize: PV.Fonts.largeSizes.sm }]
+        : [styles.switchOptionText]
+    
     return (
       <SafeAreaView style={styles.content} testID={`${testIDPrefix}_view`.prependTestId()}>
         <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.title}>
-          {translate('value_tag_consent_title')}
+          {'Terms and Conditions'}
         </Text>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollviewContent}>
-          <Text style={[styles.text, styles.attentionText]}>{translate('value_tag_consent_text_1')}</Text>
-          <Text style={styles.text}>{translate('value_tag_consent_text_2')}</Text>
-          <Text style={styles.text}>{translate('value_tag_consent_text_3')}</Text>
-          <Text style={styles.text}>{translate('value_tag_consent_text_4')}</Text>
+          <Text style={styles.text}>
+            {// eslint-disable-next-line max-len
+            `This is an experimental feature, we are not responsible for lost, misdirected, or stolen funds, and you assume all responsibility for the risks associated with using this feature.`}
+          </Text>
+          <Text
+            accessible
+            accessibilityLabel={'Source Code'}
+            accessibilityRole='button'
+            fontSizeLargestScale={PV.Fonts.largeSizes.md}
+            key={`${testIDPrefix}_source_code_button`}
+            onPress={this._handleSourceCodePress}
+            style={[switchOptionTextStyle, { width: '100%' }]}
+            testID={`${testIDPrefix}_source_code_button`}>
+            {'Source Code'}
+          </Text>
         </ScrollView>
         <CheckBox
           checked={this.state.checkboxSelected}
@@ -57,14 +81,14 @@ export class ValueTagConsentScreen extends React.Component<Props, State> {
           }}
           size={50}
           testID={`${testIDPrefix}_accept_check_box`.prependTestId()}
-          title={translate('value_tag_consent_checkbox_text')}
+          title={`I have read and agree to the terms and conditions.`}
           textStyle={{ color: PV.Colors.white, fontSize: PV.Fonts.sizes.lg }}
         />
         <Button
           onPress={() => this._acceptAgreement()}
           disabled={!this.state.checkboxSelected}
           testID={`${testIDPrefix}_next`}
-          text={translate('I Accept')}
+          text={'I Accept'}
           wrapperStyles={styles.nextButton}
         />
       </SafeAreaView>
@@ -82,6 +106,14 @@ const styles = StyleSheet.create({
   },
   scrollviewContent: {
     paddingHorizontal: 20
+  },
+  switchOptionText: {
+    color: PV.Colors.skyLight,
+    fontSize: PV.Fonts.sizes.xl,
+    marginTop: 32,
+    padding: 16,
+    textAlign: 'center',
+    textDecorationLine: 'underline'
   },
   title: {
     fontSize: PV.Fonts.sizes.xxl,

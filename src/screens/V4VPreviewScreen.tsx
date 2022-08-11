@@ -8,7 +8,7 @@ type Props = any
 
 const testIDPrefix = 'value_tag_preview_screen'
 
-export class ValueTagPreviewScreen extends React.Component<Props> {
+export class V4VPreviewScreen extends React.Component<Props> {
   static navigationOptions = ({ navigation }) => {
     const { globalTheme } = getGlobal()
 
@@ -22,7 +22,7 @@ export class ValueTagPreviewScreen extends React.Component<Props> {
   }
 
   _navigateToConsentScreen() {
-    this.props.navigation.navigate(PV.RouteNames.ValueTagConsentScreen)
+    this.props.navigation.navigate(PV.RouteNames.V4VConsentScreen)
   }
 
   render() {
