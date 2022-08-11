@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview'
 import React from 'reactn'
 import { NavDismissIcon, View } from '../components'
-import { trackPageView } from '../services/tracking'
 import { v4vAlbyGenerateOAuthUrl } from '../services/v4v/providers/alby'
 
 type Props = {
@@ -32,8 +31,6 @@ export class V4VProvidersAlbyLoginScreen extends React.Component<Props, State> {
   async componentDidMount() {
     const oauthUrl = await v4vAlbyGenerateOAuthUrl()
     this.setState({ url: oauthUrl })
-
-    trackPageView('/value-for-value/providers/alby/login', 'Value for Value - Providers - Alby - Login')
   }
 
   render() {

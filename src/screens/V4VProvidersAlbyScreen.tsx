@@ -13,7 +13,6 @@ import {
 import { PV } from '../resources'
 import { _albyKey } from '../resources/V4V'
 import PVEventEmitter from '../services/eventEmitter'
-import { trackPageView } from '../services/tracking'
 import { v4vGetConnectedProvider } from '../state/actions/v4v/v4v'
 import {
   v4vAlbyGetAccountInfo
@@ -54,8 +53,6 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
     if (!isLoadingWaitForEvent) {
       this._handleInitialize()
     }
-
-    trackPageView('/value-for-value/providers/alby', 'Value for Value - Providers - Alby')
   }
 
   componentWillUnmount() {

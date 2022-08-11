@@ -18,7 +18,6 @@ import {
 import { translate } from '../lib/i18n'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import {
   convertValueTagIntoValueTransactions,
   MINIMUM_BOOST_PAYMENT,
@@ -100,8 +99,6 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
         }
       )
     }
-
-    trackPageView('/v4v/boostagram', 'V4V - Boostagram Screen')
   }
 
   _handleV4VProvidersPressed = async () => {

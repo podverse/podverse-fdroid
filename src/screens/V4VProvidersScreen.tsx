@@ -4,7 +4,6 @@ import { Divider, TableCell, TableSectionSelectors, Text, TextInput, View } from
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { V4VProviderListItem, _albyKey } from '../resources/V4V'
-import { trackPageView } from '../services/tracking'
 import { v4vGetProviderListItems, v4vSetSenderInfo } from '../services/v4v/v4v'
 import { V4VProviderConnectedState, v4vUpdateSenderInfoName } from '../state/actions/v4v/v4v'
 import { core, table } from '../styles'
@@ -38,7 +37,6 @@ export class V4VProvidersScreen extends React.Component<Props, State> {
   componentDidMount() {
     const { name } = this.global.session.v4v.senderInfo
     this.setState({ localSenderName: name })
-    trackPageView('/value-for-value/providers', 'Value for Value - Providers')
   }
 
   _connectedOptions = () => {
