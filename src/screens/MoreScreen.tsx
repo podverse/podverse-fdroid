@@ -171,7 +171,7 @@ export class MoreScreen extends React.Component<Props, State> {
     const membershipTextStyle = getMembershipTextStyle(globalTheme, membershipStatus)
     const otherOptions = this._moreOtherOptions(membershipStatus)
 
-    const membershipAccessibilityLabel = `${translate('Membership')}${isLoggedIn ? ' - ' : ''} ${
+    const membershipAccessibilityLabel = `${translate('Membership')}${isLoggedIn ? ' – ' : ''} ${
       membershipStatus ? membershipStatus : ''
     }`
 
@@ -222,7 +222,7 @@ export class MoreScreen extends React.Component<Props, State> {
                         <Text
                           fontSizeLargestScale={PV.Fonts.largeSizes.md}
                           style={[table.cellText, membershipTextStyle]}>
-                          {membershipStatus}
+                          {`${translate('Membership')} – ${membershipStatus}`}
                         </Text>
                       )}
                     </>

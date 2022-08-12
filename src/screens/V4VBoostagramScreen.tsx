@@ -1,3 +1,4 @@
+import debounce from 'lodash/debounce'
 import { ValueTransaction } from 'podverse-shared'
 import { Dimensions, Keyboard, StyleSheet } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
@@ -99,6 +100,12 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
         }
       )
     }
+
+    this._handleBoostagramMessageTextUpdate = debounce(
+      this._handleBoostagramMessageTextUpdate,
+      200,
+      { leading: false, maxWait: 200, trailing: true }
+    )
   }
 
   _handleV4VProvidersPressed = async () => {
@@ -139,10 +146,14 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
     }
   }
 
+  _handleBoostagramMessageTextUpdate = (newText: string) => {
+    v4vUpdateBoostagramMessage(newText)
+  }
+
   _attemptBoostagram = () => {
     ReactNativeHapticFeedback.trigger('impactHeavy', PV.Haptic.options)
     this.setState({ boostIsSending: true }, () => {
-      (async () => {
+      ;(async () => {
         const { podcastValueFinal } = this.global
         const { nowPlayingItem } = this.global.player
         const includeMessage = true
@@ -287,11 +298,10 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
                       numberOfLines={4}
                       onSubmitEditing={() => Keyboard.dismiss()}
                       onChangeText={(newText: string) => {
-                        v4vUpdateBoostagramMessage(newText)
+                        this._handleBoostagramMessageTextUpdate(newText)
                       }}
                       placeholder={translate('Message optional')}
                       testID={`${testIDPrefix}_message_text_input`}
-                      value={boostagramMessage}
                     />
                   </View>
                   <Text style={styles.charCounter}>{`${boostagramMessageCharCount} / ${boostagramCharLimit}`}</Text>
