@@ -40,6 +40,7 @@ type State = {
   boostIsSending: boolean
   boostTransactions: ValueTransaction[]
   boostWasSent: boolean
+  defaultMessage: string
   explosionOrigin: number
   localBoostAmount: string
   localAppBoostAmount: string
@@ -56,6 +57,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
       boostIsSending: false,
       boostTransactions: [],
       boostWasSent: false,
+      defaultMessage: '',
       explosionOrigin: 0,
       localBoostAmount: '0',
       localAppBoostAmount: '0'
@@ -89,9 +91,11 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
       const { method, type } = activeProvider
       const typeMethodKey = v4vGetTypeMethodKey(type, method)
       const typeMethodSettings = this.global.session.v4v.settings.typeMethod[typeMethodKey] as V4VTypeMethod
+      const defaultMessage = this.global.session.v4v.boostagramMessage || ''
 
       this.setState(
         {
+          defaultMessage,
           localBoostAmount: typeMethodSettings.boostAmount?.toString(),
           localAppBoostAmount: typeMethodSettings.appBoostAmount?.toString()
         },
@@ -177,6 +181,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
       boostIsSending,
       boostTransactions,
       boostWasSent,
+      defaultMessage,
       explosionOrigin,
       // localAppBoostAmount,
       localBoostAmount
@@ -291,6 +296,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
                   </View>
                   <View style={styles.itemWrapper}>
                     <TextInput
+                      defaultValue={defaultMessage}
                       editable
                       eyebrowTitle={translate('Message')}
                       keyboardType='default'
