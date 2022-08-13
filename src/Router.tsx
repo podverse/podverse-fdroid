@@ -310,16 +310,6 @@ const V4VProvidersModals = createStackNavigator(
   }
 )
 
-const V4VBoostagramModal = createStackNavigator(
-  {
-    [PV.RouteNames.V4VBoostagramScreen]: V4VBoostagramScreen
-  },
-  {
-    mode: 'modal',
-    defaultNavigationOptions
-  }
-)
-
 const allTabs = {
   Podcasts: {
     screen: PodcastsNavigator,
@@ -354,7 +344,11 @@ const PlayerNavigator = createStackNavigator(
     [PV.RouteNames.QueueScreen]: QueueScreen,
     [PV.RouteNames.PlayerFAQScreen]: FAQScreen,
     [PV.RouteNames.PlayerMyProfileScreen]: ProfileScreen,
-    [PV.RouteNames.PlayerMembershipScreen]: MembershipScreen
+    [PV.RouteNames.PlayerMembershipScreen]: MembershipScreen,
+    [PV.RouteNames.SleepTimerScreen]: SleepTimerScreen,
+    [PV.RouteNames.V4VBoostagramScreen]: V4VBoostagramScreen,
+    [PV.RouteNames.FundingScreen]: FundingScreen,
+    [PV.RouteNames.PlaylistsAddToScreen]: PlaylistsAddToScreen
   },
   {
     defaultNavigationOptions
@@ -363,16 +357,7 @@ const PlayerNavigator = createStackNavigator(
 
 const PlaylistsAddToNavigator = createStackNavigator(
   {
-    [PV.RouteNames.PlaylistsAddToScreen]: PlaylistsAddToScreen
-  },
-  {
-    defaultNavigationOptions
-  }
-)
-
-const SleepTimerNavigator = createStackNavigator(
-  {
-    [PV.RouteNames.SleepTimerScreen]: SleepTimerScreen
+    [PV.RouteNames.PlaylistsAddToScreenModal]: PlaylistsAddToScreen
   },
   {
     defaultNavigationOptions
@@ -427,17 +412,6 @@ const AddPodcastByRSSAuthNavigator = createStackNavigator(
   }
 )
 
-const FundingScreenNavigator = createStackNavigator(
-  {
-    [PV.RouteNames.FundingScreen]: {
-      screen: FundingScreen
-    },
-  },
-  {
-    defaultNavigationOptions
-  }
-)
-
 const V4VOnboardingNavigator = createStackNavigator(
   {
     [PV.RouteNames.V4VPreviewScreen]: {
@@ -467,21 +441,18 @@ const MainApp = createStackNavigator(
     PlaylistsAddToNavigator,
     SearchNavigator,
     FilterNavigator,
-    SleepTimerNavigator,
     StartPodcastFromTimeNavigator,
     WebPageNavigator,
     EmailVerificationNavigator,
     // ScanQRCodeScreenNavigator,
     FeatureVideosStack,
-    FundingScreenNavigator,
     [PV.RouteNames.AddPodcastByRSSScreen]: {
       screen: AddPodcastByRSSURLNavigator,
       path: ''
     },
     AddPodcastByRSSAuthNavigator,
     V4VOnboardingNavigator,
-    V4VProvidersModals,
-    V4VBoostagramModal
+    V4VProvidersModals
   },
   {
     mode: 'modal',
