@@ -23,10 +23,10 @@ import {
   EpisodeScreen,
   EpisodesScreen,
   FAQScreen,
+  FeatureVideosScreen,
   FilterScreen,
   FundingScreen,
   HistoryScreen,
-  LNPaySignupScreen,
   MakeClipScreen,
   MembershipScreen,
   MoreScreen,
@@ -56,11 +56,13 @@ import {
   StartPodcastFromTimeScreen,
   SupportScreen,
   TermsOfServiceScreen,
-  ValueTagConsentScreen,
-  ValueTagPreviewScreen,
-  ValueTagSetupScreen,
-  WebPageScreen,
-  FeatureVideosScreen
+  V4VBoostagramScreen,
+  V4VConsentScreen,
+  V4VPreviewScreen,
+  V4VProvidersScreen,
+  V4VProvidersAlbyScreen,
+  V4VProvidersAlbyLoginScreen,
+  WebPageScreen
 } from './screens'
 import { darkTheme } from './styles'
 import { PodcastInfoScreen } from './screens/PodcastInfoScreen'
@@ -217,10 +219,10 @@ const MoreNavigator = createStackNavigator(
       screen: TermsOfServiceScreen,
       path: PV.DeepLinks.Terms.path
     },
-    [PV.RouteNames.LNPaySignupScreen]: LNPaySignupScreen,
     [PV.RouteNames.PrivacyPolicyScreen]: PrivacyPolicyScreen,
     [PV.RouteNames.FAQScreen]: FAQScreen,
-    [PV.RouteNames.ValueTagSetupScreen]: ValueTagSetupScreen
+    [PV.RouteNames.V4VProvidersScreen]: V4VProvidersScreen,
+    [PV.RouteNames.V4VProvidersAlbyScreen]: V4VProvidersAlbyScreen
   },
   {
     defaultNavigationOptions,
@@ -298,6 +300,16 @@ const OnboardingNavigator = createStackNavigator(
   }
 )
 
+const V4VProvidersModals = createStackNavigator(
+  {
+    [PV.RouteNames.V4VProvidersAlbyLoginScreen]: V4VProvidersAlbyLoginScreen
+  },
+  {
+    mode: 'modal',
+    defaultNavigationOptions
+  }
+)
+
 const allTabs = {
   Podcasts: {
     screen: PodcastsNavigator,
@@ -332,7 +344,11 @@ const PlayerNavigator = createStackNavigator(
     [PV.RouteNames.QueueScreen]: QueueScreen,
     [PV.RouteNames.PlayerFAQScreen]: FAQScreen,
     [PV.RouteNames.PlayerMyProfileScreen]: ProfileScreen,
-    [PV.RouteNames.PlayerMembershipScreen]: MembershipScreen
+    [PV.RouteNames.PlayerMembershipScreen]: MembershipScreen,
+    [PV.RouteNames.SleepTimerScreen]: SleepTimerScreen,
+    [PV.RouteNames.V4VBoostagramScreen]: V4VBoostagramScreen,
+    [PV.RouteNames.FundingScreen]: FundingScreen,
+    [PV.RouteNames.PlaylistsAddToScreen]: PlaylistsAddToScreen
   },
   {
     defaultNavigationOptions
@@ -341,16 +357,7 @@ const PlayerNavigator = createStackNavigator(
 
 const PlaylistsAddToNavigator = createStackNavigator(
   {
-    [PV.RouteNames.PlaylistsAddToScreen]: PlaylistsAddToScreen
-  },
-  {
-    defaultNavigationOptions
-  }
-)
-
-const SleepTimerNavigator = createStackNavigator(
-  {
-    [PV.RouteNames.SleepTimerScreen]: SleepTimerScreen
+    [PV.RouteNames.PlaylistsAddToScreenModal]: PlaylistsAddToScreen
   },
   {
     defaultNavigationOptions
@@ -405,24 +412,13 @@ const AddPodcastByRSSAuthNavigator = createStackNavigator(
   }
 )
 
-const FundingScreenNavigator = createStackNavigator(
+const V4VOnboardingNavigator = createStackNavigator(
   {
-    [PV.RouteNames.FundingScreen]: {
-      screen: FundingScreen
+    [PV.RouteNames.V4VPreviewScreen]: {
+      screen: V4VPreviewScreen
     },
-  },
-  {
-    defaultNavigationOptions
-  }
-)
-
-const ValueTagOnboardingNavigator = createStackNavigator(
-  {
-    [PV.RouteNames.ValueTagPreviewScreen]: {
-      screen: ValueTagPreviewScreen
-    },
-    [PV.RouteNames.ValueTagConsentScreen]: {
-      screen: ValueTagConsentScreen
+    [PV.RouteNames.V4VConsentScreen]: {
+      screen: V4VConsentScreen
     }
   },
   {
@@ -445,19 +441,18 @@ const MainApp = createStackNavigator(
     PlaylistsAddToNavigator,
     SearchNavigator,
     FilterNavigator,
-    SleepTimerNavigator,
     StartPodcastFromTimeNavigator,
     WebPageNavigator,
     EmailVerificationNavigator,
     // ScanQRCodeScreenNavigator,
     FeatureVideosStack,
-    FundingScreenNavigator,
     [PV.RouteNames.AddPodcastByRSSScreen]: {
       screen: AddPodcastByRSSURLNavigator,
       path: ''
     },
     AddPodcastByRSSAuthNavigator,
-    ValueTagOnboardingNavigator
+    V4VOnboardingNavigator,
+    V4VProvidersModals
   },
   {
     mode: 'modal',

@@ -3,11 +3,11 @@
 buildscript {
     ext {
         buildToolsVersion = "30.0.2"
-        minSdkVersion = 21
-        compileSdkVersion = 30
-        targetSdkVersion = 30
+        minSdkVersion = 23
+        compileSdkVersion = 31
+        targetSdkVersion = 31
         supportLibVersion = "30.0.2"
-        kotlinVersion = '1.4.10'
+        kotlinVersion = '1.6.10'
         ndkVersion = '23.2.8568313'
         androidXCore = "1.7.0"
     }
@@ -17,7 +17,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:4.2.1')
+        classpath('com.android.tools.build:gradle:7.0.4')
     }
 }
 
@@ -45,7 +45,7 @@ subprojects {
     afterEvaluate {project ->
         if (project.hasProperty("android")) {
             android {
-                compileSdkVersion 30
+                compileSdkVersion 31
                 buildToolsVersion '30.0.2'
             }
         }
