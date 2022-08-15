@@ -4,5 +4,4 @@
 - Fix "search bar missing" bug when not subscribed to podcasts.
 - Change remote bluetooth controls so "skip" buttons are time jumps instead of track skips.
 - Navigate to the Episode screen when you tap a "new episode" or "new livestream" notification.
-- Fix missing search bar in grid view.
 - Fix missing seconds in the time jump buttons.
