@@ -23,6 +23,7 @@ import {
   MINIMUM_BOOST_PAYMENT,
   sendBoost,
   v4vGetActiveValueTag,
+  v4vGetPluralCurrencyUnit,
   v4vGetTypeMethodKey
 } from '../services/v4v/v4v'
 import {
@@ -203,6 +204,10 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
     const boostagramMessageIsValid = boostagramMessageCharCount <= boostagramCharLimit
     const sendButtonDisabled = boostIsSending || !boostagramMessageIsValid
 
+    const boostAmountLabelText = activeProvider?.unit ? `${translate(
+      'Boost Amount'
+    )} (${v4vGetPluralCurrencyUnit(activeProvider.unit)})` : ''
+
     return (
       <View style={styles.content} testID='funding_screen_view'>
         <View accessible accessibilityLabel={headerAccessibilityLabel} style={styles.innerTopView}>
@@ -235,19 +240,6 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
           </View>
         </View>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          {hasValueInfo && (
-            <Text
-              // eslint-disable-next-line max-len
-              accessibilityHint={translate(
-                'ARIA HINT - This section provides the value-for-value information for this podcast'
-              )}
-              accessibilityLabel={translate('Value-for-Value')}
-              accessibilityRole='header'
-              style={styles.textHeader}
-              testID={`${testIDPrefix}_episode_funding_header`}>
-              {translate('Value-for-Value')}
-            </Text>
-          )}
           {!!activeProvider && hasValueInfo && (
             <View>
               {!boostWasSent && (
@@ -255,7 +247,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
                   <View style={styles.itemWrapper}>
                     <TextInput
                       editable
-                      eyebrowTitle={translate('Boost Amount for this Podcast')}
+                      eyebrowTitle={boostAmountLabelText}
                       keyboardType='numeric'
                       wrapperStyle={styles.textInput}
                       onBlur={async () => {
@@ -323,6 +315,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
                 </>
               )}
               <View style={styles.V4VRecipientsInfoView}>
+                {boostWasSent && <Text style={styles.boostSentText}>{`${translate('Boost Sent')} ⚡️`}</Text>}
                 <Text
                   style={styles.textTableLabel}
                   testID={`${testIDPrefix}_value_settings_lightning_boost_sample_label`}>
@@ -364,6 +357,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1
   },
+  boostSentText: {
+    marginBottom: 36,
+    marginTop: 16,
+    fontSize: PV.Fonts.sizes.huge,
+    fontWeight: PV.Fonts.weights.semibold,
+    textAlign: 'center'
+  },
   charCounter: {
     fontSize: PV.Fonts.sizes.sm,
     textAlign: 'right'
@@ -387,6 +387,7 @@ const styles = StyleSheet.create({
   innerTopView: {
     flex: 0,
     flexDirection: 'row',
+    marginBottom: 8,
     marginTop: 16,
     marginHorizontal: 12
   },
@@ -413,10 +414,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: PV.Fonts.sizes.md,
     marginBottom: 24
-  },
-  textHeader: {
-    fontSize: PV.Fonts.sizes.xl,
-    fontWeight: PV.Fonts.weights.bold
   },
   textInput: {
     marginVertical: 0
