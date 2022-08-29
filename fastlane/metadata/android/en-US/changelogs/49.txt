@@ -1,0 +1,5 @@
+- Add sorting by most recent episode on Podcasts screen.
+- Add sorting by oldest episode for custom RSS feeds.
+- Fix broken Share buttons.
+- Fix progress bars on Downloads screen.
+- Fix "connect to internet and try again" bug.
