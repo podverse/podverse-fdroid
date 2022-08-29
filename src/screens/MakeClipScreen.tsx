@@ -595,7 +595,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                         importantForAccessibility='no-hide-descendants'
                         style={styles.skipTimeTextWrapper}
                         transparent>
-                        <Text style={styles.skipTimeText}>{PV.Player.jumpBackSeconds}</Text>
+                        <Text style={styles.skipTimeText}>{jumpBackwardsTime.toString()}</Text>
                       </View>
                     </PressableWithOpacity>
                     <PressableWithOpacity
@@ -642,7 +642,7 @@ export class MakeClipScreen extends React.Component<Props, State> {
                       testID={`${testIDPrefix}_jump_forward`.prependTestId()}>
                       {this._renderPlayerControlIcon(PV.Images.JUMP_AHEAD)}
                       <View style={styles.skipTimeTextWrapper} transparent>
-                        <Text style={styles.skipTimeText}>{jumpForwardsTime}</Text>
+                        <Text style={styles.skipTimeText}>{jumpForwardsTime.toString()}</Text>
                       </View>
                     </PressableWithOpacity>
                   </View>

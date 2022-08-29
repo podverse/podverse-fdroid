@@ -20,7 +20,6 @@ import {
 import { getDownloadedPodcasts } from '../lib/downloadedPodcast'
 import { getDefaultSortForFilter, getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
 import { translate } from '../lib/i18n'
-import { navigateToEpisodeScreenInPodcastsStackNavigatorWithIds } from '../lib/navigate'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { resetAllAppKeychain } from '../lib/secutity'
 import { getAppUserAgent, safeKeyExtractor, setAppUserAgent, setCategoryQueryProperty } from '../lib/utility'
@@ -37,6 +36,7 @@ import { getAddByRSSPodcastsLocally, parseAllAddByRSSPodcasts } from '../service
 import { playerUpdateUserPlaybackPosition } from '../services/player'
 import { audioUpdateTrackPlayerCapabilities } from '../services/playerAudio'
 import { getPodcast, getPodcasts } from '../services/podcast'
+import { getSavedQueryPodcastsScreenSort, setSavedQueryPodcastsScreenSort } from '../services/savedQueryFilters'
 import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
 import { initAutoQueue } from '../state/actions/autoQueue'
 import { initDownloads, removeDownloadedPodcast, updateDownloadedPodcasts } from '../state/actions/downloads'
@@ -161,8 +161,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    const { navigation } = this.props
-
     this.props.navigation.setParams({
       _screenTitle: getScreenTitle()
     })
@@ -465,7 +463,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
     // Load the AsyncStorage authenticatedUser and subscribed podcasts immediately,
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
     await getAuthenticatedUserInfoLocally()
-    await combineWithAddByRSSPodcasts(searchBarText)
+    const savedQuerySort = await getSavedQueryPodcastsScreenSort()
+    await combineWithAddByRSSPodcasts(searchBarText, savedQuerySort)
 
     this._handleInitialDefaultQuery()
 
@@ -506,7 +505,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const preventIsLoading = true
     const preventAutoDownloading = false
     if (isConnected) {
-      this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
+      const savedQuerySort = await getSavedQueryPodcastsScreenSort()
+      this.setState({ querySort: savedQuerySort }, () => {
+        this.handleSelectFilterItem(PV.Filters._subscribedKey, preventIsLoading, preventAutoDownloading)
+      })
     } else {
       this._setDownloadedDataIfOffline()
     }
@@ -588,9 +590,15 @@ export class PodcastsScreen extends React.Component<Props, State> {
     )
   }
 
-  handleSelectSortItem = (selectedKey: string) => {
+  handleSelectSortItem = async (selectedKey: string) => {
     if (!selectedKey) {
       return
+    }
+
+    const { queryFrom } = this.state
+
+    if (queryFrom === PV.Filters._subscribedKey) {
+      await setSavedQueryPodcastsScreenSort(selectedKey)
     }
 
     const selectedSortLabel = getSelectedSortLabel(selectedKey)
@@ -907,7 +915,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     let flatListData = []
     let flatListDataTotalCount = null
-    if (queryFrom === PV.Filters._subscribedKey) {
+    if (isLoadingMore && queryFrom === PV.Filters._subscribedKey) {
+      // do nothing
+    } else if (queryFrom === PV.Filters._subscribedKey) {
       flatListData = subscribedPodcasts
       flatListDataTotalCount = subscribedPodcastsTotalCount
     } else {
@@ -995,15 +1005,15 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _querySubscribedPodcasts = async (preventAutoDownloading?: boolean, preventParseCustomRSSFeeds?: boolean) => {
-    const { searchBarText } = this.state
-    await getSubscribedPodcasts()
+    const { querySort, searchBarText } = this.state
+    await getSubscribedPodcasts(querySort)
 
     await handleUpdateNewEpisodesCount()
 
     if (!preventParseCustomRSSFeeds) {
       if (!searchBarText) await parseAllAddByRSSPodcasts()
 
-      await combineWithAddByRSSPodcasts(searchBarText)
+      await combineWithAddByRSSPodcasts(searchBarText, querySort)
     }
 
     if (!preventAutoDownloading) {
