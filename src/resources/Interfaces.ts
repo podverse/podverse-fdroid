@@ -106,7 +106,6 @@ export interface InitialState {
   hideCompleted: boolean
   urlsAPI?: any
   urlsWeb?: any
-  offlineModeEnabled?: any
   jumpBackwardsTime: string
   jumpForwardsTime: string
   addCurrentItemNextInQueue: boolean
@@ -144,7 +143,6 @@ export interface InitialState {
     myPlaylists: []
     subscribedPlaylists: []
   }
-  podcastValueFinal: any
   podcastsGridViewEnabled: boolean
   profile: {
     flatListData: []
@@ -228,6 +226,8 @@ export interface InitialState {
     [key: string]: number
   }
   hideNewEpisodesBadges: boolean
+  imageFullViewSourceUrl?: string
+  imageFullViewShow?: boolean
 }
 
 export interface BannerInfoError {

@@ -213,7 +213,7 @@ export class AuthScreen extends React.Component<Props, State> {
 
     return (
       <SafeAreaView style={styles.safeAreaView} testID={`${testIDPrefix}_safe_area_view`}>
-        <ScrollView contentContainerStyle={screenType === _signup ? styles.viewWithoutBanner : styles.view}>
+        <View style={screenType === _signup ? styles.viewWithoutBanner : styles.view}>
           {screenType !== _signup && <Image source={PV.Images.BANNER} style={styles.banner} resizeMode='contain' />}
           <View style={styles.contentView}>
             {screenType === _login && (
@@ -230,7 +230,7 @@ export class AuthScreen extends React.Component<Props, State> {
               <SignUp bottomButtons={bottomButtons} isLoading={isLoadingSignUp} onSignUpPressed={this.attemptSignUp} />
             )}
           </View>
-        </ScrollView>
+        </View>
       </SafeAreaView>
     )
   }
@@ -254,7 +254,8 @@ const styles = StyleSheet.create({
   contentView: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%'
+    width: '100%',
+    paddingBottom: 160
   },
   safeAreaView: {
     backgroundColor: PV.Colors.ink

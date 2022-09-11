@@ -9,7 +9,7 @@ import Orientation from 'react-native-orientation-locker'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { setGlobal } from 'reactn'
-import { OverlayAlert, BoostDropdownBanner } from './src/components'
+import { OverlayAlert, ImageFullView } from './src/components'
 import { refreshDownloads } from './src/lib/downloader'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
@@ -153,7 +153,7 @@ class App extends Component<Props, State> {
           <Router />
           <OverlayAlert />
         </View>
-        <BoostDropdownBanner />
+        <ImageFullView />
       </SafeAreaProvider>
     ) : (
       this._renderIntersitial()
