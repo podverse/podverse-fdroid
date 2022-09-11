@@ -1,4 +1,3 @@
-import { Funding, ValueTag } from 'podverse-shared'
 import { Alert, Linking, Pressable, StyleSheet } from 'react-native'
 import React from 'reactn'
 import AsyncStorage from '@react-native-community/async-storage'
@@ -15,7 +14,6 @@ import {
 import { translate } from '../lib/i18n'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { BoostagramItem } from '../services/v4v/v4v'
 import {
   v4vGetCurrentlyActiveProviderInfo
@@ -40,10 +38,6 @@ export class FundingPodcastEpisodeScreen extends React.Component<Props, State> {
       title: translate('Funding'),
       headerRight: null
     }
-  }
-
-  componentDidMount() {
-    trackPageView('/funding', 'Funding Screen')
   }
 
   handleFollowLink = (url: string) => {
