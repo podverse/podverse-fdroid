@@ -439,7 +439,7 @@ export class ClipsScreen extends React.Component<Props, State> {
       showDeleteConfirmDialog,
       showNoInternetConnectionMessage
     } = this.state
-    const { offlineModeEnabled, session } = this.global
+    const { session } = this.global
     const subscribedPodcastIds = safelyUnwrapNestedVariable(() => session.userInfo.subscribedPodcastIds, '')
 
     const noSubscribedPodcasts =

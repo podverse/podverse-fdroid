@@ -25,7 +25,6 @@ const initialTheme: InitialState = {
   customWebDomainEnabled: false,
   errorReportingEnabled: false,
   hideCompleted: false,
-  offlineModeEnabled: false,
   jumpBackwardsTime: PV.Player.jumpBackSeconds.toString(),
   jumpForwardsTime: PV.Player.jumpSeconds.toString(),
   addCurrentItemNextInQueue: true,
@@ -62,7 +61,6 @@ const initialTheme: InitialState = {
     myPlaylists: [],
     subscribedPlaylists: []
   },
-  podcastValueFinal: null,
   podcastsGridViewEnabled: true,
   profile: {
     flatListData: [],
@@ -166,7 +164,9 @@ const initialTheme: InitialState = {
   },
   screenReaderEnabled: false,
   newEpisodesCount: {},
-  hideNewEpisodesBadges: false
+  hideNewEpisodesBadges: false,
+  imageFullViewSourceUrl: '',
+  imageFullViewShow: false
 }
 
 export default initialTheme
