@@ -6,7 +6,6 @@ import React from 'reactn'
 import { Divider, ScrollView, SwitchWithText, TableCell, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { setOfflineModeEnabled } from '../state/actions/settings'
 import { core, table } from '../styles'
 
 type Props = {
@@ -14,7 +13,6 @@ type Props = {
 }
 
 type State = {
-  offlineModeEnabled: any
   showDeleteDownloadedEpisodesDialog?: boolean
 }
 
@@ -23,10 +21,9 @@ const testIDPrefix = 'settings_screen'
 export class SettingsScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    const { offlineModeEnabled } = this.global
 
     this.state = {
-      offlineModeEnabled
+      showDeleteDownloadedEpisodesDialog: false
     }
   }
 
@@ -34,22 +31,8 @@ export class SettingsScreen extends React.Component<Props, State> {
     title: translate('Settings')
   })
 
-  async componentDidMount() {
-    const offlineModeEnabled = await AsyncStorage.getItem(PV.Keys.OFFLINE_MODE_ENABLED)
-    this.setState({ offlineModeEnabled })
-  }
-
-  _handleToggleOfflineMode = () => {
-    const { offlineModeEnabled } = this.state
-    this.setState({ offlineModeEnabled: !offlineModeEnabled }, () => {
-      setOfflineModeEnabled(!offlineModeEnabled)
-    })
-    this.setGlobal({ offlineModeEnabled: !offlineModeEnabled })
-  }
-
   render() {
     const { navigation } = this.props
-    const { offlineModeEnabled } = this.state
     const { globalTheme, session } = this.global
     const { isLoggedIn } = session
 
@@ -59,18 +42,6 @@ export class SettingsScreen extends React.Component<Props, State> {
         style={styles.wrapper}
         testID={`${testIDPrefix}_view`}>
         <View>
-          <View style={core.itemWrapper}>
-            <SwitchWithText
-              accessibilityHint={translate('Offline mode can save battery life and improve performance')}
-              accessibilityLabel={translate('Offline Mode')}
-              onValueChange={this._handleToggleOfflineMode}
-              subText={translate('Offline mode can save battery life and improve performance')}
-              testID={`${testIDPrefix}_offline_mode`}
-              text={translate('Offline Mode')}
-              value={!!offlineModeEnabled}
-            />
-          </View>
-          <Divider />
           {isLoggedIn && (
             <TableCell
               accessibilityLabel={translate('Account')}
