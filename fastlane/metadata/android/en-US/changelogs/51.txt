@@ -1,0 +1,8 @@
+- Add IRC chat rooms to livestreams.
+- Show full size images on tap in player screen, podcast header, and episode header.
+- Fix images not loading in offline mode (plus hotfix).
+- Add "Mark as Played" button to player screen.
+- Make text selectable / copy-pastable in headers and show descriptions.
+- Fix "feature demo videos too small" on membership screen
+- Fix inaccessible buttons on sign-in screen.
+- Fix "downloaded episodes not loading by default in offline mode" on Episodes screen and Podcast screen.
