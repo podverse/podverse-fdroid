@@ -226,7 +226,7 @@ export class PlayerScreen extends React.Component<Props> {
     podcastId?: string,
     episodeId?: string,
     mediaRefId?: string,
-    mediaRefIsOfficialChapter?: boolean
+    chapterId?: string
   ) => {
     let { nowPlayingItem } = this.global.player
     nowPlayingItem = nowPlayingItem || {}
@@ -239,8 +239,8 @@ export class PlayerScreen extends React.Component<Props> {
     } else if (episodeId) {
       url = this.global.urlsWeb.episode + episodeId
       title = `${nowPlayingItem?.podcastTitle} – ${nowPlayingItem?.episodeTitle} ${translate('shared using brandName')}`
-    } else if (mediaRefIsOfficialChapter) {
-      url = this.global.urlsWeb.clip + mediaRefId
+    } else if (chapterId) {
+      url = this.global.urlsWeb.clip + chapterId
       title = `${nowPlayingItem.clipTitle ? nowPlayingItem?.clipTitle + ' – ' : translate('Untitled Chapter – ')}`
       title += `${nowPlayingItem?.podcastTitle} – ${nowPlayingItem?.episodeTitle} ${translate(
         'chapter shared using brandName'
@@ -279,7 +279,7 @@ export class PlayerScreen extends React.Component<Props> {
     const podcastId = nowPlayingItem ? nowPlayingItem.podcastId : null
     const episodeId = episode?.id || null
     const mediaRefId = mediaRef?.id || null
-    const mediaRefIsOfficialChapter = !!mediaRef?.isOfficialChapter
+    const chapterId = currentChapter?.id || null
 
     if (episode?.description) {
       episode.description = replaceLinebreaksWithBrTags(episode.description)
@@ -299,7 +299,7 @@ export class PlayerScreen extends React.Component<Props> {
                 podcastId,
                 episodeId,
                 mediaRefId,
-                mediaRefIsOfficialChapter,
+                chapterId,
                 this._handleShare
               )}
               showModal={showShareActionSheet}
@@ -316,7 +316,7 @@ const shareActionSheetButtons = (
   podcastId: string,
   episodeId: string,
   mediaRefId: string,
-  mediaRefIsOfficialChapter: boolean,
+  chapterId: string,
   handleShare: any
 ) => {
   const items = [
@@ -335,21 +335,21 @@ const shareActionSheetButtons = (
   ]
 
   if (mediaRefId) {
-    if (mediaRefIsOfficialChapter) {
-      items.push({
-        accessibilityHint: translate('ARIA HINT - share this chapter'),
-        key: 'chapter',
-        text: translate('Share Chapter'),
-        onPress: () => handleShare(null, null, mediaRefId, mediaRefIsOfficialChapter)
-      })
-    } else {
-      items.push({
-        accessibilityHint: translate('ARIA HINT - share this clip'),
-        key: 'clip',
-        text: translate('Share Clip'),
-        onPress: () => handleShare(null, null, mediaRefId)
-      })
-    }
+    items.push({
+      accessibilityHint: translate('ARIA HINT - share this clip'),
+      key: 'clip',
+      text: translate('Share Clip'),
+      onPress: () => handleShare(null, null, mediaRefId)
+    })
+  }
+
+  if (!mediaRefId && chapterId) {
+    items.push({
+      accessibilityHint: translate('ARIA HINT - share this chapter'),
+      key: 'chapter',
+      text: translate('Share Chapter'),
+      onPress: () => handleShare(null, null, null, chapterId)
+    })
   }
 
   return items
