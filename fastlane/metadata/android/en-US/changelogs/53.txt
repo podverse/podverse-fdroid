@@ -1,0 +1,8 @@
+- Fix "app becomes unresponsive after Boostagram screen" #1231
+- Add faster searching / filtering of subscribed podcasts. #1097
+- Add "Share Chapter" button to the Share menu on the Player screen. #1222
+- Fix missing email address in Podcast Request and Contact options. #1223
+- Fix crash on Player screen when a livestream is loaded. #1218
+- Fix custom RSS parser failures when parsing giant RSS feeds (2MB+). #1213
+- Fit "Edit Clip" button in ellipsis menu on small screens. #1220
+- Remove non-functioning "Mark as Played" button for custom RSS feeds. #1216
