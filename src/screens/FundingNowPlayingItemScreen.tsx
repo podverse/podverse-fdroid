@@ -23,7 +23,8 @@ import {
   v4vGetTypeMethodKey
 } from '../services/v4v/v4v'
 import {
-  v4vGetCurrentlyActiveProviderInfo,
+  getBoostagramItemValueTags,
+  v4vGetActiveProviderInfo,
   V4VTypeMethod,
   v4vUpdateTypeMethodSettingsBoostAmount
 } from '../state/actions/v4v/v4v'
@@ -55,8 +56,6 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = ({ navigation }) => {
-    const { globalTheme } = getGlobal()
-
     return {
       title: translate('Funding'),
       headerRight: null
@@ -67,7 +66,7 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
     const { player } = this.global
     const { nowPlayingItem } = player
 
-    const { activeProvider } = v4vGetCurrentlyActiveProviderInfo(this.global)
+    const { activeProvider } = v4vGetActiveProviderInfo(getBoostagramItemValueTags(nowPlayingItem))
 
     const { episodeValue, podcastValue } = nowPlayingItem
     const valueTags = (episodeValue?.length && episodeValue) || (podcastValue?.length && podcastValue)
@@ -132,14 +131,14 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
   _handleUpdateBoostTransactionsState = async (action: 'ACTION_BOOST' | 'ACTION_STREAMING', amount: number) => {
     const { player } = this.global
     const { nowPlayingItem } = player
-    const { activeProvider } = v4vGetCurrentlyActiveProviderInfo(this.global)
+    const { activeProvider } = v4vGetActiveProviderInfo(getBoostagramItemValueTags(nowPlayingItem))
 
     const valueTags =
       (nowPlayingItem?.episodeValue?.length && nowPlayingItem?.episodeValue) ||
       (nowPlayingItem?.podcastValue?.length && nowPlayingItem?.podcastValue)
     const activeValueTag = v4vGetActiveValueTag(valueTags, activeProvider?.type, activeProvider?.method)
 
-    if (activeValueTag) {
+    if (activeValueTag && activeProvider?.key) {
       let shouldRound = false
       if (action === PV.V4V.ACTION_BOOST) {
         shouldRound = true
@@ -152,7 +151,8 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
         nowPlayingItem.podcastIndexPodcastId || '',
         action,
         amount,
-        shouldRound
+        shouldRound,
+        activeProvider.key
       )
 
       if (action === 'ACTION_BOOST') {
@@ -189,10 +189,11 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
     const hasValueInfo =
       nowPlayingItem?.episodeValue?.length > 0 ||
       nowPlayingItem?.podcastValue?.length > 0
-    const { activeProvider, activeProviderSettings } = v4vGetCurrentlyActiveProviderInfo(this.global)
+    const { activeProvider, activeProviderSettings } =
+      v4vGetActiveProviderInfo(getBoostagramItemValueTags(nowPlayingItem))
 
-    const podcastTitle = nowPlayingItem?.podcastTitle.trim() || translate('Untitled Podcast')
-    const episodeTitle = nowPlayingItem?.episodeTitle.trim() || translate('Untitled Episode')
+    const podcastTitle = nowPlayingItem?.podcastTitle?.trim() || translate('Untitled Podcast')
+    const episodeTitle = nowPlayingItem?.episodeTitle?.trim() || translate('Untitled Episode')
     const pubDate = readableDate(nowPlayingItem.episodePubDate)
     const headerAccessibilityLabel = `${podcastTitle}, ${episodeTitle}, ${pubDate}`
 

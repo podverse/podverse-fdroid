@@ -3,6 +3,7 @@ import { Alert, StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, Button, ScrollView } from '../components'
 import { translate } from '../lib/i18n'
+import { clearEpisodesCount } from '../state/actions/newEpisodesCount'
 import { clearHistoryItems } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
 
@@ -26,6 +27,10 @@ export class SettingsScreenHistory extends React.Component<Props, State> {
   static navigationOptions = () => ({
     title: translate('History')
   })
+
+  _handleClearAllNewEpisodeNotifications = () => {
+    clearEpisodesCount()
+  }
 
   _handleClearHistory = () => {
     Alert.alert(translate('Clear History'), translate('Are you sure you want to clear your history'), [
@@ -68,7 +73,15 @@ export class SettingsScreenHistory extends React.Component<Props, State> {
         {!isLoading && (
           <>
             <Button
+              accessibilityLabel={translate('ARIA HINT - clear the new episode indicators for all podcasts')}
+              onPress={this._handleClearAllNewEpisodeNotifications}
+              testID={`${testIDPrefix}_clear_all_new_episode_indicators`}
+              text={translate('Clear new episode indicators')}
+              wrapperStyles={[core.button, styles.clearAllNewEpisodeIndicators]}
+            />
+            <Button
               accessibilityLabel={translate('Clear History')}
+              isWarning
               onPress={this._handleClearHistory}
               testID={`${testIDPrefix}_clear_history`}
               text={translate('Clear History')}
@@ -82,6 +95,9 @@ export class SettingsScreenHistory extends React.Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
+  clearAllNewEpisodeIndicators: {
+    marginBottom: 32
+  },
   scrollViewContentContainer: {
     paddingBottom: 48
   },

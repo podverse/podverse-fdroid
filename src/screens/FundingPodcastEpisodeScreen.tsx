@@ -15,9 +15,7 @@ import { translate } from '../lib/i18n'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
 import { BoostagramItem } from '../services/v4v/v4v'
-import {
-  v4vGetCurrentlyActiveProviderInfo
-} from '../state/actions/v4v/v4v'
+import { getBoostagramItemValueTags, v4vGetActiveProviderInfo } from '../state/actions/v4v/v4v'
 import { images } from '../styles'
 
 type Props = any
@@ -133,7 +131,8 @@ export class FundingPodcastEpisodeScreen extends React.Component<Props, State> {
     const hasValueInfo =
       (boostagramItem?.episodeValue && boostagramItem.episodeValue.length > 0) ||
       (boostagramItem.podcastValue && boostagramItem?.podcastValue.length > 0)
-    const { activeProvider } = v4vGetCurrentlyActiveProviderInfo(this.global)
+    const { activeProvider } =
+      v4vGetActiveProviderInfo(getBoostagramItemValueTags(boostagramItem))
 
     const podcastTitle = boostagramItem?.podcastTitle?.trim() || ''
     const episodeTitle = boostagramItem?.episodeTitle?.trim() || ''

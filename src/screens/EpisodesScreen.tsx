@@ -130,6 +130,7 @@ export class EpisodesScreen extends HistoryIndexListenerScreen<Props, State> {
 
     PVEventEmitter.on(PV.Events.PODCAST_SUBSCRIBE_TOGGLED, this._handleToggleSubscribeEvent)
     PVEventEmitter.on(PV.Events.APP_MODE_CHANGED, this._handleAppModeChanged)
+    PVEventEmitter.on(PV.Events.DOWNLOADED_EPISODE_REFRESH, this._handleDownloadEpisodeFinishedEvent)
 
     const { queryFrom } = this.state
     const hasInternetConnection = await hasValidNetworkConnection()
@@ -142,6 +143,7 @@ export class EpisodesScreen extends HistoryIndexListenerScreen<Props, State> {
     super.componentWillUnmount()
     PVEventEmitter.removeListener(PV.Events.PODCAST_SUBSCRIBE_TOGGLED, this._handleToggleSubscribeEvent)
     PVEventEmitter.removeListener(PV.Events.APP_MODE_CHANGED, this._handleAppModeChanged)
+    PVEventEmitter.removeListener(PV.Events.DOWNLOADED_EPISODE_REFRESH, this._handleDownloadEpisodeFinishedEvent)
     // this._unsubscribe?.()
   }
 
@@ -155,6 +157,14 @@ export class EpisodesScreen extends HistoryIndexListenerScreen<Props, State> {
   _handleToggleSubscribeEvent = () => {
     const { queryFrom } = this.state
     if (queryFrom) this.handleSelectFilterItem(queryFrom)
+  }
+
+  _handleDownloadEpisodeFinishedEvent = () => {
+    const { queryFrom } = this.state
+    if (queryFrom === PV.Filters._downloadedKey) {
+      const keepSearchTitle = true
+      this.handleSelectFilterItem(PV.Filters._downloadedKey, keepSearchTitle)
+    }
   }
 
   handleSelectFilterItem = async (selectedKey: string, keepSearchTitle?: boolean) => {
