@@ -1,6 +1,6 @@
 import { Alert, StyleSheet } from 'react-native'
 import React from 'reactn'
-import { ActivityIndicator, Divider, DropdownButtonSelect, NavHeaderButtonText, TextInput, View } from '../components'
+import { ActivityIndicator, Divider, DropdownButtonSelect, NavHeaderButtonText, Text, TextInput, View } from '../components'
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection } from '../lib/network'
 import { PV } from '../resources'
@@ -22,12 +22,12 @@ const testIDPrefix = 'edit_profile_screen'
 export class EditProfileScreen extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    const user = props.navigation.getParam('user')
+    const { isPublic, name } = this.global.session?.userInfo || {}
 
     this.state = {
       isLoading: true,
-      name: user.name,
-      selectedIsPublicKey: user.isPublic
+      name,
+      selectedIsPublicKey: isPublic
     }
   }
 
@@ -102,10 +102,10 @@ export class EditProfileScreen extends React.Component<Props, State> {
   }
 
   render() {
-    const user = this.props.navigation.getParam('user')
+    const initialIsPublic = !!this.global?.session?.userInfo?.isPublic
     const { isLoading, name, selectedIsPublicKey } = this.state
     const selectedIsPublicOption = isPublicOptions.find((x) => x.value === selectedIsPublicKey) || selectPlaceholder
-    const willBeDifferent = user.isPublic !== selectedIsPublicKey
+    const willBeDifferent = initialIsPublic !== selectedIsPublicKey
 
     let helpText = ''
     if (selectedIsPublicKey) {
@@ -135,9 +135,11 @@ export class EditProfileScreen extends React.Component<Props, State> {
               testID={`${testIDPrefix}_name`}
               value={name}
             />
+            <Text style={styles.label}>{translate('Privacy')}</Text>
             <DropdownButtonSelect
               accessibilityHint={selectedIsPublicOption.label}
               helpText={helpText}
+              helpTextLarger
               items={isPublicOptions}
               label={selectedIsPublicOption.label}
               onValueChange={this._onChangeIsPublic}
@@ -172,6 +174,11 @@ const isPublicOptions = [
 
 const styles = StyleSheet.create({
   dropdownButtonSelectWrapper: {},
+  label: {
+    fontSize: PV.Fonts.sizes.lg,
+    fontWeight: PV.Fonts.weights.bold,
+    marginBottom: 4
+  },
   textInput: {},
   textInputSubtext: {
     marginTop: 16
