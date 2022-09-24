@@ -1,9 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
 import {
-  checkIfContainsStringMatch,
   convertToNowPlayingItem,
-  Episode,
   getAuthorityFeedUrlFromArray,
   getUsernameAndPasswordFromCredentials
 } from 'podverse-shared'
@@ -234,8 +232,6 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     PVEventEmitter.on(PV.Events.PODCAST_START_PODCAST_FROM_TIME_SET, this.refreshStartPodcastFromTime)
-
-    await clearEpisodesCountForPodcast(podcastId || addByRSSPodcastFeedUrl)
 
     const hasInternetConnection = await hasValidNetworkConnection()
 
@@ -576,6 +572,13 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     })
   }
 
+  _handleClearNewEpisodeIndicators = () => {
+    const { podcast } = this.state
+    if (podcast?.id) {
+      clearEpisodesCountForPodcast(podcast.id)
+    }
+  }
+
   _handleSearchBarTextChange = (text: string) => {
     const { viewType } = this.state
 
@@ -816,7 +819,11 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
   _handleNavigateToPodcastInfoScreen = () => {
     const { navigation } = this.props
     const { podcast } = this.state
-    navigation.navigate(PV.RouteNames.PodcastInfoScreen, { podcast })
+    const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
+    navigation.navigate(PV.RouteNames.PodcastInfoScreen, {
+      addByRSSPodcastFeedUrl,
+      podcast
+    })
   }
 
   render() {
@@ -874,6 +881,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     return (
       <View style={styles.headerView} testID={`${testIDPrefix}_view`}>
         <PodcastTableHeader
+          addByRSSPodcastFeedUrl={addByRSSPodcastFeedUrl}
           autoDownloadOn={autoDownloadOn}
           description={podcast && podcast.description}
           handleNavigateToPodcastInfoScreen={this._handleNavigateToPodcastInfoScreen}
@@ -1016,7 +1024,16 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
             <Divider style={styles.divider} />
             <Button
               accessibilityHint={translate('ARIA HINT - delete all the episodes you have downloaded for this podcast')}
+              accessibilityLabel={translate('Clear new episode indicators')}
+              onPress={this._handleClearNewEpisodeIndicators}
+              wrapperStyles={styles.settingsClearNewEpisodeIndicators}
+              testID={`${testIDPrefix}_clear_new_episode_indicators`}
+              text={translate('Clear new episode indicators')}
+            />
+            <Button
+              accessibilityHint={translate('ARIA HINT - delete all the episodes you have downloaded for this podcast')}
               accessibilityLabel={translate('Delete Downloaded Episodes')}
+              isWarning
               onPress={this._handleToggleDeleteDownloadedEpisodesDialog}
               wrapperStyles={styles.settingsDeletebutton}
               testID={`${testIDPrefix}_delete_downloaded_episodes`}
@@ -1284,10 +1301,16 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginBottom: 24,
-    marginTop: 12
+    marginTop: 32
   },
   itemWrapper: {
     marginTop: 32
+  },
+  settingsClearNewEpisodeIndicators: {
+    marginBottom: 32,
+    marginHorizontal: 8,
+    marginTop: 8,
+    borderRadius: 8
   },
   settingsDeletebutton: {
     margin: 8,
