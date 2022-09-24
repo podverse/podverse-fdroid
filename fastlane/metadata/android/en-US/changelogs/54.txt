@@ -1,0 +1,10 @@
+- Prevent V4V network errors by processing payments sequentially instead of in parallel. #1246
+- Fix broken V4V boostagram feature when trying to boost podcasts without loading an episode in the player. #1237
+- Change the "new episode indicators" to persist until you listen to the episode. #1239
+- Try to speed up app performance by fixing the keyExtractor in list components. #1258
+- Show account info under More > Settings > Account. #1242
+- Add "RSS" banner overlay on the images of podcasts added by custom RSS feed. #1244
+- Fix broken "unsubscribe from custom RSS podcast" feature. #1236
+- Fix "network timeout" errors when refreshing custom RSS feeds. #1235
+- Refresh the Episodes screen when the "Downloaded" filter is selected and an episode finishes downloading. #1238
+- Fix our most frequent JS crash "undefined is not an object (evaluating 'B.episodes[t.episodeId]') in C in RCTView in Unknown in Unknown" #1253
