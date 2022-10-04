@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-community/async-storage'
 import { Pressable, StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 // import { hasValidNetworkConnection } from '../lib/network'
@@ -79,7 +78,7 @@ export class FilterScreen extends React.Component<Props, State> {
     }
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     const { navigation } = this.props
     const { flatCategoryItems } = this.state
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')

@@ -1,12 +1,11 @@
 /* eslint-disable max-len */
-import AsyncStorage from '@react-native-community/async-storage'
 import { StyleSheet } from 'react-native'
 import Config from 'react-native-config'
 import React from 'reactn'
-import { Divider, ScrollView, SwitchWithText, TableCell, Text, View } from '../components'
+import { ScrollView, TableCell, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { core, table } from '../styles'
+import { table } from '../styles'
 
 type Props = {
   navigation: any
