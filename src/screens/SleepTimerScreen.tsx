@@ -27,7 +27,7 @@ export class SleepTimerScreen extends React.Component<Props> {
     this.state = {}
   }
 
-  static navigationOptions = ({ navigation }) => ({
+  static navigationOptions = () => ({
     title: translate('Sleep Timer'),
     headerRight: () => <RNView />
   })

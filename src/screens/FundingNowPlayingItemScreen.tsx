@@ -1,6 +1,6 @@
 import { ValueTransaction } from 'podverse-shared'
 import { Alert, Keyboard, Linking, Pressable, StyleSheet } from 'react-native'
-import React, { getGlobal } from 'reactn'
+import React from 'reactn'
 import AsyncStorage from '@react-native-community/async-storage'
 import {
   Divider,
@@ -27,6 +27,7 @@ import {
   v4vGetActiveProviderInfo,
   V4VTypeMethod,
   v4vUpdateTypeMethodSettingsBoostAmount
+  // v4vUpdateTypeMethodSettingsStreamingAmount
 } from '../state/actions/v4v/v4v'
 import { images } from '../styles'
 
@@ -55,7 +56,7 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
     }
   }
 
-  static navigationOptions = ({ navigation }) => {
+  static navigationOptions = () => {
     return {
       title: translate('Funding'),
       headerRight: null
@@ -186,20 +187,19 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
       this.renderFundingLink(item, 'episode', index)
     )
 
-    const hasValueInfo =
-      nowPlayingItem?.episodeValue?.length > 0 ||
-      nowPlayingItem?.podcastValue?.length > 0
-    const { activeProvider, activeProviderSettings } =
-      v4vGetActiveProviderInfo(getBoostagramItemValueTags(nowPlayingItem))
+    const hasValueInfo = nowPlayingItem?.episodeValue?.length > 0 || nowPlayingItem?.podcastValue?.length > 0
+    const { activeProvider, activeProviderSettings } = v4vGetActiveProviderInfo(
+      getBoostagramItemValueTags(nowPlayingItem)
+    )
 
     const podcastTitle = nowPlayingItem?.podcastTitle?.trim() || translate('Untitled Podcast')
     const episodeTitle = nowPlayingItem?.episodeTitle?.trim() || translate('Untitled Episode')
     const pubDate = readableDate(nowPlayingItem.episodePubDate)
     const headerAccessibilityLabel = `${podcastTitle}, ${episodeTitle}, ${pubDate}`
 
-    const boostAmountLabelText = activeProvider?.unit ? `${translate(
-      'Boost Amount'
-    )} (${v4vGetPluralCurrencyUnit(activeProvider.unit)})` : ''
+    const boostAmountLabelText = activeProvider?.unit
+      ? `${translate('Boost Amount')} (${v4vGetPluralCurrencyUnit(activeProvider.unit)})`
+      : ''
 
     return (
       <View style={styles.content} testID='funding_screen_view'>

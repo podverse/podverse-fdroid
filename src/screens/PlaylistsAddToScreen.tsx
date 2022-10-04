@@ -48,8 +48,9 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
   }
 
   static navigationOptions = ({ navigation }) => {
-    const headerLeft = navigation.getParam('isModal')
-      ? <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} /> : null
+    const headerLeft = navigation.getParam('isModal') ? (
+      <NavDismissIcon handlePress={navigation.dismiss} testID={testIDPrefix} />
+    ) : null
 
     return {
       title: translate('Add to Playlist'),
@@ -69,7 +70,6 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
       )
     }
   }
-
 
   async componentDidMount() {
     this.props.navigation.setParams({
