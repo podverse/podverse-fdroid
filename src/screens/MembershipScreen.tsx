@@ -3,7 +3,12 @@ import { StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, Button, ComparisonTable, Text, View } from '../components'
 import { translate } from '../lib/i18n'
-import { getMembershipExpiration, getMembershipStatus } from '../lib/membership'
+import {
+  checkIfExpiredMembership,
+  checkIfValidFreeTrialMembership,
+  getMembershipExpiration,
+  getMembershipStatus
+} from '../lib/membership'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
 import { displayFOSSPurchaseAlert } from '../services/purchaseShared'
@@ -70,11 +75,20 @@ export class MembershipScreen extends React.Component<Props, State> {
     const expirationDate = getMembershipExpiration(userInfo)
     const statusAccessibilityLabel = `${translate('Status')}: ${membershipStatus}`
     const expiresAccessibilityLabel = `${translate('Expires')}: ${readableDate(expirationDate)}`
+    const expiresLabel = checkIfExpiredMembership(membershipStatus) ? translate('Expired') : translate('Expires')
+    const isValidFreeTrial = checkIfValidFreeTrialMembership(membershipStatus)
+    const isValidMembership = !checkIfExpiredMembership(membershipStatus)
+    const renewButtonLabel = isValidMembership ? translate('Extend Membership') : translate('Renew Membership')
+    const renewMembershipExplanation = isValidMembership
+      ? translate('Your membership is still valid')
+      : translate('Enjoy all Premium features by renewing for only')
+    const renewMembershipExplanation2 = isValidFreeTrial
+      ? translate('Your membership will not auto-renew')
+      : translate('You are not being charged during your free trial')
 
-    return (
-      <View style={styles.wrapper} testID={`${testIDPrefix}_view`}>
-        {isLoading && isLoggedIn && <ActivityIndicator fillSpace testID={testIDPrefix} />}
-        {!isLoading && isLoggedIn && !!membershipStatus && (
+    const listHeaderComponent = (
+      <View style={styles.listHeaderWrapper}>
+        {isLoggedIn && !!membershipStatus && (
           <View>
             <View
               accessible
@@ -86,13 +100,7 @@ export class MembershipScreen extends React.Component<Props, State> {
               style={styles.textRowCentered}>
               <Text
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                style={styles.label}
-                testID={`${testIDPrefix}_status_label`}>
-                {translate('Status')}{' '}
-              </Text>
-              <Text
-                fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                style={[styles.text, membershipTextStyle]}
+                style={[styles.textLargest, membershipTextStyle]}
                 testID={`${testIDPrefix}_status_membership`}>
                 {membershipStatus}
               </Text>
@@ -108,7 +116,7 @@ export class MembershipScreen extends React.Component<Props, State> {
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
                 style={styles.label}
                 testID={`${testIDPrefix}_expires`}>
-                {`${translate('Expires')}: `}
+                {`${expiresLabel}: `}
               </Text>
               <Text
                 fontSizeLargestScale={PV.Fonts.largeSizes.md}
@@ -125,19 +133,19 @@ export class MembershipScreen extends React.Component<Props, State> {
                 isSuccess
                 onPress={this.handleRenewPress}
                 testID={`${testIDPrefix}_renew_membership`}
-                text={translate('Renew Membership')}
+                text={renewButtonLabel}
                 wrapperStyles={styles.button}
               />
-              <Text
-                fontSizeLargestScale={PV.Fonts.largeSizes.md}
-                style={styles.explainText}
-                testID={`${testIDPrefix}_renew_explanation`}>
-                {translate('Enjoy all Premium features by renewing for only')}
-              </Text>
             </View>
+            <Text
+              fontSizeLargestScale={PV.Fonts.largeSizes.md}
+              style={styles.explainText}
+              testID={`${testIDPrefix}_renew_explanation`}>
+              {`${renewMembershipExplanation} ${renewMembershipExplanation2}`}
+            </Text>
           </View>
         )}
-        {!isLoading && !isLoggedIn && (
+        {!isLoggedIn && (
           <View>
             <View style={styles.textRowCentered}>
               <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.subTextCentered}>
@@ -167,12 +175,19 @@ export class MembershipScreen extends React.Component<Props, State> {
             </View>
           </View>
         )}
+      </View>
+    )
+
+    return (
+      <View style={styles.wrapper} testID={`${testIDPrefix}_view`}>
+        {isLoading && isLoggedIn && <ActivityIndicator fillSpace testID={testIDPrefix} />}
         {!isLoading && (
           <View style={styles.tableWrapper}>
             <ComparisonTable
               column1Title={translate('Free')}
               column2Title={translate('Premium')}
               data={comparisonData}
+              listHeaderComponent={listHeaderComponent}
               mainTitle={translate('Features')}
               mainTitleAccessibilityHint={translate('ARIA HINT - Membership features header')}
               navigation={this.props.navigation}
@@ -199,7 +214,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Download episodes'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/04138079-cc99-41ae-8080-8a5ed34be417/d4760840-77d3-4ad7-b71c-3ab5856696a1-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/04138079-cc99-41ae-8080-8a5ed34be417/1a8cdb78-0065-40b8-8db8-62995724e7bc-1080-fragmented.mp4'
   },
   {
     text: translate('Audio livestreams'),
@@ -207,7 +222,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Audio livestreams'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/bbf6eb1c-46a0-407d-b1ef-682590885882/a4daf0f9-8e10-49ce-814b-43ecebbe10ac-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/bbf6eb1c-46a0-407d-b1ef-682590885882/ba490a30-5e85-41ea-aae7-72b8bc2aac75-828-fragmented.mp4'
   },
   {
     text: translate('Video playback'),
@@ -223,7 +238,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Add custom RSS feeds'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/8c6541ac-9523-42a9-9f6b-b8e1629720ee/8aa0df27-e695-4e17-8a19-6907892a05b6-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/8c6541ac-9523-42a9-9f6b-b8e1629720ee/e8eb02b6-eaa4-4ec7-a8fd-5380ca041b95-1080-fragmented.mp4'
   },
   {
     text: translate('Sleep timer'),
@@ -243,7 +258,9 @@ const comparisonData = [
     text: translate('Podcasting 2.0 chapters'),
     column1: true,
     column2: true,
-    accessibilityLabel: translate('Podcasting 2.0 chapters')
+    accessibilityLabel: translate('Podcasting 2.0 chapters'),
+    videoUrl:
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/2c27da49-6df8-4d86-9d4b-b617af5ef3dc/1f4bd85b-9749-433c-bc20-eda78cb38068-1080-fragmented.mp4'
   },
   {
     text: translate('Podcasting 2.0 cross-app comments'),
@@ -251,7 +268,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Podcasting 2.0 cross-app comments'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/e214c3a9-9c2e-4d70-9f88-c3820a7189df/83febd73-b612-4e92-bfb8-e55a438d1f44-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/e214c3a9-9c2e-4d70-9f88-c3820a7189df/1162def8-8c14-47d3-b77f-59856c14e067-1080-fragmented.mp4'
   },
   {
     text: translate('Podcasting 2.0 transcripts'),
@@ -289,7 +306,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('New episodes and livestream notifications'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/bbf6eb1c-46a0-407d-b1ef-682590885882/a4daf0f9-8e10-49ce-814b-43ecebbe10ac-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/bbf6eb1c-46a0-407d-b1ef-682590885882/ba490a30-5e85-41ea-aae7-72b8bc2aac75-828-fragmented.mp4'
   },
   {
     text: translate('Create and share podcast clips'),
@@ -305,7 +322,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Create and share playlists'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/2a1d5f03-7415-4462-9758-738f7c93f68c/be7c693f-aab8-4da8-ac56-3672d636fef5-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/2a1d5f03-7415-4462-9758-738f7c93f68c/af4476db-8f7d-4e5f-8886-d03dfa2ef3e7-1080-fragmented.mp4'
   },
   {
     text: translate('Mark episodes as played'),
@@ -313,7 +330,7 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Mark episodes as played'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/ba616db8-9b46-436a-994f-383ff66576a2/9d0d8a84-5ae9-4fe1-b04b-c12a2a9a3350-360-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/ba616db8-9b46-436a-994f-383ff66576a2/a8ab3251-31be-4005-b45e-081c72be7b67-1080-fragmented.mp4'
   },
   {
     text: translate('Subscribe to listener profiles'),
@@ -334,21 +351,26 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 30,
     height: 32,
-    marginBottom: 16
+    marginBottom: 20
   },
   buttonWrapper: {
-    marginVertical: 16,
+    marginBottom: 28,
+    marginTop: 22,
     paddingHorizontal: 32
   },
   explainText: {
-    fontSize: PV.Fonts.sizes.lg,
+    fontSize: PV.Fonts.sizes.sm,
     fontWeight: PV.Fonts.weights.semibold,
-    marginBottom: 12,
+    marginBottom: 16,
+    paddingHorizontal: 16,
     textAlign: 'center'
   },
   label: {
     fontSize: PV.Fonts.sizes.xl,
     fontWeight: PV.Fonts.weights.bold
+  },
+  listHeaderWrapper: {
+    marginBottom: 24
   },
   subText: {
     fontSize: PV.Fonts.sizes.xl,
@@ -372,6 +394,10 @@ const styles = StyleSheet.create({
     fontSize: PV.Fonts.sizes.xl,
     fontWeight: PV.Fonts.weights.semibold,
     textAlign: 'center'
+  },
+  textLargest: {
+    fontSize: PV.Fonts.sizes.xxxl,
+    fontWeight: PV.Fonts.weights.bold
   },
   textRow: {
     flexDirection: 'row',

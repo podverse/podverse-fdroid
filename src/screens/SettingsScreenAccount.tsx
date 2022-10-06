@@ -4,7 +4,7 @@ import Dialog from 'react-native-dialog'
 import React from 'reactn'
 import { Button, Divider, Icon, ScrollView, Text, View } from '../components'
 import { translate } from '../lib/i18n'
-import { getMembershipExpiration, getMembershipStatus } from '../lib/membership'
+import { getMembershipExpiration } from '../lib/membership'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
 import { deleteLoggedInUser } from '../services/user'
@@ -129,8 +129,7 @@ export class SettingsScreenAccount extends React.Component<Props, State> {
           </View>
           {editIcon}
         </View>
-        <View
-          style={styles.itemWrapper}>
+        <View style={styles.itemWrapper}>
           <Text fontSizeLargestScale={PV.Fonts.largeSizes.md} style={styles.label} testID={`${testIDPrefix}_expires`}>
             {membershipExpirationLabelText}
           </Text>

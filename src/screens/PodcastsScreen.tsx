@@ -22,7 +22,7 @@ import { getDefaultSortForFilter, getSelectedFilterLabel, getSelectedSortLabel }
 import { translate } from '../lib/i18n'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { resetAllAppKeychain } from '../lib/secutity'
-import { getAppUserAgent, safeKeyExtractor, setAppUserAgent, setCategoryQueryProperty } from '../lib/utility'
+import { getAppUserAgent, safeKeyExtractor, setCategoryQueryProperty } from '../lib/utility'
 import { PV } from '../resources'
 import { v4vAlbyCheckConnectDeepLink } from '../services/v4v/providers/alby'
 import { getAutoDownloadsLastRefreshDate, handleAutoDownloadEpisodes } from '../services/autoDownloads'
@@ -49,7 +49,8 @@ import {
   playerLoadNowPlayingItem,
   playerUpdatePlaybackState,
   playerUpdatePlayerState,
-  showMiniPlayer
+  showMiniPlayer,
+  handleNavigateToPlayerScreen
 } from '../state/actions/player'
 import {
   combineWithAddByRSSPodcasts,
@@ -76,6 +77,7 @@ type State = {
   endOfResultsReached: boolean
   flatListData: any[]
   flatListDataTotalCount: number | null
+  isInitialLoadFinished: boolean
   isLoadingMore: boolean
   isRefreshing: boolean
   isUnsubscribing: boolean
@@ -129,6 +131,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       endOfResultsReached: false,
       flatListData: [],
       flatListDataTotalCount: null,
+      isInitialLoadFinished: false,
       isLoadingMore: true,
       isRefreshing: false,
       isUnsubscribing: false,
@@ -339,7 +342,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
   _handleDeepLinkClip = async (mediaRefId: string) => {
     if (mediaRefId) {
       const { navigation } = this.props
-      const { navigate } = navigation
 
       try {
         const currentItem = await getNowPlayingItem()
@@ -354,7 +356,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           }
         }
 
-        navigate(PV.RouteNames.PlayerScreen)
+        handleNavigateToPlayerScreen(navigation)
       } catch (error) {
         console.log(error)
       }
@@ -426,9 +428,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
         } else if (path === PV.DeepLinks.Membership.path) {
           await navigate(PV.RouteNames.MoreScreen)
           await navigate(PV.RouteNames.MembershipScreen)
-        } else if (path === PV.DeepLinks.Support.path) {
+        } else if (path === PV.DeepLinks.Contribute.path) {
           await navigate(PV.RouteNames.MoreScreen)
-          await navigate(PV.RouteNames.SupportScreen)
+          await navigate(PV.RouteNames.ContributeScreen)
         } else if (path === PV.DeepLinks.Terms.path) {
           await navigate(PV.RouteNames.MoreScreen)
           await navigate(PV.RouteNames.TermsOfServiceScreen)
@@ -469,9 +471,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     this._handleInitialDefaultQuery()
 
-    // Set the appUserAgent one time on initialization, then retrieve from a constant
-    // using the getAppUserAgent method, or from the global state (for synchronous access).
-    setAppUserAgent()
     const userAgent = getAppUserAgent()
     this.setGlobal({ userAgent })
     this.setState({ isLoadingMore: false }, () => {
@@ -585,7 +584,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
             preventAutoDownloading,
             preventParseCustomRSSFeeds
           )
-          this.setState(newState)
+          this.setState({
+            ...newState,
+            isInitialLoadFinished: true
+          })
         })()
       }
     )
@@ -770,7 +772,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     )
   }
 
-  _handleHiddenItemPress = async (selectedId, addByRSSPodcastFeedUrl, rowMap) => {
+  _handleHiddenItemPress = async (selectedId, addByRSSPodcastFeedUrl) => {
     const { queryFrom } = this.state
 
     let wasAlerted = false
@@ -915,6 +917,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
   render() {
     const { navigation } = this.props
     const {
+      isInitialLoadFinished,
       isLoadingMore,
       isRefreshing,
       queryFrom,
@@ -966,6 +969,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
               queryFrom !== PV.Filters._downloadedKey &&
               queryFrom !== PV.Filters._customFeedsKey
             }
+            disableNoResultsMessage={!isInitialLoadFinished}
             extraData={flatListData}
             handleNoResultsTopAction={!!Config.CURATOR_EMAIL ? this._navToRequestPodcastEmail : null}
             keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
@@ -1069,7 +1073,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     if (searchTitle) {
       const filteredResults = results[0].filter((serverPodcast: any) => {
         return !localPodcasts.some((localPodcast: any) => {
-          return checkIfContainsStringMatch(localPodcast?.title, serverPodcast?.title)
+          return localPodcast?.title === serverPodcast?.title
         })
       })
 
@@ -1106,6 +1110,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
       ...nextState
     } as State
 
+    let shouldCleanFlatListData = true
+
     try {
       const {
         searchBarText: searchTitle,
@@ -1125,9 +1131,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
       const isDownloadedSelected = filterKey === PV.Filters._downloadedKey || queryFrom === PV.Filters._downloadedKey
       const isAllPodcastsSelected = filterKey === PV.Filters._allPodcastsKey || queryFrom === PV.Filters._allPodcastsKey
 
+
       if (isSubscribedSelected) {
         if (!preventParseCustomRSSFeeds) {
           await getAuthUserInfo() // get the latest subscribedPodcastIds first
+          shouldCleanFlatListData = false
         }
         await this._querySubscribedPodcasts(preventAutoDownloading, preventParseCustomRSSFeeds)
       } else if (isCustomFeedsSelected) {
@@ -1184,7 +1192,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
       console.log('PodcastsScreen _queryData error', error)
     }
 
-    newState.flatListData = this.cleanFlatListData(newState.flatListData)
+    if (shouldCleanFlatListData) {
+      newState.flatListData = this.cleanFlatListData(newState.flatListData)
+    }
 
     this.shouldLoad = true
 

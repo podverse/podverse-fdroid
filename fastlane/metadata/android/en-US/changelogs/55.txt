@@ -1,0 +1,16 @@
+- Remember your last used filter on Episodes screen when you close and reopen the app. #1268
+- Add setting to automatically add downloaded episodes to your queue. #1279
+- Enable "hide completed episodes" filter on the Episodes screen. #1282
+- Move active livestreams to top of the Podcasts screen when "recent" filter is selected. #1287
+- Fix issue where live items did not appear on the Podcast screen when the feed only has a live item and no episodes. #1277
+- Fix download button in the "more buttons" alert on the Podcast screen. #1305
+- Fix download episode failures when an episode uses an http:// redirect. #1280
+- Increase custom RSS timeout to try to prevent parser failures for large RSS feeds (5MB+). #1297
+- Fix crash when opening a clip with a deep link. #1275
+- Fix cross-app comments not loading issue. #1300
+- Prevent two video players from playing simultaneously. #1298
+- Prevent "no results found" message from loading when results are actually found. #1292
+- Hide clips list on PlayerScreen when custom RSS feed podcast is loaded in the player. #1269
+- Fix missing search results issue when searching for podcasts with a similar name to one you're already subscribed to. #1274
+- Fix transcripts when it uses the application/x-subrip type. #1307
+- Change "Support" page to "Contribute" and update text. #1306

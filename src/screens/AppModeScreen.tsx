@@ -16,7 +16,6 @@ type Props = {
 const testIDPrefix = 'app_mode_screen'
 
 export class AppModeScreen extends React.Component<Props> {
-
   static navigationOptions = () => ({
     title: translate('App Mode')
   })
