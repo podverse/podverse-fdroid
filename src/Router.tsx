@@ -15,6 +15,7 @@ import {
   ClipsScreen,
   ContactScreen,
   ContactXMPPChatScreen,
+  ContributeScreen,
   DownloadsScreen,
   EditPlaylistScreen,
   EditProfileScreen,
@@ -55,7 +56,6 @@ import {
   SettingsScreenQueue,
   SleepTimerScreen,
   StartPodcastFromTimeScreen,
-  SupportScreen,
   TermsOfServiceScreen,
   V4VBoostagramScreen,
   V4VConsentScreen,
@@ -208,9 +208,9 @@ const MoreNavigator = createStackNavigator(
       screen: ContactXMPPChatScreen,
       path: PV.DeepLinks.XMPP.path
     },
-    [PV.RouteNames.SupportScreen]: {
-      screen: SupportScreen,
-      path: PV.DeepLinks.Support.path
+    [PV.RouteNames.ContributeScreen]: {
+      screen: ContributeScreen,
+      path: PV.DeepLinks.Contribute.path
     },
     [PV.RouteNames.AboutScreen]: {
       screen: AboutScreen,

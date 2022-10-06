@@ -57,7 +57,7 @@ export const RouteNames = {
   SettingsScreenQueue: 'SettingsScreenQueue',
   SleepTimerScreen: 'SleepTimerScreen',
   StartPodcastFromTimeScreen: 'StartPodcastFromTimeScreen',
-  SupportScreen: 'SupportScreen',
+  ContributeScreen: 'ContributeScreen',
   TabNavigator: 'TabNavigator',
   TermsOfServiceScreen: 'TermsOfServiceScreen',
   V4VBoostagramScreen: 'V4VBoostagramScreen',

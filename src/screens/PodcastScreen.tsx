@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
 import {
+  convertNowPlayingItemToEpisode,
   convertToNowPlayingItem,
   getAuthorityFeedUrlFromArray,
   getUsernameAndPasswordFromCredentials
@@ -1064,7 +1065,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                   navigation,
                   {
                     handleDismiss: this._handleCancelPress,
-                    handleDownload: this._handleDownloadPressed,
+                    handleDownload: () => this._handleDownloadPressed(convertNowPlayingItemToEpisode(selectedItem)),
                     includeGoToEpisodeInCurrentStack: true
                   },
                   viewType === PV.Filters._clipsKey ? 'clip' : 'episode'
