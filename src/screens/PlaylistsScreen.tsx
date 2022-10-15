@@ -155,8 +155,10 @@ export class PlaylistsScreen extends React.Component<Props, State> {
       (async () => {
         try {
           await toggleSubscribeToPlaylist(id)
-          const row = rowMap[id]
-          row?.closeRow()
+          const ignoreIndex = -1
+          const rowId = safeKeyExtractor(testIDPrefix, ignoreIndex, id)
+          rowMap[rowId]?.closeRow()
+
           const sections = this.generatePlaylistsSections()
           this.setState({ isRemoving: false, sections })
         } catch (error) {
@@ -174,8 +176,10 @@ export class PlaylistsScreen extends React.Component<Props, State> {
       (async () => {
         try {
           await deletePlaylist(id)
-          const row = rowMap[id]
-          row?.closeRow()
+          const ignoreIndex = -1
+          const rowId = safeKeyExtractor(testIDPrefix, ignoreIndex, id)
+          rowMap[rowId]?.closeRow()
+
           const sections = this.generatePlaylistsSections()
           this.setState({ isRemoving: false, sections })
         } catch (error) {

@@ -252,7 +252,9 @@ export class MoreScreen extends React.Component<Props, State> {
           ]}
           stickySectionHeadersEnabled={false}
         />
-        {this.state.isLoading && <ActivityIndicator isOverlay testID={testIDPrefix} transparent={false} />}
+        {this.state.isLoading && (
+          <ActivityIndicator isOverlay showMayTakeAwhileMsg testID={testIDPrefix} transparent={false} />
+        )}
       </View>
     )
   }
