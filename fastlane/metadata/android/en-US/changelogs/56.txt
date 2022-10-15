@@ -1,0 +1,9 @@
+- Faster custom RSS feed parsing (~33%) with parallel parsing. #1322
+- Turn auto-downloads on by default for new users. #1328
+- Fix broken "remove" button on the Downloads screen. #1331
+- Add setting to change the launch screen (Podcasts, Episodes, or Clips). #1320 
+- Add support for transcripts without timecodes (text/html). #1318
+- Fix custom RSS feeds not loading from server on login. #1334 
+- Fix text input height on Boostagram screen. #1339 
+- Add "this may take awhile" text to loading component when importing an OPML file. #1324
+- Translation updates for Norwegian Bokmål and German.
