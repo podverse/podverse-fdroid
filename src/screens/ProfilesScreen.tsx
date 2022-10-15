@@ -120,7 +120,7 @@ export class ProfilesScreen extends React.Component<Props, State> {
       (async () => {
         try {
           await toggleSubscribeToUser(selectedId)
-          rowMap[selectedId].closeRow()
+          rowMap[selectedId]?.closeRow()
           this.setState({ isUnsubscribing: false })
         } catch (error) {
           this.setState({ isUnsubscribing: false })
