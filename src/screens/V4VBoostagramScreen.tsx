@@ -305,7 +305,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
                       editable
                       eyebrowTitle={boostAmountLabelText}
                       keyboardType='numeric'
-                      wrapperStyle={styles.textInput}
+                      wrapperStyle={styles.textInputWrapper}
                       onBlur={async () => {
                         const { localBoostAmount } = this.state
                         if (activeProvider) {
@@ -344,14 +344,15 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
                       editable
                       eyebrowTitle={translate('Message')}
                       keyboardType='default'
-                      wrapperStyle={styles.textInput}
                       numberOfLines={4}
                       onSubmitEditing={() => Keyboard.dismiss()}
                       onChangeText={(newText: string) => {
                         this._handleBoostagramMessageTextUpdate(newText)
                       }}
                       placeholder={translate('Message optional')}
+                      style={styles.textInput}
                       testID={`${testIDPrefix}_message_text_input`}
+                      wrapperStyle={styles.textInputWrapper}
                     />
                   </View>
                   <Text style={styles.charCounter}>{`${boostagramMessageCharCount} / ${boostagramCharLimit}`}</Text>
@@ -472,6 +473,11 @@ const styles = StyleSheet.create({
     marginBottom: 24
   },
   textInput: {
+    minHeight: '0%',
+    paddingBottom: 12,
+    paddingTop: 12
+  },
+  textInputWrapper: {
     marginVertical: 0
   },
   textLabel: {
