@@ -1,5 +1,4 @@
 - Add "Download my data" button to More > Settings > Account screen. #1358
-- Pause and resume app playback for Siri and other app interruptions. #1345
 - Add sharable links for custom RSS feed podcasts and episodes. #1352
 - Show "Connect and log into Alby" when Alby login session expires from inactivity. #1353
 - Add "Live" indicator to grid view images. #1354
