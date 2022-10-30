@@ -1,0 +1,8 @@
+- Add "Download my data" button to More > Settings > Account screen. #1358
+- Add sharable links for custom RSS feed podcasts and episodes. #1352
+- Show "Connect and log into Alby" when Alby login session expires from inactivity. #1353
+- Add "Live" indicator to grid view images. #1354
+- Add Tutorials link to the More screen. #1375
+- Fix incorrect date on Boostagrams screen for livestreams. #1349
+- Add "servers under maintenance mode" to prepare for future upgrades. #1355
+- Translation updates: French, German, Italian, Norwegian Bokmål, Portuguese, Swedish
