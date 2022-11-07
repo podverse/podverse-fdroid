@@ -1,0 +1,11 @@
+- Directly import OPML from other apps into Podverse. #1385
+- Sync "new episode indicators" across devices. #1398
+- Dismiss "new episode indicator" when an episode is marked as played. #1343
+- Fix broken scrolling issue for custom RSS feeds. #1382
+- Auto-delete finished episodes after restart instead of deleting them immediately. #1384, #1383
+- Add Transcript screen that can be viewed without playing the episode. #1342
+- Force livestreams to play at 1x speed. #1378
+- Fixes to Alby connect feature. #1394, #1377
+- Fix "start podcast from time" selector #1411
+- Fix for OPML filenames that contain spaces. #1388
+- Add Podverse Matrix space link to Contact screen. #1344

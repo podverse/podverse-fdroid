@@ -23,6 +23,7 @@ import {
   EpisodeMediaRefScreen,
   EpisodeScreen,
   EpisodesScreen,
+  EpisodeTranscriptScreen,
   FAQScreen,
   FeatureVideosScreen,
   FilterScreen,
@@ -113,6 +114,9 @@ const PodcastsNavigator = createStackNavigator(
     },
     [PV.RouteNames.EpisodeMediaRefScreen]: {
       screen: EpisodeMediaRefScreen
+    },
+    [PV.RouteNames.EpisodeTranscriptScreen]: {
+      screen: EpisodeTranscriptScreen
     }
   },
   {
@@ -135,6 +139,9 @@ const EpisodesNavigator = createStackNavigator(
     [PV.RouteNames.EpisodeScreen]: EpisodeScreen,
     [PV.RouteNames.EpisodeMediaRefScreen]: {
       screen: EpisodeMediaRefScreen
+    },
+    [PV.RouteNames.EpisodeTranscriptScreen]: {
+      screen: EpisodeTranscriptScreen
     }
   },
   {
@@ -146,7 +153,7 @@ const EpisodesNavigator = createStackNavigator(
       // tabBarAccessibilityLabel: translate('Episodes'),
       tabBarLabel: (props) => <TabBarLabel {...props} tabKey='Episodes' />,
       tabBarTestID: 'tab_episodes_screen'.prependTestId()
-    },
+    }
   }
 )
 
