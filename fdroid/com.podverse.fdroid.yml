@@ -2505,9 +2505,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.12-qa.1
+  - versionName: 4.6.12-beta.1
     versionCode: 58
-    commit: 4.6.12-qa.1
+    commit: 4.6.12-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
