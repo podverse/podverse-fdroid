@@ -228,6 +228,7 @@ export class EpisodeScreen extends HistoryIndexListenerScreen<Props, State> {
 
     const showClipsCell = hasInternetConnection && totalClips > 0
     const showChaptersCell = hasInternetConnection && !!episode?.chaptersUrl
+    const showTranscriptCell = hasInternetConnection && !!episode?.transcript?.[0]
 
     const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(episodeId)
 
@@ -293,6 +294,25 @@ export class EpisodeScreen extends HistoryIndexListenerScreen<Props, State> {
                 <>
                   <Text style={styles.showNotesCellText} testID={testIDPrefix}>
                     {translate('Chapters')}
+                  </Text>
+                  <Icon name='arrow-right' size={15} />
+                </>
+              </PressableWithOpacity>
+            )}
+            {showTranscriptCell && (
+              <PressableWithOpacity
+                accessibilityLabel={translate('Transcript')}
+                accessibilityRole='button'
+                activeOpacity={1}
+                style={styles.showNotesCell}
+                onPress={() => {
+                  this.props.navigation.navigate(PV.RouteNames.EpisodeTranscriptScreen, {
+                    episode
+                  })
+                }}>
+                <>
+                  <Text style={styles.showNotesCellText} testID={testIDPrefix}>
+                    {translate('Transcript')}
                   </Text>
                   <Icon name='arrow-right' size={15} />
                 </>

@@ -209,11 +209,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
             <NavFundingIcon globalTheme={globalTheme} navigation={navigation} podcast={podcast} />
           )}
           {!addByRSSPodcastFeedUrl && (
-            <NavShareIcon
-              podcastTitle={podcastTitle}
-              urlId={podcastId}
-              urlPath={PV.URLs.webPaths.podcast}
-            />
+            <NavShareIcon podcastTitle={podcastTitle} urlId={podcastId} urlPath={PV.URLs.webPaths.podcast} />
           )}
           {!!addByRSSPodcastFeedUrl && podcast?.linkUrl && (
             <NavShareIcon
@@ -354,7 +350,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
 
   _handleMaintenanceMode = () => {
     const { queryFrom } = this.state
-    
+
     if (queryFrom !== PV.Filters._downloadedKey) {
       this.handleSelectFilterItem(PV.Filters._downloadedKey)
     }
@@ -1074,7 +1070,8 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                 extraData={flatListData}
                 isLoadingMore={isLoadingMore}
                 isRefreshing={isRefreshing}
-                keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
+                keyExtractor={(item: any, index: number) => 
+                  safeKeyExtractor(testIDPrefix, index, item?.id, !!item?.addedByRSS)}
                 ListHeaderComponent={this._ListHeaderComponent}
                 noResultsMessage={noResultsMessage}
                 onEndReached={this._onEndReached}
