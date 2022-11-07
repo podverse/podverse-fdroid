@@ -4,7 +4,6 @@ import React from 'reactn'
 import { ActivityIndicator, MediaPlayerCarouselTranscripts, View } from '../components'
 import { translate } from '../lib/i18n'
 import { getParsedTranscript } from '../lib/transcriptHelpers'
-import { trackPageView } from '../services/tracking'
 
 type Props = {
   navigation: any
@@ -45,7 +44,6 @@ export class EpisodeTranscriptScreen extends React.Component<Props, State> {
       }
     }
     this.setState({ isLoading: false, parsedTranscript })
-    trackPageView('/episode/transcript', 'EpisodeTranscript Screen')
   }
 
   render() {
