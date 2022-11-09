@@ -19,6 +19,7 @@ const _bugReportKey = 'bugReport'
 const _podcastRequestKey = 'podcastRequest'
 const _joinOurDiscordKey = 'joinOurDiscord'
 const _joinOurXMPPServerKey = 'joinOurXMPPServer'
+const _joinOurMatrixSpaceKey = 'joinOurMatrixSpace'
 
 const emailOptions = [
   {
@@ -40,6 +41,10 @@ const emailOptions = [
 ]
 
 const liveChatOptions = [
+  {
+    key: _joinOurMatrixSpaceKey,
+    title: translate('Join our Matrix space')
+  },
   {
     key: _joinOurXMPPServerKey,
     title: translate('Join our XMPP server')
@@ -69,6 +74,8 @@ export class ContactScreen extends React.Component<Props> {
       navigation.navigate(PV.RouteNames.ContactXMPPChatScreen)
     } else if (item.key === _joinOurDiscordKey) {
       Linking.openURL(Config.URL_SOCIAL_DISCORD)
+    } else if (item.key === _joinOurMatrixSpaceKey) {
+      Linking.openURL(PV.URLs.social.matrix)
     }
   }
 
