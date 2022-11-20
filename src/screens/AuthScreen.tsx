@@ -255,7 +255,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    paddingBottom: 160
+    paddingBottom: 160,
+    maxWidth: 600
   },
   safeAreaView: {
     backgroundColor: PV.Colors.ink
