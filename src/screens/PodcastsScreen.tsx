@@ -297,7 +297,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     this.setGlobal({
       screen: {
         orientation: isPortrait() ? 'portrait' : 'landscape',
-        screenWidth: Dimensions.get('screen').width
+        screenWidth: Dimensions.get('window').width
       }      
     })
     refreshChaptersWidth()
@@ -572,6 +572,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     this._setDownloadedDataIfOffline()
     downloadedEpisodeDeleteMarked()
+
+    /* This event signals to CarPlay to refresh views after the app initializes. */
+    setTimeout(() => PVEventEmitter.emit(PV.Events.APP_FINISHED_INITALIZING), 1000)
   }
 
   _handleInitialDefaultQuery = async () => {
