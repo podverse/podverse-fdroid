@@ -339,7 +339,12 @@ tabsList.forEach((tabName: string) => {
 })
 
 const TabNavigator = createBottomTabNavigator(tabs, {
-  tabBarComponent: (props: any) => <PVTabBar {...props} />
+  tabBarComponent: (props: any) => <PVTabBar {...props} />,
+  tabBarOptions: {
+    safeAreaInset: {
+      bottom: 'never'
+    }
+  }
 })
 
 const PlayerNavigator = createStackNavigator(
