@@ -12,7 +12,7 @@ import { setGlobal, getGlobal } from 'reactn'
 import { OverlayAlert, ImageFullView } from './src/components'
 import { pvIsTablet } from './src/lib/deviceDetection'
 import { refreshDownloads } from './src/lib/downloader'
-import PVEventEmitter from './src/services/eventEmitter'
+// import PVEventEmitter from './src/services/eventEmitter'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
@@ -23,13 +23,13 @@ import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
 import { hasValidDownloadingConnection } from './src/lib/network'
 import { migrateCredentialsIfNeeded } from './src/lib/secutity'
-import {
-  handleCarPlayPodcastsUpdate,
-  handleCarPlayQueueUpdate,
-  registerCarModule,
-  showRootView,
-  unregisterCarModule
-} from './src/lib/carplay/PVCarPlay'
+// import {
+//   handleCarPlayPodcastsUpdate,
+//   handleCarPlayQueueUpdate,
+//   registerCarModule,
+//   showRootView,
+//   unregisterCarModule
+// } from './src/lib/carplay/PVCarPlay'
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', "Require cycle"])
 
@@ -94,20 +94,20 @@ class App extends Component<Props, State> {
     // unregisterCarModule(this.onConnect, this.onDisconnect);
   }
 
-  onConnect = () => {
-    // Do things now that carplay is connected
-    const { subscribedPodcasts = [], session } = getGlobal()
-    const { historyItems = [], queueItems = [] } = session.userInfo
-    showRootView(subscribedPodcasts, historyItems, queueItems)
-    PVEventEmitter.on(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
-    PVEventEmitter.on(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
-  }
+  // onConnect = () => {
+  //   // Do things now that carplay is connected
+  //   const { subscribedPodcasts = [], session } = getGlobal()
+  //   const { historyItems = [], queueItems = [] } = session.userInfo
+  //   showRootView(subscribedPodcasts, historyItems, queueItems)
+  //   PVEventEmitter.on(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
+  //   PVEventEmitter.on(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
+  // }
 
-  onDisconnect = () => {
-    // Do things now that carplay is disconnected
-    PVEventEmitter.removeListener(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
-    PVEventEmitter.removeListener(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
-  }
+  // onDisconnect = () => {
+  //   // Do things now that carplay is disconnected
+  //   PVEventEmitter.removeListener(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
+  //   PVEventEmitter.removeListener(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
+  // }
 
   handleNetworkChange = () => {
     (async () => {
