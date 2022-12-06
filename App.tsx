@@ -8,11 +8,10 @@ import 'react-native-gesture-handler'
 import Orientation from 'react-native-orientation-locker'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
-import { setGlobal, getGlobal } from 'reactn'
+import { setGlobal } from 'reactn'
 import { OverlayAlert, ImageFullView } from './src/components'
 import { pvIsTablet } from './src/lib/deviceDetection'
 import { refreshDownloads } from './src/lib/downloader'
-// import PVEventEmitter from './src/services/eventEmitter'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
@@ -85,7 +84,6 @@ class App extends Component<Props, State> {
     
   
     // registerCarModule(this.onConnect, this.onDisconnect)
-    
   }
 
   componentWillUnmount() {
