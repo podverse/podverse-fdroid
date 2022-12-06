@@ -210,7 +210,6 @@ export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
           <FlatList
             data={historyItems}
             dataTotalCount={historyItems.length}
-            disableLeftSwipe
             extraData={historyItems}
             isLoadingMore={isLoadingMore}
             keyExtractor={(item: any, index: number) =>

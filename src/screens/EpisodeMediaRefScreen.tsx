@@ -228,7 +228,6 @@ export class EpisodeMediaRefScreen extends React.Component<Props, State> {
         <FlatList
           data={flatListData}
           dataTotalCount={flatListDataTotalCount}
-          disableLeftSwipe
           extraData={flatListData}
           isLoadingMore={isLoadingMore}
           ItemSeparatorComponent={this._ItemSeparatorComponent}

@@ -557,7 +557,6 @@ export class EpisodesScreen extends HistoryIndexListenerScreen<Props, State> {
           <FlatList
             data={flatListData}
             dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe={queryFrom !== PV.Filters._downloadedKey}
             extraData={flatListData}
             handleNoResultsTopAction={this._handleNoResultsTopAction}
             isLoadingMore={isLoadingMore}
