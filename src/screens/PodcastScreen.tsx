@@ -968,7 +968,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                     'ARIA HINT - set the maximum number of downloaded episodes to save from this podcast on your device'
                   )},${translate(
                     // eslint-disable-next-line max-len
-                    'Limit the number of downloaded episodes from this podcast on your device. Once the download limit is exceeded the oldest episode will be automatically deleted.'
+                    'Limit the number of downloaded epiosdes explanation'
                   )}`}
                   accessibilityLabel={`${translate('Download limit max')} ${
                     !!downloadedEpisodeLimit ? downloadedEpisodeLimit : ''
@@ -977,10 +977,10 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                   selectedNumber={downloadedEpisodeLimit}
                   subText={translate(
                     // eslint-disable-next-line max-len
-                    'Limit the number of downloaded episodes from this podcast on your device. Once the download limit is exceeded the oldest episode will be automatically deleted.'
+                    'Limit the number of downloaded epiosdes explanation'
                   )}
                   testID={`${testIDPrefix}_downloaded_episode_limit_count`}
-                  text={translate('Download limit max')}
+                  text={translate('Limit')}
                 />
               </View>
             )}
@@ -1042,11 +1042,11 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
             <Divider style={styles.divider} />
             <Button
               accessibilityHint={translate('ARIA HINT - delete all the episodes you have downloaded for this podcast')}
-              accessibilityLabel={translate('Clear new episode indicators')}
+              accessibilityLabel={translate('Mark episodes as seen')}
               onPress={this._handleClearNewEpisodeIndicators}
               wrapperStyles={styles.settingsClearNewEpisodeIndicators}
               testID={`${testIDPrefix}_clear_new_episode_indicators`}
-              text={translate('Clear new episode indicators')}
+              text={translate('Mark episodes as seen')}
             />
             <Button
               accessibilityHint={translate('ARIA HINT - delete all the episodes you have downloaded for this podcast')}
@@ -1066,7 +1066,6 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                 data={flatListData}
                 dataTotalCount={flatListDataTotalCount}
                 disableNoResultsMessage={isLoadingMore}
-                disableLeftSwipe={viewType !== PV.Filters._downloadedKey}
                 extraData={flatListData}
                 isLoadingMore={isLoadingMore}
                 isRefreshing={isRefreshing}

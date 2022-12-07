@@ -255,7 +255,6 @@ export class PlaylistScreen extends HistoryIndexListenerScreen<Props, State> {
           <FlatList
             data={flatListData}
             dataTotalCount={flatListDataTotalCount}
-            disableLeftSwipe
             extraData={flatListData}
             isLoadingMore={isLoadingMore}
             ItemSeparatorComponent={this._ItemSeparatorComponent}

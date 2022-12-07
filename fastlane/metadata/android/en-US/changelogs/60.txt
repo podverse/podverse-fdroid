@@ -1,0 +1,9 @@
+- Fixes for iPad Split View. #1450, #1449
+- Fix extra padding appearing below bottom tabs on some iOS devices. #1445
+- Add "mark as seen" button to Podcasts screen to dismiss new episode indicators. Swipe left to reveal. #1466
+- Change Alert button color from black to white so the text is more visible. #1458
+- Automatically log out when your login session expires. #1465
+- Notify when Premium features are failing because the membership has expired. #1443
+- Fix incorrect privacy setting displaying on More > Settings > Account screen. #1463
+- Fix broken links to Tutorials and Contribute page. #1464
+- Fix crash when V4V is enabled. #1476
