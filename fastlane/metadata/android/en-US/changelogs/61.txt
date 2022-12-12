@@ -1,3 +1,3 @@
-- Improvements to app performance and responsiveness. #1490
+- Improve app performance and responsiveness. #1490
 - Fix livestream notifications bug. #1479
 - Fix "Authorize" error with Alby login. #1489
