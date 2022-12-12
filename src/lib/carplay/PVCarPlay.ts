@@ -4,6 +4,7 @@ import { ListItem } from 'react-native-carplay/lib/interfaces/ListItem';
 import { TemplateConfig } from 'react-native-carplay/lib/templates/Template';
 import { getGlobal } from 'reactn'
 import { getHistoryItems } from '../../state/actions/userHistoryItem';
+import { errorLogger } from '../logger';
 import { translate } from '../i18n';
 import { downloadImageFile, getSavedImageUri } from '../storage';
 import { readableDate } from '../utility';
@@ -12,31 +13,31 @@ import { getEpisodesForPodcast, loadEpisodeInPlayer, loadNowPlayingItemInPlayer 
 
 /* Initialize */
 
-export const registerCarModule = (onConnect, onDisconnect) => {
+export const registerCarModule = (onConnect: any, onDisconnect: any) => {
   CarPlay.registerOnConnect(onConnect);
   CarPlay.registerOnDisconnect(onDisconnect);
 }
 
-export const unregisterCarModule = (onConnect, onDisconnect) => { 
+export const unregisterCarModule = (onConnect: any, onDisconnect: any) => { 
   CarPlay.unregisterOnConnect(onConnect);
   CarPlay.unregisterOnDisconnect(onDisconnect);
 }
 
 /* Root View */
 
-export const showRootView = async (subscribedPodcasts: Podcast[], historyItems: any[], queueItems: any[]) => {
-  const pListTab = await podcastsListTab(subscribedPodcasts)
-  const qListTab = await queueItemsListTab(queueItems)
-  const hListTab = await historyItemsListTab(historyItems)
+export const showRootView = () => {
+  const pListTab = podcastsListTab()
+  const qListTab = queueItemsListTab()
+  const hListTab = historyItemsListTab()
 
   const tabBarTemplate = new TabBarTemplate({
     templates: [pListTab, qListTab, hListTab],
     onTemplateSelect(e: any) {
-      if(e.config.title === "Podcasts") {
+      if (e.config.title === 'Podcasts') {
         handleCarPlayPodcastsUpdate()
-      } else if (e.config.title === "Queue") {
+      } else if (e.config.title === 'Queue') {
         handleCarPlayQueueUpdate()
-      } else if (e.config.title === "History") {
+      } else if (e.config.title === 'History') {
         refreshHistory()
       }
     }
@@ -48,24 +49,30 @@ export const showRootView = async (subscribedPodcasts: Podcast[], historyItems: 
 /* Podcasts Tab */
 
 let podcastsList: ListTemplate
+let podcastsListLoaded = false
 
-const podcastsListTab = async (subscribedPodcasts: Podcast[]) => {
-  const listItems = await generatePodcastListItems(subscribedPodcasts)
+let episodes: any[] = []
 
+const podcastsListTab = () => {
   podcastsList = new ListTemplate({
     sections: [
       {
-        header: translate('Subscribed'),
-        items: listItems
+        header: '',
+        items: loadingItems
       }
     ],
     title: translate('Podcasts'),
     tabSystemImg: 'music.note.list',
     onItemSelect: async (item) => {
-      const { subscribedPodcasts } = getGlobal()
-      const podcast = subscribedPodcasts[item.index]
-      const [episodes] = await getEpisodesForPodcast(podcast)
-      showEpisodesList(podcast, episodes)
+      if (podcastsListLoaded) {
+        const { subscribedPodcasts } = getGlobal()
+        const podcast = subscribedPodcasts[item.index]
+        showEpisodesList(podcast)
+
+        const results = await getEpisodesForPodcast(podcast)
+        episodes = results[0]
+        handleCarPlayEpisodesUpdate(podcast)
+      }
     }
   })
 
@@ -74,12 +81,13 @@ const podcastsListTab = async (subscribedPodcasts: Podcast[]) => {
 
 export const handleCarPlayPodcastsUpdate = async () => {
   if (podcastsList) {
+    podcastsListLoaded = true
     const { subscribedPodcasts } = getGlobal()
     const listItems = await generatePodcastListItems(subscribedPodcasts)
 
     podcastsList.updateSections([
       {
-        header: translate('Subscribed'),
+        header: '',
         items: listItems
       }
     ])
@@ -103,31 +111,19 @@ const createCarPlayPodcastListItem = async (podcast: Podcast) => {
   return {
     text: podcast.title || translate('Untitled Podcast'),
     imgUrl
-  }
+  } as ListItem
 }
 
 /* Podcast Episodes Tab */
 
-const showEpisodesList = (podcast: Podcast, episodes: Episode[]) => {
-  const episodesList = new ListTemplate({
+let episodesList: ListTemplate
+
+const showEpisodesList = (podcast: Podcast) => {
+  episodesList = new ListTemplate({
     sections: [
       {
         header: podcast.title || translate('Untitled Podcast'),
-        items: episodes.map((episode) => {
-          // const imgUrl =  episode.imageUrl
-          //   || podcast.shrunkImageUrl
-          //   || podcast.imageUrl
-          //   || null
-
-          const pubDate =
-            (episode?.liveItem?.start && readableDate(episode.liveItem.start))
-            || (episode.pubDate && readableDate(episode.pubDate))
-            || ''
-
-          return {
-            text: episode.title || translate('Untitled Episode'),
-            detailText: pubDate
-          }}),
+        items: loadingItems
       },
     ],
     onItemSelect: ({index}) => showCarPlayerForEpisode(episodes[index], podcast)
@@ -136,29 +132,54 @@ const showEpisodesList = (podcast: Podcast, episodes: Episode[]) => {
   CarPlay.pushTemplate(episodesList)
 }
 
+const handleCarPlayEpisodesUpdate = (podcast: Podcast) => {
+  if (episodesList) {
+    const listItems = generateEpisodesListItems()
+
+    episodesList.updateSections([
+      {
+        header: podcast.title || translate('Untitled Podcast'),
+        items: listItems
+      }
+    ])
+  }
+}
+
+const generateEpisodesListItems = () => {
+  return episodes.map((episode) => {
+    const pubDate =
+      (episode?.liveItem?.start && readableDate(episode.liveItem.start))
+      || (episode.pubDate && readableDate(episode.pubDate))
+      || ''
+
+    return {
+      text: episode.title || translate('Untitled Episode'),
+      detailText: pubDate
+    }
+  })
+}
+
 /* Queue Tab */
 
 let queueList: ListTemplate 
 
-const queueItemsListTab = async (queueItems: NowPlayingItem[]) => {
-  const listItems = await generateNPIListItems(queueItems)
-
+const queueItemsListTab = () => {
   queueList = new ListTemplate({
     sections: [
       {
         header: '',
-        items: listItems
-      },
+        items: loadingItems
+      }
     ],
     title: translate('Queue'),
-    tabSystemImg:"list.bullet",
+    tabSystemImg: 'list.bullet',
     onItemSelect: async (item) => {
       const { session } = getGlobal()
       const updatedItems = session?.userInfo?.queueItems || []
       const nowPlayingItem = updatedItems[item.index]
       await showCarPlayerForNowPlayingItem(nowPlayingItem)
     }
-  });
+  })
 
   return queueList
 }
@@ -181,25 +202,23 @@ export const handleCarPlayQueueUpdate = async () => {
 
 let historyList: ListTemplate
 
-const historyItemsListTab = async (historyItems: NowPlayingItem[]) => {
-  const listItems = await generateNPIListItems(historyItems)
-
+const historyItemsListTab = () => {
   historyList = new ListTemplate({
     sections: [
       {
-        header: translate('Recently Played'),
-        items: listItems
+        header: '',
+        items: loadingItems
       }
     ],
     title: translate('History'),
-    tabSystemImg:"timer",
+    tabSystemImg: 'timer',
     onItemSelect: async (item) => {
       const { session } = getGlobal()
       const updatedItems = session?.userInfo?.historyItems || []
       const nowPlayingItem = updatedItems[item.index]
       await showCarPlayerForNowPlayingItem(nowPlayingItem)
     }
-  });
+  })
 
   return historyList
 }
@@ -208,7 +227,9 @@ export const handleCarPlayHistoryUpdate = async () => {
   if (historyList) {
     const { session } = getGlobal()
     const updatedItems = session?.userInfo?.historyItems || []
-    const listItems = await generateNPIListItems(updatedItems)
+    // Limit historyItems to the most recent 20 items, for performance reasons.
+    const limitedItems = updatedItems.slice(0, 20)
+    const listItems = await generateNPIListItems(limitedItems)
     historyList.updateSections([
       {
         header: '',
@@ -268,7 +289,7 @@ const generateNPIListItems = async (nowPlayingItems: NowPlayingItem[]) => {
 
 const createCarPlayNPIListItem = async (item: NowPlayingItem) => {
   const imgUrl = await getDownloadedImageUrl(
-    item?.episodeImageUrl || item?.podcastShrunkImageUrl || item?.podcastImageUrl
+    item?.podcastShrunkImageUrl || item?.podcastImageUrl
   )
 
   return {
@@ -293,9 +314,17 @@ const getDownloadedImageUrl = async (origImageUrl?: string | null) => {
       // in the background so it can load from downloaded storage next time.
       downloadImageFile(finalImageUrl)
 
-      console.log('carPlayListItems error:', error)
+      errorLogger('carPlayListItems error:', error)
     }
   }
 
   return finalImageUrl
 }
+
+/* Loading Cell Helper */
+const loadingItems: ListItem[] = [
+  {
+    text: translate('Loading'),
+    showsDisclosureIndicator: false // This doesn't seem to work...
+  }
+]
