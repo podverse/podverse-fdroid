@@ -2,6 +2,7 @@
 import { StyleSheet } from 'react-native'
 import React from 'reactn'
 import { ActivityIndicator, Button, ComparisonTable, Text, View } from '../components'
+import { errorLogger } from '../lib/logger'
 import { translate } from '../lib/i18n'
 import {
   checkIfExpiredMembership,

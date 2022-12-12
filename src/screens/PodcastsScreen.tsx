@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
 import { convertToNowPlayingItem, createEmailLinkUrl } from 'podverse-shared'
+import qs from 'qs'
 import { Alert, AppState, Dimensions, Linking, Platform, StyleSheet, View as RNView } from 'react-native'
+import { CarPlay } from 'react-native-carplay'
 import Config from 'react-native-config'
 import Dialog from 'react-native-dialog'
 import { NavigationStackOptions } from 'react-navigation-stack'
@@ -13,12 +15,12 @@ import {
   PlayerEvents,
   PodcastTableCell,
   SearchBar,
-  SwipeRowBack,
   SwipeRowBackMultipleButtons,
   TableSectionSelectors,
   View
 } from '../components'
 import { SwipeRowBackButton } from '../components/SwipeRowBackMultipleButtons'
+import { errorLogger } from '../lib/logger'
 import { isPortrait } from '../lib/deviceDetection'
 import { getDownloadedPodcasts } from '../lib/downloadedPodcast'
 import { getDefaultSortForFilter, getSelectedFilterLabel, getSelectedSortLabel } from '../lib/filters'
@@ -47,7 +49,11 @@ import { initAutoQueue } from '../state/actions/autoQueue'
 import { downloadedEpisodeDeleteMarked, initDownloads, removeDownloadedPodcast,
   updateDownloadedPodcasts } from '../state/actions/downloads'
 import { v4vAlbyHandleConnect } from '../state/actions/v4v/providers/alby'
-import { clearEpisodesCountForPodcast, handleUpdateNewEpisodesCount, syncNewEpisodesCountWithHistory } from '../state/actions/newEpisodesCount'
+import {
+  clearEpisodesCountForPodcast,
+  handleUpdateNewEpisodesCount,
+  syncNewEpisodesCountWithHistory
+} from '../state/actions/newEpisodesCount'
 import {
   initializePlayerSettings,
   initializePlayer,
@@ -106,6 +112,8 @@ type State = {
 const testIDPrefix = 'podcasts_screen'
 
 let isInitialLoad = true
+const horizontalRowHeight = 94
+const dividerHeight = 1
 
 const getScreenTitle = () => {
   const { appMode } = getGlobal()
@@ -176,6 +184,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
       _screenTitle: getScreenTitle()
     })
 
+    // if (CarPlay.connected) {
+    //   CarPlay.bridge.checkForConnection()
+    // }
+
     Linking.getInitialURL().then((initialUrl) => {
       // settimeout here gives a chance to the rest of
       // the app to have finished loading and navigate correctly
@@ -230,7 +242,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       this.setState({
         isLoadingMore: false
       })
-      console.log(error)
+      errorLogger('PodcastsScreen componentDidMount init error', error)
 
       Alert.alert(PV.Alerts.SOMETHING_WENT_WRONG.title, PV.Alerts.SOMETHING_WENT_WRONG.message, PV.Alerts.BUTTONS.OK)
     }
@@ -408,7 +420,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
         handleNavigateToPlayerScreen(navigation)
       } catch (error) {
-        console.log(error)
+        errorLogger('PodcastsScreen _handleDeepLinkClip', error)
       }
     }
   }
@@ -429,17 +441,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
           const domain = splitPath[0] ? splitPath[0] : ''
           const path = splitPath[1] ? splitPath[1] : ''
           const id = splitPath[2] ? splitPath[2] : ''
-          const urlParamsString = splitPath[splitPath.length - 1].split('?')[1]
-          const urlParams: any = {}
-          if (urlParamsString) {
-            const urlParamsArr = urlParamsString.split('&')
-            if (urlParamsArr.length) {
-              urlParamsArr.forEach((param) => {
-                const [key, value] = param.split('=')
-                urlParams[key] = value
-              })
-            }
-          }
+          const urlParams: {
+            code?: string,
+            token?: string
+          } = qs.parse(splitPath[splitPath.length - 1].split('?')[1])
 
           await this._goBackWithDelay()
           if (path.indexOf(PV.DeepLinks.VerifyEmail.path) > -1) {
@@ -504,6 +509,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
           }
 
           // V4V PROVIDERS:
+          // NOTE: HandleConnect is in two places due to iOS webview issue.
+          // https://github.com/react-native-webview/react-native-webview/issues/2681
           else if (v4vAlbyCheckConnectDeepLink(domain) && urlParams?.code) {
             await v4vAlbyHandleConnect(navigation, urlParams.code)
           }
@@ -555,7 +562,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           isLoggedIn = await getAuthUserInfo()
           if (isLoggedIn) await askToSyncWithNowPlayingItem(this._initializeScreenDataPart2)
         } catch (error) {
-          console.log('initializeScreenData getAuthUserInfo', error)
+          errorLogger('PodcastsScreen initializeScreenData getAuthUserInfo', error)
           // If getAuthUserInfo fails, continue with the networkless version of the app
         }
         if (!isLoggedIn) this._initializeScreenDataPart2()
@@ -852,6 +859,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     const buttons: SwipeRowBackButton[] = [
       {
+        key: 'mark_as_seen',
         text: translate('Mark as Seen'),
         type: 'primary',
         onPress: () => {
@@ -861,6 +869,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         }
       },
       {
+        key: 'unsubscribe',
         text: buttonText,
         type: 'danger',
         onPress: () => this._handleHiddenItemPress(item.id, item.addByRSSPodcastFeedUrl),
@@ -902,7 +911,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           // const row = rowMap[selectedId] || rowMap[addByRSSPodcastFeedUrl]
           // row.closeRow()
         } catch (error) {
-          console.log('_handleHiddenItemPress', error)
+          errorLogger('PodcastsScreen _handleHiddenItemPress', error)
         }
         this.setState({ isUnsubscribing: false })
       })()
@@ -1075,6 +1084,12 @@ export class PodcastsScreen extends React.Component<Props, State> {
             }
             disableNoResultsMessage={!isInitialLoadFinished}
             extraData={flatListData}
+            getItemLayout={(_: any, index: number) => ({
+              length: horizontalRowHeight + dividerHeight,
+              offset: (horizontalRowHeight + dividerHeight) * index,
+              index
+            })}
+            gridView={podcastsGridViewEnabled}
             handleNoResultsTopAction={!!Config.CURATOR_EMAIL ? this._navToRequestPodcastEmail : null}
             keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
             isLoadingMore={isLoadingMore}
@@ -1090,14 +1105,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
             noResultsTopActionText={!!Config.CURATOR_EMAIL && searchBarText ? translate('Request Podcast') : ''}
             noResultsTopActionTextAccessibilityHint={translate('ARIA HINT - send us an email to request a podcast')}
             onEndReached={this._onEndReached}
+            onGridItemSelected={this._onPodcastItemSelected}
             onRefresh={this._onRefresh}
             renderHiddenItem={this._renderHiddenItem}
             renderItem={this._renderPodcastItem}
             rightOpenValue={PV.FlatList.hiddenItems.rightOpenValue.twoButtons}
             showNoInternetConnectionMessage={showNoInternetConnectionMessage}
             testID={testIDPrefix}
-            gridView={podcastsGridViewEnabled}
-            onGridItemSelected={this._onPodcastItemSelected}
           />
         </RNView>
         <Dialog.Container accessible visible={showDataSettingsConfirmDialog}>
@@ -1138,7 +1152,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         await handleAutoDownloadEpisodes(dateISOString)
         await handleAutoQueueEpisodes(dateISOString)
       } catch (error) {
-        console.log('_querySubscribedPodcasts auto download error:', error)
+        errorLogger('PodcastsScreen _querySubscribedPodcasts auto download error:', error)
       }
       await AsyncStorage.setItem(PV.Keys.AUTODOWNLOADS_LAST_REFRESHED, new Date().toISOString())
     }
@@ -1299,7 +1313,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         newState.flatListDataTotalCount = results[1]
       }
     } catch (error) {
-      console.log('PodcastsScreen _queryData error', error)
+      errorLogger('PodcastsScreen _queryData error', error)
     }
 
     if (shouldCleanFlatListData) {
