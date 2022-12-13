@@ -7,12 +7,9 @@ import { convertSecToHHMMSSAccessibilityLabel } from '../lib/utility'
 import { PV } from '../resources'
 import { sleepTimerIsRunning } from '../services/sleepTimer'
 import {
-  pauseSleepTimerStateUpdates,
-  resumeSleepTimerStateUpdates,
   setSleepTimerTimeRemaining,
   startSleepTimer,
-  stopSleepTimer,
-  updateSleepTimerTimeRemaining
+  stopSleepTimer
 } from '../state/actions/sleepTimer'
 
 type Props = {
@@ -32,28 +29,8 @@ export class SleepTimerScreen extends React.Component<Props> {
     headerRight: () => <RNView />
   })
 
-  componentDidMount() {
-    const isActive = sleepTimerIsRunning()
-    updateSleepTimerTimeRemaining()
-
-    if (isActive) {
-      resumeSleepTimerStateUpdates()
-    }
-  }
-
-  componentWillUnmount() {
-    pauseSleepTimerStateUpdates()
-  }
-
   _toggleSleepTimer = () => {
-    const { isActive } = this.global.player.sleepTimer
-    if (isActive) {
-      stopSleepTimer()
-    } else {
-      const { timeRemaining } = this.global.player.sleepTimer
-      startSleepTimer(timeRemaining)
-      resumeSleepTimerStateUpdates()
-    }
+    this.global?.player?.sleepTimer?.isActive ? stopSleepTimer() : startSleepTimer()
   }
 
   _updateSleepTimer = (hours: number, minutes: number, seconds: number) => {
