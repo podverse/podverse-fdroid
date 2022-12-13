@@ -10,7 +10,6 @@ import { downloadImageFile, getSavedImageUri } from '../storage';
 import { readableDate } from '../utility';
 import { getEpisodesForPodcast, loadEpisodeInPlayer, loadNowPlayingItemInPlayer } from './helpers';
 
-
 /* Initialize */
 
 export const registerCarModule = (onConnect: any, onDisconnect: any) => {

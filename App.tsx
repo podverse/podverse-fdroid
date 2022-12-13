@@ -17,19 +17,19 @@ import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
 import Router from './src/Router'
 import { downloadCategoriesList } from './src/services/category'
-import PVEventEmitter from './src/services/eventEmitter'
+// import PVEventEmitter from './src/services/eventEmitter'
 import { startBackgroundTimer, stopBackgroundTimer } from './src/services/playerBackgroundTimer'
 import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
 import { hasValidDownloadingConnection } from './src/lib/network'
-import {
-  handleCarPlayPodcastsUpdate,
-  handleCarPlayQueueUpdate,
-  registerCarModule,
-  showRootView,
-  unregisterCarModule
-} from './src/lib/carplay/PVCarPlay'
+// import {
+//   handleCarPlayPodcastsUpdate,
+//   handleCarPlayQueueUpdate,
+//   registerCarModule,
+//   showRootView,
+//   unregisterCarModule
+// } from './src/lib/carplay/PVCarPlay'
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', "Require cycle"])
 
@@ -43,7 +43,7 @@ type State = {
 setGlobal(initialState)
 
 let ignoreHandleNetworkChange = true
-let carplayEventsInitialized = false
+// let carplayEventsInitialized = false
 
 class App extends Component<Props, State> {
   unsubscribeNetListener: NetInfoSubscription | null
@@ -86,32 +86,30 @@ class App extends Component<Props, State> {
 
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
 
-    
-  
-    registerCarModule(this.onConnect, this.onDisconnect)
+    // registerCarModule(this.onConnect, this.onDisconnect)
   }
 
   componentWillUnmount() {
     this.unsubscribeNetListener && this.unsubscribeNetListener()
 
-    unregisterCarModule(this.onConnect, this.onDisconnect);
+    // unregisterCarModule(this.onConnect, this.onDisconnect);
   }
 
-  onConnect = () => {
-    // Do things now that carplay is connected
-    showRootView()
-    if (!carplayEventsInitialized) {
-      carplayEventsInitialized = true
-      PVEventEmitter.on(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
-      PVEventEmitter.on(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
-    }
-  }
+  // onConnect = () => {
+  //   // Do things now that carplay is connected
+  //   showRootView()
+  //   if (!carplayEventsInitialized) {
+  //     carplayEventsInitialized = true
+  //     PVEventEmitter.on(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
+  //     PVEventEmitter.on(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
+  //   }
+  // }
 
-  onDisconnect = () => {
-    // Do things now that carplay is disconnected
-    PVEventEmitter.removeListener(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
-    PVEventEmitter.removeListener(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
-  }
+  // onDisconnect = () => {
+  //   // Do things now that carplay is disconnected
+  //   PVEventEmitter.removeListener(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
+  //   PVEventEmitter.removeListener(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
+  // }
 
   handleNetworkChange = () => {
     (async () => {
