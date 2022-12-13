@@ -1,3 +1,4 @@
 - Improve app performance and responsiveness. #1490
-- Fix livestream notifications bug. #1479
+- Fix sleep timer. #816
 - Fix "Authorize" error with Alby login. #1489
+- Fix "chapters not updating when phone is locked". #1500
