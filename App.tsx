@@ -21,7 +21,6 @@ import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
 import { hasValidDownloadingConnection } from './src/lib/network'
-import { migrateCredentialsIfNeeded } from './src/lib/secutity'
 // import {
 //   handleCarPlayPodcastsUpdate,
 //   handleCarPlayQueueUpdate,
@@ -42,6 +41,7 @@ type State = {
 setGlobal(initialState)
 
 let ignoreHandleNetworkChange = true
+// let carplayEventsInitialized = false
 
 class App extends Component<Props, State> {
   unsubscribeNetListener: NetInfoSubscription | null
@@ -63,6 +63,7 @@ class App extends Component<Props, State> {
 
   async componentDidMount() {
     TrackPlayer.registerPlaybackService(() => require('./src/services/playerAudioEvents'))
+    
     StatusBar.setBarStyle('light-content')
     Platform.OS === 'android' && StatusBar.setBackgroundColor(PV.Colors.ink, true)
     const darkModeEnabled = await AsyncStorage.getItem(PV.Keys.DARK_MODE_ENABLED)
@@ -74,15 +75,9 @@ class App extends Component<Props, State> {
     }
 
     await this.setupGlobalState(globalTheme)
-    try {
-      await migrateCredentialsIfNeeded()
-    } catch (error) {
-      console.log('migrateCredentialsIfNeeded error:', error)
-    }
+
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
 
-    
-  
     // registerCarModule(this.onConnect, this.onDisconnect)
   }
 
@@ -94,11 +89,12 @@ class App extends Component<Props, State> {
 
   // onConnect = () => {
   //   // Do things now that carplay is connected
-  //   const { subscribedPodcasts = [], session } = getGlobal()
-  //   const { historyItems = [], queueItems = [] } = session.userInfo
-  //   showRootView(subscribedPodcasts, historyItems, queueItems)
-  //   PVEventEmitter.on(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
-  //   PVEventEmitter.on(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
+  //   showRootView()
+  //   if (!carplayEventsInitialized) {
+  //     carplayEventsInitialized = true
+  //     PVEventEmitter.on(PV.Events.QUEUE_HAS_UPDATED, handleCarPlayQueueUpdate)
+  //     PVEventEmitter.on(PV.Events.APP_FINISHED_INITALIZING, handleCarPlayPodcastsUpdate)
+  //   }
   // }
 
   // onDisconnect = () => {
