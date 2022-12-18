@@ -3,7 +3,6 @@ import React from 'reactn'
 import { ScrollView, Text } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 
 type Props = any
 
@@ -15,10 +14,6 @@ export class V4VInfoStreamingSatsScreen extends React.Component<Props> {
       headerRight: () => null,
       title: null
     }
-  }
-
-  componentDidMount() {
-    trackPageView('/value-for-value-info-streaming-sats', 'Value for Value Info Streaming Sats Screen')
   }
 
   render() {
