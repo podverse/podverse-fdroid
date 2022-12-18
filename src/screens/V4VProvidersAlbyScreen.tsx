@@ -15,7 +15,7 @@ import { PV } from '../resources'
 import { _albyKey } from '../resources/V4V'
 import PVEventEmitter from '../services/eventEmitter'
 import { v4vAlbyGetAccessToken } from '../services/v4v/providers/alby'
-import { v4vGetConnectedProvider } from '../state/actions/v4v/v4v'
+import { v4vGetConnectedProvider, v4vRefreshProviderWalletInfo } from '../state/actions/v4v/v4v'
 import { v4vAlbyGetAccountInfo } from '../state/actions/v4v/providers/alby'
 
 type Props = {
@@ -49,6 +49,7 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
     const { isLoadingWaitForEvent } = this.state
 
     PVEventEmitter.on(PV.Events.V4V_PROVIDERS_ALBY_CONNECTED, this._handleConnectedEvent)
+    PVEventEmitter.on(PV.Events.V4V_VALUE_SENT, this._handleWalletRefresh)
 
     if (!isLoadingWaitForEvent) {
       this._handleInitialize()
@@ -57,6 +58,7 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
 
   componentWillUnmount() {
     PVEventEmitter.removeListener(PV.Events.V4V_PROVIDERS_ALBY_CONNECTED, this._handleConnectedEvent)
+    PVEventEmitter.removeListener(PV.Events.V4V_VALUE_SENT, this._handleWalletRefresh)
   }
 
   _handleInitialize = async () => {
@@ -76,6 +78,10 @@ export class V4VProvidersAlbyScreen extends React.Component<Props, State> {
 
   _handleConnectedEvent = () => {
     this._handleInitialize()
+  }
+  
+  _handleWalletRefresh = () => {
+    v4vRefreshProviderWalletInfo('alby')
   }
 
   _disconnectWalletCallback = () => {

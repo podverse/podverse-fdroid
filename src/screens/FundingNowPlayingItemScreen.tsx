@@ -18,6 +18,7 @@ import { PV } from '../resources'
 import {
   convertValueTagIntoValueTransactions,
   MINIMUM_BOOST_PAYMENT,
+  MINIMUM_STREAMING_PAYMENT,
   v4vGetActiveValueTag,
   v4vGetPluralCurrencyUnit,
   v4vGetTypeMethodKey
@@ -26,8 +27,8 @@ import {
   getBoostagramItemValueTags,
   v4vGetActiveProviderInfo,
   V4VTypeMethod,
-  v4vUpdateTypeMethodSettingsBoostAmount
-  // v4vUpdateTypeMethodSettingsStreamingAmount
+  v4vUpdateTypeMethodSettingsBoostAmount,
+  v4vUpdateTypeMethodSettingsStreamingAmount
 } from '../state/actions/v4v/v4v'
 import { images } from '../styles'
 
@@ -319,7 +320,7 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
                   erroringTransactions={previousTransactionErrors.boost}
                 />
               </View>
-              {/* <View style={styles.itemWrapper}>
+              <View style={styles.itemWrapper}>
                 <TextInput
                   editable
                   eyebrowTitle={translate('Streaming Amount for this podcast')}
@@ -369,7 +370,7 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
                   transactions={streamingTransactions}
                   erroringTransactions={previousTransactionErrors.streaming}
                 />
-              </View> */}
+              </View>
             </View>
           )}
           {hasValueInfo && episodeLinks?.length > 0 && <Divider />}
