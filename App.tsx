@@ -9,7 +9,7 @@ import Orientation from 'react-native-orientation-locker'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { setGlobal } from 'reactn'
-import { OverlayAlert, ImageFullView } from './src/components'
+import { OverlayAlert, ImageFullView, BoostDropdownBanner } from './src/components'
 import { pvIsTablet } from './src/lib/deviceDetection'
 import { refreshDownloads } from './src/lib/downloader'
 import { PV } from './src/resources'
@@ -17,6 +17,8 @@ import { determineFontScaleMode } from './src/resources/Fonts'
 import { GlobalTheme } from './src/resources/Interfaces'
 import Router from './src/Router'
 import { downloadCategoriesList } from './src/services/category'
+// import PVEventEmitter from './src/services/eventEmitter'
+import { v4vClearTransactionQueue } from './src/services/v4v/v4v'
 import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
@@ -28,6 +30,7 @@ import { hasValidDownloadingConnection } from './src/lib/network'
 //   showRootView,
 //   unregisterCarModule
 // } from './src/lib/carplay/PVCarPlay'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', "Require cycle"])
 
@@ -75,6 +78,10 @@ class App extends Component<Props, State> {
     }
 
     await this.setupGlobalState(globalTheme)
+
+    // Clear V4V transaction queue every time the app launches
+    // so leftover streaming value isn't unexpectedly sent.
+    await v4vClearTransactionQueue()
 
     this.unsubscribeNetListener = NetInfo.addEventListener(this.handleNetworkChange)
 
@@ -175,13 +182,16 @@ class App extends Component<Props, State> {
         }
 
     return this.state.appReady ? (
-      <SafeAreaProvider initialMetrics={initialWindowMetrics} style={wrapperStyle}>
-        <View style={{ flex: 1 }}>
-          <Router />
-          <OverlayAlert />
-        </View>
-        <ImageFullView />
-      </SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics} style={wrapperStyle}>
+          <View style={{ flex: 1 }}>
+            <Router />
+            <OverlayAlert />
+          </View>
+          <ImageFullView />
+          <BoostDropdownBanner />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     ) : (
       this._renderIntersitial()
     )
