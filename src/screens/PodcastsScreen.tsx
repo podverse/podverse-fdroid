@@ -79,7 +79,8 @@ import {
   v4vInitializeConnectedProviders,
   v4vInitializeSenderInfo,
   v4vInitializeSettings,
-  v4vInitializeShowLightningIcon
+  v4vInitializeShowLightningIcon,
+  v4vInitializeStreamingValue
 } from '../state/actions/v4v/v4v'
 import { core } from '../styles'
 
@@ -538,6 +539,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     await v4vInitializeSettings()
     await v4vInitializeConnectedProviders()
     await v4vInitializeSenderInfo()
+    await v4vInitializeStreamingValue()
 
     // Load the AsyncStorage authenticatedUser and subscribed podcasts immediately,
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
