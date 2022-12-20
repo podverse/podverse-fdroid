@@ -44,6 +44,7 @@ import { audioUpdateTrackPlayerCapabilities } from '../services/playerAudio'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getSavedQueryPodcastsScreenSort, setSavedQueryPodcastsScreenSort } from '../services/savedQueryFilters'
 import { getNowPlayingItem, getNowPlayingItemLocally } from '../services/userNowPlayingItem'
+import { v4vClearTransactionQueue } from '../services/v4v/v4v'
 import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
 import { initAutoQueue } from '../state/actions/autoQueue'
 import { downloadedEpisodeDeleteMarked, initDownloads, removeDownloadedPodcast,
@@ -78,7 +79,8 @@ import {
   v4vInitializeConnectedProviders,
   v4vInitializeSenderInfo,
   v4vInitializeSettings,
-  v4vInitializeShowLightningIcon
+  v4vInitializeShowLightningIcon,
+  v4vInitializeStreamingValue
 } from '../state/actions/v4v/v4v'
 import { core } from '../styles'
 
@@ -111,7 +113,7 @@ type State = {
 
 const testIDPrefix = 'podcasts_screen'
 
-let isInitialLoad = true
+export let isInitialLoadPodcastsScreen = true
 const horizontalRowHeight = 94
 const dividerHeight = 1
 
@@ -238,7 +240,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         this._initializeScreenData()
       }
     } catch (error) {
-      isInitialLoad = false
+      isInitialLoadPodcastsScreen = false
       this.setState({
         isLoadingMore: false
       })
@@ -330,7 +332,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     (async () => {
       await playerUpdateUserPlaybackPosition()
 
-      if (nextAppState === 'active' && !isInitialLoad) {
+      if (nextAppState === 'active' && !isInitialLoadPodcastsScreen) {
         const { nowPlayingItem: lastItem } = this.global.player
         const currentItem = await getNowPlayingItemLocally()
 
@@ -537,6 +539,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     await v4vInitializeSettings()
     await v4vInitializeConnectedProviders()
     await v4vInitializeSenderInfo()
+    await v4vInitializeStreamingValue()
 
     // Load the AsyncStorage authenticatedUser and subscribed podcasts immediately,
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
@@ -583,7 +586,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     downloadedEpisodeDeleteMarked()
 
     /* This event signals to CarPlay to refresh views after the app initializes. */
-    setTimeout(() => PVEventEmitter.emit(PV.Events.APP_FINISHED_INITALIZING), 1000)
+    // setTimeout(() => PVEventEmitter.emit(PV.Events.APP_FINISHED_INITALIZING_FOR_CARPLAY), 1000)
   }
 
   _handleInitialDefaultQuery = async () => {
@@ -644,7 +647,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const selectedFilterLabel = await getSelectedFilterLabel(selectedKey)
     const selectedSortLabel = getSelectedSortLabel(sort)
 
-    isInitialLoad = false
+    isInitialLoadPodcastsScreen = false
 
     this.setState(
       {
