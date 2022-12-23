@@ -1,0 +1,3 @@
+- Add streaming sats V4V feature (plus hotfixes).
+- Fix alert text color when app is in light mode.
+- Fix rendering of non-ASCII characters in podcast description.
