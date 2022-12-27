@@ -6,6 +6,8 @@ import { errorLogger } from '../lib/logger'
 import { translate } from '../lib/i18n'
 import { getParsedTranscript } from '../lib/transcriptHelpers'
 
+const _fileName = 'src/screens/EpisodeTranscriptScreen.tsx'
+
 type Props = {
   navigation: any
 }
@@ -20,7 +22,7 @@ const testIDPrefix = 'episode_transcript_screen'
 export class EpisodeTranscriptScreen extends React.Component<Props, State> {
   shouldLoad: boolean
 
-  constructor(props: Props) {
+  constructor() {
     super()
 
     this.state = {
@@ -41,7 +43,7 @@ export class EpisodeTranscriptScreen extends React.Component<Props, State> {
       try {
         parsedTranscript = await getParsedTranscript(episode.transcript[0].url, episode.transcript[0].type)
       } catch (error) {
-        errorLogger('TranscriptScreen componentDidMount error:', error)
+        errorLogger(_fileName, 'componentDidMount', error)
       }
     }
     this.setState({ isLoading: false, parsedTranscript })
