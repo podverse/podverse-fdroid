@@ -44,11 +44,14 @@ import { audioUpdateTrackPlayerCapabilities } from '../services/playerAudio'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getSavedQueryPodcastsScreenSort, setSavedQueryPodcastsScreenSort } from '../services/savedQueryFilters'
 import { getNowPlayingItem, getNowPlayingItemLocally } from '../services/userNowPlayingItem'
-import { v4vClearTransactionQueue } from '../services/v4v/v4v'
 import { askToSyncWithNowPlayingItem, getAuthenticatedUserInfoLocally, getAuthUserInfo } from '../state/actions/auth'
 import { initAutoQueue } from '../state/actions/autoQueue'
-import { downloadedEpisodeDeleteMarked, initDownloads, removeDownloadedPodcast,
-  updateDownloadedPodcasts } from '../state/actions/downloads'
+import {
+  downloadedEpisodeDeleteMarked,
+  initDownloads,
+  removeDownloadedPodcast,
+  updateDownloadedPodcasts
+} from '../state/actions/downloads'
 import { v4vAlbyHandleConnect } from '../state/actions/v4v/providers/alby'
 import {
   clearEpisodesCountForPodcast,
@@ -83,6 +86,8 @@ import {
   v4vInitializeStreamingValue
 } from '../state/actions/v4v/v4v'
 import { core } from '../styles'
+
+const _fileName = 'src/screens/PodcastsScreen.tsx'
 
 type Props = {
   navigation?: any
@@ -200,7 +205,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       }, 300)
     })
 
-    Dimensions.addEventListener('change', this._handleOrientationChange)    
+    Dimensions.addEventListener('change', this._handleOrientationChange)
     Linking.addEventListener('url', this._handleOpenURLEvent)
     AppState.addEventListener('change', this._handleAppStateChange)
     PVEventEmitter.on(PV.Events.ADD_BY_RSS_AUTH_SCREEN_SHOW, this._handleNavigateToAddPodcastByRSSAuthScreen)
@@ -244,7 +249,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       this.setState({
         isLoadingMore: false
       })
-      errorLogger('PodcastsScreen componentDidMount init error', error)
+      errorLogger(_fileName, 'componentDidMount init', error)
 
       Alert.alert(PV.Alerts.SOMETHING_WENT_WRONG.title, PV.Alerts.SOMETHING_WENT_WRONG.message, PV.Alerts.BUTTONS.OK)
     }
@@ -314,7 +319,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       screen: {
         orientation: isPortrait() ? 'portrait' : 'landscape',
         screenWidth: Dimensions.get('window').width
-      }      
+      }
     })
     refreshChaptersWidth()
   }
@@ -422,7 +427,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
         handleNavigateToPlayerScreen(navigation)
       } catch (error) {
-        errorLogger('PodcastsScreen _handleDeepLinkClip', error)
+        errorLogger(_fileName, '_handleDeepLinkClip', error)
       }
     }
   }
@@ -434,9 +439,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
     try {
       if (url) {
         if (url.endsWith('xml') || url.endsWith('opml')) {
-            await getAuthUserInfo(() => {
-              navigate(PV.RouteNames.MoreScreen, { opmlUri: url })
-            })
+          await getAuthUserInfo(() => {
+            navigate(PV.RouteNames.MoreScreen, { opmlUri: url })
+          })
         } else {
           const route = url.replace(/.*?:\/\//g, '')
           const splitPath = route.split('/')
@@ -444,7 +449,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           const path = splitPath[1] ? splitPath[1] : ''
           const id = splitPath[2] ? splitPath[2] : ''
           const urlParams: {
-            code?: string,
+            code?: string
             token?: string
           } = qs.parse(splitPath[splitPath.length - 1].split('?')[1])
 
@@ -452,11 +457,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           if (path.indexOf(PV.DeepLinks.VerifyEmail.path) > -1) {
             const ok = await verifyEmail(urlParams?.token || '')
             if (ok) {
-              Alert.alert(
-                translate('Verify email title'),
-                translate('Verify email succeeded'),
-                PV.Alerts.BUTTONS.OK
-              )
+              Alert.alert(translate('Verify email title'), translate('Verify email succeeded'), PV.Alerts.BUTTONS.OK)
             }
           } else if (path === PV.DeepLinks.Clip.pathPrefix) {
             await this._handleDeepLinkClip(id)
@@ -565,7 +566,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           isLoggedIn = await getAuthUserInfo()
           if (isLoggedIn) await askToSyncWithNowPlayingItem(this._initializeScreenDataPart2)
         } catch (error) {
-          errorLogger('PodcastsScreen initializeScreenData getAuthUserInfo', error)
+          errorLogger(_fileName, 'initializeScreenData getAuthUserInfo', error)
           // If getAuthUserInfo fails, continue with the networkless version of the app
         }
         if (!isLoggedIn) this._initializeScreenDataPart2()
@@ -880,12 +881,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
       }
     ]
 
-    return (
-      <SwipeRowBackMultipleButtons
-        buttons={buttons}
-        testID={`${testIDPrefix}_podcast_item_hidden_${index}`}
-      />
-    )
+    return <SwipeRowBackMultipleButtons buttons={buttons} testID={`${testIDPrefix}_podcast_item_hidden_${index}`} />
   }
 
   _handleHiddenItemPress = async (selectedId, addByRSSPodcastFeedUrl) => {
@@ -914,7 +910,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
           // const row = rowMap[selectedId] || rowMap[addByRSSPodcastFeedUrl]
           // row.closeRow()
         } catch (error) {
-          errorLogger('PodcastsScreen _handleHiddenItemPress', error)
+          errorLogger(_fileName, '_handleHiddenItemPress', error)
         }
         this.setState({ isUnsubscribing: false })
       })()
@@ -1030,6 +1026,14 @@ export class PodcastsScreen extends React.Component<Props, State> {
     }
   }
 
+  _getItemLayout = (_: any, index: number) => {
+    return {
+      length: horizontalRowHeight + dividerHeight,
+      offset: (horizontalRowHeight + dividerHeight) * index,
+      index
+    }
+  }
+
   render() {
     const { navigation } = this.props
     const {
@@ -1087,11 +1091,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
             }
             disableNoResultsMessage={!isInitialLoadFinished}
             extraData={flatListData}
-            getItemLayout={(_: any, index: number) => ({
-              length: horizontalRowHeight + dividerHeight,
-              offset: (horizontalRowHeight + dividerHeight) * index,
-              index
-            })}
+            getItemLayout={this._getItemLayout}
             gridView={podcastsGridViewEnabled}
             handleNoResultsTopAction={!!Config.CURATOR_EMAIL ? this._navToRequestPodcastEmail : null}
             keyExtractor={(item: any, index: number) => safeKeyExtractor(testIDPrefix, index, item?.id)}
@@ -1155,7 +1155,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         await handleAutoDownloadEpisodes(dateISOString)
         await handleAutoQueueEpisodes(dateISOString)
       } catch (error) {
-        errorLogger('PodcastsScreen _querySubscribedPodcasts auto download error:', error)
+        errorLogger(_fileName, '_querySubscribedPodcasts auto download', error)
       }
       await AsyncStorage.setItem(PV.Keys.AUTODOWNLOADS_LAST_REFRESHED, new Date().toISOString())
     }
@@ -1316,7 +1316,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         newState.flatListDataTotalCount = results[1]
       }
     } catch (error) {
-      errorLogger('PodcastsScreen _queryData error', error)
+      errorLogger(_fileName, '_queryData error', error)
     }
 
     if (shouldCleanFlatListData) {

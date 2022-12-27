@@ -16,6 +16,8 @@ import { displayFOSSPurchaseAlert } from '../services/purchaseShared'
 import { getAuthUserInfo } from '../state/actions/auth'
 import { getMembershipTextStyle } from '../styles'
 
+const _fileName = 'src/screens/MembershipScreen.tsx'
+
 type Props = {
   navigation?: any
 }
