@@ -3,3 +3,4 @@
 - OPML import and export bug fixes. #1552, #1546
 - Remove livestream from player after it has ended after app restart. #1527
 - Prevent marked as played episodes from auto-downloading. #1519
+- Translation updates for Norwegian Bokmål and Swedish.
