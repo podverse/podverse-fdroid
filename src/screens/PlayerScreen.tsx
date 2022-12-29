@@ -34,6 +34,8 @@ import { loadChaptersForEpisode } from '../state/actions/playerChapters'
 import { getHistoryItems } from '../state/actions/userHistoryItem'
 import { core, navHeader } from '../styles'
 
+const _fileName = 'src/screens/PlayerScreen.tsx'
+
 type Props = {
   navigation?: any
 }
@@ -144,7 +146,7 @@ export class PlayerScreen extends React.Component<Props> {
       await playerUpdateUserPlaybackPosition(skipSetNowPlaying, shouldAwait)
       await getHistoryItems(1, [])
     } catch (error) {
-      errorLogger('PlayerScreen componentWillUnmount error', error)
+      errorLogger(_fileName, 'componentWillUnmount', error)
     }
   }
 
@@ -265,7 +267,7 @@ export class PlayerScreen extends React.Component<Props> {
         url
       })
     } catch (error) {
-      errorLogger('PlayerScreen handleShare error', error)
+      errorLogger(_fileName, 'handleShare', error)
     }
     this._dismissShareActionSheet()
   }

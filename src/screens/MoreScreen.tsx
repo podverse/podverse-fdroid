@@ -16,6 +16,8 @@ import { logoutUser } from '../state/actions/auth'
 import { core, getMembershipTextStyle, table } from '../styles'
 import { addAddByRSSPodcasts } from '../state/actions/parser'
 
+const _fileName = 'src/screens/MoreScreen.tsx'
+
 type Props = {
   navigation?: any
 }
@@ -38,7 +40,7 @@ export class MoreScreen extends React.Component<Props, State> {
   })
 
   componentDidMount() {
-    const {opmlUri} = this.props.navigation?.state?.params || {}
+    const { opmlUri } = this.props.navigation?.state?.params || {}
     
     if (opmlUri) {
       this._importOpml(this.props.navigation.state.params.opmlUri)
@@ -46,7 +48,7 @@ export class MoreScreen extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Readonly<Props>): void {
-    const {opmlUri} = this.props.navigation?.state?.params || {}
+    const { opmlUri } = this.props.navigation?.state?.params || {}
 
     if (opmlUri && opmlUri !== prevProps.navigation?.state?.params?.opmlUri) {
       this._importOpml(this.props.navigation.state.params.opmlUri)
@@ -155,7 +157,7 @@ export class MoreScreen extends React.Component<Props, State> {
               this.props.navigation.navigate(PV.RouteNames.PodcastsScreen)
             })
           } catch (error) {
-            errorLogger('Error parsing podcast: ', error)
+            errorLogger(_fileName, '_importOpml parsing', error)
             this.setState({ isLoading: false })
           }
         })
@@ -164,7 +166,7 @@ export class MoreScreen extends React.Component<Props, State> {
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
       } else {
-        errorLogger('Error parsing podcast: ', err)
+        errorLogger(_fileName, '_importOpml DocumentPicker.isCancel', err)
         Alert.alert('Error', 'There was an issue with the opml file import.', err.message)
       }
     }

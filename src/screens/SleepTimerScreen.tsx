@@ -5,12 +5,7 @@ import { Button, SafeAreaView, ScrollView, Text, TimePicker } from '../component
 import { translate } from '../lib/i18n'
 import { convertSecToHHMMSSAccessibilityLabel } from '../lib/utility'
 import { PV } from '../resources'
-import { sleepTimerIsRunning } from '../services/sleepTimer'
-import {
-  setSleepTimerTimeRemaining,
-  startSleepTimer,
-  stopSleepTimer
-} from '../state/actions/sleepTimer'
+import { setSleepTimerTimeRemaining, startSleepTimer, stopSleepTimer } from '../state/actions/sleepTimer'
 
 type Props = {
   navigation?: any

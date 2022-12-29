@@ -19,6 +19,8 @@ import { PV } from '../resources'
 import { addOrRemovePlaylistItem, createPlaylist } from '../state/actions/playlist'
 import { getLoggedInUserPlaylists } from '../state/actions/user'
 
+const _fileName = 'src/screens/PlaylistsAddToScreen.tsx'
+
 type Props = {
   navigation?: any
 }
@@ -153,7 +155,7 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
               }
             )
           } catch (error) {
-            errorLogger('PlaylistsAddToScreen _renderPlaylistItem error', error)
+            errorLogger(_fileName, '_renderPlaylistItem', error)
             this.setState({ isSavingId: '' })
           }
         }}
