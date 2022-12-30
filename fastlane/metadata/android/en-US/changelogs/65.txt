@@ -1,0 +1,10 @@
+- Use Alby batch API endpoint for sending value-for-value. #1537
+- Add "oldest" sort option to Downloaded filter to Episodes screen. #1563
+- Fix jumping UI when scrolling on Podcasts screen. #1549
+- Fix comments not scrolling on Player screen. #1544
+- Fix V4V buttons missing in player on app launch. #1545
+- Fix OPML import and export issues. #1552, #1546
+- Remove livestream from player after it has ended after app restart. #1527
+- Prevent marked as played episodes from auto-downloading. #1519
+- Translation updates for Norwegian Bokmål and Swedish.
+- If you would like to help with Podverse translations, please visit https://hosted.weblate.org/projects/podverse/ or email contact@podverse.fm.
