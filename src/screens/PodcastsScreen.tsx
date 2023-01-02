@@ -14,6 +14,7 @@ import {
   NavPodcastsViewIcon,
   PlayerEvents,
   PodcastTableCell,
+  PVDialog,
   SearchBar,
   SwipeRowBackMultipleButtons,
   TableSectionSelectors,
@@ -78,13 +79,7 @@ import {
 } from '../state/actions/podcast'
 import { updateScreenReaderEnabledState } from '../state/actions/screenReader'
 import { initializeSettings } from '../state/actions/settings'
-import {
-  v4vInitializeConnectedProviders,
-  v4vInitializeSenderInfo,
-  v4vInitializeSettings,
-  v4vInitializeShowLightningIcon,
-  v4vInitializeStreamingValue
-} from '../state/actions/v4v/v4v'
+import { v4vInitialize } from '../state/actions/v4v/v4v'
 import { core } from '../styles'
 
 const _fileName = 'src/screens/PodcastsScreen.tsx'
@@ -536,11 +531,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     await initPlayerState(this.global)
     await initializeSettings()
-    await v4vInitializeShowLightningIcon()
-    await v4vInitializeSettings()
-    await v4vInitializeConnectedProviders()
-    await v4vInitializeSenderInfo()
-    await v4vInitializeStreamingValue()
+    await v4vInitialize()
 
     // Load the AsyncStorage authenticatedUser and subscribed podcasts immediately,
     // before getting the latest from server and parsing the addByPodcastFeedUrls in getAuthUserInfo.
@@ -1117,22 +1108,28 @@ export class PodcastsScreen extends React.Component<Props, State> {
             testID={testIDPrefix}
           />
         </RNView>
-        <Dialog.Container accessible visible={showDataSettingsConfirmDialog}>
-          <Dialog.Title>{translate('Data Settings')}</Dialog.Title>
-          <Dialog.Description>
-            {translate('Do you want to allow downloading episodes with your data plan')}
-          </Dialog.Description>
-          <Dialog.Button
-            label={translate('No Wifi Only')}
-            onPress={this._handleDataSettingsWifiOnly}
-            testID={'alert_no_wifi_only'.prependTestId()}
-          />
-          <Dialog.Button
-            label={translate('Yes Allow Data')}
-            onPress={this._handleDataSettingsAllowData}
-            testID={'alert_yes_allow_data'.prependTestId()}
-          />
-        </Dialog.Container>
+        <PVDialog
+          buttonProps={[
+            {
+              label: translate('No Wifi Only'),
+              onPress: this._handleDataSettingsWifiOnly,
+              testID: 'alert_no_wifi_only'.prependTestId()
+            },
+            {
+              label: translate('Yes Allow Data'),
+              onPress: this._handleDataSettingsAllowData,
+              testID: 'alert_yes_allow_data'.prependTestId()
+            }
+          ]}
+          descriptionProps={[
+            {
+              children: translate('Do you want to allow downloading episodes with your data plan'),
+              testID: 'alert_description_allow_data'.prependTestId()
+            }
+          ]}
+          title={translate('Data Settings')}
+          visible={showDataSettingsConfirmDialog}
+        />
       </View>
     )
   }
