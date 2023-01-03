@@ -142,9 +142,6 @@ const styles = StyleSheet.create({
   scrollViewContentContainer: {
     paddingBottom: 48
   },
-  textInputWrapper: {
-    marginVertical: 20
-  },
   wrapper: {
     flex: 1,
     paddingTop: 24,

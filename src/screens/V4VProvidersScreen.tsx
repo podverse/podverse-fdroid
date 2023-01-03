@@ -112,9 +112,9 @@ export class V4VProvidersScreen extends React.Component<Props, State> {
           onChangeText={(newText: string) => {
             this.setState({ localSenderName: newText })
           }}
+          outerWrapperStyle={styles.textInputWrapperOuter}
           testID={`${testIDPrefix}_settings_name`}
           value={localSenderName}
-          wrapperStyle={styles.textInputWrapper}
         />
         <Text
           fontSizeLargestScale={PV.Fonts.largeSizes.sm}
@@ -216,7 +216,7 @@ export class V4VProvidersScreen extends React.Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  textInputWrapper: {
+  textInputWrapperOuter: {
     marginTop: 0,
     marginBottom: 12
   }
