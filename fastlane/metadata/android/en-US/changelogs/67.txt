@@ -1,0 +1,2 @@
+- Fix streaming sats "undefined" error.
+- Fix Satoshi conversion rate error.
