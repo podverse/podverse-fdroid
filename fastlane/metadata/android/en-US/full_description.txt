@@ -1,23 +1,27 @@
 <b>Free features:</b>
 * Subscribe to podcasts
 * Auto-download episodes
-* Drag-and-drop queue
 * Video playback
 * Livestream playback
-* Screen-reader accessibility
+* Drag-and-drop queue
+* Boostagrams (V4V)
+* Streaming (V4V)
 * Podcasting 2.0 chapters
 * Podcasting 2.0 transcripts
 * Podcasting 2.0 cross-app comments
+* Screen-reader accessibility
 
 <b>Premium features:</b>
 * Sync your subscriptions across devices
 * Sync your queue across devices
 * Sync your history across devices
 * New episode notifications
-* Livestream starting notifications
+* Livestream notifications
 * Create clips
 * Create playlists
 * Create a profile
+          
+All Podverse software is provided under a free and open source license (AGPLv3).
 
 <a href="https://podverse.fm">podverse.fm</a>
 
