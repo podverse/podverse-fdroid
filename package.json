@@ -162,7 +162,8 @@
     "underscore": "1.12.1",
     "trim": "0.0.3",
     "node-fetch": "2.6.7",
-    "follow-redirects": "1.14.7"
+    "follow-redirects": "1.14.7",
+    "use-force-update": "1.0.8"
   },
   "isSwift": true
 }

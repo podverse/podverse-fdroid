@@ -10513,10 +10513,10 @@ url-parse-lax@^1.0.0:
   dependencies:
     prepend-http "^1.0.1"
 
-use-force-update@^1.0.5:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/use-force-update/-/use-force-update-1.0.11.tgz#9483e9cf3e3cfba0f486cce141b66426bcb27619"
-  integrity sha512-h4SICYgTJHon8w9dFIqdqR1Vrzdgl4YaRfRwhmAh01kBGljzTICanyfaFU8C4etuEfRdYpE+04XX2ZrEhOWKXQ==
+use-force-update@1.0.8, use-force-update@^1.0.5:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/use-force-update/-/use-force-update-1.0.8.tgz#14483faa4571673f070080f8233057b43b266ace"
+  integrity sha512-ua22fB++yaCvnf+Unht3L/2Lq3O7QstCtyh1IV8ydkJcyT6yVwMNgkKKhOsj5HRJCJj2oQbjzd6JJVnx7S+3uA==
 
 use-subscription@^1.0.0:
   version "1.8.0"
