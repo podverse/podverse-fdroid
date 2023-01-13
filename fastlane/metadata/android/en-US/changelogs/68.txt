@@ -1,0 +1,2 @@
+- Fix satoshi conversion rate.
+- Fix padding on Make Clip screen.
