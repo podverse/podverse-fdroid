@@ -4,11 +4,11 @@
 * Video playback
 * Livestream playback
 * Drag-and-drop queue
-* Boostagrams (V4V)
-* Streaming Value (V4V)
-* Podcasting 2.0 chapters
-* Podcasting 2.0 transcripts
-* Podcasting 2.0 cross-app comments
+* Boostagrams (Value for Value)
+* Streaming Value (Value for Value)
+* Chapters (Podcasting 2.0)
+* Transcripts (Podcasting 2.0)
+* Cross-app comments (Podcasting 2.0)
 * Screen-reader accessibility
 
 <b>Premium features:</b>
