@@ -98,7 +98,7 @@
     "react-native-swipe-list-view": "3.2.9",
     "react-native-system-setting": "1.7.6",
     "react-native-text-ticker": "1.13.0",
-    "react-native-track-player": "nightly",
+    "react-native-track-player": "3.2.0-11137d56135ed2b47ae5f9a5713c1560e6d65f1c",
     "react-native-vector-icons": "8.1.0",
     "react-native-video": "6.0.0-alpha.4",
     "react-native-video-controls": "^2.8.1",

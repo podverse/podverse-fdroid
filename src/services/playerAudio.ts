@@ -66,7 +66,7 @@ PVAudioPlayer.getCurrentLoadedTrack = async () => {
   //   return serviceRunningResult
   // }
 
-  return PVAudioPlayer.getCurrentTrack()
+  return PVAudioPlayer.getActiveTrackIndex()
 }
 
 PVAudioPlayer.getTrackDuration = async () => {
@@ -125,8 +125,8 @@ export const audioUpdateTrackPlayerCapabilities = () => {
 }
 
 export const audioIsLoaded = async () => {
-  const trackIndex = await PVAudioPlayer.getCurrentTrack()
-  return Number.isInteger(trackIndex) && trackIndex >= 0
+  const trackIndex = await PVAudioPlayer.getActiveTrackIndex()
+  return Number.isInteger(trackIndex) && (trackIndex || trackIndex === 0)
 }
 
 export const audioCheckIfIsPlaying = (playbackState: any) => {
@@ -136,8 +136,10 @@ export const audioCheckIfIsPlaying = (playbackState: any) => {
 export const audioGetCurrentLoadedTrackId = async () => {
   let currentTrackId = ''
   try {
-    const trackIndex = await PVAudioPlayer.getCurrentTrack()
-    currentTrackId = await audioGetLoadedTrackIdByIndex(trackIndex)
+    const trackIndex = await PVAudioPlayer.getActiveTrackIndex()
+    if (trackIndex || trackIndex === 0) {
+      currentTrackId = await audioGetLoadedTrackIdByIndex(trackIndex)
+    }
   } catch (error) {
     errorLogger(_fileName, 'audioGetCurrentLoadedTrackId', error)
   }
@@ -162,18 +164,19 @@ export const audioGetLoadedTrackIdByIndex = async (trackIndex: number) => {
   removing the upcoming tracks (starting from the end of the queue).
 */
 const audioRemoveUpcomingTracks = async () => {
-  const currentIndex = await PVAudioPlayer.getCurrentTrack()
-  if (currentIndex === 0 || (currentIndex && currentIndex >= 1)) {
-    const queueItems = await PVAudioPlayer.getQueue()
-    if (queueItems && queueItems.length > 1) {
-      const queueItemsCount = queueItems.length
-      const upcomingQueueItemsCount = queueItemsCount - currentIndex - 1
-      for (let i = 0; i < upcomingQueueItemsCount; i++) {
-        const adjustedIndex = queueItemsCount - i - 1
-        await PVAudioPlayer.remove(adjustedIndex)
-      }
-    }
-  }
+  await PVAudioPlayer.removeUpcomingTracks()
+  // const currentIndex = await PVAudioPlayer.getActiveTrackIndex()
+  // if (currentIndex === 0 || (currentIndex && currentIndex >= 1)) {
+  //   const queueItems = await PVAudioPlayer.getQueue()
+  //   if (queueItems && queueItems.length > 1) {
+  //     const queueItemsCount = queueItems.length
+  //     const upcomingQueueItemsCount = queueItemsCount - currentIndex - 1
+  //     for (let i = 0; i < upcomingQueueItemsCount; i++) {
+  //       const adjustedIndex = queueItemsCount - i - 1
+  //       await PVAudioPlayer.removeUpcomingTracks()
+  //     }
+  //   }
+  // }
 }
 
 export const audioLoadNowPlayingItem = async (
@@ -201,12 +204,12 @@ export const audioLoadNowPlayingItem = async (
   if (currentId) {
     await audioRemoveUpcomingTracks()
     const track = (await audioCreateTrack(item)) as Track
-    await PVAudioPlayer.add(track)
+    PVAudioPlayer.add([track])
     await PVAudioPlayer.skipToNext()
     audioSyncPlayerWithQueue()
   } else {
     const track = (await audioCreateTrack(item)) as Track
-    await PVAudioPlayer.add(track)
+    PVAudioPlayer.add([track])
   }
 
   if (shouldPlay) {
@@ -231,7 +234,7 @@ export const audioSyncPlayerWithQueue = async () => {
     const pvQueueItems = await getQueueItemsLocally()
     await audioRemoveUpcomingTracks()
     const tracks = await audioCreateTracks(pvQueueItems)
-    await PVAudioPlayer.add(tracks)
+    PVAudioPlayer.add(tracks)
   } catch (error) {
     errorLogger(_fileName, 'audioSyncPlayerWithQueue', error)
   }
@@ -239,8 +242,8 @@ export const audioSyncPlayerWithQueue = async () => {
 
 export const audioUpdateCurrentTrack = async (trackTitle?: string, artworkUrl?: string) => {
   try {
-    const currentIndex = await PVAudioPlayer.getCurrentTrack()
-    if (currentIndex > 0 || currentIndex === 0) {
+    const currentIndex = await PVAudioPlayer.getActiveTrackIndex()
+    if (currentIndex || currentIndex === 0) {
       const track = await PVAudioPlayer.getTrack(currentIndex)
 
       if (track) {
@@ -347,7 +350,7 @@ export const audioMovePlayerItemToNewPosition = async (id: string, newIndex: num
       )
       if (itemToMove) {
         const track = (await audioCreateTrack(itemToMove)) as any
-        await PVAudioPlayer.add([track], newIndex)
+        PVAudioPlayer.add([track], newIndex)
       }
     } catch (error) {
       errorLogger(_fileName, 'movePlayerItemToNewPosition', error)
@@ -508,7 +511,7 @@ export const audioInitializePlayerQueue = async (item?: NowPlayingItem) => {
 
       if (filteredItems.length > 0) {
         const tracks = await audioCreateTracks(filteredItems)
-        await PVAudioPlayer.add(tracks)
+        PVAudioPlayer.add(tracks)
       }
     }
   } catch (error) {
