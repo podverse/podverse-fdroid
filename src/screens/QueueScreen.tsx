@@ -19,7 +19,8 @@ import { safeKeyExtractor } from '../lib/utility'
 import { PV } from '../resources'
 import { checkIfShouldUseServerData } from '../services/auth'
 import PVEventEmitter from '../services/eventEmitter'
-import { audioMovePlayerItemToNewPosition, audioSyncPlayerWithQueue } from '../services/playerAudio'
+import { audioMovePlayerItemToNewPosition } from '../services/playerAudio'
+import { playerSyncPlayerWithQueue } from '../services/player'
 import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { addQueueItemToServer, getQueueItems, removeQueueItem, setAllQueueItemsLocally } from '../state/actions/queue'
 import { getHistoryItems, removeHistoryItem } from '../state/actions/userHistoryItem'
@@ -236,7 +237,7 @@ export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
     if (queueItems && queueItems[rowIndex]) {
       const item = queueItems[rowIndex]
       await removeQueueItem(item)
-      await audioSyncPlayerWithQueue()
+      await playerSyncPlayerWithQueue()
       this._handlePlayItem(item)
     }
   }
@@ -312,7 +313,7 @@ export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
       (async () => {
         try {
           await removeQueueItem(item)
-          await audioSyncPlayerWithQueue()
+          await playerSyncPlayerWithQueue()
         } catch (error) {
           //
         }
