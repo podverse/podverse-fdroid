@@ -100,6 +100,7 @@ export const TimeRemainingWidget = (props: Props) => {
   const convertedItem = convertToNowPlayingItem(item, episode, podcast, userPlaybackPosition)
   const player = getGlobal().player
   const { nowPlayingItem, playbackState } = player
+  const [forceRerender, setForceRerender] = useState(false)
 
   const hasStartedItem = !!mediaFileDuration
   const totalTime = mediaFileDuration || convertedItem.episodeDuration || 0
@@ -146,7 +147,11 @@ export const TimeRemainingWidget = (props: Props) => {
       const forceUpdateOrderDate = false
       const shouldPlay = true
       const setCurrentItemNextInQueue = true
-      playerLoadNowPlayingItem(convertedItem, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
+      await playerLoadNowPlayingItem(convertedItem, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
+
+      setTimeout(() => {
+        setForceRerender(!forceRerender)
+      }, 3000)
     }
   }
 

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
-import { convertToNowPlayingItem, createEmailLinkUrl } from 'podverse-shared'
+import { convertToNowPlayingItem, createEmailLinkUrl, Podcast, NowPlayingItem } from 'podverse-shared'
 import qs from 'qs'
 import { Alert, AppState, Dimensions, Linking, Platform, StyleSheet, View as RNView } from 'react-native'
 // import { CarPlay } from 'react-native-carplay'
@@ -8,6 +8,7 @@ import Config from 'react-native-config'
 import { NavigationStackOptions } from 'react-navigation-stack'
 import React, { getGlobal } from 'reactn'
 import {
+  ActionSheet,
   Divider,
   FlatList,
   NavPodcastsViewIcon,
@@ -106,6 +107,8 @@ type State = {
   tempQueryEnabled: boolean
   tempQueryFrom: string | null
   tempQuerySort: string | null
+  showPodcastActionSheet: boolean
+  gridItemSelected: Podcast & NowPlayingItem | null
 }
 
 const testIDPrefix = 'podcasts_screen'
@@ -159,7 +162,9 @@ export class PodcastsScreen extends React.Component<Props, State> {
       selectedSortLabel: translate('A-Z'),
       tempQueryEnabled: false,
       tempQueryFrom: null,
-      tempQuerySort: null
+      tempQuerySort: null,
+      showPodcastActionSheet: false,
+      gridItemSelected: null
     }
 
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
@@ -852,6 +857,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
     })
   }
 
+  _onPodcastItemLongPressed = (item:Podcast) => {
+    this.setState({showPodcastActionSheet:true, gridItemSelected:item})
+  }
+
   _handleClearNewEpisodeIndicators = (podcast: any) => {
     if (podcast?.id || podcast?.addByRSSPodcastFeedUrl) {
       clearEpisodesCountForPodcast(podcast.addByRSSPodcastFeedUrl || podcast.id)
@@ -1046,7 +1055,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
       selectedCategorySub,
       selectedFilterLabel,
       selectedSortLabel,
-      showNoInternetConnectionMessage
+      showNoInternetConnectionMessage,
+      showPodcastActionSheet
     } = this.state
     const { session, podcastsGridViewEnabled } = this.global
     const { subscribedPodcastIds } = session?.userInfo
@@ -1107,6 +1117,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
             noResultsTopActionTextAccessibilityHint={translate('ARIA HINT - send us an email to request a podcast')}
             onEndReached={this._onEndReached}
             onGridItemSelected={this._onPodcastItemSelected}
+            onGridItemLongPressed={this._onPodcastItemLongPressed}
             onRefresh={this._onRefresh}
             renderHiddenItem={this._renderHiddenItem}
             renderItem={this._renderPodcastItem}
@@ -1115,8 +1126,46 @@ export class PodcastsScreen extends React.Component<Props, State> {
             testID={testIDPrefix}
           />
         </RNView>
+        <ActionSheet
+          handleCancelPress={this._handleActionSheetCancelPress}
+          items={this._getGridActionItems()}
+          showModal={showPodcastActionSheet}
+          testID={testIDPrefix}
+        />
       </View>
     )
+  }
+
+  _getGridActionItems = () => {
+    const {gridItemSelected} = this.state
+
+    return [
+      {
+        accessibilityLabel: translate('Mark as Seen'),
+        key: 'mark_as_seen',
+        text: translate('Mark as Seen'),
+        onPress: () => {
+          this._handleClearNewEpisodeIndicators(gridItemSelected)
+          this.setState({showPodcastActionSheet:false,gridItemSelected:null})
+        }
+      },
+      {
+        accessibilityLabel: translate('Unsubscribe'),
+        key: 'unsubscribe',
+        text: translate('Unsubscribe'),
+        onPress: async () => {
+          await this._handleHiddenItemPress(gridItemSelected?.id, gridItemSelected?.addByRSSPodcastFeedUrl).then()
+          this.setState({showPodcastActionSheet:false,gridItemSelected:null})
+        },
+        buttonTextStyle: {
+          color: PV.Colors.redLighter
+        }
+      }
+    ]
+  }
+
+  _handleActionSheetCancelPress = () => {
+    this.setState({showPodcastActionSheet: false, gridItemSelected: null})
   }
 
   _querySubscribedPodcasts = async (preventAutoDownloading?: boolean, preventParseCustomRSSFeeds?: boolean) => {
