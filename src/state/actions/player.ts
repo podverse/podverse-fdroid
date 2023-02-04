@@ -6,6 +6,7 @@ import {
   convertNowPlayingItemToMediaRef,
   NowPlayingItem
 } from 'podverse-shared'
+import { State } from 'react-native-track-player'
 import { getGlobal, setGlobal } from 'reactn'
 import { errorLogger } from '../../lib/logger'
 import { getParsedTranscript } from '../../lib/transcriptHelpers'
@@ -346,14 +347,23 @@ export const playerTogglePlay = async () => {
 
 export const playerUpdatePlaybackState = async (state?: any) => {
   let playbackState = state
-  if (!playbackState) playbackState = await playerGetState()
-  const backupDuration = await playerGetDuration()
+  if (!playbackState) {
+    playbackState = await playerGetState()
+  }
 
+  /*
+    Ready is getting returned at errorneous times...so I'm ignoring the ready state.
+  */
+  if (playbackState === State.Ready) {
+    playbackState = getGlobal().player?.playbackState || null
+  }
+
+  const backupDuration = await playerGetDuration()
   const globalState = getGlobal()
   setGlobal({
     player: {
       ...globalState.player,
-      playbackState,
+      ...(playbackState ? { playbackState } : {}),
       ...(backupDuration ? { backupDuration } : {})
     }
   })
