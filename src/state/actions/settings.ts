@@ -8,7 +8,7 @@ import {
   setPlayerJumpForwards as setPlayerJumpForwardsService,
   playerUpdateTrackPlayerCapabilities
 } from '../../services/player'
-import { PVAudioPlayer } from '../../services/playerAudio'
+import { audioReset } from '../../services/playerAudio'
 import { v4vClearTransactionQueue } from '../../services/v4v/v4v'
 
 export const settingsRunEveryStartup = async () => {
@@ -25,7 +25,7 @@ export const settingsRunEveryStartup = async () => {
     Calling .reset here clears the queue before continuing to load the app.
   */
   if (Platform.OS === 'android') {
-    await PVAudioPlayer.reset()
+    await audioReset()
   }
 }
 
