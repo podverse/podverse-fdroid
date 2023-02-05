@@ -1,0 +1,6 @@
+- Improve app speed and responsiveness.
+- Add loading screen during app startup.
+- Partially fix the resume from last played time bug.
+- Hide Player screen after end of episode is reached.
+- Add support for HLS video playback.
+- Fix Alert prompt colors.
