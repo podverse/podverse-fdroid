@@ -40,7 +40,7 @@ import PVEventEmitter from '../services/eventEmitter'
 import { getMediaRef } from '../services/mediaRef'
 import { getAddByRSSPodcastsLocally, parseAllAddByRSSPodcasts } from '../services/parser'
 import { playerUpdateUserPlaybackPosition } from '../services/player'
-import { audioUpdateTrackPlayerCapabilities, PVAudioPlayer } from '../services/playerAudio'
+import { audioUpdateTrackPlayerCapabilities } from '../services/playerAudio'
 import { getPodcast, getPodcasts } from '../services/podcast'
 import { getSavedQueryPodcastsScreenSort, setSavedQueryPodcastsScreenSort } from '../services/savedQueryFilters'
 import { getNowPlayingItem, getNowPlayingItemLocally } from '../services/userNowPlayingItem'
@@ -108,7 +108,7 @@ type State = {
   tempQueryFrom: string | null
   tempQuerySort: string | null
   showPodcastActionSheet: boolean
-  gridItemSelected: Podcast & NowPlayingItem | null
+  gridItemSelected: (Podcast & NowPlayingItem) | null
 }
 
 const testIDPrefix = 'podcasts_screen'
@@ -857,8 +857,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
     })
   }
 
-  _onPodcastItemLongPressed = (item:Podcast) => {
-    this.setState({showPodcastActionSheet:true, gridItemSelected:item})
+  _onPodcastItemLongPressed = (item: Podcast) => {
+    this.setState({ showPodcastActionSheet: true, gridItemSelected: item })
   }
 
   _handleClearNewEpisodeIndicators = (podcast: any) => {
@@ -1137,7 +1137,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _getGridActionItems = () => {
-    const {gridItemSelected} = this.state
+    const { gridItemSelected } = this.state
 
     return [
       {
@@ -1146,7 +1146,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         text: translate('Mark as Seen'),
         onPress: () => {
           this._handleClearNewEpisodeIndicators(gridItemSelected)
-          this.setState({showPodcastActionSheet:false,gridItemSelected:null})
+          this.setState({ showPodcastActionSheet: false, gridItemSelected: null })
         }
       },
       {
@@ -1155,7 +1155,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         text: translate('Unsubscribe'),
         onPress: async () => {
           await this._handleHiddenItemPress(gridItemSelected?.id, gridItemSelected?.addByRSSPodcastFeedUrl).then()
-          this.setState({showPodcastActionSheet:false,gridItemSelected:null})
+          this.setState({ showPodcastActionSheet: false, gridItemSelected: null })
         },
         buttonTextStyle: {
           color: PV.Colors.redLighter
@@ -1165,7 +1165,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   _handleActionSheetCancelPress = () => {
-    this.setState({showPodcastActionSheet: false, gridItemSelected: null})
+    this.setState({ showPodcastActionSheet: false, gridItemSelected: null })
   }
 
   _querySubscribedPodcasts = async (preventAutoDownloading?: boolean, preventParseCustomRSSFeeds?: boolean) => {
