@@ -1,0 +1,6 @@
+- Improve app speed and responsiveness.
+- Add value-for-value streaming for videos.
+- Fix the resume from last played time bug.
+- Add loading screen during app startup.
+- Hide player screen after end of episode is reached.
+- Add support for HLS video playback.
