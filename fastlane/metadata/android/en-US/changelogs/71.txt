@@ -1,4 +1,4 @@
-- Improve app speed and responsiveness.
+- Improve audio and video playback.
 - Add value-for-value streaming for videos.
 - Fix the resume from last played time bug.
 - Add loading screen during app startup.
