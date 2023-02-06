@@ -136,7 +136,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
         versionCode 70
-        versionName "4.11.1"
+        versionName "4.12.0"
         multiDexEnabled true
     }
     splits {
