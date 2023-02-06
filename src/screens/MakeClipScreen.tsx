@@ -116,7 +116,6 @@ export class MakeClipScreen extends React.Component<Props, State> {
     // Prevent the temporary progressValue from sticking in the progress bar
     setTimeout(() => this.setState({ progressValue: null }), 250)
 
-    await AsyncStorage.setItem(PV.Keys.PLAYER_PREVENT_END_OF_TRACK_HANDLING, 'TRUE')
     PVAudioPlayer.setRepeatMode(RepeatMode.Track)
 
     const hideHowToModal = await AsyncStorage.getItem(PV.Keys.MAKE_CLIP_HOW_TO_HAS_LOADED)
@@ -168,7 +167,6 @@ export class MakeClipScreen extends React.Component<Props, State> {
   }
 
   async componentWillUnmount() {
-    await AsyncStorage.removeItem(PV.Keys.PLAYER_PREVENT_END_OF_TRACK_HANDLING)
     PVAudioPlayer.setRepeatMode(RepeatMode.Off)
 
     if (!this.props.navigation.getParam('isEditing')) {

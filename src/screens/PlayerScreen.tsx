@@ -133,7 +133,7 @@ export class PlayerScreen extends React.Component<Props> {
       )
     }
 
-    InteractionManager.runAfterInteractions(async() => {
+    InteractionManager.runAfterInteractions(async () => {
       await this._handleUpdateFullEpisode()
     })
   }
