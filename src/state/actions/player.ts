@@ -21,10 +21,12 @@ import {
   playerTogglePlay as playerTogglePlayService,
   playerGetState,
   playerGetDuration,
-  getRemoteSkipButtonsTimeJumpOverride
+  getRemoteSkipButtonsTimeJumpOverride,
+  playerGetPosition
 } from '../../services/player'
 import { getNextFromQueue } from '../../services/queue'
 import { initSleepTimerDefaultTimeRemaining } from '../../services/sleepTimer'
+import { addOrUpdateHistoryItem } from '../../services/userHistoryItem'
 import {
   clearNowPlayingItem as clearNowPlayingItemService,
   getNowPlayingItemLocally,
@@ -213,21 +215,28 @@ const playerHandleLoadChapterForNowPlayingEpisode = async (item: NowPlayingItem)
   }
 }
 
+export const playerHandleResumeAfterClipHasEnded = async () => {
+  const [nowPlayingItem, playbackPosition, mediaFileDuration] = await Promise.all([
+    getNowPlayingItemLocally(),
+    playerGetPosition(),
+    playerGetDuration()
+  ])
+  const nowPlayingItemEpisode = convertNowPlayingItemClipToNowPlayingItemEpisode(nowPlayingItem)
+  await addOrUpdateHistoryItem(nowPlayingItemEpisode, playbackPosition, mediaFileDuration)
+  playerSetNowPlayingItem(nowPlayingItemEpisode, playbackPosition)
+}
+
 export const playerLoadNowPlayingItem = async (
   item: NowPlayingItem,
   shouldPlay: boolean,
   forceUpdateOrderDate: boolean,
   setCurrentItemNextInQueue: boolean
-) => {
+) => { 
   const globalState = getGlobal()
   const { nowPlayingItem: previousNowPlayingItem } = globalState.player
 
   if (item) {
     await clearEnrichedPodcastDataIfNewEpisode(previousNowPlayingItem, item)
-
-    item.clipId
-      ? await AsyncStorage.setItem(PV.Keys.PLAYER_CLIP_IS_LOADED, 'TRUE')
-      : await AsyncStorage.removeItem(PV.Keys.PLAYER_CLIP_IS_LOADED)
 
     if (item.clipIsOfficialChapter) {
       if (previousNowPlayingItem && item.episodeId === previousNowPlayingItem.episodeId) {
