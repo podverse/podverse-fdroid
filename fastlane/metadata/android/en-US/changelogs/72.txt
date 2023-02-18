@@ -1,0 +1,5 @@
+- Play videos in the background.
+- Add video quality selector (1080p, 720p, etc).
+- Fix HLS video livestream error.
+- Fix "resume from current live position" button for video.
+- Portuguese and Spanish translation updates.
