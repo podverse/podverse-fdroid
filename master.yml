@@ -11,6 +11,11 @@ pool:
 
 steps:
 
+- task: NodeTool@0
+  inputs:
+    versionSource: 'spec'
+    versionSpec: '16.x'
+
 - task: CmdLine@2
   displayName: Install Dependencies
   inputs:
