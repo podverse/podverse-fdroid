@@ -1,0 +1,1 @@
+- Fix critical bug with Android storage limit. This bug was breaking "Add by RSS" podcasts for many people.
