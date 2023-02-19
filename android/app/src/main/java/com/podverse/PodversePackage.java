@@ -1,4 +1,5 @@
-package com.podverse; 
+package com.podverse.fdroid;
+
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
