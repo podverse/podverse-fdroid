@@ -3149,7 +3149,7 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12-2-qa.1
+  - versionName: 4.12.2-qa.1
     versionCode: 72
     commit: 4.12.2-qa.1
     subdir: android/app
@@ -3195,7 +3195,7 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12-3-qa.1
+  - versionName: 4.12.3-qa.1
     versionCode: 73
     commit: 4.12.3-qa.1
     subdir: android/app
