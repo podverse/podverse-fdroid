@@ -99,7 +99,7 @@ export class EditProfileScreen extends React.Component<Props, State> {
     )
   }
 
-  _ItemSeparatorComponent = () => <Divider />
+  _ItemSeparatorComponent = () => <Divider optional />
 
   _onChangeIsPublic = (key: boolean) => {
     this.setState({ selectedIsPublicKey: key })
