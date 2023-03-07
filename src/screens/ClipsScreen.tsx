@@ -260,7 +260,7 @@ export class ClipsScreen extends React.Component<Props, State> {
     )
   }
 
-  _ItemSeparatorComponent = () => <Divider />
+  _ItemSeparatorComponent = () => <Divider optional />
 
   _handleCancelPress = () =>
     new Promise((resolve) => {

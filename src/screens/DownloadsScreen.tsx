@@ -45,9 +45,7 @@ export class DownloadsScreen extends React.Component<Props, State> {
     title: translate('Downloads')
   })
 
-  _ItemSeparatorComponent = () => {
-    return <Divider />
-  }
+  _ItemSeparatorComponent = () => <Divider optional />
 
   _handleItemPress = (downloadTaskState: DownloadTaskState) => {
     if (downloadTaskState.status === DownloadStatus.FINISHED) {
