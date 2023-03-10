@@ -1,0 +1,5 @@
+- Misc crash fixes. #1714 #1703 #1702
+- Add translator attributions to More > About screen. #1604
+- Add option to remove list dividers to More > Settings > Other. #1597
+- Pass the episode_guid with the Bitcoin Lightning TLV. #1628
+- Translations: Norwegian Bokmål, Portuguese (Brazil)
