@@ -1,6 +1,6 @@
 {
   "name": "podverse",
-  "version": "4.12.5",
+  "version": "4.12.7",
   "private": true,
   "contributors": [
     "Creon Creonopoulos",
@@ -42,6 +42,7 @@
     "@babel/eslint-parser": "^7.15.0",
     "@babel/preset-env": "^7.17.10",
     "@babel/preset-typescript": "^7.16.7",
+    "@kesha-antonov/react-native-background-downloader": "^2.7.2",
     "@podverse/podcast-feed-parser": "^1.0.17",
     "@react-native-community/async-storage": "1.12.1",
     "@react-native-community/masked-view": "0.1.11",
@@ -71,7 +72,6 @@
     "qs": "^6.11.0",
     "react": "17.0.1",
     "react-native": "0.66.5",
-    "react-native-background-downloader": "2.3.4",
     "react-native-cheerio": "1.0.0-rc.4",
     "react-native-confetti-cannon": "1.5.2",
     "react-native-config": "1.4.3",
@@ -99,7 +99,7 @@
     "react-native-swipe-list-view": "3.2.9",
     "react-native-system-setting": "1.7.6",
     "react-native-text-ticker": "1.13.0",
-    "react-native-track-player": "3.2.0-bb749e5d286737681ba8907dfd287480eb1cec45",
+    "react-native-track-player": "4.0.0-rc03",
     "react-native-vector-icons": "8.1.0",
     "react-native-video": "6.0.0-alpha.4",
     "react-native-video-controls": "2.8.1",
