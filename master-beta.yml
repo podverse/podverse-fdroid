@@ -57,6 +57,11 @@ steps:
     script: 'python3 -m pip install androguard'
 
 - task: CmdLine@2
+  displayName: Install defusedxml Dependency
+  inputs:
+    script: 'python3 -m pip install defusedxml'
+
+- task: CmdLine@2
   displayName: Clone frdoiddata
   inputs:
     script: 'git clone https://gitlab.com/fdroid/fdroiddata.git' 
