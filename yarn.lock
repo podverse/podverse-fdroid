@@ -1294,6 +1294,11 @@
   resolved "https://registry.yarnpkg.com/@jsamr/react-native-li/-/react-native-li-2.3.1.tgz#12a5b5f6e3971cec77b96bee58104eed0ae9314a"
   integrity sha512-Qbo4NEj48SQ4k8FZJHFE2fgZDKTWaUGmVxcIQh3msg5JezLdTMMHuRRDYctfdHI6L0FZGObmEv3haWbIvmol8w==
 
+"@kesha-antonov/react-native-background-downloader@^2.7.2":
+  version "2.7.2"
+  resolved "https://registry.yarnpkg.com/@kesha-antonov/react-native-background-downloader/-/react-native-background-downloader-2.7.2.tgz#d2fe895a8dff5d48a9c4d9dc5f61d7a0d528746d"
+  integrity sha512-m+ub4pbOkpQQ6f0wPE0k6Ca1mI5lYwExuKM7xnP/mDVm7c1D8INjbbSaOU6KV6jMa2HHFSaLRzbOIsIvbCaO3g==
+
 "@native-html/css-processor@1.11.0":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@native-html/css-processor/-/css-processor-1.11.0.tgz#27d02e5123b0849f4986d44060ba3f235a15f552"
@@ -8408,11 +8413,6 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-native-background-downloader@2.3.4:
-  version "2.3.4"
-  resolved "https://registry.yarnpkg.com/react-native-background-downloader/-/react-native-background-downloader-2.3.4.tgz#050a94b044b0a204f1c41b9852d4d53dcefe527c"
-  integrity sha512-SqAnsf3dJ/aoj2zq8zG/qVcQZxeK3Le0PsoNQ00G/q6oDho2kHNfIOxthD/00B0t384J3u2gWurwRW8idI79zg==
-
 react-native-cheerio@1.0.0-rc.4:
   version "1.0.0-rc.4"
   resolved "https://registry.yarnpkg.com/react-native-cheerio/-/react-native-cheerio-1.0.0-rc.4.tgz#bab0c1fe5888bbd69481d9b928d58b525f18f3b1"
@@ -8659,10 +8659,10 @@ react-native-text-ticker@1.13.0:
   resolved "https://registry.yarnpkg.com/react-native-text-ticker/-/react-native-text-ticker-1.13.0.tgz#e96e9bd72a66e67353c12f95f17499506aee3560"
   integrity sha512-5Mh5vqZhfeIVQdXBFaUQw6I/uMyhi9ZlB/RQydqqtwoXZHEZkuz9250bfskpG0L/NkshOWHh1n2Xdlji0LxYzg==
 
-react-native-track-player@3.2.0-bb749e5d286737681ba8907dfd287480eb1cec45:
-  version "3.2.0-bb749e5d286737681ba8907dfd287480eb1cec45"
-  resolved "https://registry.yarnpkg.com/react-native-track-player/-/react-native-track-player-3.2.0-bb749e5d286737681ba8907dfd287480eb1cec45.tgz#9813246fcc1c05320ad0386765513c8b4148cd91"
-  integrity sha512-WS4DbirdPwrnkozKGgXBkphtRDpfTGQ16kRUag3Ltr4bmFGTQHk7g4otI1C0So7fEZzJzzFEmXR/F8ykJ+lmkw==
+react-native-track-player@4.0.0-rc04:
+  version "4.0.0-rc04"
+  resolved "https://registry.yarnpkg.com/react-native-track-player/-/react-native-track-player-4.0.0-rc04.tgz#eb5892a623ae746e37bead80afbefe93561861f8"
+  integrity sha512-zagx73cFcZAmrB5yZdFbmigkbko9AIiF0cl6G5L6QQWCMPOoZnNItMJkyDmcnQXHsTrrgSuUwuR/2xKt8ALHhQ==
 
 react-native-typescript-transformer@1.2.13:
   version "1.2.13"
