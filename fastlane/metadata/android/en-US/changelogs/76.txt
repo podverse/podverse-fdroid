@@ -2,4 +2,4 @@
 - Upgrade our file downloader library. #1722
 - Prevent keyboard from covering up Chat Room on Player screen. #1718
 - Fix divider styles in list views.
-- German and Swedish translation updates.
+- German, Norwegian Bokmål, Portuguese, and Swedish translation updates.
