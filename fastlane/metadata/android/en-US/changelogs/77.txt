@@ -3,4 +3,4 @@
 - Prevent Podverse audio from mixing with other app audio. #1720
 - Fixes for marking as played after an episode finishes. #1704
 - Fix for V4V buttons sometimes not showing on Player screen. #1701
-- Translation updates: Portuguese, Portuguese (Brazil)
+- Translation updates: Portuguese, Portuguese (Brazil).
