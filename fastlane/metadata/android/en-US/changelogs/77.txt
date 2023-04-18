@@ -1,6 +1,7 @@
 - Fix crash on app launch. #1702
 - Pause and resume playback during interruptions (like maps navigation). #1720
 - Prevent Podverse audio from mixing with other app audio. #1720
+- Add transcriptator library to parse transcripts more reliably. #1766
 - Fixes for marking as played after an episode finishes. #1704
 - Fix for V4V buttons sometimes not showing on Player screen. #1701
 - Translation updates: Portuguese, Portuguese (Brazil).
