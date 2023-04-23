@@ -6,7 +6,7 @@ export const displayFOSSPurchaseAlert = () => {
     { text: translate('Cancel') },
     {
       text: translate('Renew Membership'),
-      onPress: () => Linking.openURL('https://podverse.fm?login=true')
+      onPress: () => Linking.openURL('https://podverse.fm/extend-membership')
     }
   ])
 }
