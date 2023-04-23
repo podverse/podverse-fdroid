@@ -28,6 +28,7 @@ import { downloadCategoriesList } from './src/services/category'
 // import PVEventEmitter from './src/services/eventEmitter'
 // import { playerHandlePauseWithUpdate } from './src/services/player'
 // import { isOnMinimumAllowedVersion } from './src/services/versioning'
+import { PlayerAudioSetupService } from './src/services/playerAudioSetup'
 import { pauseDownloadingEpisodesAll } from './src/state/actions/downloads'
 import { settingsRunEveryStartup } from './src/state/actions/settings'
 import initialState from './src/state/initialState'
@@ -75,6 +76,7 @@ class App extends Component<Props, State> {
 
   async componentDidMount() {
     TrackPlayer.registerPlaybackService(() => require('./src/services/playerAudioEvents'))
+    await PlayerAudioSetupService()
     
     StatusBar.setBarStyle('light-content')
     Platform.OS === 'android' && StatusBar.setBackgroundColor(PV.Colors.ink, true)
