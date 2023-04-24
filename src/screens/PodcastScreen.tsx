@@ -1079,6 +1079,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                 onEndReached={this._onEndReached}
                 renderItem={this._renderItem}
                 listRef={(ref) => (this.listRef = ref)}
+                stickyHeaderIndices={false}
                 showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               />
             )}
