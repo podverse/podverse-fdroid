@@ -1,8 +1,10 @@
-import { Alert, Linking, StyleSheet } from 'react-native'
-import React from 'reactn'
-import { HTMLScrollView, PodcastTableHeader, View } from '../components'
+import { Alert, Linking, StyleSheet, View as RNView } from 'react-native'
+import { NavigationStackOptions } from 'react-navigation-stack'
+import React, { getGlobal } from 'reactn'
+import { HTMLScrollView, NavOfficialLinkIcon, PodcastTableHeader, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
+import { core } from '../styles'
 
 type Props = any
 
@@ -26,10 +28,22 @@ export class PodcastInfoScreen extends React.Component<Props, State> {
     }
   }
 
-  static navigationOptions = () => ({
-    title: translate('More Info'),
-    headerRight: null
-  })
+  static navigationOptions = ({ navigation }) => {
+    const podcast = navigation.getParam('podcast')
+    const hasLinkUrl = !!podcast?.linkUrl
+    const { globalTheme } = getGlobal()
+
+    return {
+      title: translate('More Info'),
+      headerRight: () => (
+        <RNView style={core.row}>
+          {hasLinkUrl && (
+            <NavOfficialLinkIcon globalTheme={globalTheme} linkUrl={podcast.linkUrl} />
+          )}
+        </RNView>
+      )
+    } as NavigationStackOptions
+  }
 
   showLeavingAppAlert = (url: string) => {
     Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [

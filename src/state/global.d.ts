@@ -156,5 +156,6 @@ declare module 'reactn/default' {
     hideDividersInLists: boolean
     imageFullViewSourceUrl?: string
     imageFullViewShow?: boolean
+    refreshSubscriptionsOnLaunch?: boolean
   }
 }
