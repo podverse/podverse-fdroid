@@ -114,7 +114,7 @@ type State = {
 const testIDPrefix = 'podcasts_screen'
 
 export let isInitialLoadPodcastsScreen = true
-const horizontalRowHeight = 94
+const horizontalRowHeight = 98
 const dividerHeight = 1
 
 const getScreenTitle = () => {
@@ -874,7 +874,6 @@ export class PodcastsScreen extends React.Component<Props, State> {
           handleClear={this._handleSearchBarClear}
           hideIcon
           icon='filter'
-          noContainerPadding
           onChangeText={this._handleSearchBarTextChange}
           placeholder={getSearchPlaceholder()}
           testID={`${testIDPrefix}_filter_bar`}
@@ -1175,6 +1174,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
             renderItem={this._renderPodcastItem}
             rightOpenValue={PV.FlatList.hiddenItems.rightOpenValue.twoButtons}
             showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+            stickyHeader
             testID={testIDPrefix}
           />
         </RNView>
