@@ -250,7 +250,6 @@ export class ClipsScreen extends React.Component<Props, State> {
           handleClear={this._handleSearchBarClear}
           hideIcon
           icon='filter'
-          noContainerPadding
           onChangeText={this._handleSearchBarTextChange}
           placeholder={translate('Search clips')}
           testID={`${testIDPrefix}_filter_bar`}
@@ -474,6 +473,7 @@ export class ClipsScreen extends React.Component<Props, State> {
             onRefresh={this._onRefresh}
             renderItem={this._renderClipItem}
             showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+            stickyHeader
           />
         )}
         <ActionSheet

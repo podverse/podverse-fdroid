@@ -469,7 +469,6 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
             handleClear={this._handleSearchBarClear}
             hideIcon
             icon='filter'
-            noContainerPadding
             onChangeText={this._handleSearchBarTextChange}
             placeholder={placeholder}
             testID={`${testIDPrefix}_filter_bar`}
@@ -1079,7 +1078,6 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
                 onEndReached={this._onEndReached}
                 renderItem={this._renderItem}
                 listRef={(ref) => (this.listRef = ref)}
-                stickyHeaderIndices={false}
                 showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               />
             )}
