@@ -1,0 +1,10 @@
+- Fix repeating queue bug.
+- Fix v4v "stream" meta tag. #1777
+- Fix search bar to top of lists. #1757
+- Fix "add by RSS" feed parser bug. #1775
+- Show error message when "add by RSS" fails. #1763
+- Fix "mark as played" episode not being auto-deleted. #1762
+- Fix download error for some podcasts (SSL + redirect issues). #1736
+- Add "refresh subscriptions on launch" setting to More > Setting > Other. #1755
+- Prevent next track from playing automatically while listening to a livestream. #1735
+- Translation updates: Norwegian Bokmål
