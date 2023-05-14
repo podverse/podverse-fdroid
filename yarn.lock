@@ -8489,13 +8489,6 @@ react-native-background-downloader@^2.3.4:
   resolved "https://registry.yarnpkg.com/react-native-background-downloader/-/react-native-background-downloader-2.3.4.tgz#050a94b044b0a204f1c41b9852d4d53dcefe527c"
   integrity sha512-SqAnsf3dJ/aoj2zq8zG/qVcQZxeK3Le0PsoNQ00G/q6oDho2kHNfIOxthD/00B0t384J3u2gWurwRW8idI79zg==
 
-react-native-carplay@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-carplay/-/react-native-carplay-2.1.0.tgz#13be2647ec226413c8b8c3a2ebe7971f0725cdd0"
-  integrity sha512-vB8pCyw3vY+GDHDBwOJ/wwiZkHLb845Vjhs7+Y69iszhWGOU7ZSGiyJMjG6FpooUXc4i94CCOAJTNuT7nEnKyQ==
-  dependencies:
-    traverse "^0.6.6"
-
 react-native-cheerio@1.0.0-rc.4:
   version "1.0.0-rc.4"
   resolved "https://registry.yarnpkg.com/react-native-cheerio/-/react-native-cheerio-1.0.0-rc.4.tgz#bab0c1fe5888bbd69481d9b928d58b525f18f3b1"
