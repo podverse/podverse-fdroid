@@ -1,0 +1,2 @@
+- Fix a bug that caused 95% of our "Android not responsive" errors.
+- Make the play button in episode rows easier to press.
