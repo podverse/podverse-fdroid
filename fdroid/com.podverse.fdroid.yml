@@ -3609,7 +3609,7 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-- versionName: 4.12.13-beta.1
+  - versionName: 4.12.13-beta.1
     versionCode: 82
     commit: 4.12.13-beta.1
     subdir: android/app
