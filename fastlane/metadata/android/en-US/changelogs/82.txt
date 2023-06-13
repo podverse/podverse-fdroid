@@ -1,0 +1,8 @@
+- Transcript layout redesign and improvements.
+- Fixed issue where app sometimes does not pause when a call is received.
+- Fixed bug when playing video when an audio file was last played.
+- Fixed a scenario where offline playback mode failed for downloaded episodes.
+- Fixed a bug where the current chapter did not load in the player.
+- Fixed a padding issue on the Podcast screen.
+- Updated the "Renew" button in membership expired banner to now link to the renew info page.
+- Translation updates: German
