@@ -36,7 +36,10 @@ import { core, images } from '../styles'
 type Props = any
 type State = {
   activeValueTag?: ValueTag
-  streamingTransactions: ValueTransaction[]
+  streamingFeeTransactions: ValueTransaction[]
+  streamingNonFeeTransactions: ValueTransaction[]
+  streamingParentFeeTransactions: ValueTransaction[]
+  streamingParentNonFeeTransactions: ValueTransaction[]
   localStreamingAmount: number
   localAppStreamingAmount: number
   playerPositionState: number
@@ -48,7 +51,10 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
-      streamingTransactions: [],
+      streamingFeeTransactions: [],
+      streamingParentFeeTransactions: [],
+      streamingParentNonFeeTransactions: [],
+      streamingNonFeeTransactions: [],
       localStreamingAmount: 0,
       localAppStreamingAmount: 0,
       playerPositionState: 0
@@ -149,7 +155,12 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
       )
 
 
-      this.setState({ streamingTransactions: newValueTransactions })
+      this.setState({
+        streamingFeeTransactions: newValueTransactions?.feeValueTransactions,
+        streamingNonFeeTransactions: newValueTransactions?.nonFeeValueTransactions,
+        streamingParentFeeTransactions: newValueTransactions?.parentFeeValueTransactions,
+        streamingParentNonFeeTransactions: newValueTransactions?.parentNonFeeValueTransactions
+      })
     }
   }
 
@@ -158,7 +169,10 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
       activeValueTag,
       // localAppStreamingAmount,
       localStreamingAmount,
-      streamingTransactions
+      streamingFeeTransactions,
+      streamingNonFeeTransactions,
+      streamingParentFeeTransactions,
+      streamingParentNonFeeTransactions
     } = this.state
     const { player, session } = this.global
     const { v4v } = session
@@ -315,7 +329,10 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
                   activeValueTag={activeValueTag}
                   testID={`${testIDPrefix}_streaming`}
                   totalAmount={activeProviderSettings?.streamingAmount || 0}
-                  transactions={streamingTransactions}
+                  feeTransactions={streamingFeeTransactions}
+                  nonFeeTransactions={streamingNonFeeTransactions}
+                  parentFeeTransactions={streamingParentFeeTransactions}
+                  parentNonFeeTransactions={streamingParentNonFeeTransactions}
                   erroringTransactions={previousTransactionErrors.streaming}
                 />
               </View>
