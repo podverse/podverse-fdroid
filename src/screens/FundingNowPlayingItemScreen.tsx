@@ -1,4 +1,4 @@
-import { ValueTransaction } from 'podverse-shared'
+import { ValueTag, ValueTransaction } from 'podverse-shared'
 import { Alert, Keyboard, Linking, Pressable, StyleSheet } from 'react-native'
 import React from 'reactn'
 import AsyncStorage from '@react-native-community/async-storage'
@@ -15,6 +15,7 @@ import {
 import { translate } from '../lib/i18n'
 import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
+import { playerGetPosition } from '../services/player'
 import {
   convertValueTagIntoValueTransactions,
   extractV4VValueTags,
@@ -34,9 +35,14 @@ import { core, images } from '../styles'
 
 type Props = any
 type State = {
-  streamingTransactions: ValueTransaction[]
+  activeValueTag?: ValueTag
+  streamingFeeTransactions: ValueTransaction[]
+  streamingNonFeeTransactions: ValueTransaction[]
+  streamingParentFeeTransactions: ValueTransaction[]
+  streamingParentNonFeeTransactions: ValueTransaction[]
   localStreamingAmount: number
   localAppStreamingAmount: number
+  playerPositionState: number
 }
 
 const testIDPrefix = 'funding_screen'
@@ -45,9 +51,13 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
   constructor() {
     super()
     this.state = {
-      streamingTransactions: [],
+      streamingFeeTransactions: [],
+      streamingParentFeeTransactions: [],
+      streamingParentNonFeeTransactions: [],
+      streamingNonFeeTransactions: [],
       localStreamingAmount: 0,
-      localAppStreamingAmount: 0
+      localAppStreamingAmount: 0,
+      playerPositionState: 0
     }
   }
 
@@ -58,7 +68,7 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const { player } = this.global
     const { nowPlayingItem } = player
 
@@ -66,7 +76,9 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
 
     const { episodeValue, podcastValue } = nowPlayingItem
     const valueTags = extractV4VValueTags(episodeValue, podcastValue)
-    const activeValueTag = v4vGetActiveValueTag(valueTags, activeProvider?.type, activeProvider?.method)
+    const playerPositionState = await playerGetPosition()
+    const activeValueTag = v4vGetActiveValueTag(
+      valueTags, playerPositionState, activeProvider?.type, activeProvider?.method)
 
     if (activeValueTag && activeProvider) {
       const { method, type } = activeProvider
@@ -75,8 +87,10 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
 
       this.setState(
         {
+          activeValueTag,
           localStreamingAmount: typeMethodSettings.streamingAmount,
-          localAppStreamingAmount: typeMethodSettings.appStreamingAmount
+          localAppStreamingAmount: typeMethodSettings.appStreamingAmount,
+          playerPositionState
         },
         () => {
           Promise.all([
@@ -122,14 +136,10 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
   }
 
   _handleUpdateBoostTransactionsState = async (action: 'ACTION_STREAMING', amount: number) => {
+    const { activeValueTag } = this.state
     const { player } = this.global
     const { nowPlayingItem } = player
     const { activeProvider } = v4vGetActiveProviderInfo(getBoostagramItemValueTags(nowPlayingItem))
-
-    const valueTags =
-      (nowPlayingItem?.episodeValue?.length && nowPlayingItem?.episodeValue) ||
-      (nowPlayingItem?.podcastValue?.length && nowPlayingItem?.podcastValue)
-    const activeValueTag = v4vGetActiveValueTag(valueTags, activeProvider?.type, activeProvider?.method)
 
     if (activeValueTag && activeProvider?.key) {
       const newValueTransactions = await convertValueTagIntoValueTransactions(
@@ -145,15 +155,24 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
       )
 
 
-      this.setState({ streamingTransactions: newValueTransactions })
+      this.setState({
+        streamingFeeTransactions: newValueTransactions?.feeValueTransactions,
+        streamingNonFeeTransactions: newValueTransactions?.nonFeeValueTransactions,
+        streamingParentFeeTransactions: newValueTransactions?.parentFeeValueTransactions,
+        streamingParentNonFeeTransactions: newValueTransactions?.parentNonFeeValueTransactions
+      })
     }
   }
 
   render() {
     const {
+      activeValueTag,
       // localAppStreamingAmount,
       localStreamingAmount,
-      streamingTransactions
+      streamingFeeTransactions,
+      streamingNonFeeTransactions,
+      streamingParentFeeTransactions,
+      streamingParentNonFeeTransactions
     } = this.state
     const { player, session } = this.global
     const { v4v } = session
@@ -307,9 +326,13 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
                   {translate('Streaming splits per minute')}
                 </Text>
                 <V4VRecipientsInfoView
+                  activeValueTag={activeValueTag}
                   testID={`${testIDPrefix}_streaming`}
                   totalAmount={activeProviderSettings?.streamingAmount || 0}
-                  transactions={streamingTransactions}
+                  feeTransactions={streamingFeeTransactions}
+                  nonFeeTransactions={streamingNonFeeTransactions}
+                  parentFeeTransactions={streamingParentFeeTransactions}
+                  parentNonFeeTransactions={streamingParentNonFeeTransactions}
                   erroringTransactions={previousTransactionErrors.streaming}
                 />
               </View>
