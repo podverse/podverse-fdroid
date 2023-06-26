@@ -1,0 +1,1 @@
+- Fix our most common crash with the audio player.
