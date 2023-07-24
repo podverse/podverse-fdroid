@@ -1,14 +1,19 @@
 package com.podverse.fdroid;
 
+import static com.podverse.fdroid.PVUnifiedPushModule.emitEvent;
+import static com.podverse.fdroid.PVUnifiedPushModule.popNotificationMap;
+
 import com.facebook.react.ReactActivity;
-import com.facebook.react.ReactActivityDelegate;
-import com.facebook.react.ReactRootView;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
 
 import android.os.Bundle;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+
+import org.json.JSONException;
 
 public class MainActivity extends ReactActivity {
 
@@ -36,5 +41,52 @@ public class MainActivity extends ReactActivity {
         Intent intent = new Intent("onConfigurationChanged");
         intent.putExtra("newConfig", newConfig);
         this.sendBroadcast(intent);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        if (intent == null || intent.getExtras() == null) {
+            super.onNewIntent(intent);
+            return;
+        }
+
+        Bundle extras = intent.getExtras();
+
+        int messageId = extras.getInt("pv_message_id", -1);
+        if (messageId == -1) {
+            super.onNewIntent(intent);
+            return;
+        }
+
+        String instance = extras.getString("up_instance", null);
+        if (instance == null) {
+            super.onNewIntent(intent);
+            return;
+        }
+
+        WritableMap notificationMap = null;
+
+        try {
+            notificationMap = popNotificationMap(messageId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (notificationMap != null) {
+            WritableMap eventMap = new WritableNativeMap();
+            eventMap.putMap("data", notificationMap);
+
+            WritableNativeMap newInitialNotification = new WritableNativeMap();
+            newInitialNotification.merge(eventMap);
+            PVUnifiedPushModule.setInitialNotification(newInitialNotification);
+
+            var UPMessage = new PVUnifiedPushMessage(
+                    "UnifiedPushMessage",
+                    instance,
+                    eventMap
+            );
+
+            emitEvent(UPMessage);
+        }
     }
 }

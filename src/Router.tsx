@@ -53,6 +53,7 @@ import {
   SettingsScreenOther,
   SettingsScreenDownloads,
   SettingsScreenHistory,
+  SettingsScreenNotifications,
   SettingsScreenPlayer,
   SettingsScreenQueue,
   SleepTimerScreen,
@@ -201,6 +202,7 @@ const MoreNavigator = createStackNavigator(
     [PV.RouteNames.SettingsScreenOther]: SettingsScreenOther,
     [PV.RouteNames.SettingsScreenDownloads]: SettingsScreenDownloads,
     [PV.RouteNames.SettingsScreenHistory]: SettingsScreenHistory,
+    [PV.RouteNames.SettingsScreenNotifications]: SettingsScreenNotifications,
     [PV.RouteNames.SettingsScreenPlayer]: SettingsScreenPlayer,
     [PV.RouteNames.SettingsScreenQueue]: SettingsScreenQueue,
     [PV.RouteNames.MembershipScreen]: {
