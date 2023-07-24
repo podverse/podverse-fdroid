@@ -1,4 +1,4 @@
-package com.podverse;
+package com.podverse.fdroid;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -101,9 +101,9 @@ public class PVUnifiedPushEncryption {
         SharedPreferences preferences = context.getSharedPreferences(NOTIFICATION_ENCRYPTION_SHARED_PREF_NAME, Context.MODE_PRIVATE);
         String pushPrivateKey = preferences.getString("push_private_key", null);
         String pushPublicKey = preferences.getString("push_public_key", null);
-        Log.d("com.podverse.PVUnifiedPushEncryption", "pushPublicKey: " + pushPublicKey);
+        Log.d("com.podverse.fdroid.PVUnifiedPushEncryption", "pushPublicKey: " + pushPublicKey);
         String encodedAuthKey = preferences.getString("encoded_auth_key", null);
-        Log.d("com.podverse.PVUnifiedPushEncryption", "encodedAuthKey: " + encodedAuthKey);
+        Log.d("com.podverse.fdroid.PVUnifiedPushEncryption", "encodedAuthKey: " + encodedAuthKey);
 
         PrivateKey privateKey;
         PublicKey publicKey;
@@ -120,17 +120,17 @@ public class PVUnifiedPushEncryption {
         }
 
         if (privateKey == null) {
-            Log.d("com.podverse.PVUnifiedPushEncryption", "privateKey is null");
+            Log.d("com.podverse.fdroid.PVUnifiedPushEncryption", "privateKey is null");
             return null;
         }
 
         if (publicKey == null) {
-            Log.d("com.podverse.PVUnifiedPushEncryption", "publicKey is null");
+            Log.d("com.podverse.fdroid.PVUnifiedPushEncryption", "publicKey is null");
             return null;
         }
 
         if (authKey == null) {
-            Log.d("com.podverse.PVUnifiedPushEncryption", "authKey is null");
+            Log.d("com.podverse.fdroid.PVUnifiedPushEncryption", "authKey is null");
             return null;
         }
 

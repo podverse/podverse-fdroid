@@ -1,4 +1,4 @@
-package com.podverse;
+package com.podverse.fdroid;
 
 import android.content.Context;
 import android.util.Log;
@@ -19,7 +19,7 @@ public class PVUnifiedPushMessageReceiver extends MessagingReceiver {
     public void onNewEndpoint(@NonNull Context context, @NonNull String endpoint, @NonNull String instance) {
         // Called when a new endpoint be used for sending push messages
 
-        Log.d("com.podverse.PVUnifiedPushMessageReceiver",
+        Log.d("com.podverse.fdroid.PVUnifiedPushMessageReceiver",
                 "received endpoint '" + endpoint + "' for instance '" + instance + "'");
 
         WritableNativeMap map = new WritableNativeMap();
@@ -102,14 +102,14 @@ public class PVUnifiedPushMessageReceiver extends MessagingReceiver {
 
         // Handle decryption and image downloading in a separate thread to avoid blocking the main process
         new Thread(() -> {
-            Log.i("com.podverse.PVUnifiedPushMessageReceiver", "Received UP message");
+            Log.i("com.podverse.fdroid.PVUnifiedPushMessageReceiver", "Received UP message");
 
             // if you want to disable encryption
             // String messageString = new String(message, StandardCharsets.UTF_8);
             String messageString = PVUnifiedPushEncryption.decryptNotification(context, message);
 
             if (messageString == null) {
-                Log.i("com.podverse.PVUnifiedPushMessageReceiver", "Unable to decrypt UP message");
+                Log.i("com.podverse.fdroid.PVUnifiedPushMessageReceiver", "Unable to decrypt UP message");
                 return;
             }
 

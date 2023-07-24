@@ -8,7 +8,6 @@ import { Icon, ScrollView, SwitchWithText, Text, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { checkIfUPNotificationsEnabled, disableUPNotifications, enableUPNotifications, setUPDistributor } from '../services/notifications'
-import { trackPageView } from '../services/tracking'
 import { core, darkTheme, hidePickerIconOnAndroidTransparent } from '../styles'
 
 const { PVUnifiedPushModule } = NativeModules
@@ -81,8 +80,6 @@ export class SettingsScreenNotifications extends React.Component<Props, State> {
       distributor,
       upNotificationsEnabled
     })
-
-    trackPageView('/settings-notifications', 'Settings Screen Notifications')
   }
 
   componentWillUnmount() {

@@ -7,7 +7,7 @@
 import { SatoshiStreamStats } from 'podverse-shared'
 import { getGlobal } from 'reactn'
 import Config from 'react-native-config'
-import { getBuildNumber, getVersion } from 'react-native-device-info'
+// import { getBuildNumber, getVersion } from 'react-native-device-info'
 import { translate } from './i18n'
 const uuidv4 = require('uuid/v4')
 
@@ -46,7 +46,7 @@ export const createSatoshiStreamStats = (
       value_msat_total: totalBatchedAmount * 1000,
       uuid: uuidv4(),
       app_name: Config.USER_AGENT_PREFIX,
-      app_version: `${getVersion()}-${getBuildNumber()}`,
+      app_version: Config.FDROID_VERSION,
       name,
       sender_name: senderName
       // 7629169 "message" added elsewhere in app-logic

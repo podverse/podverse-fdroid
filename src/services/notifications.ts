@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import messaging from '@react-native-firebase/messaging'
+// import messaging from '@react-native-firebase/messaging'
 import { Alert, Linking, NativeModules } from 'react-native'
 import { requestNotifications, RESULTS } from 'react-native-permissions'
 import { getGlobal } from 'reactn'
@@ -70,31 +70,31 @@ export const notificationUnsubscribe = async (podcastId: string) => {
 /* FCM notification helpers (used in Apple and Google Play releases) */
 
 export const enableFCMNotifications = async (callback: any) => {
-  const { session } = getGlobal()
+  // const { session } = getGlobal()
 
-  if (!session?.isLoggedIn) {
-    Alert.alert(
-      PV.Alerts.LOGIN_TO_ENABLE_PODCAST_NOTIFICATIONS.title,
-      PV.Alerts.LOGIN_TO_ENABLE_PODCAST_NOTIFICATIONS.message
-    )
-  } else {
-    try {
-      const { status } = await requestNotifications(['alert', 'sound', 'badge'])
-      const enabled = status === RESULTS.GRANTED || status === RESULTS.LIMITED
-      if (enabled) {
-        const fcmToken = await messaging().getToken()
-        await saveOrUpdateFCMDevice(fcmToken)
-        await callback()
-      } else {
-        Alert.alert(PV.Alerts.ENABLE_NOTIFICATIONS_SETTINGS.title, PV.Alerts.ENABLE_NOTIFICATIONS_SETTINGS.message, [
-          { text: translate('Cancel') },
-          { text: translate('Go to Settings'), onPress: () => Linking.openSettings() }
-        ])
-      }
-    } catch (err) {
-      errorLogger(_fileName, 'enableFCMNotifications', err)
-    }
-  }
+  // if (!session?.isLoggedIn) {
+  //   Alert.alert(
+  //     PV.Alerts.LOGIN_TO_ENABLE_PODCAST_NOTIFICATIONS.title,
+  //     PV.Alerts.LOGIN_TO_ENABLE_PODCAST_NOTIFICATIONS.message
+  //   )
+  // } else {
+  //   try {
+  //     const { status } = await requestNotifications(['alert', 'sound', 'badge'])
+  //     const enabled = status === RESULTS.GRANTED || status === RESULTS.LIMITED
+  //     if (enabled) {
+  //       const fcmToken = await messaging().getToken()
+  //       await saveOrUpdateFCMDevice(fcmToken)
+  //       await callback()
+  //     } else {
+  //       Alert.alert(PV.Alerts.ENABLE_NOTIFICATIONS_SETTINGS.title, PV.Alerts.ENABLE_NOTIFICATIONS_SETTINGS.message, [
+  //         { text: translate('Cancel') },
+  //         { text: translate('Go to Settings'), onPress: () => Linking.openSettings() }
+  //       ])
+  //     }
+  //   } catch (err) {
+  //     errorLogger(_fileName, 'enableFCMNotifications', err)
+  //   }
+  // }
 }
 
 // TODO: handle disableFCMNotifications

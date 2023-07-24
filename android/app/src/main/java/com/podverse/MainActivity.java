@@ -1,7 +1,7 @@
 package com.podverse.fdroid;
 
-import static com.podverse.PVUnifiedPushModule.emitEvent;
-import static com.podverse.PVUnifiedPushModule.popNotificationMap;
+import static com.podverse.fdroid.PVUnifiedPushModule.emitEvent;
+import static com.podverse.fdroid.PVUnifiedPushModule.popNotificationMap;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.bridge.WritableMap;

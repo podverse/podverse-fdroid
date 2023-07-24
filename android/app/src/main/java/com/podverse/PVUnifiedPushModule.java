@@ -1,4 +1,4 @@
-package com.podverse;
+package com.podverse.fdroid;
 
 import static org.unifiedpush.android.connector.UnifiedPush.getDistributor;
 import static org.unifiedpush.android.connector.UnifiedPush.getDistributors;
@@ -95,7 +95,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         // Check if a distributor is already registered
         var distributor = getDistributor(context);
         if (!distributor.isEmpty()) {
-            Log.i("com.podverse.PVUnifiedPushModule", "current UP distributor: " + distributor);
+            Log.i("com.podverse.fdroid.PVUnifiedPushModule", "current UP distributor: " + distributor);
             // Re-register in case something broke
             registerApp(
                     context,
@@ -105,10 +105,10 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
                     context.getPackageName()
             );
 
-            Log.i("com.podverse.PVUnifiedPushModule", "UnifiedPush registered");
+            Log.i("com.podverse.fdroid.PVUnifiedPushModule", "UnifiedPush registered");
         }
 
-        Log.i("com.podverse.PVUnifiedPushModule", "no UP distributor set");
+        Log.i("com.podverse.fdroid.PVUnifiedPushModule", "no UP distributor set");
     }
 
     @ReactMethod
@@ -118,13 +118,13 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         // Check if a distributor is already registered
         String distributor = getDistributor(context);
         if (!distributor.isEmpty()) {
-            Log.i("com.podverse.PVUnifiedPushModule", "current UP distributor: " + distributor);
+            Log.i("com.podverse.fdroid.PVUnifiedPushModule", "current UP distributor: " + distributor);
             promise.resolve(distributor);
 
             return;
         }
 
-        Log.i("com.podverse.PVUnifiedPushModule", "no UP distributor set");
+        Log.i("com.podverse.fdroid.PVUnifiedPushModule", "no UP distributor set");
 
         promise.resolve(null);
     }
@@ -134,11 +134,11 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         var context = this.getReactApplicationContext();
 
         var distributors = getDistributors(context, new ArrayList<String>());
-        Log.d("com.podverse.PVUnifiedPushModule", "num distributors: " + distributors.size());
+        Log.d("com.podverse.fdroid.PVUnifiedPushModule", "num distributors: " + distributors.size());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             distributors.forEach(distributor -> {
-                Log.d("com.podverse.PVUnifiedPushModule", "available distributor: " + distributor);
+                Log.d("com.podverse.fdroid.PVUnifiedPushModule", "available distributor: " + distributor);
             });
         }
 
@@ -151,9 +151,9 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
     public void setUPDistributor(String distributor, Promise promise) {
         var context = this.getReactApplicationContext();
 
-        Log.i("com.podverse.PVUnifiedPushModule", "setting UP distributor " + distributor);
+        Log.i("com.podverse.fdroid.PVUnifiedPushModule", "setting UP distributor " + distributor);
         saveDistributor(context, distributor);
-        Log.i("com.podverse.PVUnifiedPushModule", "distributor saved");
+        Log.i("com.podverse.fdroid.PVUnifiedPushModule", "distributor saved");
 
         registerApp(
                 context,
@@ -163,7 +163,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
                 context.getPackageName()
         );
 
-        Log.i("com.podverse.PVUnifiedPushModule", "UnifiedPush registered");
+        Log.i("com.podverse.fdroid.PVUnifiedPushModule", "UnifiedPush registered");
 
         promise.resolve(true);
     }
@@ -172,7 +172,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
     public void unregister() {
         var context = this.getReactApplicationContext();
 
-        Log.i("com.podverse.PVUnifiedPushModule", "unregistering UP distributor ");
+        Log.i("com.podverse.fdroid.PVUnifiedPushModule", "unregistering UP distributor ");
         unregisterApp(context, "default");
     }
 
@@ -241,7 +241,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
             promise.resolve(writableMap);
             markInitialNotificationAsRead(messageId);
         } catch (JSONException e) {
-            Log.e("com.podverse.PVUnifiedPushModule", e.toString());
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", e.toString());
             promise.reject(e);
         }
     }
@@ -303,7 +303,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         SharedPreferences.Editor editor = preferences.edit();
 
         String messageIdKey = PREF_KEY_NOTIFICATION_PREFIX + messageId;
-        Log.d("com.podverse.PVUnifiedPushModule", "Saving notification id " + messageIdKey);
+        Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Saving notification id " + messageIdKey);
 
         // Store current notification
         editor.putString(messageIdKey, payload);
@@ -313,18 +313,18 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         // Remove old notifications
         List<String> allNotificationList = new ArrayList<>(Arrays.asList(notificationIds.split(DELIMITER)));
         if (allNotificationList.size() > MAX_STORED_NOTIFICATIONS) {
-            Log.d("com.podverse.PVUnifiedPushModule", "Trimming old notifications");
+            Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Trimming old notifications");
             String firstMessageId = allNotificationList.get(0);
             String firstMessageIdKey = PREF_KEY_NOTIFICATION_PREFIX + firstMessageId;
             editor.remove(firstMessageIdKey);
-            Log.d("com.podverse.PVUnifiedPushModule", "Removed notification id " + firstMessageIdKey);
+            Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Removed notification id " + firstMessageIdKey);
             notificationIds = notificationIds.replace(firstMessageId + DELIMITER, "");
         }
         editor.putString(PREF_KEY_NOTIFICATION_IDS, notificationIds);
 
         editor.apply();
 
-        Log.d("com.podverse.PVUnifiedPushModule", "Saved notification id " + messageIdKey);
+        Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Saved notification id " + messageIdKey);
     }
 
     public static String popNotification(@NonNull Context context, int messageId) {
@@ -332,7 +332,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         SharedPreferences.Editor editor = preferences.edit();
 
         String messageIdKey = PREF_KEY_NOTIFICATION_PREFIX + messageId;
-        Log.d("com.podverse.PVUnifiedPushModule", "Consuming notification id " + messageIdKey);
+        Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Consuming notification id " + messageIdKey);
 
         // Get and remove requested notification
         String notificationPayload = preferences.getString(messageIdKey, null);
@@ -346,7 +346,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
 
         editor.apply();
 
-        Log.d("com.podverse.PVUnifiedPushModule", "Consumed notification id " + messageIdKey);
+        Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Consumed notification id " + messageIdKey);
 
         return notificationPayload;
     }
@@ -424,14 +424,14 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
             notificationManager.createNotificationChannel(channel);
         }
 
-        Log.d("com.podverse.PVUnifiedPushModule", "Sending notification of type " + notificationType + " with id " + messageId);
+        Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Sending notification of type " + notificationType + " with id " + messageId);
 
         notificationManager.notify(messageId, notificationBuilder.build());
     }
 
     private static Bitmap getBitmapfromUrl(String imageUrl) {
         try {
-            Log.d("com.podverse.PVUnifiedPushModule", "Getting image url: " + imageUrl);
+            Log.d("com.podverse.fdroid.PVUnifiedPushModule", "Getting image url: " + imageUrl);
             URL url = new URL(imageUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoInput(true);
@@ -440,12 +440,12 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
             return BitmapFactory.decodeStream(input);
         } catch (java.net.MalformedURLException e) {
             var message = e.getMessage();
-            Log.e("com.podverse.PVUnifiedPushModule", Objects.requireNonNullElse(message, "Bad image URL"));
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", Objects.requireNonNullElse(message, "Bad image URL"));
 
             return null;
         } catch (java.io.IOException e) {
             var message = e.getMessage();
-            Log.e("com.podverse.PVUnifiedPushModule", Objects.requireNonNullElse(message, "Unknown IOException"));
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", Objects.requireNonNullElse(message, "Unknown IOException"));
 
             throw new RuntimeException(e);
         }
