@@ -19,7 +19,7 @@ import {
   FlatList,
   NavFundingIcon,
   NavShareIcon,
-  // NavNotificationsIcon,
+  NavNotificationsIcon,
   NumberSelectorWithText,
   PodcastTableHeader,
   ScrollView,
