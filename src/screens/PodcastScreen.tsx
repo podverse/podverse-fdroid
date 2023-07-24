@@ -194,6 +194,7 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
     const podcastId = navigation.getParam('podcastId')
     const podcastTitle = navigation.getParam('podcastTitle')
     const podcast = navigation.getParam('podcast')
+    const notificationsEnabled = navigation.getParam('notificationsEnabled')
 
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
 
@@ -208,6 +209,16 @@ export class PodcastScreen extends HistoryIndexListenerScreen<Props, State> {
           {/* Always show NavFundingIcon in dev, otherwise funding tag will be unavailable to Appium tests. */}
           {(!!Config.IS_DEV || !!showFundingIcon) && podcast && (
             <NavFundingIcon globalTheme={globalTheme} navigation={navigation} podcast={podcast} />
+          )}
+          {!addByRSSPodcastFeedUrl && (
+            <NavNotificationsIcon
+              podcastId={podcastId}
+              navigation={navigation}
+              isEnabled={notificationsEnabled}
+              onNotificationSelectionChanged={() =>
+                navigation.setParams({ notificationsEnabled: !notificationsEnabled })
+              }
+            />
           )}
           {!addByRSSPodcastFeedUrl && (
             <NavShareIcon podcastTitle={podcastTitle} urlId={podcastId} urlPath={PV.URLs.webPaths.podcast} />

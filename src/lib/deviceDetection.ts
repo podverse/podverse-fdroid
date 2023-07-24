@@ -1,4 +1,5 @@
-import { Dimensions } from "react-native"
+import { Dimensions, Platform } from 'react-native'
+import Config from 'react-native-config'
 
 export const pvIsTablet = () => {
   // return isTablet()
@@ -28,4 +29,8 @@ const isTabletBasedOnRatio = () => {
 export const isPortrait = () => {
   const dim = Dimensions.get('window')
   return dim.height >= dim.width
+}
+
+export const checkIfFDroidAppVersion = () => {
+  return Platform.OS === 'android' && Config.RELEASE_TYPE === 'F-Droid'
 }

@@ -54,6 +54,7 @@ export const RouteNames = {
   SettingsScreenOther: 'SettingsScreenOther',
   SettingsScreenDownloads: 'SettingsScreenDownloads',
   SettingsScreenHistory: 'SettingsScreenHistory',
+  SettingsScreenNotifications: 'SettingsScreenNotifications',
   SettingsScreenPlayer: 'SettingsScreenPlayer',
   SettingsScreenQueue: 'SettingsScreenQueue',
   SleepTimerScreen: 'SleepTimerScreen',
