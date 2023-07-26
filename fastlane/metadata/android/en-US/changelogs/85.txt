@@ -1,0 +1,3 @@
+- Add UnifiedPush support for sending new episode and livestream push notifications 🎉
+- Add "app_version" to V4V boost and streaming metadata.
+- Translation updates: Italian, Norwegian Bokmål, Russian
