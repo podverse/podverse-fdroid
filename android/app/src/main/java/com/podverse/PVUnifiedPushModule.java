@@ -99,12 +99,12 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
                 String instance = intent.getStringExtra("instance");
 
                 if (eventName == null) {
-                    Log.e("com.podverse.PVUnifiedPushModule", "event_name is null");
+                    Log.e("com.podverse.fdroid.PVUnifiedPushModule", "event_name is null");
                     return;
                 }
 
                 if (instance == null) {
-                    Log.e("com.podverse.PVUnifiedPushModule", "instance is null");
+                    Log.e("com.podverse.fdroid.PVUnifiedPushModule", "instance is null");
                     return;
                 }
 
@@ -467,7 +467,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         try {
             notification = new JSONObject(payload);
         } catch (JSONException e) {
-            Log.e("com.podverse.PVUnifiedPushModule", "Failed to parse notification with id " + messageId);
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", "Failed to parse notification with id " + messageId);
             e.printStackTrace();
             return;
         }
@@ -480,14 +480,14 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         try {
             imageUrl = notification.getString("image");
         } catch (JSONException e) {
-            Log.w("com.podverse.PVUnifiedPushModule", "Failed to get image from notification with id " + messageId);
+            Log.w("com.podverse.fdroid.PVUnifiedPushModule", "Failed to get image from notification with id " + messageId);
             e.printStackTrace();
         }
 
         try {
             messageTitle = notification.getString("title");
         } catch (JSONException e) {
-            Log.e("com.podverse.PVUnifiedPushModule", "Failed to get title from notification with id " + messageId);
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", "Failed to get title from notification with id " + messageId);
             e.printStackTrace();
             return;
         }
@@ -495,7 +495,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         try {
             messageBody = notification.getString("body");
         } catch (JSONException e) {
-            Log.e("com.podverse.PVUnifiedPushModule", "Failed to get body from notification with id " + messageId);
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", "Failed to get body from notification with id " + messageId);
             e.printStackTrace();
             return;
         }
@@ -503,7 +503,7 @@ public class PVUnifiedPushModule extends ReactContextBaseJavaModule {
         try {
             notificationType = notification.getString("notificationType");
         } catch (JSONException e) {
-            Log.e("com.podverse.PVUnifiedPushModule", "Failed to get notificationType from notification with id " + messageId);
+            Log.e("com.podverse.fdroid.PVUnifiedPushModule", "Failed to get notificationType from notification with id " + messageId);
             e.printStackTrace();
             return;
         }
