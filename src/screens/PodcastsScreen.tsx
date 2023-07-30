@@ -152,7 +152,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
   shouldLoad: boolean
   _unsubscribe: any | null
   // TODO: Replace with service
-  pvNativeEventEmitter: NativeEventEmitter = new NativeEventEmitter(PVUnifiedPushModule)
+  pvNativeEventEmitter: NativeEventEmitter | null =
+    checkIfFDroidAppVersion() ? new NativeEventEmitter(PVUnifiedPushModule) : null
   pvNativeEventSubscriptions: EmitterSubscription[] = []
 
   constructor(props: Props) {
@@ -331,7 +332,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
   }
 
   setupDeeplinkListeners = () => {
-    if (checkIfFDroidAppVersion()) {
+    if (checkIfFDroidAppVersion() && !!this.pvNativeEventEmitter) {
       this.pvNativeEventSubscriptions.push(
         this.pvNativeEventEmitter.addListener('UnifiedPushMessage', ({instance, payload}) => { 
           debugLogger(`Received UnifiedPush notification from ${instance} with payload`, payload)
