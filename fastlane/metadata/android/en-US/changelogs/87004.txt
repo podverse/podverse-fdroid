@@ -1,0 +1,10 @@
+- Pin the search bar to the top of the Home screen in grid view. #1846
+- Show URL in popup before following a link out of the app. #1827
+- Add popup to explain why "Add by RSS" feature is unavailable. #1854
+- Updated membership info table. #1851
+- Set custom user agent header in image network requests. #1875
+- Fix bug resulting in incorrect amounts appearing in Helipad. #1873
+- Prevent "value time splits" from being used with live streams. #1839
+- Translation updates: Norwegian Bokmål, Russian
+
+Repo: https://github.com/podverse/podverse-rn
