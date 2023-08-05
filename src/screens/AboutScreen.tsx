@@ -1,6 +1,5 @@
 import { Translator, TranslatorsSection } from 'podverse-shared'
-import { Alert, Linking, Pressable, StyleSheet, View as RNView } from 'react-native'
-import Config from 'react-native-config'
+import { Pressable, StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 import { Divider, FastImage, Icon, ScrollView, Text, View } from '../components'
 import { getTransalatorsSections, translate } from '../lib/i18n'
@@ -36,10 +35,7 @@ export class AboutScreen extends React.Component<Props, State> {
   })
 
   handleFollowLink = (url: string) => {
-    Alert.alert(PV.Alerts.LEAVING_APP.title, PV.Alerts.LEAVING_APP.message, [
-      { text: 'Cancel' },
-      { text: 'Yes', onPress: () => Linking.openURL(url) }
-    ])
+    PV.Alerts.LEAVING_APP_ALERT(url)
   }
 
   render() {
