@@ -89,6 +89,10 @@ export class MembershipScreen extends React.Component<Props, State> {
       ? translate('Your membership will not auto-renew')
       : translate('You are not being charged during your free trial')
 
+    const renewMembershipExplanation3 = isLoggedIn
+      ? ''
+      : translate('Feature unavailable for manually added feeds')
+
     const listHeaderComponent = (
       <View style={styles.listHeaderWrapper}>
         {isLoggedIn && !!membershipStatus && (
@@ -181,6 +185,12 @@ export class MembershipScreen extends React.Component<Props, State> {
               style={styles.explainText}
               testID={`${testIDPrefix}_renew_explanation_sign_up`}>
               {translate('You will not be charged for signing up for your free trial')}
+            </Text>
+            <Text
+              fontSizeLargestScale={PV.Fonts.largeSizes.md}
+              style={styles.explainText}
+              testID={`${testIDPrefix}_renew_explanation_asterisk`}>
+              {`* ${renewMembershipExplanation3}`}
             </Text>
           </View>
         )}
@@ -307,7 +317,8 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Sync your subscriptions, queue, and history across all your devices'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/b5a0ca7e-76c0-4b5e-9aa8-31f14505dcee/16e1a414-fdbc-499e-9ecc-8a95d73b9e78-1080-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/b5a0ca7e-76c0-4b5e-9aa8-31f14505dcee/16e1a414-fdbc-499e-9ecc-8a95d73b9e78-1080-fragmented.mp4',
+    hasAsterisk: true
   },
   {
     text: translate('New episodes and livestream notifications'),
@@ -315,7 +326,8 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('New episodes and livestream notifications'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/bbf6eb1c-46a0-407d-b1ef-682590885882/ba490a30-5e85-41ea-aae7-72b8bc2aac75-828-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/bbf6eb1c-46a0-407d-b1ef-682590885882/ba490a30-5e85-41ea-aae7-72b8bc2aac75-828-fragmented.mp4',
+    hasAsterisk: true
   },
   {
     text: translate('Create and share podcast clips'),
@@ -323,7 +335,8 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('ARIA HINT - Membership - Create and share clips'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/4f26b27a-aab7-456c-98d4-a10b46a500e0/4a43118d-8721-4ae0-b33c-40887d8477b0-1080-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/4f26b27a-aab7-456c-98d4-a10b46a500e0/4a43118d-8721-4ae0-b33c-40887d8477b0-1080-fragmented.mp4',
+    hasAsterisk: true
   },
   {
     text: translate('Create and share playlists'),
@@ -331,7 +344,8 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Create and share playlists'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/2a1d5f03-7415-4462-9758-738f7c93f68c/af4476db-8f7d-4e5f-8886-d03dfa2ef3e7-1080-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/2a1d5f03-7415-4462-9758-738f7c93f68c/af4476db-8f7d-4e5f-8886-d03dfa2ef3e7-1080-fragmented.mp4',
+    hasAsterisk: true
   },
   {
     text: translate('Mark episodes as played'),
@@ -339,7 +353,8 @@ const comparisonData = [
     column2: true,
     accessibilityLabel: translate('Mark episodes as played'),
     videoUrl:
-      'https://peertube.podverse.fm/static/streaming-playlists/hls/ba616db8-9b46-436a-994f-383ff66576a2/a8ab3251-31be-4005-b45e-081c72be7b67-1080-fragmented.mp4'
+      'https://peertube.podverse.fm/static/streaming-playlists/hls/ba616db8-9b46-436a-994f-383ff66576a2/a8ab3251-31be-4005-b45e-081c72be7b67-1080-fragmented.mp4',
+    hasAsterisk: true
   },
   {
     text: translate('Subscribe to listener profiles'),
