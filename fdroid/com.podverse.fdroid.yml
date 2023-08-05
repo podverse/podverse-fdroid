@@ -2183,9 +2183,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.5-qa.1
+  - versionName: 4.6.5-beta.1
     versionCode: 51
-    commit: 4.6.5-qa.1
+    commit: 4.6.5-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2229,9 +2229,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.6-qa.1
+  - versionName: 4.6.6-beta.1
     versionCode: 52
-    commit: 4.6.6-qa.1
+    commit: 4.6.6-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2275,9 +2275,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.7-qa.1
+  - versionName: 4.6.7-beta.1
     versionCode: 53
-    commit: 4.6.7-qa.1
+    commit: 4.6.7-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2321,9 +2321,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.8-qa.2
+  - versionName: 4.6.8-beta.2
     versionCode: 54
-    commit: 4.6.8-qa.2
+    commit: 4.6.8-beta.2
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2367,9 +2367,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.9-qa.1
+  - versionName: 4.6.9-beta.1
     versionCode: 55
-    commit: 4.6.9-qa.1
+    commit: 4.6.9-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2413,9 +2413,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.10-qa.1
+  - versionName: 4.6.10-beta.1
     versionCode: 56
-    commit: 4.6.10-qa.1
+    commit: 4.6.10-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2459,9 +2459,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.11-qa.1
+  - versionName: 4.6.11-beta.1
     versionCode: 57
-    commit: 4.6.11-qa.1
+    commit: 4.6.11-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2505,9 +2505,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.6.12-qa.1
+  - versionName: 4.6.12-beta.1
     versionCode: 58
-    commit: 4.6.12-qa.1
+    commit: 4.6.12-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2551,9 +2551,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.7.0-qa.1
+  - versionName: 4.7.0-beta.1
     versionCode: 59
-    commit: 4.7.0-qa.1
+    commit: 4.7.0-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2597,9 +2597,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.8.0-qa.1
+  - versionName: 4.8.0-beta.1
     versionCode: 60
-    commit: 4.8.0-qa.1
+    commit: 4.8.0-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2643,9 +2643,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.9.0-qa.1
+  - versionName: 4.9.0-beta.1
     versionCode: 61
-    commit: 4.9.0-qa.1
+    commit: 4.9.0-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2689,9 +2689,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.0-qa.1
+  - versionName: 4.10.0-beta.1
     versionCode: 62
-    commit: 4.10.0-qa.1
+    commit: 4.10.0-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2735,9 +2735,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.1-qa.1
+  - versionName: 4.10.1-beta.1
     versionCode: 63
-    commit: 4.10.1-qa.1
+    commit: 4.10.1-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2781,9 +2781,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.2-qa.1
+  - versionName: 4.10.2-beta.1
     versionCode: 64
-    commit: 4.10.2-qa.1
+    commit: 4.10.2-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2827,9 +2827,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.3-qa.1
+  - versionName: 4.10.3-beta.1
     versionCode: 65
-    commit: 4.10.3-qa.1
+    commit: 4.10.3-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2873,9 +2873,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.4-qa.1
+  - versionName: 4.10.4-beta.1
     versionCode: 66
-    commit: 4.10.4-qa.1
+    commit: 4.10.4-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2919,9 +2919,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.5-qa.1
+  - versionName: 4.10.5-beta.1
     versionCode: 67
-    commit: 4.10.5-qa.1
+    commit: 4.10.5-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -2965,9 +2965,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.10.6-qa.1
+  - versionName: 4.10.6-beta.1
     versionCode: 68
-    commit: 4.10.6-qa.1
+    commit: 4.10.6-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3011,9 +3011,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.11.0-qa.3
+  - versionName: 4.11.0-beta.3
     versionCode: 69
-    commit: 4.11.0-qa.3
+    commit: 4.11.0-beta.3
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3057,9 +3057,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.0-qa.1
+  - versionName: 4.12.0-beta.1
     versionCode: 70
-    commit: 4.12.0-qa.1
+    commit: 4.12.0-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3103,9 +3103,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.1-qa.1
+  - versionName: 4.12.1-beta.1
     versionCode: 71
-    commit: 4.12.1-qa.1
+    commit: 4.12.1-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3149,9 +3149,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.2-qa.1
+  - versionName: 4.12-2-beta.1
     versionCode: 72
-    commit: 4.12.2-qa.1
+    commit: 4.12.2-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3195,9 +3195,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.3-qa.1
+  - versionName: 4.12.3-beta.1
     versionCode: 73
-    commit: 4.12.3-qa.1
+    commit: 4.12.3-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3241,9 +3241,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.4-qa.1
+  - versionName: 4.12.4-beta.1
     versionCode: 74
-    commit: 4.12.4-qa.1
+    commit: 4.12.4-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3287,9 +3287,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.5-qa.1
+  - versionName: 4.12.5-beta.1
     versionCode: 75
-    commit: 4.12.5-qa.1
+    commit: 4.12.5-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3333,9 +3333,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.7-qa.1
+  - versionName: 4.12.7-beta.1
     versionCode: 76
-    commit: 4.12.7-qa.1
+    commit: 4.12.7-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3379,9 +3379,9 @@ Builds:
       - node_modules
     ndk: r23c
 
-  - versionName: 4.12.8-qa.1
+  - versionName: 4.12.8-beta.1
     versionCode: 77
-    commit: 4.12.8-qa.1
+    commit: 4.12.8-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3425,9 +3425,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.12.9-qa.1
+  - versionName: 4.12.9-beta.1
     versionCode: 78
-    commit: 4.12.9-qa.1
+    commit: 4.12.9-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3471,9 +3471,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.12.10-qa.1
+  - versionName: 4.12.10-beta.1
     versionCode: 79
-    commit: 4.12.10-qa.1
+    commit: 4.12.10-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3517,9 +3517,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.12.11-qa.1
+  - versionName: 4.12.11-beta.1
     versionCode: 80
-    commit: 4.12.11-qa.1
+    commit: 4.12.11-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3563,9 +3563,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.12.12-qa.1
+  - versionName: 4.12.12-beta.1
     versionCode: 81
-    commit: 4.12.12-qa.1
+    commit: 4.12.12-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3609,9 +3609,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.12.13-qa.1
+  - versionName: 4.12.13-beta.1
     versionCode: 82
-    commit: 4.12.13-qa.1
+    commit: 4.12.13-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3655,9 +3655,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.12.14-qa.1
+  - versionName: 4.12.14-beta.1
     versionCode: 83
-    commit: 4.12.14-qa.1
+    commit: 4.12.14-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3701,9 +3701,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.13.0-qa.1
+  - versionName: 4.13.0-beta.1
     versionCode: 84
-    commit: 4.13.0-qa.1
+    commit: 4.13.0-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3747,9 +3747,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.13.1-qa.1
+  - versionName: 4.13.1-beta.1
     versionCode: 85
-    commit: 4.13.1-qa.1
+    commit: 4.13.1-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3794,9 +3794,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.13.2-qa.2
+  - versionName: 4.13.2-beta.2
     versionCode: 86
-    commit: 4.13.2-qa.2
+    commit: 4.13.2-beta.2
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -3841,9 +3841,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.13.3-qa.1
+  - versionName: 4.13.3-beta.1
     versionCode: 87
-    commit: 4.13.3-qa.1
+    commit: 4.13.3-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
