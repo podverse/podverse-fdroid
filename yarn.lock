@@ -1790,27 +1790,13 @@
   dependencies:
     react-navigation "*"
 
-"@types/react@*":
-  version "18.0.26"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.26.tgz#8ad59fc01fef8eaf5c74f4ea392621749f0b7917"
-  integrity sha512-hCR3PJQsAIXyxhTNSiDFY//LhnMZWpNNr5etoCqx/iUfGc5gXWtQR2Phl908jVR6uPXacojQWTg4qRpkxTuGug==
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/scheduler" "*"
-    csstype "^3.0.2"
-
-"@types/react@17.0.1":
+"@types/react@*", "@types/react@17.0.1":
   version "17.0.1"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.1.tgz#eb1f1407dea8da3bc741879c1192aa703ab9975b"
   integrity sha512-w8t9f53B2ei4jeOqf/gxtc2Sswnc3LBK5s0DyJcg5xd10tMHXts2N31cKjWfH9IC/JvEPa/YF1U4YeP1t4R6HQ==
   dependencies:
     "@types/prop-types" "*"
     csstype "^3.0.2"
-
-"@types/scheduler@*":
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.2.tgz#1a62f89525723dde24ba1b01b092bf5df8ad4d39"
-  integrity sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==
 
 "@types/urijs@^1.19.15":
   version "1.19.19"
@@ -3588,7 +3574,7 @@ depd@2.0.0:
   resolved "https://registry.yarnpkg.com/depd/-/depd-2.0.0.tgz#b696163cc757560d09cf22cc8fad1571b79e76df"
   integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
 
-deprecated-react-native-prop-types@^2.2.0:
+deprecated-react-native-prop-types@^2.2.0, deprecated-react-native-prop-types@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/deprecated-react-native-prop-types/-/deprecated-react-native-prop-types-2.3.0.tgz#c10c6ee75ff2b6de94bb127f142b814e6e08d9ab"
   integrity sha512-pWD0voFtNYxrVqvBMYf5gq3NA2GCpfodS1yNynTPc93AYA/KEMGeWDqqeUB6R2Z9ZofVhks2aeJXiuQqKNpesA==
@@ -8647,7 +8633,12 @@ react-native-config@1.4.3:
   resolved "https://registry.yarnpkg.com/react-native-config/-/react-native-config-1.4.3.tgz#22de798ffea621c2683abfa3fc054e17dd2cf1cc"
   integrity sha512-KcrlImtkrANeYMT5VM3NaXO5+nyxZkY42CVW8FCHThVqLa5xkNwQJSn8RXu+pNn5WpUatxYgUTP5ZqUpA4/ZKQ==
 
-react-native-dialog@*, react-native-dialog@9.3.0:
+react-native-dialog@*:
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.2.1.tgz#21e12c8bf70df390963c1c4e697ce8d16055d4a4"
+  integrity sha512-UNnGFTpH0cX16cJZLFq9/TAZH1+B2vzJrQL1mUaSqZjV+sFTpUB1WvghJZxPwi52v587kJpfKN7oPfWaXAu+YQ==
+
+react-native-dialog@9.3.0:
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.3.0.tgz#9d745cc51653a1e2ae08076b46f11d99723c47f6"
   integrity sha512-JEOJY/0AzTM9grIl0BL8o/IJPIJru7k5MPj9POTE9RRezUEtgn0YSvCpTlBtG0obWgOdzg2otMz1OQvMXS0wMQ==
@@ -8757,6 +8748,14 @@ react-native-picker-select@8.0.4:
   dependencies:
     "@react-native-picker/picker" "^1.8.3"
     lodash.isequal "^4.5.0"
+
+react-native-popover-view@^5.1.7:
+  version "5.1.7"
+  resolved "https://registry.yarnpkg.com/react-native-popover-view/-/react-native-popover-view-5.1.7.tgz#12f1df9b7c142ab8fa1a3ded2919a4164823be45"
+  integrity sha512-Xa+zKYp9x62UNezT8o9SnqQaBQEHdGwGHZnFnA2bsXLneVRvvlBopNwMNj+p7N65qnPf3mmzWj+57ThtM1qFuw==
+  dependencies:
+    deprecated-react-native-prop-types "^2.3.0"
+    prop-types "^15.8.1"
 
 react-native-ratings@8.0.4:
   version "8.0.4"
