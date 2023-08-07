@@ -182,7 +182,8 @@ const initialTheme: InitialState = {
   hideDividersInLists: false,
   imageFullViewSourceUrl: '',
   imageFullViewShow: false,
-  refreshSubscriptionsOnLaunch: true
+  refreshSubscriptionsOnLaunch: true,
+  showPodcastsListPopover: false
 }
 
 export default initialTheme
