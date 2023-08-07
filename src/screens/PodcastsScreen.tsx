@@ -1190,8 +1190,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
 
     const { flatListData, flatListDataTotalCount } = this._getFlatListData()
 
-    const hasANotch = hasNotch() || hasDynamicIsland()
-    const popoverYOffset = hasANotch ? 100 : 40
+    // const hasANotch = hasNotch() || hasDynamicIsland()
+    // const popoverYOffset = hasANotch ? 100 : 40
+
+    const popoverYOffset = 40
 
     return (
       <View style={styles.view} testID={`${testIDPrefix}_view`}>
