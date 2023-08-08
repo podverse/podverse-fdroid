@@ -11,41 +11,47 @@
 #
 #####################################################################
 
+# Properties ==========================================================================================
+
 # Get the version from package.json and create NEW_VERSION variable
 PACKAGE_VERSION=$(grep -o '"version": *"[^"]*"' package.json | sed 's/"version": "//; s/"//')
 NEW_VERSION="${PACKAGE_VERSION}-$1"
+ENV_TYPE="QA"
 
-echo "Updating .env..."
-# Replace FDROID_VERSION in .env with NEW_VERSION
-sed -i '' "s/FDROID_VERSION=.*/FDROID_VERSION='${NEW_VERSION}'/" .env
+# Functions ==========================================================================================
 
-if [[ "$1" == *"beta"* ]]
-then
-    echo "Looking for 'versionName' and 'commit' properties in com.podverse.fdroid.yml..."
-    # Grab last occurence of "versionName" and "commit" and replace them with NEW_VERSION in com.podverse.fdroid.yml
-    last_version_name_line=$(grep -n "versionName:" fdroid/com.podverse.fdroid.yml | tail -n1 | cut -d: -f1)
-    last_commit_line=$(grep -n "commit:" fdroid/com.podverse.fdroid.yml | tail -n1 | cut -d: -f1)
-
-    # Check if both "versionName:" and "commit:" are found in the file
-    if [ -n "$last_version_name_line" ] && [ -n "$last_commit_line" ]; then
-        # Replace the value of "versionName:" and "commit:" with the NEW_VERSION
-        echo "Updating 'versionName' and 'commit' properties in com.podverse.fdroid.yml..."
-        sed -i '' "${last_version_name_line}s/:.*/: ${NEW_VERSION}/" fdroid/com.podverse.fdroid.yml
-        sed -i '' "${last_commit_line}s/:.*/: ${NEW_VERSION}/" fdroid/com.podverse.fdroid.yml
+create_new_beta_version () {
+    if grep -q "${PACKAGE_VERSION}-[^ ]*" fdroid/com.podverse.fdroid.yml; then
+        echo "Version found. Replacing environment type version..."
+        
+        # Replace occurrences of PACKAGE_VERSION with the NEW_VERSION format
+        sed -i '' "s/${PACKAGE_VERSION}-[^ ]*/${NEW_VERSION}/g" fdroid/com.podverse.fdroid.yml
+        
+        echo "Replacement complete."
     else
-        echo "Error: 'versionName:' or 'commit:' not found in fdroid/com.podverse.fdroid.yml"
-        exit 1
-    fi
-    # push tag and then push to master-beta
-    # Replace "CurrentVersion" and "CurrentVersionCode" in the rest of fdroid/com.podverse.fdroid.yml
-    echo "Updating 'CurrentVersion' in com.podverse.fdroid.yml..."
-    sed -i '' "s/CurrentVersion:.*/CurrentVersion: ${NEW_VERSION}/" fdroid/com.podverse.fdroid.yml
+        echo "Looking for 'versionName' and 'commit' properties in com.podverse.fdroid.yml..."
+        # Grab last occurence of "versionName" and "commit" and replace them with NEW_VERSION in com.podverse.fdroid.yml
+        last_version_name_line=$(grep -n "versionName:" fdroid/com.podverse.fdroid.yml | tail -n1 | cut -d: -f1)
+        last_commit_line=$(grep -n "commit:" fdroid/com.podverse.fdroid.yml | tail -n1 | cut -d: -f1)
 
-    # Commit changes
-    # git add .env fdroid/com.podverse.fdroid.yml
-    # git commit -m "Prepare BETA release for ${NEW_VERSION}"
-elif [[ "$1" == *"qa"* ]]
-then
+        # Check if both "versionName:" and "commit:" are found in the file
+        if [ -n "$last_version_name_line" ] && [ -n "$last_commit_line" ]; then
+            # Replace the value of "versionName:" and "commit:" with the NEW_VERSION
+            echo "Updating 'versionName' and 'commit' properties in com.podverse.fdroid.yml..."
+            sed -i '' "${last_version_name_line}s/:.*/: ${NEW_VERSION}/" fdroid/com.podverse.fdroid.yml
+            sed -i '' "${last_commit_line}s/:.*/: ${NEW_VERSION}/" fdroid/com.podverse.fdroid.yml
+        else
+            echo "Error: 'versionName:' or 'commit:' not found in fdroid/com.podverse.fdroid.yml"
+            exit 1
+        fi
+        # push tag and then push to master-beta
+        # Replace "CurrentVersion" and "CurrentVersionCode" in the rest of fdroid/com.podverse.fdroid.yml
+        echo "Updating 'CurrentVersion' in com.podverse.fdroid.yml..."
+        sed -i '' "s/CurrentVersion:.*/CurrentVersion: ${NEW_VERSION}/" fdroid/com.podverse.fdroid.yml
+    fi
+}
+
+create_new_qa_version () {
     echo "Creating new version submission block in com.podverse.fdroid.yml..."
     # Find the lines between "versionName:" and "ndk:" in fdroid/com.podverse.fdroid.yml
     START_LINE=$(grep -n "versionName:" fdroid/com.podverse.fdroid.yml | tail -n1 | cut -d: -f1)
@@ -79,24 +85,64 @@ then
     echo "Updating 'CurrentVersion' and 'CurrentVersionCode' properties in com.podverse.fdroid.yml..."
     # Replace "CurrentVersion" and "CurrentVersionCode" in the rest of fdroid/com.podverse.fdroid.yml
     sed -i '' "s/CurrentVersion:.*/CurrentVersion: ${NEW_VERSION}/; s/CurrentVersionCode:.*/CurrentVersionCode: ${VERSION_CODE}/" fdroid/com.podverse.fdroid.yml
+}
 
-    # # Commit changes
+replace_existing_version () {
+    echo "Pattern found. Replacing Environment Version..."
+        
+    # Replace occurrences of PACKAGE_VERSION with the NEW_VERSION format
+    sed -i '' "s/${PACKAGE_VERSION}-[^ ]*/${NEW_VERSION}/g" fdroid/com.podverse.fdroid.yml
+        
+    echo "Version updated..."
+}
+
+create_new_release () {
+    echo "Updating .env..."
+    # Always Replace FDROID_VERSION in .env with NEW_VERSION
+    sed -i '' "s/FDROID_VERSION=.*/FDROID_VERSION='${NEW_VERSION}'/" .env
+
+    if [[ "$NEW_VERSION" == *"beta"* ]]
+    then
+        ENV_TYPE="BETA"
+        if grep -q "${PACKAGE_VERSION}-[^ ]*" fdroid/com.podverse.fdroid.yml; then
+            replace_existing_version
+        else
+            create_new_beta_version
+        fi    
+    elif [[ "$NEW_VERSION" == *"qa"* ]]
+    then
+        if grep -q "${PACKAGE_VERSION}-[^ ]*" fdroid/com.podverse.fdroid.yml; then
+            replace_existing_version
+        else
+            create_new_qa_version
+        fi  
+    else
+        echo "Invalid second argument. Usage is './prepare_release.sh qa.<<number>>' (or beta.<<number>>)"
+        exit 1
+    fi
+}
+
+commit_and_upload () {
     git add .env fdroid/com.podverse.fdroid.yml
-    git commit -m "Prepare QA release for ${NEW_VERSION}"
-else
-    echo "Invalid second argument. Usage is './prepare_release.sh qa.<<number>>' (or beta.<<number>>)"
-    exit 1
-fi
+    git commit -m "Prepare ${ENV_TYPE} release for ${NEW_VERSION}"
 
-echo "Creating git tag for '${NEW_VERSION}'"
-# Tag and push to the repository
-git tag "${NEW_VERSION}"
-git push origin "${NEW_VERSION}"
+    echo "Creating git tag for '${NEW_VERSION}'"
+    # Tag and push to the repository
+    git tag "${NEW_VERSION}"
+    git push origin "${NEW_VERSION}"
 
-# Push to the current branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-echo "Pushing to '${CURRENT_BRANCH}'"
-git push origin "${CURRENT_BRANCH}"
+    # Push to the current branch
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    echo "Pushing to '${CURRENT_BRANCH}'"
+    git push origin "${CURRENT_BRANCH}"
 
-# # Create a PR from the current branch to the develop branch
-# gh pr create --base develop --head "${CURRENT_BRANCH}" --title "${CURRENT_BRANCH}"
+    # # Create a PR from the current branch to the develop branch
+    # gh pr create --base develop --head "${CURRENT_BRANCH}" --title "${CURRENT_BRANCH}"
+}
+
+# Main Body ==========================================================================================
+
+
+
+create_new_release
+commit_and_upload
