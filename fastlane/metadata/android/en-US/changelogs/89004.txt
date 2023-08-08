@@ -1,0 +1,2 @@
+- Add multi-function button to Podcasts screen with "Grid view" selector and "Mark all as seen."
+- Fix chapter image loading issue with Wavlake image files.

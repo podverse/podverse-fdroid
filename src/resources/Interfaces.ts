@@ -244,6 +244,7 @@ export interface InitialState {
   imageFullViewSourceUrl?: string
   imageFullViewShow?: boolean
   refreshSubscriptionsOnLaunch?: boolean
+  showPodcastsListPopover: boolean
 }
 
 export interface BannerInfoError {

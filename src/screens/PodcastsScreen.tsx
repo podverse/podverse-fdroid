@@ -16,9 +16,11 @@ import {
 } from 'react-native'
 import Config from 'react-native-config'
 import { NavigationStackOptions } from 'react-navigation-stack'
-import React, { getGlobal } from 'reactn'
+import React, { getGlobal, addCallback } from 'reactn'
+import Popover from 'react-native-popover-view'
 import {
   ActionSheet,
+  Button,
   Divider,
   FlatList,
   NavPodcastsViewIcon,
@@ -38,7 +40,7 @@ import { translate } from '../lib/i18n'
 import { navigateToEpisodeScreenInPodcastsStackNavigatorWithIds } from '../lib/navigate'
 import { alertIfNoNetworkConnection, hasValidNetworkConnection } from '../lib/network'
 import { resetAllAppKeychain } from '../lib/secutity'
-import { getAppUserAgent, safeKeyExtractor, setCategoryQueryProperty } from '../lib/utility'
+import { GlobalPropertyCallbackFunction, getAppUserAgent, safeKeyExtractor, setCategoryQueryProperty } from '../lib/utility'
 import { PV } from '../resources'
 import { v4vAlbyCheckConnectDeepLink } from '../services/v4v/providers/alby'
 import { getAutoDownloadsLastRefreshDate, handleAutoDownloadEpisodes } from '../services/autoDownloads'
@@ -65,6 +67,7 @@ import {
 } from '../state/actions/downloads'
 import { v4vAlbyHandleConnect } from '../state/actions/v4v/providers/alby'
 import {
+  clearEpisodesCount,
   clearEpisodesCountForPodcast,
   handleUpdateNewEpisodesCount,
   syncNewEpisodesCountWithHistory
@@ -88,7 +91,8 @@ import {
   toggleSubscribeToPodcast
 } from '../state/actions/podcast'
 import { updateScreenReaderEnabledState } from '../state/actions/screenReader'
-import { initializeSettings } from '../state/actions/settings'
+import { initializeSettings, setPodcastsGridView } from '../state/actions/settings'
+import { setShouldshowPodcastsListPopover } from "../state/actions/podcasts-ui"
 import { v4vInitialize } from '../state/actions/v4v/v4v'
 import { core } from '../styles'
 
@@ -185,23 +189,39 @@ export class PodcastsScreen extends React.Component<Props, State> {
     }
 
     this._handleSearchBarTextQuery = debounce(this._handleSearchBarTextQuery, PV.SearchBar.textInputDebounceTime)
+        
+    // Add a callback for subscribed podcasts to show or hide header button
+    addCallback(
+      GlobalPropertyCallbackFunction(
+        'subscribedPodcastsTotalCount',
+        (podcastCount) => {
+          props.navigation.setParams({
+            _hasSubscribedPodcasts: podcastCount && podcastCount > 0
+          })
+        }
+      )
+    );
   }
 
   static navigationOptions = ({ navigation }) => {
     const _screenTitle = navigation.getParam('_screenTitle')
+    const _hasSubscribedPodcasts = navigation.getParam('_hasSubscribedPodcasts')
     return {
       title: _screenTitle,
-      headerRight: () => (
+      headerRight: () => 
+      _hasSubscribedPodcasts 
+      ? (
         <RNView style={core.row}>
           <NavPodcastsViewIcon />
         </RNView>
-      )
+      ) 
+      : null
     } as NavigationStackOptions
   }
 
   async componentDidMount() {
     this.props.navigation.setParams({
-      _screenTitle: getScreenTitle()
+      _screenTitle: getScreenTitle(),
     })
 
     // if (CarPlay.connected) {
@@ -711,7 +731,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         })
       } else {
         this._setDownloadedDataIfOffline()
-      }
+      }      
     }
   }
 
@@ -1124,9 +1144,10 @@ export class PodcastsScreen extends React.Component<Props, State> {
     } else if (queryFrom === PV.Filters._subscribedKey) {
       flatListData = subscribedPodcasts
       flatListDataTotalCount = subscribedPodcastsTotalCount
+      
     } else {
-      flatListData = this.state.flatListData
-      flatListDataTotalCount = this.state.flatListDataTotalCount
+      flatListData = this.state?.flatListData || []
+      flatListDataTotalCount = this.state?.flatListDataTotalCount || []
     }
 
     return {
@@ -1168,6 +1189,11 @@ export class PodcastsScreen extends React.Component<Props, State> {
     const isCategoryScreen = queryFrom === PV.Filters._categoryKey
 
     const { flatListData, flatListDataTotalCount } = this._getFlatListData()
+
+    // const hasANotch = hasNotch() || hasDynamicIsland()
+    // const popoverYOffset = hasANotch ? 100 : 40
+
+    const popoverYOffset = 40
 
     return (
       <View style={styles.view} testID={`${testIDPrefix}_view`}>
@@ -1234,6 +1260,33 @@ export class PodcastsScreen extends React.Component<Props, State> {
           showModal={showPodcastActionSheet}
           testID={testIDPrefix}
         />
+        <Popover
+          arrowSize={{ width: 0, height: 0 }}
+          from={{ x: this.global.screen.screenWidth - 25, y: popoverYOffset }}
+          popoverStyle={[styles.popoverStyle]}
+          onRequestClose={() => setShouldshowPodcastsListPopover(false)}
+          isVisible={this.global.showPodcastsListPopover}>
+          <Button
+            accessibilityLabel={translate('ARIA HINT - toggle podcast screen display')}
+            onPress={() => {
+              setPodcastsGridView(!this.global.podcastsGridViewEnabled)
+              setShouldshowPodcastsListPopover(false)
+            }}
+            testID={`${testIDPrefix}_toggle_podcasts_screen_view`}
+            text={this.global.podcastsGridViewEnabled ? translate('List View') : translate('Grid View')}
+            wrapperStyles={[core.button, styles.podcastViewChangeButton]}
+          />
+          <Button
+            accessibilityLabel={translate('ARIA HINT - clear the new episode indicators for all podcasts')}
+            onPress={() => {
+              clearEpisodesCount()
+              setShouldshowPodcastsListPopover(false)
+            }}
+            testID={`${testIDPrefix}_clear_all_new_episode_indicators`}
+            text={translate('Mark All As Seen')}
+            wrapperStyles={[core.button, styles.markAllAsSeenButton]}
+          />
+        </Popover>
       </View>
     )
   }
@@ -1469,5 +1522,21 @@ export class PodcastsScreen extends React.Component<Props, State> {
 const styles = StyleSheet.create({
   view: {
     flex: 1
+  },
+  popoverStyle: {
+    backgroundColor: PV.Colors.whiteOpaque, 
+    borderRadius: 10
+  },
+  podcastViewChangeButton: {
+    backgroundColor: PV.Colors.velvet, 
+    marginTop:10, 
+    marginBottom:10, 
+    paddingHorizontal: 10
+  },
+  markAllAsSeenButton: {
+    backgroundColor: PV.Colors.velvet,
+    marginTop:0, 
+    marginBottom:10, 
+    paddingHorizontal: 10
   }
 })
