@@ -1,0 +1,6 @@
+- Remember the last selected filter on the Podcast screen for each podcast. #1419
+- Add search for "add by RSS" feeds on the Podcast screen. #1879
+- Show alert if attempt to import invalid OPML file type. #1881
+- Fix broken episode Transcript screen. #1889
+- Fix downloads for episodes with Chartable URL redirects. #1898
+- Translation updates: Russian
