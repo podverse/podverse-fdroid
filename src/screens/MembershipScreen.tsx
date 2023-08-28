@@ -89,9 +89,7 @@ export class MembershipScreen extends React.Component<Props, State> {
       ? translate('Your membership will not auto-renew')
       : translate('You are not being charged during your free trial')
 
-    const renewMembershipExplanation3 = isLoggedIn
-      ? ''
-      : translate('Feature unavailable for manually added feeds')
+    const renewMembershipExplanation3 = isLoggedIn ? '' : translate('Feature unavailable for manually added feeds')
 
     const listHeaderComponent = (
       <View style={styles.listHeaderWrapper}>
