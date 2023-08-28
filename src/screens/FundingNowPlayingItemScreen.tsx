@@ -78,7 +78,11 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
     const valueTags = extractV4VValueTags(episodeValue, podcastValue)
     const playerPositionState = await playerGetPosition()
     const activeValueTag = v4vGetActiveValueTag(
-      valueTags, playerPositionState, activeProvider?.type, activeProvider?.method)
+      valueTags,
+      playerPositionState,
+      activeProvider?.type,
+      activeProvider?.method
+    )
 
     if (activeValueTag && activeProvider) {
       const { method, type } = activeProvider
@@ -152,7 +156,6 @@ export class FundingNowPlayingItemScreen extends React.Component<Props, State> {
         activeValueTag?.remoteFeedGuid,
         activeValueTag?.remoteItemGuid
       )
-
 
       this.setState({
         streamingFeeTransactions: newValueTransactions?.feeValueTransactions,

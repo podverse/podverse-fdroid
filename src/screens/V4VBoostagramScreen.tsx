@@ -21,7 +21,6 @@ import { readableDate } from '../lib/utility'
 import { PV } from '../resources'
 import { playerGetPosition } from '../services/player'
 import {
-  BoostagramItem,
   convertValueTagIntoValueTransactions,
   extractV4VValueTags,
   MINIMUM_BOOST_PAYMENT,
@@ -103,7 +102,11 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
 
     const valueTags = extractV4VValueTags(episodeValue, podcastValue)
     const activeValueTag = v4vGetActiveValueTag(
-      valueTags, playerPositionState, activeProvider?.type, activeProvider?.method)
+      valueTags,
+      playerPositionState,
+      activeProvider?.type,
+      activeProvider?.method
+    )
 
     if (activeValueTag && activeProvider) {
       const { method, type } = activeProvider
@@ -167,7 +170,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
         amount,
         shouldRound,
         activeProvider.key,
-        boostagramItem.episodeGuid ||  '',
+        boostagramItem.episodeGuid || '',
         activeValueTag?.remoteFeedGuid,
         activeValueTag?.remoteItemGuid
       )
@@ -219,7 +222,7 @@ export class V4VBoostagramScreen extends React.Component<Props, State> {
       defaultMessage,
       explosionOrigin,
       // localAppBoostAmount,
-      localBoostAmount,
+      localBoostAmount
     } = this.state
     const { screen, session } = this.global
     const { screenWidth } = screen

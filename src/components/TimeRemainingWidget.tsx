@@ -1,6 +1,6 @@
 import { checkIfNowPlayingItem, convertToNowPlayingItem } from 'podverse-shared'
 import React, { useState } from 'react'
-import { Platform, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { getGlobal } from 'reactn'
 import { PV } from '../resources'
 import PVEventEmitter from '../services/eventEmitter'
@@ -20,6 +20,7 @@ type Props = {
   episodeDownloading?: boolean
   forceShowProgressBar?: boolean
   handleMorePress?: any
+  hideMoreButton?: boolean
   hidePlayButton?: boolean
   isChapter?: boolean
   item: any
@@ -84,6 +85,7 @@ export const TimeRemainingWidget = (props: Props) => {
     episodeDownloading,
     forceShowProgressBar,
     handleMorePress,
+    hideMoreButton,
     hidePlayButton,
     item,
     itemType,
@@ -215,7 +217,7 @@ export const TimeRemainingWidget = (props: Props) => {
         </View>
       )}
       <View style={{ flexDirection: 'row' }}>
-        {!!handleMorePress && (
+        {!hideMoreButton && !!handleMorePress && (
           <MoreButton
             accessible={false}
             handleMorePress={handleMorePress}
