@@ -1,0 +1,7 @@
+- Add "mark multiple / all episodes as played" to Podcast screen. #935
+- Fix Sleep Timer font color issue. #1921
+- Fix OPML import file type error. #1881
+- Reduce app launch time by 1 second. #1920
+- Add podcast GUID to boostagram TLV records. #1934
+- Add "Report a content issue" to the Contact screen. #1922
+- Translation updates: Dutch and Russian
