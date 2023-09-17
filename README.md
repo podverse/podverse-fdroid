@@ -27,6 +27,7 @@ If you'd like to add features or a bug fix to the Podverse mobile app, please ma
 
 - [About](#about)
 - [Licensing](#licensing)
+- [Version support](#version-support)
 - [Getting started](#getting-started)
 - [More contributing info](#more-contributing-info)
   * [Translations on Hosted Weblate](#translations-on-hosted-weblate)
@@ -84,6 +85,15 @@ Find us on on these App Stores and our [Website](https://podverse.fm/):
 ## Licensing
 
 All Podverse software is provided under a [libre software licence](https://github.com/podverse/podverse-rn/blob/develop/LICENSE).
+
+## Version support
+
+Officially, Podverse supports the following OS versions:
+
+- iOS: 14-16
+- Android: 11-13
+
+That said, Podverse might work on earlier versions, but our target for each release is to provide full support for at least those versions.
 
 ## Getting started
 

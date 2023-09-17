@@ -16,6 +16,7 @@ const testIDPrefix = 'contact_screen'
 const _generalKey = 'general'
 const _featureRequestKey = 'featureRequest'
 const _bugReportKey = 'bugReport'
+const _reportAContentIssue = 'reportAContentIssue'
 const _podcastRequestKey = 'podcastRequest'
 const _joinOurDiscordKey = 'joinOurDiscord'
 const _joinOurXMPPServerKey = 'joinOurXMPPServer'
@@ -33,6 +34,10 @@ const emailOptions = [
   {
     key: _podcastRequestKey,
     title: translate('Podcast Request')
+  },
+  {
+    key: _reportAContentIssue,
+    title: translate('Report a content issue')
   },
   {
     key: _generalKey,
@@ -68,6 +73,8 @@ export class ContactScreen extends React.Component<Props> {
       Linking.openURL(createEmailLinkUrl(PV.Emails.FEATURE_REQUEST))
     } else if (item.key === _podcastRequestKey) {
       Linking.openURL(createEmailLinkUrl(PV.Emails.PODCAST_REQUEST))
+    } else if (item.key === _reportAContentIssue) {
+      Linking.openURL(createEmailLinkUrl(PV.Emails.REPORT_A_CONTENT_ISSUE))
     } else if (item.key === _generalKey) {
       Linking.openURL(createEmailLinkUrl(PV.Emails.GENERAL_CONTACT))
     } else if (item.key === _joinOurXMPPServerKey) {
