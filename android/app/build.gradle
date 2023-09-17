@@ -135,8 +135,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
-        versionCode 92
-        versionName "4.13.8"
+        versionCode 93
+        versionName "4.13.9"
         multiDexEnabled true
     }
     splits {
@@ -197,7 +197,7 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.github.UnifiedPush:android-connector:2.1.1'
+    implementation 'com.github.UnifiedPush:android-connector:2.2.0'
     implementation "com.google.crypto.tink:apps-webpush:1.9.1"
     
     if (enableHermes) {
