@@ -4076,9 +4076,9 @@ Builds:
       - node_modules
     ndk: 23.2.8568313
 
-  - versionName: 4.13.8-qa.1
+  - versionName: 4.13.9-beta.1
     versionCode: 92
-    commit: 4.13.8-qa.1
+    commit: 4.13.9-beta.1
     subdir: android/app
     sudo:
       - curl -Lo node.tar.xz https://nodejs.org/download/release/v14.17.6/node-v14.17.6-linux-x64.tar.xz
@@ -4126,5 +4126,5 @@ Builds:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"(.+)"
-CurrentVersion: 4.13.8-qa.1
+CurrentVersion: 4.13.9-beta.1
 CurrentVersionCode: 92
