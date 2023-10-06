@@ -159,5 +159,6 @@ declare module 'reactn/default' {
     imageFullViewShow?: boolean
     refreshSubscriptionsOnLaunch?: boolean
     showPodcastsListPopover: boolean
+    slidingPositionOverride: number | null
   }
 }
