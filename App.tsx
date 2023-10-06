@@ -83,7 +83,7 @@ class App extends Component<Props, State> {
     // Android Auto
     if (Platform.OS === 'android') {
       // initialize Android Auto Tabs with no content. Content will be updated as they are loaded to the global state.
-      registerAndroidAutoModule()
+      // registerAndroidAutoModule()
     }
 
     StatusBar.setBarStyle('light-content')
