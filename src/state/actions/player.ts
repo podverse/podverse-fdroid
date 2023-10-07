@@ -174,6 +174,13 @@ export const initPlayerState = async (globalState: any) => {
   })
 }
 
+const handleSlidingPositionOverride = (startTime: number) => {
+  setGlobal({ slidingPositionOverride: startTime })
+  setTimeout(() => {
+    setGlobal({ slidingPositionOverride: null })
+  }, 4333)
+}
+
 export const playerPlayPreviousChapterOrReturnToBeginningOfTrack = async () => {
   const globalState = getGlobal()
   const { currentChapters } = globalState
@@ -183,6 +190,7 @@ export const playerPlayPreviousChapterOrReturnToBeginningOfTrack = async () => {
     if (previousChapter) {
       await playerHandleSeekTo(previousChapter.startTime)
       setChapterOnGlobalState(previousChapter)
+      handleSlidingPositionOverride(previousChapter.startTime)
       return
     }
   }
@@ -199,6 +207,7 @@ export const playerPlayNextChapterOrQueueItem = async () => {
     if (nextChapter) {
       await playerHandleSeekTo(nextChapter.startTime)
       setChapterOnGlobalState(nextChapter)
+      handleSlidingPositionOverride(nextChapter.startTime)
       return
     }
   }

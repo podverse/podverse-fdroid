@@ -245,6 +245,7 @@ export interface InitialState {
   imageFullViewShow?: boolean
   refreshSubscriptionsOnLaunch?: boolean
   showPodcastsListPopover: boolean
+  slidingPositionOverride: number | null
 }
 
 export interface BannerInfoError {

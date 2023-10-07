@@ -1,0 +1,3 @@
+- Improve the speed of skip / previous track and chapter buttons.
+- Prevent jumping progress indicator when changing time position.
+- Other player improvements.
