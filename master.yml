@@ -21,6 +21,13 @@ steps:
   inputs:
     script: 'yarn install'
 
+# this 2nd yarn install is a workaround that solves a build error that happens
+# when installing lovegaoshi's fork of react-native-track-player from github.
+- task: CmdLine@2
+  displayName: Install Dependencies2
+  inputs:
+    script: 'yarn install'
+
 - task: CmdLine@2
   displayName: Install GitPython Dependency
   inputs:
