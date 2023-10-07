@@ -4136,6 +4136,9 @@ Builds:
       - npm -g install yarn
     init:
       - yarn install
+      # this 2nd yarn install is a workaround that solves a build error that happens
+      # when installing lovegaoshi's fork of react-native-track-player from github.
+      - yarn install
       - yarn add jetifier --dev
       - yarn jetify
     gradle:
