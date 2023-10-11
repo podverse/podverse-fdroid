@@ -82,6 +82,7 @@ export class FilterScreen extends React.Component<Props, State> {
     const { navigation } = this.props
     const { flatCategoryItems } = this.state
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
+    const hasSeasons = navigation.getParam('hasSeasons')
     const screenName = navigation.getParam('screenName')
     const selectedCategoryItemKey = navigation.getParam('selectedCategoryItemKey')
     const selectedCategorySubItemKey = navigation.getParam('selectedCategorySubItemKey')
@@ -92,6 +93,7 @@ export class FilterScreen extends React.Component<Props, State> {
     const { newSelectedSortItemKey, sections } = generateSections({
       addByRSSPodcastFeedUrl,
       flatCategoryItems,
+      hasSeasons,
       screenName,
       selectedCategoryItemKey,
       selectedCategorySubItemKey,
@@ -121,6 +123,7 @@ export class FilterScreen extends React.Component<Props, State> {
       selectedFromItemKey,
       selectedSortItemKey
     } = this.state
+
     const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
     const options = { addByRSSPodcastFeedUrl, flatCategoryItems, screenName } as any
 
@@ -150,6 +153,11 @@ export class FilterScreen extends React.Component<Props, State> {
       options.selectedCategoryItemKey = selectedCategoryItemKey
       options.selectedCategorySubItemKey = selectedCategorySubItemKey
       options.selectedFromItemKey = selectedFromItemKey
+    }
+
+    const hasSeasons = this.props.navigation.getParam('hasSeasons')
+    if (hasSeasons) {
+      options.hasSeasons = true
     }
 
     const {

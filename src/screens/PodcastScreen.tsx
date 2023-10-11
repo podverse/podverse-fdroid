@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import debounce from 'lodash/debounce'
+import orderBy from 'lodash/orderBy'
 import {
   Episode,
   convertNowPlayingItemToEpisode,
   convertToNowPlayingItem,
   getAuthorityFeedUrlFromArray,
+  getSeasonOrSerialEpisodesData,
   getUsernameAndPasswordFromCredentials
 } from 'podverse-shared'
 import { Alert, Platform, StyleSheet, View as RNView } from 'react-native'
@@ -30,7 +32,9 @@ import {
   SwitchWithText,
   TableSectionSelectors,
   Text,
-  View
+  View,
+  PressableWithOpacity,
+  Icon
 } from '../components'
 import { errorLogger } from '../lib/logger'
 import { getDownloadedEpisodeLimit, setDownloadedEpisodeLimit } from '../lib/downloadedEpisodeLimiter'
@@ -67,6 +71,7 @@ import { toggleSubscribeToPodcast } from '../state/actions/podcast'
 import { markAsPlayedEpisodesAll, markAsPlayedEpisodesMultiple } from '../state/actions/userHistoryItem'
 import { core } from '../styles'
 import { checkIfLoggedIn } from '../services/auth'
+import { SectionListStickyHeaders } from '../components/SectionListStickyHeaders'
 
 const _fileName = 'src/screens/PodcastScreen.tsx'
 
@@ -75,11 +80,13 @@ type Props = {
 }
 
 type State = {
+  collapsedSectionsData: any
   downloadedEpisodeLimit?: string | null
   endOfResultsReached: boolean
   flatListData: any[]
   flatListDataTotalCount: number | null
   hasInternetConnection: boolean
+  hasSeasons: boolean
   isLoading: boolean
   isLoadingMore: boolean
   isRefreshing: boolean
@@ -92,6 +99,7 @@ type State = {
   querySort: string | null
   searchBarText: string
   searchTitle?: string
+  sections: Section[] | null
   selectedFilterLabel?: string | null
   selectedSortLabel?: string | null
   selectedItem?: any
@@ -105,8 +113,6 @@ type State = {
   selectedEpisodes: string[]
   multiSelectEnabled: boolean
 }
-
-type RenderItemArg = { item: any; index: number }
 
 const testIDPrefix = 'podcast_screen'
 
@@ -150,6 +156,7 @@ const getDefaultSelectedFilterLabel = () => {
 export class PodcastScreen extends React.Component<Props, State> {
   shouldLoad: boolean
   listRef = null
+  listStickyRef = null
 
   constructor(props: Props) {
     super()
@@ -176,6 +183,7 @@ export class PodcastScreen extends React.Component<Props, State> {
     }
 
     this.state = {
+      collapsedSectionsData: {},
       downloadedEpisodeLimit: null,
       endOfResultsReached: false,
       flatListData: [],
@@ -192,6 +200,7 @@ export class PodcastScreen extends React.Component<Props, State> {
       queryPage: 1,
       querySort: PV.Filters._mostRecentKey,
       searchBarText: '',
+      sections: null,
       selectedFilterLabel: getDefaultSelectedFilterLabel(),
       selectedSortLabel: translate('Recent'),
       showActionSheet: false,
@@ -356,16 +365,20 @@ export class PodcastScreen extends React.Component<Props, State> {
               },
               () => {
                 this._updateCredentialsState()
-                // Adding a no time setTimeout for the listref to have populated
-                // in the next event loop otherwise, there will be no ref to call scroll to yet
-                if (Platform.OS === 'ios') {
-                  setTimeout(() => {
-                    this.listRef?.scrollToOffset({
-                      animated: false,
-                      offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
-                    })
+                // NOTE: contentOffset works for the SectionList version of FlatList,
+                // but not with our Flatlist for some reason. As a result I'm only calling
+                // scrollToOffset in addition to setting contentOffset.
+                // The setTimeout is necessary for some render timing reason...
+                setTimeout(() => {
+                  this.listRef?.scrollToOffset?.({
+                    animated: false,
+                    offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
                   })
-                }
+                  this.listStickyRef?.scrollToOffset?.({
+                    animated: false,
+                    offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
+                  })
+                }, 0)
               }
             )
           } catch (error) {
@@ -402,7 +415,6 @@ export class PodcastScreen extends React.Component<Props, State> {
 
   handleSelectFilterItem = async (selectedKey: string) => {
     if (!selectedKey) return
-
     if (this.state?.podcastId && this.state?.querySort) {
       const savedQuery: PodcastScreenSavedQuery = {
         filterType: selectedKey,
@@ -421,6 +433,7 @@ export class PodcastScreen extends React.Component<Props, State> {
         isLoadingMore: true,
         queryPage: 1,
         searchBarText: '',
+        sections: null,
         selectedFilterLabel,
         viewType: selectedKey
       },
@@ -454,6 +467,7 @@ export class PodcastScreen extends React.Component<Props, State> {
         isLoadingMore: true,
         queryPage: 1,
         querySort: selectedKey,
+        sections: null,
         selectedSortLabel
       },
       () => {
@@ -466,7 +480,9 @@ export class PodcastScreen extends React.Component<Props, State> {
   }
 
   _onEndReached = ({ distanceFromEnd }: { distanceFromEnd: number }) => {
-    const { endOfResultsReached, podcast, queryPage = 1, viewType } = this.state
+    const { endOfResultsReached, podcast, queryPage = 1, sections, viewType } = this.state
+    
+    if (!!sections?.length) return null 
 
     if (
       !podcast.addByRSSPodcastFeedUrl &&
@@ -510,24 +526,29 @@ export class PodcastScreen extends React.Component<Props, State> {
   }
 
   _ListHeaderComponent = () => {
-    const { searchBarText, viewType, flatListDataTotalCount } = this.state
+    const { searchBarText, viewType, flatListDataTotalCount, sections } = this.state
     const placeholder = getSearchPlaceholder(viewType)
-    const shouldShowSearchBar = !!(searchBarText || (flatListDataTotalCount && flatListDataTotalCount > 3))
+    const shouldShowSearchBar =
+      !!(searchBarText
+        || (flatListDataTotalCount && flatListDataTotalCount > 3)
+        || (sections && sections.length >= 1))
 
     return (
-      <View style={styles.ListHeaderComponent}>
+      <>
         {shouldShowSearchBar && (
-          <SearchBar
-            handleClear={this._handleSearchBarClear}
-            hideIcon
-            icon='filter'
-            onChangeText={this._handleSearchBarTextChange}
-            placeholder={placeholder}
-            testID={`${testIDPrefix}_filter_bar`}
-            value={searchBarText}
-          />
+          <View style={styles.ListHeaderComponent}>
+            <SearchBar
+              handleClear={this._handleSearchBarClear}
+              hideIcon
+              icon='filter'
+              onChangeText={this._handleSearchBarTextChange}
+              placeholder={placeholder}
+              testID={`${testIDPrefix}_filter_bar`}
+              value={searchBarText}
+            />
+          </View>
         )}
-      </View>
+      </>
     )
   }
 
@@ -550,7 +571,7 @@ export class PodcastScreen extends React.Component<Props, State> {
     }
   }
 
-  _renderItem = ({ item, index }: RenderItemArg) => {
+  _renderItem = ({ item, index }) => {
     const { navigation } = this.props
     const { podcast, viewType } = this.state
 
@@ -684,7 +705,8 @@ export class PodcastScreen extends React.Component<Props, State> {
         flatListData: [],
         flatListDataTotalCount: null,
         isLoadingMore: true,
-        queryPage: 1
+        queryPage: 1,
+        sections: null
       },
       () => {
         (async () => {
@@ -723,7 +745,8 @@ export class PodcastScreen extends React.Component<Props, State> {
         endOfResultsReached: false,
         flatListData: [],
         flatListDataTotalCount: null,
-        isLoadingMore: true
+        isLoadingMore: true,
+        sections: null
       },
       () => {
         this._handleSearchBarTextChange('')
@@ -987,7 +1010,7 @@ export class PodcastScreen extends React.Component<Props, State> {
 
   _renderTableInnerHeader = () => {
     const { navigation } = this.props
-    const { querySort, selectedFilterLabel, selectedSortLabel, viewType, multiSelectEnabled } = this.state
+    const { hasSeasons, querySort, selectedFilterLabel, selectedSortLabel, viewType, multiSelectEnabled } = this.state
 
     const addByRSSPodcastFeedUrl = navigation.getParam('addByRSSPodcastFeedUrl')
 
@@ -1027,6 +1050,7 @@ export class PodcastScreen extends React.Component<Props, State> {
           filterScreenTitle={getScreenTitle()}
           handleSelectFilterItem={this.handleSelectFilterItem}
           handleSelectSortItem={this.handleSelectSortItem}
+          hasSeasons={hasSeasons}
           includePadding
           navigation={navigation}
           screenName='PodcastScreen'
@@ -1040,11 +1064,64 @@ export class PodcastScreen extends React.Component<Props, State> {
     }
   }
 
+  _renderSectionHeader = ({ section }, { collapsedSectionsData, globalTheme }) => {
+    const sectionIsCollapsed = !!collapsedSectionsData?.[section.seasonKey]
+
+    return (
+      <PressableWithOpacity
+        onPress={() => {
+          this._setSeasonIsCollapsed(section.seasonKey, !sectionIsCollapsed)
+        }}>
+        <TableSectionSelectors
+          disableFilter
+          expandedIconColor={globalTheme.headerText.color}
+          expandedState={sectionIsCollapsed ? 'collapsed' : 'expanded'}
+          hideDropdown
+          includePadding
+          selectedFilterLabel={section.title}
+          showDivider
+          textStyle={[globalTheme.headerText, core.seasonSectionHeaderText]}
+          viewStyle={[globalTheme.sectionHeaderBackground]}
+        />
+      </PressableWithOpacity>
+    )
+  }
+
+  _setSeasonIsCollapsed = (seasonKey: string, shouldCollapse: boolean) => {
+    const { collapsedSectionsData, sections } = this.state
+    if (shouldCollapse) {
+      const section = sections?.find((s: any) => {
+        return s.seasonKey === seasonKey
+      })
+      if (section) {
+        collapsedSectionsData[seasonKey] = section.data
+        sections?.map((s: any) => {
+          if (s.seasonKey === seasonKey) {
+            s.data = []
+          }
+          return s
+        })
+      }
+    } else {
+      sections?.map((s: any) => {
+        if (s.seasonKey === seasonKey) {
+          s.data = collapsedSectionsData[seasonKey] || []
+        }
+        return s
+      })
+      delete collapsedSectionsData[seasonKey]
+    }
+
+    this.setState({ collapsedSectionsData, sections })
+  }
+
   render() {
     const { navigation } = this.props
 
     const {
+      collapsedSectionsData,
       downloadedEpisodeLimit,
+      hasSeasons,
       isLoading,
       isLoadingMore,
       isRefreshing,
@@ -1053,6 +1130,7 @@ export class PodcastScreen extends React.Component<Props, State> {
       password,
       podcast,
       podcastId,
+      sections,
       selectedItem,
       showActionSheet,
       showNoInternetConnectionMessage,
@@ -1064,6 +1142,7 @@ export class PodcastScreen extends React.Component<Props, State> {
       flatListData,
       flatListDataTotalCount
     } = this.state
+    const { globalTheme } = this.global
     const subscribedPodcastIds = safelyUnwrapNestedVariable(() => this.global.session.userInfo.subscribedPodcastIds, [])
     const addByRSSPodcastFeedUrl = this.props.navigation.getParam('addByRSSPodcastFeedUrl')
 
@@ -1088,6 +1167,8 @@ export class PodcastScreen extends React.Component<Props, State> {
         viewType === PV.Filters._showCompletedKey) &&
         translate('No episodes found')) ||
       (viewType === PV.Filters._clipsKey && translate('No clips found'))
+
+    const disableNoResultsMessage = isLoadingMore || !!sections?.length
 
     return (
       <View style={styles.headerView} testID={`${testIDPrefix}_view`}>
@@ -1259,11 +1340,15 @@ export class PodcastScreen extends React.Component<Props, State> {
         )}
         {!showSettings && (
           <View style={styles.view}>
-            {flatListData && podcast && (
+            {flatListData && podcast && !hasSeasons && (
               <FlatList
+                contentOffset={{
+                  x: 0,
+                  y: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
+                }}
                 data={flatListData}
                 dataTotalCount={flatListDataTotalCount}
-                disableNoResultsMessage={isLoadingMore}
+                disableNoResultsMessage={disableNoResultsMessage}
                 extraData={flatListData}
                 isLoadingMore={isLoadingMore}
                 isRefreshing={isRefreshing}
@@ -1271,10 +1356,34 @@ export class PodcastScreen extends React.Component<Props, State> {
                   safeKeyExtractor(testIDPrefix, index, item?.id, !!item?.addedByRSS)
                 }
                 ListHeaderComponent={this._ListHeaderComponent}
+                listRef={(ref) => (this.listRef = ref)}
                 noResultsMessage={noResultsMessage}
                 onEndReached={this._onEndReached}
                 renderItem={this._renderItem}
-                listRef={(ref) => (this.listRef = ref)}
+                renderSectionHeader={(obj) => this._renderSectionHeader(obj, { collapsedSectionsData, globalTheme })}
+                sections={sections}
+                showNoInternetConnectionMessage={showNoInternetConnectionMessage}
+                // stickySectionHeadersEnabled
+              />
+            )}
+            {flatListData && podcast && hasSeasons && (
+              <SectionListStickyHeaders
+                contentOffset={{
+                  x: 0,
+                  y: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
+                }}
+                disableNoResultsMessage={disableNoResultsMessage}
+                globalTheme={globalTheme}
+                isLoadingMore={isLoadingMore}
+                keyExtractor={(item: any, index: number) =>
+                  safeKeyExtractor(testIDPrefix, index, item?.id, !!item?.addedByRSS)
+                }
+                ListHeaderComponent={this._ListHeaderComponent}
+                listRef={(ref) => (this.listStickyRef = ref)}
+                noResultsMessage={noResultsMessage}
+                renderItem={this._renderItem}
+                renderSectionHeader={(obj) => this._renderSectionHeader(obj, { collapsedSectionsData, globalTheme })}
+                sections={sections || []}
                 showNoInternetConnectionMessage={showNoInternetConnectionMessage}
               />
             )}
@@ -1350,8 +1459,13 @@ export class PodcastScreen extends React.Component<Props, State> {
         podcastId
       )
 
-      const { combinedEpisodes } = results
-      return combinedEpisodes
+      const { combinedEpisodes, hasSeasons, isSerial } = results
+      const extraParams = {
+        hasSeasons,
+        isSerial
+      }
+
+      return [combinedEpisodes, extraParams]
     }
   }
 
@@ -1365,6 +1479,30 @@ export class PodcastScreen extends React.Component<Props, State> {
       ...(searchTitle ? { searchTitle } : {})
     })
     return results
+  }
+
+  _handleSeasonOrSerialPodcastEpisodes = async (
+    data: any[], querySort: string | null, newState: State,
+    extraParams: any) => {
+    const { hasSeasons, querySort: newQuerySort, seasonSections } = getSeasonOrSerialEpisodesData({
+      data,
+      querySort,
+      extraParams,
+      translator: translate,
+      _oldestKey: PV.Filters._oldestKey,
+      _mostRecentKey: PV.Filters._mostRecentKey
+    })
+
+    if (hasSeasons) {
+      newState.hasSeasons = hasSeasons
+      newState.sections = seasonSections
+      newState.selectedSortLabel = await getSelectedSortLabel(newQuerySort)
+      newState.flatListData = []
+      newState.flatListDataTotalCount = 0
+      newState.collapsedSectionsData = {}
+    }
+
+    newState.querySort = querySort
   }
 
   _queryData = async (filterKey: string | null, queryOptions: { queryPage?: number; searchTitle?: string } = {}) => {
@@ -1403,10 +1541,14 @@ export class PodcastScreen extends React.Component<Props, State> {
           filterKey === PV.Filters._showCompletedKey)
       ) {
         const results = await this._queryEpisodes(filterKey, querySort, queryOptions.queryPage)
-        newState.flatListData = [...flatListData, ...results[0]]
+        const episodes = results[0]?.[0]
+        const episodesCount = results[0]?.[1]
+        const extraParams = results[1]
+        await this._handleSeasonOrSerialPodcastEpisodes(episodes, querySort, newState, extraParams)
+        newState.flatListData = [...flatListData, ...episodes]
         newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
-        newState.endOfResultsReached = newState.flatListData.length >= results[1]
-        newState.flatListDataTotalCount = results[1]
+        newState.endOfResultsReached = newState.flatListData.length >= extraParams
+        newState.flatListDataTotalCount = episodesCount
       } else if (filterKey === PV.Filters._clipsKey) {
         const results = await this._queryClips(querySort, queryOptions.queryPage)
         newState.flatListData = [...flatListData, ...results[0]]
@@ -1414,7 +1556,8 @@ export class PodcastScreen extends React.Component<Props, State> {
         newState.endOfResultsReached = newState.flatListData.length >= results[1]
         newState.flatListDataTotalCount = results[1]
       } else if (PV.FilterOptions.screenFilters.PodcastScreen.sort.some((option) => option === filterKey)) {
-        let results = []
+        let data = []
+        let dataCount = 0
 
         if (podcast?.addByRSSPodcastFeedUrl) {
           const { addByRSSEpisodes, addByRSSEpisodesCount } = this._queryAddByRSSEpisodes(viewType, filterKey)
@@ -1426,15 +1569,21 @@ export class PodcastScreen extends React.Component<Props, State> {
           viewType === PV.Filters._hideCompletedKey ||
           viewType === PV.Filters._showCompletedKey
         ) {
-          results = await this._queryEpisodes(viewType, filterKey)
+          const results = await this._queryEpisodes(viewType, filterKey)
+          data = results[0]?.[0]
+          dataCount = results[0]?.[1]
+          const extraParams = results[1]
+          await this._handleSeasonOrSerialPodcastEpisodes(data, querySort, newState, extraParams)
         } else if (viewType === PV.Filters._clipsKey) {
-          results = await this._queryClips(querySort)
+          const results = await this._queryClips(querySort)
+          data = results[0]
+          dataCount = results[1]
         }
 
-        newState.flatListData = [...flatListData, ...results[0]]
+        newState.flatListData = [...flatListData, data]
         newState.flatListData = this.cleanFlatListData(newState.flatListData, viewType)
-        newState.endOfResultsReached = newState.flatListData.length >= results[1]
-        newState.flatListDataTotalCount = results[1]
+        newState.endOfResultsReached = newState.flatListData.length >= dataCount
+        newState.flatListDataTotalCount = dataCount
       }
       newState.queryPage = queryOptions.queryPage || 1
 
@@ -1519,6 +1668,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginTop: 32
   },
+  dropdownButtonIcon: {
+    flex: 1,
+    fontSize: PV.Fonts.sizes.xxl,
+    paddingHorizontal: 16
+  },
   itemWrapper: {
     marginTop: 32
   },
@@ -1587,7 +1741,8 @@ const styles = StyleSheet.create({
     marginTop: 4
   },
   ListHeaderComponent: {
-    paddingTop: 15
+    marginTop: -60,
+    paddingTop: 75
   },
   view: {
     flex: 1,
