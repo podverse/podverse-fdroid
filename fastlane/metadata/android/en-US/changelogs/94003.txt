@@ -1,3 +1,5 @@
+- Add seasons, bonus content, and trailer handling to the Podcast screen.
 - Improve the speed of skip / previous track and chapter buttons.
 - Prevent jumping progress indicator when changing time position.
+- Add playback speed option of 0.9x.
 - Other player improvements.
