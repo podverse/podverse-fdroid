@@ -18,7 +18,9 @@ import {
   BoostDropdownBanner,
   LoadingInterstitialView
 } from './src/components'
-import { pvIsTablet } from './src/lib/deviceDetection'
+import { checkIfFDroidAppVersion, pvIsTablet } from './src/lib/deviceDetection'
+import { registerAndroidAutoModule, requestDrawOverAppsPermission,
+  unregisterAndroidAutoModule } from './src/lib/carplay/PVCarPlay.android'
 import { refreshDownloads } from './src/lib/downloader'
 import { PV } from './src/resources'
 import { determineFontScaleMode } from './src/resources/Fonts'
@@ -35,7 +37,6 @@ import { settingsRunEveryStartup } from './src/state/actions/settings'
 import initialState from './src/state/initialState'
 import { darkTheme, lightTheme } from './src/styles'
 import { hasValidDownloadingConnection } from './src/lib/network'
-
 // import {
 //   handleCarPlayPodcastsUpdate,
 //   handleCarPlayQueueUpdate,
@@ -43,7 +44,6 @@ import { hasValidDownloadingConnection } from './src/lib/network'
 //   showRootView,
 //   unregisterCarModule
 // } from './src/lib/carplay/PVCarPlay'
-// import { registerAndroidAutoModule, unregisterAndroidAutoModule } from './src/lib/carplay/PVCarPlay.android'
 
 LogBox.ignoreLogs(['EventEmitter.removeListener', 'Require cycle'])
 
@@ -78,13 +78,15 @@ class App extends Component<Props, State> {
   }
 
   async componentDidMount() {
+    // Android Auto
+    if (Platform.OS === 'android' && !checkIfFDroidAppVersion()) {
+      // // initialize Android Auto Tabs with no content. Content will be updated as they are loaded to the global state.
+      // registerAndroidAutoModule()
+      // await requestDrawOverAppsPermission()
+    }
+    
     TrackPlayer.registerPlaybackService(() => require('./src/services/playerAudioEvents'))
     await PlayerAudioSetupService()
-    // Android Auto
-    if (Platform.OS === 'android') {
-      // initialize Android Auto Tabs with no content. Content will be updated as they are loaded to the global state.
-      // registerAndroidAutoModule()
-    }
 
     StatusBar.setBarStyle('light-content')
     Platform.OS === 'android' && StatusBar.setBackgroundColor(PV.Colors.ink, true)
@@ -112,7 +114,10 @@ class App extends Component<Props, State> {
     // iOS CarPlay
     // Platform.OS === 'ios' && unregisterCarModule(this.onConnect, this.onDisconnect)
     // Android Auto
-    // Platform.OS === 'android' && unregisterAndroidAutoModule()
+
+    // if (Platform.OS === 'android' && !checkIfFDroidAppVersion()) {
+    //   unregisterAndroidAutoModule()
+    // }
   }
 
   // onConnect = () => {
