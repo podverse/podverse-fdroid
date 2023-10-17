@@ -2,15 +2,18 @@ import AsyncStorage from '@react-native-community/async-storage'
 import { Platform } from 'react-native'
 import { Event, State } from 'react-native-track-player'
 import { getGlobal } from 'reactn'
+import { cleanVoiceCommandQuery, voicePlayNextQueuedItem, voicePlayNextSubscribedPodcast, voicePlayNowPlayingItem, voicePlayPodcastFromSearchAPI } from '../lib/voiceCommandHelpers'
 import { debugLogger, errorLogger } from '../lib/logger'
 import { PV } from '../resources'
 import { downloadedEpisodeMarkForDeletion } from '../state/actions/downloads'
 import {
   playerClearNowPlayingItem,
+  playerHandlePlayWithUpdate,
   playerHandleResumeAfterClipHasEnded,
   playerPlayNextChapterOrQueueItem,
   playerPlayPreviousChapterOrReturnToBeginningOfTrack
 } from '../state/actions/player'
+import { handleAABrowseMediaId, handlePlayRemoteMediaId } from '../lib/carplay/PVCarPlay.android'
 import PVEventEmitter from './eventEmitter'
 import {
   getClipHasEnded,
@@ -32,7 +35,7 @@ import {
   audioGetLoadedTrackIdByIndex,
   audioGetTrackDuration
 } from './playerAudio'
-import { handleBackgroundTimerInterval, syncAudioNowPlayingItemWithTrack } from './playerBackgroundTimer'
+import { debouncedHandleBackgroundTimerInterval, syncAudioNowPlayingItemWithTrack } from './playerBackgroundTimer'
 import { addOrUpdateHistoryItem, getHistoryItemEpisodeFromIndexLocally } from './userHistoryItem'
 import { getEnrichedNowPlayingItemFromLocalStorage, getNowPlayingItemLocally } from './userNowPlayingItem'
 
@@ -116,7 +119,7 @@ const syncDurationWithMetaData = async () => {
 
 export const audioHandleQueueEnded = (x: any) => {
   setTimeout(() => {
-    (async () => {
+    ;(async () => {
       PVEventEmitter.emit(PV.Events.PLAYER_DISMISS)
       await audioResetHistoryItemQueueEnded(x)
       await playerClearNowPlayingItem()
@@ -126,7 +129,7 @@ export const audioHandleQueueEnded = (x: any) => {
 
 export const audioHandleActiveTrackChanged = (x: any) => {
   setTimeout(() => {
-    (async () => {
+    ;(async () => {
       await audioResetHistoryItemActiveTrackChanged(x)
     })()
   }, 0)
@@ -198,7 +201,7 @@ module.exports = async () => {
   })
 
   PVAudioPlayer.addEventListener(Event.PlaybackState, (x) => {
-    (async () => {
+    ;(async () => {
       debugLogger('playback-state', x)
 
       // // Force global state to appear as playing since we expect it to play quickly,
@@ -321,7 +324,7 @@ module.exports = async () => {
   */
   let wasPausedByDuck = false
   PVAudioPlayer.addEventListener(Event.RemoteDuck, (x: any) => {
-    (async () => {
+    ;(async () => {
       debugLogger('remote-duck', x)
       const { paused, permanent } = x
       const currentState = await audioGetState()
@@ -354,6 +357,99 @@ module.exports = async () => {
   PVAudioPlayer.addEventListener(Event.PlaybackProgressUpdated, () => {
     // debugLogger('playback-progress-updated', x)
     const isVideo = false
-    handleBackgroundTimerInterval(isVideo)
+    debouncedHandleBackgroundTimerInterval(isVideo)
   })
+
+  // Android Auto Handlers
+  if (Platform.OS === 'android') {
+    PVAudioPlayer.addEventListener(Event.RemotePlayId, (e) => {
+      handlePlayRemoteMediaId(e.id)
+    })
+    PVAudioPlayer.addEventListener(Event.RemoteSkip, (e) => {
+      PVAudioPlayer.skip(e.index).then(() => PVAudioPlayer.play())
+    })
+    PVAudioPlayer.addEventListener(Event.RemoteBrowse, (e) => {
+      handleAABrowseMediaId(e.mediaId)
+    })
+    PVAudioPlayer.addEventListener(Event.RemotePlaySearch, (e) => {
+      /*
+        Sample event
+        {
+          "android.intent.extra.focus": "vnd.android.cursor.item/*",
+          "com.google.android.projection.gearhead.ignore_original_pkg": false,
+          "android.intent.extra.REFERRER_NAME":
+            "android-app://com.google.android.googlequicksearchbox/https/www.google.com",
+          "query": "Linux Unplugged in podverse",
+          "android.intent.extra.START_PLAYBACK": true,
+          "INTENT_EXTRA_INTENT_PKG_SENDER": "aap/com.google.android.googlequicksearchbox",
+          "opa_allow_launch_intent_on_lockscreen": true
+        }
+      */
+
+      /*
+        the remote search command basically works like this:
+        1) no query, just play
+        2) query, check if the nowPlayingItem.podcastTitle matches the query, and if found, play it
+        3) query, search queue for a podcast title in the queue that includes that query, and if found, play the first match
+        4) query, search subscribed podcasts for a podcast title that includes that query, and if found, play the first match
+        5) query, search Podverse API for a podcast title that includes that query, and if found, play the first match
+      */
+
+      console.log('Event.RemotePlaySearch', e)
+
+      ;(async () => {
+        const shouldPlay = e?.['android.intent.extra.START_PLAYBACK']
+  
+        if (!shouldPlay) {
+          return
+        }
+  
+        const cleanedQuery = cleanVoiceCommandQuery(e?.query)
+  
+        if (!cleanedQuery) {
+          playerHandlePlayWithUpdate()
+          return
+        }
+  
+        let shouldContinue = true
+
+        shouldContinue = voicePlayNowPlayingItem(cleanedQuery)
+
+        if (shouldContinue) {
+          shouldContinue = await voicePlayNextQueuedItem(cleanedQuery)
+        }
+
+        if (shouldContinue) {
+          shouldContinue = await voicePlayNextSubscribedPodcast(cleanedQuery)
+        }
+
+        if (shouldContinue) {
+          shouldContinue = await voicePlayPodcastFromSearchAPI(cleanedQuery)
+        }
+      })()
+    })
+
+    // TODO: handle skip next/previous via customActions in android auto
+    PVAudioPlayer.addEventListener(Event.RemoteCustomAction, (e) => {
+      console.log('Event.RemoteCustomAction', e)
+      switch (e.customAction) {
+        case 'customSkipPrev':
+          playerPlayPreviousChapterOrReturnToBeginningOfTrack()
+          break
+        case 'customSkipNext':
+          playerPlayNextChapterOrQueueItem()
+          break
+        case 'customJumpForward':
+          const { jumpBackwardsTime } = getGlobal()
+          audioJumpBackward(jumpBackwardsTime)
+          break
+        case 'customJumpBackward':
+          const { jumpForwardsTime } = getGlobal()
+          audioJumpForward(jumpForwardsTime)
+          break
+        default:
+          break
+      }
+    })
+  }
 }

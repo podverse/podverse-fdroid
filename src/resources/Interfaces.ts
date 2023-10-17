@@ -42,6 +42,7 @@ export interface GlobalTheme {
   player?: any
   playerClipTimeFlag?: any
   playerText?: any
+  sectionHeaderBackground?: any
   selectorText?: any
   swipeRowBack?: any
   swipeRowBackMultiple?: any
@@ -245,6 +246,7 @@ export interface InitialState {
   imageFullViewShow?: boolean
   refreshSubscriptionsOnLaunch?: boolean
   showPodcastsListPopover: boolean
+  slidingPositionOverride: number | null
 }
 
 export interface BannerInfoError {

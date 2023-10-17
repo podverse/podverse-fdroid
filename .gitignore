@@ -29,6 +29,7 @@ build/
 .gradle
 local.properties
 *.iml
+.settings
 
 # node.js
 #
@@ -57,11 +58,12 @@ buck-out/
 *.jsbundle
 .vscode/.react/
 
-# CocoaPods
-/ios/Pods/
+# all iOS
+/ios
 
 truffle.log
 
 stage_ssh_key
 
 main.js
+
