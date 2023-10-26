@@ -1,7 +1,7 @@
 - Hotfix for "loading startup loop" bug that was in v4.14.0.
+- Make the player screen load faster and smoother for Podcasting 2.0 enabled podcasts.
 - Fix bluetooth forward and backward time skip buttons.
 - Fix boost buttons not appearing issue.
-- Make the player screen load faster for Podcasting 2.0 enabled podcasts.
 - Add seasons, bonus content, and trailer handling to the Podcast screen.
 - Improve the speed of skip / previous track and chapter buttons.
 - Automatically turn autoscroll on when the chapters or transcripts appear on screen.
