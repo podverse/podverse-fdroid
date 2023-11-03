@@ -370,6 +370,8 @@ export class PodcastsScreen extends React.Component<Props, State> {
       //   .then(this.handleInitialNotification)
     }
 
+    // DEBUG: Make sure remote debugging is disabled in the dev environment
+    // or else initialUrl will always return null.
     Linking.getInitialURL().then((initialUrl) => {
       if (initialUrl) {
         this._handleOpenURLEvent({ url: initialUrl })
@@ -470,7 +472,7 @@ export class PodcastsScreen extends React.Component<Props, State> {
         // on the lock screen.
         // Source: https://github.com/react-native-kit/react-native-track-player/issues/921#issuecomment-686806847
         if (Platform.OS === 'ios') {
-          audioUpdateTrackPlayerCapabilities()
+          await audioUpdateTrackPlayerCapabilities()
         }
       }
 
@@ -580,14 +582,13 @@ export class PodcastsScreen extends React.Component<Props, State> {
             if (episode) {
               const podcast = await getPodcast(episode.podcast?.id)
 
-              handlePodcastScreenNavigateWithParams(
+              if (!podcast?.id && !episode?.id) return
+
+              navigateToEpisodeScreenInPodcastsStackNavigatorWithIds(
                 this.props.navigation,
                 podcast?.id,
-                podcast
+                episode.id
               )
-              navigate(PV.RouteNames.EpisodeScreen, {
-                episode
-              })
             }
           } else if (path === PV.DeepLinks.Playlist.pathPrefix) {
             await navigate(PV.RouteNames.MyLibraryScreen)
