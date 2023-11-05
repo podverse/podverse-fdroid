@@ -5,7 +5,6 @@ import React from 'reactn'
 import { ScrollView, SwitchWithText, View } from '../components'
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
-import { trackPageView } from '../services/tracking'
 import { core } from '../styles'
 
 type Props = {
@@ -37,8 +36,6 @@ export class SettingsScreenDebugging extends React.Component<Props, State> {
     this.setState({
       appKilledContinuePlayback: !!appKilledContinuePlayback
     })
-
-    trackPageView('/settings-debugging', 'Settings Screen Debugging')
   }
 
   _toggleAppKilledContinuePlayback = () => {
