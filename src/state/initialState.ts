@@ -155,9 +155,6 @@ const initialTheme: InitialState = {
         boost: [],
         streaming: []
       },
-      senderInfo: {
-        name: translate('anonymous')
-      },
       boostagramMessage: '',
       valueTimeSplitIsActive: false
     }

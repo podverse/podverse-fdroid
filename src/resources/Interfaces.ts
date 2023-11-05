@@ -222,7 +222,6 @@ export interface InitialState {
         boost: BannerInfoError[]
         streaming: BannerInfoError[]
       }
-      senderInfo: V4VSenderInfo
       boostagramMessage: string
       valueTimeSplitIsActive: boolean
     }
