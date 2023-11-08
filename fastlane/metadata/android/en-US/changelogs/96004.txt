@@ -1,0 +1,7 @@
+- Improved handling of Podcasting 2.0 chapters and value time splits.
+- Fixed the Downloaded filter on the Podcast screen. #2013
+- Made the boost sending experience faster. #2024
+- Fixed value for value unexpected log out bug. #2023
+- Fixed "anonymous" boost name bug. #2021
+- Fixed "boost fails to all recipients if one recipient should receive 0 amount" bug. #2025
+- Fixed the "Renew" button on the Extend Membership popup. #2008

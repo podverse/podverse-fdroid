@@ -283,7 +283,7 @@ export class PlayerScreen extends React.Component<Props> {
 
   render() {
     const { navigation } = this.props
-    const { currentChapter, player, screenPlayer } = this.global
+    const { currentTocChapter, player, screenPlayer } = this.global
     const { episode, nowPlayingItem } = player
     const { showShareActionSheet } = screenPlayer
     let { mediaRef } = player
@@ -295,7 +295,7 @@ export class PlayerScreen extends React.Component<Props> {
     const podcastId = nowPlayingItem ? nowPlayingItem.podcastId : null
     const episodeId = episode?.id || null
     const mediaRefId = mediaRef?.id || null
-    const chapterId = currentChapter?.id || null
+    const chapterId = currentTocChapter?.id || null
     const customRSSPodcastLink =
       nowPlayingItem?.addByRSSPodcastFeedUrl && nowPlayingItem.podcastLinkUrl ? nowPlayingItem.podcastLinkUrl : null
     const customRSSEpisodeLink =
