@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
 import { getAuthorityFeedUrlFromArray, Podcast } from 'podverse-shared'
-import { getGlobal } from 'reactn'
 import { setItemWithStorageCapacityCheck } from '../lib/asyncStorage'
 import { setDownloadedEpisodeLimit } from '../lib/downloadedEpisodeLimiter'
 import { getDownloadedPodcast, removeDownloadedPodcast } from '../lib/downloadedPodcast'
@@ -49,7 +48,9 @@ export const getPodcasts = async (query: any = {}) => {
     ...(query.sort ? { sort: query.sort } : {}),
     ...(searchAuthor ? { searchAuthor } : {}),
     ...(searchTitle ? { searchTitle } : {}),
-    ...(query.hasVideo ? { hasVideo: query.hasVideo } : {})
+    ...(query.hasVideo ? { hasVideo: true } : {}),
+    ...(query.isMusic ? { isMusic: true } : {}),
+    ...(query.podcastsOnly ? { podcastsOnly: true } : {})
   } as any
 
   if (query.categories) {
@@ -88,14 +89,10 @@ export const findPodcastsByFeedUrls = async (feedUrls: string[]) => {
 export const getSubscribedPodcasts = async (subscribedPodcastIds: string[], sort?: string | null) => {
   const addByRSSPodcasts = await getAddByRSSPodcastsLocally()
 
-  const { appMode } = getGlobal()
-  const videoOnlyMode = appMode === PV.AppMode.videos
-
   const query = {
     podcastIds: subscribedPodcastIds,
     sort: sort ? sort : PV.Filters._alphabeticalKey,
-    maxResults: true,
-    ...(videoOnlyMode ? { hasVideo: true } : {})
+    maxResults: true
   }
   const isConnected = await hasValidNetworkConnection()
 
@@ -127,9 +124,6 @@ export const getSubscribedPodcasts = async (subscribedPodcastIds: string[], sort
 }
 
 export const combineWithAddByRSSPodcasts = async (sort?: string | null) => {
-  const { appMode } = getGlobal()
-  const videoOnlyMode = appMode === PV.AppMode.videos
-
   const [subscribedPodcastsResults, addByRSSPodcastsResults] = await Promise.all([
     getSubscribedPodcastsLocally(),
     getAddByRSSPodcastsLocally()
@@ -137,11 +131,7 @@ export const combineWithAddByRSSPodcasts = async (sort?: string | null) => {
 
   const subscribedPodcasts =
     subscribedPodcastsResults[0] && Array.isArray(subscribedPodcastsResults[0]) ? subscribedPodcastsResults[0] : []
-  let addByRSSPodcasts = Array.isArray(addByRSSPodcastsResults) ? addByRSSPodcastsResults : []
-
-  if (videoOnlyMode) {
-    addByRSSPodcasts = addByRSSPodcasts.filter((podcast: any) => podcast.hasVideo)
-  }
+  const addByRSSPodcasts = Array.isArray(addByRSSPodcastsResults) ? addByRSSPodcastsResults : []
 
   const combinedPodcasts = [...subscribedPodcasts, ...addByRSSPodcasts]
 
@@ -170,20 +160,6 @@ export const getSubscribedPodcastsLocally = async () => {
   } else {
     return [[], 0]
   }
-}
-
-export const searchPodcasts = async (title?: string, author?: string) => {
-  const response = await request({
-    endpoint: '/podcast',
-    query: {
-      sort: PV.Filters._alphabeticalKey,
-      ...(title ? { title } : {}),
-      ...(author ? { author } : {}),
-      page: 1
-    }
-  })
-
-  return response && response.data
 }
 
 export const subscribeToPodcastIfNotAlready = async (
