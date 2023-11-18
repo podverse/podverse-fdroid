@@ -38,7 +38,6 @@ import PVEventEmitter from '../services/eventEmitter'
 import { getAddByRSSPodcastsLocally, parseAllAddByRSSPodcasts } from '../services/parser'
 import { getPodcasts } from '../services/podcast'
 import { getSavedQueryAlbumsScreenSort, setSavedQueryAlbumsScreenSort } from '../services/savedQueryFilters'
-import { trackPageView } from '../services/tracking'
 import { removeDownloadedPodcast } from '../state/actions/downloads'
 import { clearEpisodesCountForPodcast } from '../state/actions/newEpisodesCount'
 import {
@@ -191,7 +190,6 @@ export class AlbumsScreen extends React.Component<Props, State> {
   _initializeScreenData = async () => {
     await this._handleInitialDefaultQuery()
     await this._setDownloadedDataIfOffline()
-    trackPageView('/albums', 'Albums Screen')
   }
 
   _handleInitialDefaultQuery = async () => {
