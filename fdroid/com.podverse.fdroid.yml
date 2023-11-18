@@ -4309,7 +4309,7 @@ Builds:
       - node_modules/@react-native-community/netinfo/android/build.gradle
     scandelete:
       - node_modules
-    ndk: 23c
+    ndk: 24.0.8215888
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
