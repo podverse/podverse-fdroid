@@ -1,0 +1,3 @@
+- Add Music Albums screen to My Library.
+- Add auto-play next episode from podcast.
+- Add auto-play next track from album.

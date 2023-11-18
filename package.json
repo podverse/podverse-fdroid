@@ -1,6 +1,6 @@
 {
   "name": "podverse",
-  "version": "4.14.3",
+  "version": "4.15.0",
   "private": true,
   "contributors": [
     "Creon Creonopoulos",
@@ -54,7 +54,7 @@
     "@types/qs": "^6.9.7",
     "@types/react-native-video": "^5.0.9",
     "@types/validator": "12.0.1",
-    "axios": "0.25.0",
+    "axios": "1.6.0",
     "bad-words": "3.0.3",
     "base-64": "^1.0.0",
     "bottleneck": "2.19.5",
@@ -68,8 +68,9 @@
     "m3u8-parser": "^6.0.0",
     "moment": "^2.29.4",
     "p-limit": "^4.0.0",
-    "podverse-shared": "^4.14.14",
+    "podverse-shared": "^4.14.17",
     "qs": "^6.11.0",
+    "queue-promise": "^2.2.1",
     "react": "17.0.1",
     "react-native": "0.66.5",
     "react-native-background-downloader": "^2.3.4",

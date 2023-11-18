@@ -27,6 +27,7 @@ type Props = {
   itemType: 'episode' | 'clip' | 'chapter'
   loadChapterOnPlay?: boolean
   mediaFileDuration?: number | undefined
+  playlistId?: string
   progressFullWidth?: boolean
   style?: any
   testID: string
@@ -91,6 +92,7 @@ export const TimeRemainingWidget = (props: Props) => {
     itemType,
     loadChapterOnPlay,
     mediaFileDuration,
+    playlistId,
     progressFullWidth,
     style,
     testID,
@@ -146,10 +148,12 @@ export const TimeRemainingWidget = (props: Props) => {
     } else if (isNowPlayingItem) {
       playerTogglePlay()
     } else {
-      const forceUpdateOrderDate = false
-      const shouldPlay = true
-      const setCurrentItemNextInQueue = true
-      await playerLoadNowPlayingItem(convertedItem, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
+      await playerLoadNowPlayingItem(convertedItem, {
+        forceUpdateOrderDate: false,
+        setCurrentItemNextInQueue: true,
+        shouldPlay: true,
+        secondaryQueuePlaylistId: playlistId
+      })
 
       setTimeout(() => {
         setForceRerender(!forceRerender)
