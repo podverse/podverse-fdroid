@@ -8,7 +8,7 @@ buildscript {
         targetSdkVersion = 33
         supportLibVersion = "30.0.2"
         kotlinVersion = '1.6.10'
-        ndkVersion = '23.2.8568313'
+        ndkVersion = '23'
         androidXCore = "1.7.0"
     }
     repositories {
