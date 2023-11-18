@@ -39,7 +39,6 @@ import {
   savePodcastCredentials
 } from '../services/parser'
 import { getPodcast } from '../services/podcast'
-import { getTrackingIdText, trackPageView } from '../services/tracking'
 import * as DownloadState from '../state/actions/downloads'
 import { toggleAddByRSSPodcastFeedUrl } from '../state/actions/parser'
 import { playerLoadNowPlayingItem } from '../state/actions/player'
@@ -216,13 +215,6 @@ export class AlbumScreen extends React.Component<Props, State> {
       },
       () => {
         this._initializePageData()
-
-        const titleToEncode = podcast ? podcast.title : translate('no info available')
-        trackPageView(
-          '/album/' + getTrackingIdText(podcastId, !!addByRSSPodcastFeedUrl),
-          'Album Screen - ',
-          titleToEncode
-        )
       }
     )
   }
