@@ -4265,7 +4265,7 @@ Builds:
     ndk: 23.2.8568313
 
   - versionName: 4.15.0-beta.1
-    versionCode: 1700281421
+    versionCode: 1700498604
     commit: 4.15.0-beta.1
     subdir: android/app
     sudo:
@@ -4315,4 +4315,4 @@ AutoUpdateMode: Version
 UpdateCheckMode: Tags ^[0-9.]+$
 UpdateCheckData: android/app/build.gradle|versionCode\s(\d+)|.|versionName\s"(.+)"
 CurrentVersion: 4.15.0-beta.1
-CurrentVersionCode: 1700281421
+CurrentVersionCode: 1700498604
