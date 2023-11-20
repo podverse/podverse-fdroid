@@ -7,6 +7,7 @@ import { ActivityIndicator, Icon, ScrollView, SwitchWithText, Text, View } from 
 import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { setAutoQueueDownloadsOn, updateAutoQueueSettingsPosition } from '../state/actions/autoQueue'
+import { setQueueEnabledWhileMusicIsPlaying } from '../state/actions/queue'
 import { setAddCurrentItemNextInQueue } from '../state/actions/settings'
 import { core, darkTheme, hidePickerIconOnAndroidTransparent } from '../styles'
 
@@ -61,9 +62,15 @@ export class SettingsScreenQueue extends React.Component<Props, State> {
     setAutoQueueDownloadsOn(!autoQueueDownloadsOn)
   }
 
+  _toggleEnableQueueWhileMusicIsPlaying = () => {
+    const queueEnabledWhileMusicIsPlaying = this.global?.player?.queueEnabledWhileMusicIsPlaying
+    setQueueEnabledWhileMusicIsPlaying(!queueEnabledWhileMusicIsPlaying)
+  }
+
   render() {
     const { isLoading } = this.state
     const { addCurrentItemNextInQueue, autoQueueSettingsPosition, autoQueueDownloadsOn, globalTheme } = this.global
+    const queueEnabledWhileMusicIsPlaying = this.global?.player?.queueEnabledWhileMusicIsPlaying
     const isDarkMode = globalTheme === darkTheme
 
     const autoQueueOptionSelected = PV.Queue.autoQueuePositionOptions.find((option: any) => {
@@ -78,6 +85,15 @@ export class SettingsScreenQueue extends React.Component<Props, State> {
         {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
         {!isLoading && (
           <>
+           <View style={core.itemWrapper}>
+              <SwitchWithText
+                onValueChange={this._toggleEnableQueueWhileMusicIsPlaying}
+                accessibilityLabel={translate('Settings - Queue - enable queue while music is playing')}
+                testID={`${testIDPrefix}_enable_queue_while_music`}
+                text={translate('Settings - Queue - enable queue while music is playing')}
+                value={!!queueEnabledWhileMusicIsPlaying}
+              />
+            </View>
             <View style={core.itemWrapper}>
               <SwitchWithText
                 onValueChange={this._toggleAddCurrentItemNextInQueue}
