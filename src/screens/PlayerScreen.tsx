@@ -160,7 +160,7 @@ export class PlayerScreen extends React.Component<Props> {
       if (!!nowPlayingItem) {
         await playerUpdateUserPlaybackPosition(skipSetNowPlaying, shouldAwait)
       }
-      await getHistoryItems(1, [])
+      await getHistoryItems(1)
     } catch (error) {
       errorLogger(_fileName, 'componentWillUnmount', error)
     }

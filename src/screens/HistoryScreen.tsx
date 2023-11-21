@@ -105,7 +105,7 @@ export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
     })
 
     try {
-      await getHistoryItems(1, [])
+      await getHistoryItems(1)
       this.setState({
         isLoading: false
       })
@@ -157,6 +157,7 @@ export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
           }
         }}
         podcastImageUrl={item?.podcastImageUrl}
+        podcastMedium={item?.podcastMedium}
         {...(item?.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
         showRemoveButton={isEditing}
         testID={`${testIDPrefix}_history_item_${index}`}
@@ -232,15 +233,14 @@ export class HistoryScreen extends HistoryIndexListenerScreen<Props, State> {
   }
 
   _queryData = async (page = 1) => {
-    const { historyItemsCount, historyItems = [] } = this.global.session.userInfo
     const newState = {
       isLoading: false,
       isLoadingMore: false
     } as State
 
     try {
-      const newHistoryItems = await getHistoryItems(page || 1, historyItems)
-      newState.endOfResultsReached = newHistoryItems.length >= historyItemsCount
+      const endOfResultsReached = await getHistoryItems(page || 1)
+      newState.endOfResultsReached = endOfResultsReached
       newState.queryPage = page
       this.shouldLoad = true
       return newState
