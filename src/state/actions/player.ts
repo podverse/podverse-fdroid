@@ -287,7 +287,9 @@ export const playerLoadNowPlayingItem = async (
   const globalState = getGlobal()
   const { nowPlayingItem: previousNowPlayingItem } = globalState.player
 
-  if (item) {
+  if (!!item?.episodeId) {
+    showMiniPlayer()
+
     await clearEnrichedPodcastDataIfNewEpisode(previousNowPlayingItem, item)
 
     if (item.clipIsOfficialChapter) {
@@ -319,8 +321,6 @@ export const playerLoadNowPlayingItem = async (
         secondaryQueuePlaylistId
       }
     )
-
-    showMiniPlayer()
   }
 
   setGlobal(

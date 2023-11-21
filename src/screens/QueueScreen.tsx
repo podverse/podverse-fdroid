@@ -201,7 +201,7 @@ export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
         await getQueueItems()
         this.setState({ isLoading: false, isLoadingMore: false })
       } else if (x === _historyKey) {
-        await getHistoryItems(1, [])
+        await getHistoryItems(1)
         this.setState({ isLoading: false, isLoadingMore: false })
       }
     } catch (error) {
@@ -269,6 +269,7 @@ export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
             }
           }}
           podcastImageUrl={item.podcastImageUrl}
+          podcastMedium={item?.podcastMedium}
           {...(item?.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
           showRemoveButton={isEditing}
           testID={`${testIDPrefix}_history_item_${index}`}
@@ -300,6 +301,7 @@ export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
         mediaFileDuration={mediaFileDuration}
         onPress={() => this._onPressRow(index)}
         podcastImageUrl={item.podcastImageUrl}
+        podcastMedium={item?.podcastMedium}
         {...(item?.podcastTitle ? { podcastTitle: item.podcastTitle } : {})}
         showMoveButton={!isEditing}
         showRemoveButton={isEditing}
@@ -420,7 +422,7 @@ export class QueueScreen extends HistoryIndexListenerScreen<Props, State> {
       const endOfResultsReached = historyItems && historyItems.length <= historyItemsCount
 
       if (endOfResultsReached) {
-        await getHistoryItems(queryPage + 1, historyItems || [])
+        await getHistoryItems(queryPage + 1)
         const endOfResultsReached = historyItems && historyItems.length >= historyItemsCount
         this.shouldLoad = true
         this.setState({ isLoading: false, isLoadingMore: false, endOfResultsReached })
