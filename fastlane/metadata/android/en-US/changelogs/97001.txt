@@ -2,3 +2,6 @@
 - Add auto-play next episode from podcast.
 - Add auto-play next track from album.
 - Add auto-play next item from playlist.
+- Improved "Add to Playlist" functionality.
+- Add a Heart (quick save) function while listening to a podcast with time splits.
+- Fix "no audio" bug that was happening with some videos.
