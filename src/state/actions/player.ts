@@ -26,7 +26,7 @@ import {
   playerGetPosition
 } from '../../services/player'
 import { audioPlayPreviousFromQueue } from '../../services/playerAudio'
-import { getNextFromQueue, getQueueRepeatModeMusic } from '../../services/queue'
+import { getAutoPlayEpisodesFromPodcast, getNextFromQueue, getQueueRepeatModeMusic } from '../../services/queue'
 import { initSleepTimerDefaultTimeRemaining } from '../../services/sleepTimer'
 import { addOrUpdateHistoryItem } from '../../services/userHistoryItem'
 import {
@@ -457,13 +457,15 @@ export const initializePlayerSettings = async () => {
     hidePlaybackSpeedButton,
     remoteSkipButtonsAreTimeJumps,
     queueRepeatModeMusic,
-    queueEnabledWhileMusicIsPlaying
+    queueEnabledWhileMusicIsPlaying,
+    autoPlayEpisodesFromPodcast,
   ] = await Promise.all([
     AsyncStorage.getItem(PV.Keys.PLAYER_PLAYBACK_SPEED),
     AsyncStorage.getItem(PV.Keys.PLAYER_HIDE_PLAYBACK_SPEED_BUTTON),
     getRemoteSkipButtonsTimeJumpOverride(),
     getQueueRepeatModeMusic(),
-    AsyncStorage.getItem(PV.Keys.QUEUE_ENABLED_WHILE_MUSIC_IS_PLAYING)
+    AsyncStorage.getItem(PV.Keys.QUEUE_ENABLED_WHILE_MUSIC_IS_PLAYING),
+    getAutoPlayEpisodesFromPodcast()
   ])
 
   let playbackSpeed = 1
@@ -479,7 +481,8 @@ export const initializePlayerSettings = async () => {
       hidePlaybackSpeedButton: !!hidePlaybackSpeedButton,
       remoteSkipButtonsAreTimeJumps: !!remoteSkipButtonsAreTimeJumps,
       queueRepeatModeMusic,
-      queueEnabledWhileMusicIsPlaying
+      queueEnabledWhileMusicIsPlaying,
+      autoPlayEpisodesFromPodcast
     }
   })
 }
