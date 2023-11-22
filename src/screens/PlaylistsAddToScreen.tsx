@@ -1,4 +1,4 @@
-import { isOdd } from 'podverse-shared'
+import { Playlist, PodcastMedium, isOdd } from 'podverse-shared'
 import { Alert, StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 import {
@@ -30,6 +30,7 @@ type State = {
   isLoading: boolean
   isSavingId?: string
   mediaRefId?: string
+  medium: PodcastMedium
   newPlaylistTitle?: string
   showNewPlaylistDialog?: boolean
 }
@@ -44,7 +45,8 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
     this.state = {
       episodeId: navigation.getParam('episodeId'),
       isLoading: true,
-      mediaRefId: navigation.getParam('mediaRefId')
+      mediaRefId: navigation.getParam('mediaRefId'),
+      medium: navigation.getParam('medium') || PV.Medium.mixed
     }
 
     navigation.setParams({ isLoggedIn })
@@ -141,6 +143,8 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         hasZebraStripe={isOdd(index)}
         isSaving={item.id && item.id === isSavingId}
         itemCount={item.itemCount}
+        itemId={episodeId || mediaRefId}
+        itemsOrder={item.itemsOrder}
         onPress={() => {
           try {
             this.setState(
@@ -149,7 +153,11 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
               },
               () => {
                 (async () => {
-                  await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
+                  try {
+                    await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
+                  } catch (error) {
+                    //
+                  }
                   this.setState({ isSavingId: '' })
                 })()
               }
@@ -168,10 +176,15 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
   _onPressLogin = () => this.props.navigation.navigate(PV.RouteNames.AuthScreen)
 
   render() {
-    const { isLoading, newPlaylistTitle, showNewPlaylistDialog } = this.state
+    const { isLoading, medium, newPlaylistTitle, showNewPlaylistDialog } = this.state
     const { playlists, session } = this.global
     const { myPlaylists } = playlists
     const { isLoggedIn } = session
+
+    // Don't include playlists that are incompatible with the item on
+    // the PlaylistsAddToScreen's medium type.
+    const finalPlaylists = myPlaylists?.filter((myPlaylist: Playlist) =>
+      myPlaylist?.medium === PV.Medium.mixed || myPlaylist?.medium === medium)
 
     return (
       <View style={styles.view} testID={`${testIDPrefix}_view`}>
@@ -186,11 +199,11 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         {isLoggedIn && (
           <View style={styles.view}>
             {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
-            {!isLoading && myPlaylists && (
+            {!isLoading && finalPlaylists && (
               <FlatList
-                data={myPlaylists}
-                dataTotalCount={myPlaylists.length}
-                extraData={myPlaylists}
+                data={finalPlaylists}
+                dataTotalCount={finalPlaylists.length}
+                extraData={finalPlaylists}
                 ItemSeparatorComponent={this._ItemSeparatorComponent}
                 keyExtractor={(item: any, index: number) => `myPlaylists_${index}`}
                 noResultsMessage={translate('No playlists found')}
