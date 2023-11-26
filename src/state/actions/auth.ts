@@ -12,6 +12,7 @@ import {
   login,
   signUp
 } from '../../services/auth'
+import PVEventEmitter from '../../services/eventEmitter'
 import { checkIfNotificationsEnabled } from '../../services/notifications'
 import { getPodcastCredentials, parseAllAddByRSSPodcasts,
   setAddByRSSPodcastFeedUrlsLocally } from '../../services/parser'
@@ -127,10 +128,11 @@ export const askToSyncWithNowPlayingItem = async (callback?: any) => {
         await setNowPlayingItemLocally(serverNowPlayingItem, serverNowPlayingItem.userPlaybackPosition || 0)
       }
     }
-    callback?.()
   } catch (error) {
     errorLogger(_fileName, 'askToSyncWithNowPlayingItem error', error)
   }
+
+  callback?.()
 }
 
 // If a new player item should be loaded, the local history/queue must be up-to-date
@@ -177,6 +179,7 @@ export const loginUser = async (credentials: Credentials) => {
             await askToSyncWithNowPlayingItem()
             await parseAllAddByRSSPodcasts()
             await combineWithAddByRSSPodcasts()
+            PVEventEmitter.emit(PV.Events.USER_LOGGED_IN)
           }
           askToSyncLocalPodcastsWithServer(localUserInfo, serverUserInfo, callback)
         } catch (error) {

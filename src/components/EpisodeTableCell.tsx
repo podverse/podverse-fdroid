@@ -21,6 +21,7 @@ type Props = {
   item?: any
   mediaFileDuration?: number
   navigation: any
+  playlistId?: string
   shouldHideCompleted?: boolean
   showPodcastInfo?: boolean
   testID: string
@@ -40,6 +41,7 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
       hideImage,
       item,
       mediaFileDuration,
+      playlistId,
       shouldHideCompleted,
       showPodcastInfo,
       testID,
@@ -220,6 +222,7 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
                   item={item}
                   itemType='episode'
                   mediaFileDuration={mediaFileDuration}
+                  playlistId={playlistId}
                   testID={testID}
                   timeLabel={timeLabel}
                   userPlaybackPosition={userPlaybackPosition}
@@ -236,13 +239,12 @@ export class EpisodeTableCell extends React.PureComponent<Props> {
 const styles = StyleSheet.create({
   outerView: {
     borderWidth: 2,
-    borderStyle: 'solid',
-    marginVertical: 5
+    borderStyle: 'solid'
   },
   description: {
     fontSize: PV.Fonts.sizes.sm,
     color: PV.Colors.grayLighter,
-    marginTop: 12
+    marginTop: 10
   },
   image: {
     flex: 0,
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
   wrapper: {
     paddingBottom: 14,
     paddingHorizontal: 8,
-    paddingTop: 16
+    paddingTop: 14
   },
   wrapperTop: {
     flexDirection: 'row',

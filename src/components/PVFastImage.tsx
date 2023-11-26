@@ -5,6 +5,8 @@ import React from 'reactn'
 import { translate } from '../lib/i18n'
 import { downloadImageFile, getSavedImageUri } from '../lib/storage'
 import { PV } from '../resources'
+import { getEpisode } from '../services/episode'
+import { addOrRemovePlaylistItemToDefaultPlaylist } from '../state/actions/playlist'
 import { Icon, LightningIcon, LiveStatusBadge, NewContentBadge, Text } from '.'
 const PlaceholderImage = PV.Images.PLACEHOLDER.default
 
@@ -12,11 +14,12 @@ type Props = {
   accessible?: boolean
   allowFullView?: boolean
   cache?: string
+  currentChapter?: any
   isAddByRSSPodcast?: boolean
   isAddByRSSPodcastLarger?: boolean
-  isSmall?: boolean
   isTabletGridView?: boolean
   linkButtonUrl?: string
+  navigation?: any
   newContentCount?: number
   placeholderLabel?: string
   resizeMode?: any
@@ -98,6 +101,52 @@ export class PVFastImage extends React.PureComponent<Props, State> {
     PV.Alerts.LEAVING_APP_ALERT(url)
   }
 
+  checkIfVTS = () => {
+    const { currentChapter } = this.props
+    return !!currentChapter?.remoteEpisodeId
+  }
+
+  checkIfVTSIsInDefaultPlaylist = () => {
+    const { currentChapter } = this.props
+    const myPlaylists = this.global?.playlists?.myPlaylists || []
+    const remoteMedium = currentChapter?.remoteMedium
+    const localDefaultPlaylist = myPlaylists.find((playlist: any) =>
+      playlist.isDefault && playlist.medium === remoteMedium)
+    let isInDefaultPublic = false
+    if (localDefaultPlaylist) {
+      isInDefaultPublic = localDefaultPlaylist
+        .itemsOrder?.some((itemId: string) => itemId === currentChapter?.remoteEpisodeId)
+    }
+
+    return isInDefaultPublic
+  }
+
+  handleLikePress = async () => {
+    const { currentChapter, navigation } = this.props
+
+    const isVTS = this.checkIfVTS()
+    let isInDefaultPlaylist = false
+    if (isVTS) {
+      isInDefaultPlaylist = this.checkIfVTSIsInDefaultPlaylist()
+    }
+
+    if (isInDefaultPlaylist && currentChapter?.remoteEpisodeId) {
+      const episode = await getEpisode(currentChapter.remoteEpisodeId)
+      navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { episode })
+    } else if (!isInDefaultPlaylist && currentChapter?.remoteEpisodeId) {
+      await addOrRemovePlaylistItemToDefaultPlaylist(currentChapter.remoteEpisodeId)
+    }
+  }
+
+  handleLikeLongPress = async () => {
+    const { currentChapter, navigation } = this.props
+
+    if (currentChapter?.remoteEpisodeId) {
+      const episode = await getEpisode(currentChapter.remoteEpisodeId)
+      navigation.navigate(PV.RouteNames.PlaylistsAddToScreen, { episode })
+    }
+  }
+
   render() {
     const {
       accessible = false,
@@ -119,6 +168,7 @@ export class PVFastImage extends React.PureComponent<Props, State> {
     const showLightningIcons = session?.v4v?.showLightningIcons
     let imageSource = source
     let isValid = false
+
     if (localImageSource.exists) {
       imageSource = 'file://' + localImageSource.imageUrl
       isValid = true
@@ -137,6 +187,16 @@ export class PVFastImage extends React.PureComponent<Props, State> {
     const lightningIconStyles = isTabletGridView
       ? [defaultStyles.lightningIcon, defaultStyles.lightningIconLarge]
       : [defaultStyles.lightningIcon]
+
+    const isVTS = this.checkIfVTS()
+    let isInDefaultPlaylist = false
+    if (isVTS) {
+      isInDefaultPlaylist = this.checkIfVTSIsInDefaultPlaylist()
+    }
+
+    const heartButtonIconStyles = isInDefaultPlaylist
+      ? [defaultStyles.heartButtonIcon, globalTheme.buttonActive]
+      : [defaultStyles.heartButtonIcon]
 
     const image = isSvg ? (
       <Pressable disabled={!allowFullView} onPress={this._showImageFullView}>
@@ -163,6 +223,19 @@ export class PVFastImage extends React.PureComponent<Props, State> {
           {!!showLiveIndicator && (
             <View style={defaultStyles.liveStatusBadge}>
               <LiveStatusBadge />
+            </View>
+          )}
+          {isVTS && (
+            <View style={defaultStyles.heartButton}>
+              <Icon
+                accessible={false}
+                name='heart'
+                onPress={this.handleLikePress}
+                onLongPress={this.handleLikeLongPress}
+                solid={isInDefaultPlaylist}
+                size={14}
+                style={heartButtonIconStyles}
+              />
             </View>
           )}
           {!!linkButtonUrl && (
@@ -262,10 +335,31 @@ const defaultStyles = StyleSheet.create({
     minWidth: 36,
     minHeight: 36
   },
+  heartButton: {
+    position: 'absolute',
+    zIndex: 1000001,
+    right: 24,
+    top: 7,
+    backgroundColor: PV.Colors.blackOpaque,
+    width: 48,
+    height: 48,
+    borderRadius: 48,
+    borderColor: PV.Colors.gray,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1
+  },
+  heartButtonIcon: {
+    color: PV.Colors.white,
+    fontSize: 23,
+    paddingTop: 2
+  },
   linkButton: {
     position: 'absolute',
     zIndex: 1000001,
-    right: 26,
+    right: 24,
     bottom: 7,
     backgroundColor: PV.Colors.blackOpaque,
     width: 48,

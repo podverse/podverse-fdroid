@@ -1,6 +1,5 @@
 import { Dimensions } from 'react-native'
 import { isPortrait, pvIsTablet } from '../lib/deviceDetection'
-import { translate } from '../lib/i18n'
 import { PV } from '../resources'
 import { InitialState } from '../resources/Interfaces'
 import { v4vSettingsDefault } from './actions/v4v/v4v'
@@ -71,7 +70,10 @@ const initialTheme: InitialState = {
       videoPosition: 0
     },
     hidePlaybackSpeedButton: false,
-    remoteSkipButtonsAreTimeJumps: true
+    remoteSkipButtonsAreTimeJumps: true,
+    queueRepeatModeMusic: 'off',
+    queueEnabledWhileMusicIsPlaying: false,
+    autoPlayEpisodesFromPodcast: 'off'
   },
   playlists: {
     myPlaylists: [],
@@ -164,7 +166,6 @@ const initialTheme: InitialState = {
   urlsAPI: null,
   urlsWeb: null,
   userAgent: '',
-  appMode: 'podcasts',
   bannerInfo: {
     show: false,
     description: ''

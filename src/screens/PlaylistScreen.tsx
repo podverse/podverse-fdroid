@@ -11,6 +11,7 @@ import {
   FlatList,
   NavShareIcon,
   PlaylistTableHeader,
+  TrackTableCell,
   View
 } from '../components'
 import { downloadEpisode } from '../lib/downloader'
@@ -20,6 +21,7 @@ import { alertIfNoNetworkConnection } from '../lib/network'
 import { safeKeyExtractor, safelyUnwrapNestedVariable } from '../lib/utility'
 import { PV } from '../resources'
 import { getHistoryItemIndexInfoForEpisode } from '../services/userHistoryItem'
+import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { getPlaylist, toggleSubscribeToPlaylist } from '../state/actions/playlist'
 import { core } from '../styles'
 import { HistoryIndexListenerScreen } from './HistoryIndexListenerScreen'
@@ -135,12 +137,15 @@ export class PlaylistScreen extends HistoryIndexListenerScreen<Props, State> {
 
   _renderItem = ({ item, index }) => {
     const { navigation } = this.props
+    const { playlistId } = this.state
+
     if (item.startTime) {
       return item.episode && item.episode.podcast ? (
         <ClipTableCell
           handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null))}
           item={item}
           navigation={navigation}
+          playlistId={playlistId}
           showEpisodeInfo
           showPodcastInfo
           testID={`${testIDPrefix}_clip_item_${index}`}
@@ -148,9 +153,27 @@ export class PlaylistScreen extends HistoryIndexListenerScreen<Props, State> {
       ) : (
         <></>
       )
+    } else if (item.podcast?.medium === PV.Medium.music) {
+      const userPlaybackPosition = 0
+      return (
+        <TrackTableCell
+          episode={item}
+          handleMorePress={() => this._handleMorePress(convertToNowPlayingItem(item, null, null, userPlaybackPosition))}
+          handlePlayPress={async () => {
+            await playerLoadNowPlayingItem(convertToNowPlayingItem(item), {
+              forceUpdateOrderDate: false,
+              setCurrentItemNextInQueue: true,
+              shouldPlay: true,
+              secondaryQueuePlaylistId: playlistId
+            })    
+          }}
+          hideImage={false}
+          showArtist
+          testID={`${testIDPrefix}_track_item_${index}`}
+        />
+      )
     } else {
       const { mediaFileDuration, userPlaybackPosition } = getHistoryItemIndexInfoForEpisode(item.id)
-
       return (
         <EpisodeTableCell
           handleDownloadPress={() => this._handleDownloadPressed(item)}
@@ -162,6 +185,7 @@ export class PlaylistScreen extends HistoryIndexListenerScreen<Props, State> {
           item={item}
           mediaFileDuration={mediaFileDuration}
           navigation={navigation}
+          playlistId={playlistId}
           showPodcastInfo
           testID={`${testIDPrefix}_episode_item_${index}`}
           userPlaybackPosition={userPlaybackPosition}
@@ -277,7 +301,11 @@ export class PlaylistScreen extends HistoryIndexListenerScreen<Props, State> {
                 includeGoToPodcast: true,
                 includeGoToEpisodeInEpisodesStack: true
               },
-              !!selectedItem?.startTime ? 'clip' : 'episode'
+              selectedItem?.podcastMedium === PV.Medium.music
+                ? 'album'
+                : !!selectedItem?.startTime
+                    ? 'clip'
+                    : 'episode'
             )
           }
           showModal={showActionSheet}

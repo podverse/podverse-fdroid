@@ -1,6 +1,7 @@
 import React from 'react'
 import { AccessibilityRole, View as RNView } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
 import { useGlobal } from 'reactn'
 import { ImportantForAccessibility } from '../lib/accessibilityHelpers'
 import { darkTheme, iconStyles } from '../styles'
@@ -15,7 +16,9 @@ type Props = {
   color?: string
   importantForAccessibility?: ImportantForAccessibility
   isSecondary?: boolean
+  materialIconName?: string
   name: string
+  onLongPress?: any
   onPress?: any
   size: number
   solid?: boolean
@@ -34,7 +37,9 @@ export const PVIcon = (props: Props) => {
     color: colorOverride,
     importantForAccessibility,
     isSecondary,
+    materialIconName,
     name,
+    onLongPress,
     onPress,
     size,
     solid,
@@ -52,12 +57,22 @@ export const PVIcon = (props: Props) => {
     ? iconStyles.lightSecondary.color
     : iconStyles.light.color
 
-  const icon = (
+  const icon = !materialIconName ? (
     <Icon
       {...(accessible === false ? { accessible: false } : {})}
       {...(brand ? { brand } : {})}
       color={colorOverride || color}
       name={name}
+      size={size}
+      {...(solid ? { solid } : {})}
+      {...(style ? { style } : {})}
+    />
+  ) : (
+    <MaterialIcon
+      {...(accessible === false ? { accessible: false } : {})}
+      {...(brand ? { brand } : {})}
+      color={colorOverride || color}
+      name={materialIconName}
       size={size}
       {...(solid ? { solid } : {})}
       {...(style ? { style } : {})}
@@ -77,6 +92,7 @@ export const PVIcon = (props: Props) => {
             right: 8,
             top: 8
           }}
+          onLongPress={onLongPress}
           onPress={onPress}
           {...(testID ? { testID: `${testID}_icon_button`.prependTestId() } : {})}>
           <RNView style={wrapperStyle}>{icon}</RNView>

@@ -115,39 +115,17 @@ type State = {
 const testIDPrefix = 'podcast_screen'
 
 const getScreenTitle = () => {
-  const { appMode } = getGlobal()
-  let screenTitle = translate('Podcast')
-
-  if (appMode === PV.AppMode.videos) {
-    screenTitle = translate('Channel')
-  }
-
+  const screenTitle = translate('Podcast')
   return screenTitle
 }
 
-const getSearchPlaceholder = (viewType: string) => {
-  const { appMode } = getGlobal()
-  let searchPlaceholder = translate('Search episodes')
-
-  if (viewType === PV.Filters._clipsKey) {
-    searchPlaceholder = translate('Search clips')
-  } else {
-    if (appMode === PV.AppMode.videos) {
-      searchPlaceholder = translate('Search videos')
-    }
-  }
-
+const getSearchPlaceholder = () => {
+  const searchPlaceholder = translate('Search podcasts')
   return searchPlaceholder
 }
 
 const getDefaultSelectedFilterLabel = () => {
-  const { appMode } = getGlobal()
-  let defaultSelectedFilterLabel = translate('Episodes')
-
-  if (appMode === PV.AppMode.videos) {
-    defaultSelectedFilterLabel = translate('Videos')
-  }
-
+  const defaultSelectedFilterLabel = translate('Episodes')
   return defaultSelectedFilterLabel
 }
 
@@ -382,16 +360,21 @@ export class PodcastScreen extends React.Component<Props, State> {
                 // but not with our Flatlist for some reason. As a result I'm only calling
                 // scrollToOffset in addition to setting contentOffset.
                 // The setTimeout is necessary for some render timing reason...
-                setTimeout(() => {
-                  this.listRef?.scrollToOffset?.({
-                    animated: false,
-                    offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
-                  })
-                  this.listStickyRef?.scrollToOffset?.({
-                    animated: false,
-                    offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
-                  })
-                }, 0)
+
+                const flatListDataTotalCount = newState?.flatListDataTotalCount
+                const shouldShowSearchBar = flatListDataTotalCount && flatListDataTotalCount > 3
+                if (shouldShowSearchBar) {
+                  setTimeout(() => {
+                    this.listRef?.scrollToOffset?.({
+                      animated: false,
+                      offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
+                    })
+                    this.listStickyRef?.scrollToOffset?.({
+                      animated: false,
+                      offset: PV.FlatList.ListHeaderHiddenSearchBar.contentOffset.y
+                    })
+                  }, 0)
+                }
               }
             )
           } catch (error) {
@@ -503,7 +486,7 @@ export class PodcastScreen extends React.Component<Props, State> {
       !endOfResultsReached &&
       this.shouldLoad
     ) {
-      if (distanceFromEnd > -1) {
+      // if (distanceFromEnd > -1) {
         this.shouldLoad = false
         this.setState(
           {
@@ -519,7 +502,7 @@ export class PodcastScreen extends React.Component<Props, State> {
             })()
           }
         )
-      }
+      // }
     }
   }
 
@@ -625,6 +608,10 @@ export class PodcastScreen extends React.Component<Props, State> {
         (hideCompleted && viewType === PV.Filters._episodesKey && completed) ||
         (!hideCompleted && viewType === PV.Filters._hideCompletedKey && completed)
 
+      if (shouldHideCompleted) {
+        return <></>
+      }
+
       return (
         <EpisodeTableCell
           handleDeletePress={() => this._handleDeleteEpisode(item)}
@@ -673,7 +660,8 @@ export class PodcastScreen extends React.Component<Props, State> {
   }
 
   _handleToggleDeleteDownloadedEpisodesDialog = () => {
-    const DOWNLOADED_EPISODES_DELETE = PV.Alerts.DOWNLOADED_EPISODES_DELETE(() => this._handleDeleteDownloadedEpisodes)
+    const DOWNLOADED_EPISODES_DELETE = PV.Alerts.DOWNLOADED_EPISODES_DELETE(
+      this._handleDeleteDownloadedEpisodesForThisPodcast)
     Alert.alert(
       DOWNLOADED_EPISODES_DELETE.title,
       DOWNLOADED_EPISODES_DELETE.message,
@@ -681,7 +669,7 @@ export class PodcastScreen extends React.Component<Props, State> {
     )
   }
 
-  _handleDeleteDownloadedEpisodes = async () => {
+  _handleDeleteDownloadedEpisodesForThisPodcast = async () => {
     const { podcast, podcastId } = this.state
     const id = podcast?.id || podcastId
     try {
@@ -1548,6 +1536,7 @@ export class PodcastScreen extends React.Component<Props, State> {
         const { addByRSSEpisodes, addByRSSEpisodesCount } = this._queryAddByRSSEpisodes(filterKey, querySort)
         newState.flatListData = addByRSSEpisodes || []
         newState.flatListDataTotalCount = addByRSSEpisodesCount
+        newState.endOfResultsReached = true
       } else if (
         !podcast?.addByRSSPodcastFeedUrl &&
         (filterKey === PV.Filters._downloadedKey ||
@@ -1562,13 +1551,13 @@ export class PodcastScreen extends React.Component<Props, State> {
         await this._handleSeasonOrSerialPodcastEpisodes(episodes, querySort, newState, extraParams)
         newState.flatListData = [...flatListData, ...episodes]
         newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
-        newState.endOfResultsReached = newState.flatListData.length >= extraParams
+        newState.endOfResultsReached = episodes.length < 20
         newState.flatListDataTotalCount = episodesCount
       } else if (filterKey === PV.Filters._clipsKey) {
         const results = await this._queryClips(querySort, queryOptions.queryPage)
         newState.flatListData = [...flatListData, ...results[0]]
         newState.flatListData = this.cleanFlatListData(newState.flatListData, filterKey)
-        newState.endOfResultsReached = newState.flatListData.length >= results[1]
+        newState.endOfResultsReached = results[0].length < 20
         newState.flatListDataTotalCount = results[1]
       } else if (PV.FilterOptions.screenFilters.PodcastScreen.sort.some((option) => option === filterKey)) {
         let data = []
@@ -1578,6 +1567,7 @@ export class PodcastScreen extends React.Component<Props, State> {
           const { addByRSSEpisodes, addByRSSEpisodesCount } = this._queryAddByRSSEpisodes(viewType, filterKey)
           newState.flatListData = addByRSSEpisodes || []
           newState.flatListDataTotalCount = addByRSSEpisodesCount
+          newState.endOfResultsReached = true
         } else if (
           viewType === PV.Filters._downloadedKey ||
           viewType === PV.Filters._episodesKey ||
@@ -1588,16 +1578,17 @@ export class PodcastScreen extends React.Component<Props, State> {
           data = results[0]?.[0]
           dataCount = results[0]?.[1]
           const extraParams = results[1]
+          newState.endOfResultsReached = data.length < 20
           await this._handleSeasonOrSerialPodcastEpisodes(data, querySort, newState, extraParams)
         } else if (viewType === PV.Filters._clipsKey) {
           const results = await this._queryClips(querySort)
           data = results[0]
           dataCount = results[1]
+          newState.endOfResultsReached = results[1].length < 20
         }
 
         newState.flatListData = [...flatListData, ...data]
         newState.flatListData = this.cleanFlatListData(newState.flatListData, viewType)
-        newState.endOfResultsReached = newState.flatListData.length >= dataCount
         newState.flatListDataTotalCount = dataCount
       }
       newState.queryPage = queryOptions.queryPage || 1

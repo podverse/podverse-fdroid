@@ -33,7 +33,6 @@ import {
   getUserPlaylists
 } from '../services/user'
 import { getAuthUserInfo } from '../state/actions/auth'
-import { playerLoadNowPlayingItem } from '../state/actions/player'
 import { getPublicUser, toggleSubscribeToUser } from '../state/actions/user'
 import { core } from '../styles'
 
@@ -398,13 +397,6 @@ export class ProfileScreen extends React.Component<Props, State> {
     }
   }
 
-  _handleNavigationPress = async (selectedItem: any) => {
-    const shouldPlay = true
-    const forceUpdateOrderDate = false
-    const setCurrentItemNextInQueue = true
-    await playerLoadNowPlayingItem(selectedItem, shouldPlay, forceUpdateOrderDate, setCurrentItemNextInQueue)
-  }
-
   _renderItem = ({ item, index }) => {
     const { navigation } = this.props
     const { viewType } = this.state
@@ -550,8 +542,8 @@ export class ProfileScreen extends React.Component<Props, State> {
                   const itemType = selectedItem.clipIsOfficialChapter
                     ? 'chapter'
                     : !!selectedItem.clipId
-                    ? 'clip'
-                    : 'episode'
+                      ? 'clip'
+                      : 'episode'
 
                   return PV.ActionSheet.media.moreButtons(
                     selectedItem,

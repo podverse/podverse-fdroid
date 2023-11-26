@@ -28,12 +28,12 @@ public class MainActivity extends ReactActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
-        // This is to support Android Auto wake PV when the screen is locked.
-        // and to prevent app showing up on the lock screen, use PVAndroidAutoModule to turn this off
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true);
-            setTurnScreenOn(true);
-        }
+        // // This is to support Android Auto wake PV when the screen is locked.
+        // // and to prevent app showing up on the lock screen, use PVAndroidAutoModule to turn this off
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+        //     setShowWhenLocked(true);
+        //     setTurnScreenOn(true);
+        // }
         if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }

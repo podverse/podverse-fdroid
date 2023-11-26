@@ -7,6 +7,7 @@ import { checkIfShouldUseServerData, getBearerToken } from './auth'
 import { getQueueItemsLocally } from './queue'
 import { request } from './request'
 import { getHistoryItemsLocally } from './userHistoryItem'
+import { getEpisode } from './episode'
 
 const _fileName = 'src/services/userNowPlayingItem.ts'
 
@@ -118,15 +119,19 @@ export const clearNowPlayingItemOnServer = async () => {
 
   await clearNowPlayingItemLocally()
 
-  await request({
-    endpoint: '/user-now-playing-item',
-    method: 'DELETE',
-    headers: {
-      Authorization: bearerToken,
-      'Content-Type': 'application/json'
-    },
-    opts: { credentials: 'include' }
-  })
+  try {
+    await request({
+      endpoint: '/user-now-playing-item',
+      method: 'DELETE',
+      headers: {
+        Authorization: bearerToken,
+        'Content-Type': 'application/json'
+      },
+      opts: { credentials: 'include' }
+    })
+  } catch (error) {
+    errorLogger(_fileName, 'clearNowPlayingItemOnServer', error)
+  }
 }
 
 /*
@@ -167,5 +172,16 @@ export const getEnrichedNowPlayingItemFromLocalStorage = async (episodeId: strin
     }
   }
 
+  return currentNowPlayingItem
+}
+
+export const getEnrichedNowPlayingItemFromLocalStorageOrRemote = async (currentTrackId: string) => {
+  let currentNowPlayingItem = await getEnrichedNowPlayingItemFromLocalStorage(currentTrackId)
+  if (!currentNowPlayingItem) {
+    const remoteEpisode = await getEpisode(currentTrackId)
+    if (remoteEpisode) {
+      currentNowPlayingItem = convertToNowPlayingItem(remoteEpisode)
+    }
+  }
   return currentNowPlayingItem
 }

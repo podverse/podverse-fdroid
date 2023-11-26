@@ -1,15 +1,17 @@
-import { isOdd } from 'podverse-shared'
+import { Episode, MediaRef, Playlist, PodcastMedium, isOdd } from 'podverse-shared'
 import { Alert, StyleSheet, View as RNView } from 'react-native'
 import React from 'reactn'
 import {
   ActivityIndicator,
   Divider,
+  FastImage,
   FlatList,
   MessageWithAction,
   NavDismissIcon,
   NavHeaderButtonText,
   PlaylistTableCell,
   PVDialog,
+  Text,
   View
 } from '../components'
 import { errorLogger } from '../lib/logger'
@@ -26,10 +28,11 @@ type Props = {
 }
 
 type State = {
-  episodeId?: string
+  episode?: Episode
   isLoading: boolean
   isSavingId?: string
-  mediaRefId?: string
+  mediaRef?: MediaRef
+  medium: PodcastMedium
   newPlaylistTitle?: string
   showNewPlaylistDialog?: boolean
 }
@@ -42,9 +45,9 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
     const { navigation } = props
     const { isLoggedIn } = this.global.session
     this.state = {
-      episodeId: navigation.getParam('episodeId'),
+      episode: navigation.getParam('episode'),
       isLoading: true,
-      mediaRefId: navigation.getParam('mediaRefId')
+      mediaRef: navigation.getParam('mediaRef')
     }
 
     navigation.setParams({ isLoggedIn })
@@ -133,7 +136,10 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
   _ItemSeparatorComponent = () => <Divider optional />
 
   _renderPlaylistItem = ({ item, index }) => {
-    const { episodeId, isSavingId, mediaRefId } = this.state
+    const { episode, isSavingId, mediaRef } = this.state
+
+    const episodeId = episode?.id
+    const mediaRefId = mediaRef?.id
 
     return (
       <PlaylistTableCell
@@ -141,6 +147,8 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         hasZebraStripe={isOdd(index)}
         isSaving={item.id && item.id === isSavingId}
         itemCount={item.itemCount}
+        itemId={episodeId || mediaRefId}
+        itemsOrder={item.itemsOrder}
         onPress={() => {
           try {
             this.setState(
@@ -149,7 +157,11 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
               },
               () => {
                 (async () => {
-                  await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
+                  try {
+                    await addOrRemovePlaylistItem(item.id, episodeId, mediaRefId)
+                  } catch (error) {
+                    //
+                  }
                   this.setState({ isSavingId: '' })
                 })()
               }
@@ -159,6 +171,7 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
             this.setState({ isSavingId: '' })
           }
         }}
+        showCheckmarks
         testID={`${testIDPrefix}_playlist_item_${index}`}
         title={item.title || translate('Untitled Playlist')}
       />
@@ -168,10 +181,26 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
   _onPressLogin = () => this.props.navigation.navigate(PV.RouteNames.AuthScreen)
 
   render() {
-    const { isLoading, newPlaylistTitle, showNewPlaylistDialog } = this.state
+    const { episode, isLoading, mediaRef, newPlaylistTitle, showNewPlaylistDialog } = this.state
     const { playlists, session } = this.global
     const { myPlaylists } = playlists
     const { isLoggedIn } = session
+
+    const medium = mediaRef?.episode?.podcast?.medium
+      || episode?.podcast?.medium
+      || PV.Medium.mixed
+
+    // Don't include playlists that are incompatible with the item on
+    // the PlaylistsAddToScreen's medium type.
+    const finalPlaylists = myPlaylists?.filter((myPlaylist: Playlist) =>
+      myPlaylist?.medium === PV.Medium.mixed || myPlaylist?.medium === medium)
+
+    const headerTitle = mediaRef?.title || episode?.title
+    const headerSubtitle = mediaRef?.episode?.podcast?.title || episode?.podcast?.title
+    const headerImage = mediaRef?.episode?.imageUrl
+      || mediaRef?.episode?.podcast?.imageUrl
+      || episode?.imageUrl
+      || episode?.podcast?.imageUrl
 
     return (
       <View style={styles.view} testID={`${testIDPrefix}_view`}>
@@ -186,16 +215,34 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
         {isLoggedIn && (
           <View style={styles.view}>
             {isLoading && <ActivityIndicator fillSpace testID={testIDPrefix} />}
-            {!isLoading && myPlaylists && (
-              <FlatList
-                data={myPlaylists}
-                dataTotalCount={myPlaylists.length}
-                extraData={myPlaylists}
-                ItemSeparatorComponent={this._ItemSeparatorComponent}
-                keyExtractor={(item: any, index: number) => `myPlaylists_${index}`}
-                noResultsMessage={translate('No playlists found')}
-                renderItem={this._renderPlaylistItem}
-              />
+            {!isLoading && finalPlaylists && (
+              <>
+                <View style={styles.headerWrapper}>
+                  <FastImage
+                    allowFullView
+                    source={headerImage}
+                    styles={styles.headerImage}
+                  />
+                  <View style={styles.headerTextWrapper}>
+                    {headerTitle && (
+                      <Text numberOfLines={1} style={styles.headerTitle}>{headerTitle}</Text>
+                    )}
+                    {headerSubtitle && (
+                      <Text numberOfLines={1} style={styles.headerSubtitle}>{headerSubtitle}</Text>
+                    )}
+                  </View>
+                </View>
+                <Divider />
+                <FlatList
+                  data={finalPlaylists}
+                  dataTotalCount={finalPlaylists.length}
+                  extraData={finalPlaylists}
+                  ItemSeparatorComponent={this._ItemSeparatorComponent}
+                  keyExtractor={(item: any, index: number) => `myPlaylists_${index}`}
+                  noResultsMessage={translate('No playlists found')}
+                  renderItem={this._renderPlaylistItem}
+                />
+              </>
             )}
             <PVDialog
               buttonProps={[
@@ -232,5 +279,30 @@ export class PlaylistsAddToScreen extends React.Component<Props, State> {
 const styles = StyleSheet.create({
   view: {
     flex: 1
+  },
+  headerWrapper: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: 'row'
+  },
+  headerImage: {
+    height: PV.Table.cells.standard.height,
+    width: PV.Table.cells.standard.height,
+    marginRight: 16
+  },
+  headerTextWrapper: {
+    flexDirection: 'column',
+    flex: 1
+  },
+  headerTitle: {
+    fontSize: PV.Fonts.sizes.xl,
+    fontWeight: PV.Fonts.weights.bold,
+    marginTop: 4
+  },
+  headerSubtitle: {
+    fontSize: PV.Fonts.sizes.sm,
+    fontWeight: PV.Fonts.weights.semibold,
+    color: PV.Colors.skyLight,
+    marginTop: 6
   }
 })
