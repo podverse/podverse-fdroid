@@ -386,6 +386,10 @@ export class EpisodesScreen extends HistoryIndexListenerScreen<Props, State> {
     const { hideCompleted } = this.global
     const shouldHideCompleted = hideCompleted && completed
 
+    if (shouldHideCompleted) {
+      return <></>
+    }
+
     return (
       <EpisodeTableCell
         item={item}
