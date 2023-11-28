@@ -3,4 +3,4 @@
 - Prevent music tracks from being automatically deleted.
 - Fix extra dividers from appearing when Hide Completed is selected.
 - Add "Hide Completed" to EpisodesScreen.
-
+- Fix "search bar sometimes missing on Podcasts screen" bug.
