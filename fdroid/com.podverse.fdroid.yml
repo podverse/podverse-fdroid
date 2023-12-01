@@ -4350,6 +4350,7 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-track-player/android/build.gradle
       - node_modules/react-native-vector-icons/android/build.gradle
+      - node_modules/react-native-video/android/build.gradle
       - node_modules/react-native-webview/android/build.gradle
       - node_modules/@react-native-community/async-storage/android/build.gradle
       - node_modules/@react-native-community/masked-view/android/build.gradle
