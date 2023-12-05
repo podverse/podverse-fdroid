@@ -414,10 +414,6 @@ export const handleEnrichingPlayerState = (item: NowPlayingItem) => {
     loadChaptersForNowPlayingItem(item)
     enrichParsedTranscript(item)
     v4vEnrichValueTagDataIfNeeded(item)
-
-    // TODO: this might not be the best place to put tracking because
-    // it may get called from multiple places after a track loads in the player.
-    trackPlayerScreenPageView(item)
   }
 }
 
