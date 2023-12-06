@@ -112,7 +112,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/podcast/" />
             </intent-filter>
@@ -123,7 +123,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/profile/" />
             </intent-filter>
@@ -134,7 +134,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/reset-password/" />
             </intent-filter>
@@ -145,7 +145,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/about/" />
             </intent-filter>
@@ -156,7 +156,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/contact/" />
             </intent-filter>
@@ -167,7 +167,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/membership/" />
             </intent-filter>
@@ -178,7 +178,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/contribute/" />
             </intent-filter>
@@ -189,18 +189,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
-                    android:host="podverse.fm"
-                    android:pathPrefix="/profile/" />
-            </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/terms/" />
             </intent-filter>
@@ -211,7 +200,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="podverse.fm"
                     android:pathPrefix="/xmpp/" />
             </intent-filter>

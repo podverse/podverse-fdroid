@@ -1,0 +1,9 @@
+- Fixes for queue, history, and mark as played behavior.
+- Add bluetooth controls for video playback.
+- Fix broken transcripts.
+- Fix bug preventing videos from appearing on Podcasts screen.
+- Prevent music tracks from being automatically deleted.
+- Fix extra dividers from appearing when Hide Completed is selected.
+- Add "Hide Completed" to EpisodesScreen.
+- Fix "search bar sometimes missing on Podcasts screen" bug.
+- Show "livestream has ended" message on live Episode screen.

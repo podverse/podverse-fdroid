@@ -135,8 +135,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
-        versionCode 97
-        versionName "4.15.0"
+        versionCode 98
+        versionName "4.15.1"
         multiDexEnabled true
     }
     splits {
@@ -183,7 +183,6 @@ android {
 
 dependencies {
     implementation project(':react-native-config')
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
 
     // Added this to address a bug with react-native and react-native-elements TextInputs
     // https://stackoverflow.com/questions/67683149/react-native-build-error-attempt-to-invoke-virtual-methodboolean-com-facebook
