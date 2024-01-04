@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
-import { getVersion } from 'react-native-device-info'
+// import { getVersion } from 'react-native-device-info'
 import { errorLogger } from '../lib/logger'
 import { hasValidNetworkConnection } from '../lib/network'
 import { PV } from '../resources'
@@ -17,7 +17,7 @@ type MetaAppInfo = {
 }
 
 export const getMetaAppInfo = async (): Promise<MetaAppInfo> => {
-  let versionValid = true
+  const versionValid = true
   
   try {
     const isConnected = await hasValidNetworkConnection()
@@ -38,11 +38,11 @@ export const getMetaAppInfo = async (): Promise<MetaAppInfo> => {
     })
 
     const data = (response && response.data) || {}
-    const { version, maintenanceScheduled } = data
+    const { /* version, */ maintenanceScheduled } = data
 
-    if (!!version && semver.lt(getVersion(), String(version))) {
-      versionValid = false
-    }
+    // if (!!version && semver.lt(getVersion(), String(version))) {
+    //   versionValid = false
+    // }
 
     return {
       versionValid,
