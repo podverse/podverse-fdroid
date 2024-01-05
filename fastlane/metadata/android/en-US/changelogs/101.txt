@@ -5,3 +5,4 @@
 - Fix excessive loading time occurring for some podcasts.
 - Fix OPML import issue where the podcasts screen did not refresh after importing.
 - Add "planned maintenance" screen to give advance notice of server maintenance.
+- Translation updates: Danish, Norwegian Bokmål, Russian, Spanish
