@@ -135,8 +135,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
-        versionCode 1702588007
-        versionName "4.15.3"
+        versionCode 1704356542
+        versionName "4.15.4"
         multiDexEnabled true
     }
     splits {
