@@ -7,8 +7,8 @@ buildscript {
         compileSdkVersion = 33
         targetSdkVersion = 33
         supportLibVersion = "30.0.2"
-        kotlinVersion = '1.7.0'
-        ndkVersion = '24.0.8215888'
+        kotlinVersion = '1.8.0'
+        ndkVersion = '23.0.7599858'
         androidXCore = "1.7.0"
         RNVUseExoplayerIMA = false
     }
@@ -19,6 +19,8 @@ buildscript {
     }
     dependencies {
         classpath('com.android.tools.build:gradle:7.0.4')
+
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
