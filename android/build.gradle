@@ -8,7 +8,7 @@ buildscript {
         targetSdkVersion = 33
         supportLibVersion = "30.0.2"
         kotlinVersion = '1.8.0'
-        ndkVersion = '23.0.7599858'
+        ndkVersion = '24.0.8215888'
         androidXCore = "1.7.0"
         RNVUseExoplayerIMA = false
     }
