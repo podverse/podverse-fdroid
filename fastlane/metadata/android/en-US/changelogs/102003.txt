@@ -1,0 +1,6 @@
+- Fix file storage issues and offline playback mode. #2117, #1314, #1004
+- Fix for livestreams not resuming playback. #2152
+- Add support for GIFs in chapter art. #2146
+- Fix "delete all episodes" button to remove incomplete downloads. #2126
+- Add podcast and episode title to Player screen summary. #2145
+- Fix value splits percentage display. #2137

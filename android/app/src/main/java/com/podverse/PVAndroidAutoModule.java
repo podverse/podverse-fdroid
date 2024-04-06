@@ -1,4 +1,4 @@
-package com.podverse;
+package com.podverse.fdroid;
 
 import android.app.Activity;
 import android.net.Uri;
