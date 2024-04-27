@@ -1,1 +1,1 @@
-- Fix episode download errors. #2161
+- Fix episode download errors and offline mode. #2161
