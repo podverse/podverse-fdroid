@@ -1,5 +1,6 @@
 import { Translator, TranslatorsSection } from 'podverse-shared'
 import { Pressable, StyleSheet, View as RNView } from 'react-native'
+import Config from 'react-native-config'
 import React from 'reactn'
 import { Divider, FastImage, Icon, ScrollView, Text, View } from '../components'
 import { getTransalatorsSections, translate } from '../lib/i18n'
