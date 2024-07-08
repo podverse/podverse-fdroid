@@ -1,0 +1,5 @@
+- Fixes for the media player.
+- Fixes for Add by RSS.
+- Fixes for transcripts.
+- Add Transcripts support for Add by RSS podcasts.
+- Translation updates: German.
