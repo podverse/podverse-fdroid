@@ -4,8 +4,8 @@ buildscript {
     ext {
         buildToolsVersion = "30.0.2"
         minSdkVersion = 23
-        compileSdkVersion = 33
-        targetSdkVersion = 33
+        compileSdkVersion = 34
+        targetSdkVersion = 34
         supportLibVersion = "30.0.2"
         kotlinVersion = '1.8.0'
         ndkVersion = '24.0.8215888'
@@ -15,6 +15,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
         jcenter()
     }
     dependencies {

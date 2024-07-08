@@ -136,8 +136,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         ndkVersion rootProject.ext.ndkVersion
-        versionCode 1714365890
-        versionName "4.16.3"
+        versionCode 1
+        versionName "4.16.4"
         multiDexEnabled true
     }
     splits {
@@ -207,6 +207,7 @@ dependencies {
 
     implementation 'com.github.UnifiedPush:android-connector:2.1.1'
     implementation "com.google.crypto.tink:apps-webpush:1.9.1"
+    implementation 'com.github.lovegaoshi:KotlinAudio:v2.0.0-aa22'
     
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
